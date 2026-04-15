@@ -4,19 +4,32 @@ namespace App\Http\Controllers;
 
 use App\Models\Unit;
 use App\Http\Requests\UnitRequest;
+use Illuminate\Http\Request;
+use App\Models\Company;
 
 class UnitController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $units = Unit::latest()->paginate(10);
+        $query = Unit::query();
+
+        if ($request->filled('search')) {
+            $query->where('unit_name', 'like', '%' . $request->search . '%')
+                  ->orWhere('short_name', 'like', '%' . $request->search . '%');
+        }
+
+        $units = $query->orderBy('unit_name')
+                       ->paginate(10)
+                       ->withQueryString();
 
         return view('units.index', compact('units'));
     }
 
     public function create()
     {
-        return view('units.create');
+        $companies = Company::orderBy('company_name')->get();
+
+        return view('units.create',compact('companies'));
     }
 
     public function store(UnitRequest $request)
@@ -30,7 +43,9 @@ class UnitController extends Controller
 
     public function edit(Unit $unit)
     {
-        return view('units.edit', compact('unit'));
+        $companies = Company::orderBy('company_name')->get();
+    
+        return view('units.edit', compact('unit', 'companies'));
     }
 
     public function update(UnitRequest $request, Unit $unit)

@@ -22,18 +22,18 @@ class UnitRequest extends FormRequest
      */
     public function rules(): array
     {
+        $unitId = $this->route('unit')?->id;
+    
         return [
+            'company_id' => 'required|exists:companies,id',
     
-            'company_id'=>'required|exists:companies,id',
+            'unit_name' => 'required|max:100|unique:units,unit_name,' . $unitId . ',id,company_id,' . $this->company_id,
     
-            'unit_name'=>'required|max:100',
+            'short_name' => 'required|max:20|unique:units,short_name,' . $unitId . ',id,company_id,' . $this->company_id,
     
-            'short_name'=>'required|max:20',
+            'description' => 'nullable',
     
-            'description'=>'nullable',
-    
-            'status'=>'required|boolean',
-    
+            'status' => 'required|boolean',
         ];
     }
 }
