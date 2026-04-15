@@ -9,6 +9,8 @@ use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\CompanyController;
 //add store controller
 use App\Http\Controllers\StoreController;
+//add unit controller
+use App\Http\Controllers\UnitController;
 
 use Illuminate\Support\Facades\Route;
 
@@ -37,6 +39,11 @@ Route::middleware(['auth'])->group(function () {
 //add the routes for categories
 Route::middleware(['auth'])->group(function () {
     Route::resource('categories', CategoryController::class);
+});
+
+//add the routes for unit
+Route::middleware(['auth'])->group(function () {
+    Route::resource('units', UnitController::class);
 });
 
 //add the routes for store

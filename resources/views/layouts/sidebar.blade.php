@@ -63,7 +63,7 @@
         </li>
 
         <li>
-            <a href="#">
+            <a href="{{ route('units.index') }}" class="{{ request()->routeIs('units.*') ? 'active' : '' }}">
                 <i class="fas fa-ruler"></i>
                 <span>Units</span>
             </a>
