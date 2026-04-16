@@ -40,7 +40,7 @@
         </li>
 
         <li>
-            <a href="{{ route('company.edit') }}"
+            <a href="{{ route('companies.index') }}"
                class="{{ request()->routeIs('company.*') ? 'active' : '' }}">
                 <i class="fas fa-building"></i>
                 <span>Company</span>

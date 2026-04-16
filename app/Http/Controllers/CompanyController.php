@@ -2,91 +2,87 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\CompanyRequest;
 use App\Models\Company;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 
 class CompanyController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
-    public function index()
+    public function index(Request $request)
     {
-        //
+        $companies = Company::when($request->search, function ($query) use ($request) {
+                $query->where('company_name', 'like', '%' . $request->search . '%')
+                      ->orWhere('gst_number', 'like', '%' . $request->search . '%')
+                      ->orWhere('phone', 'like', '%' . $request->search . '%');
+            })
+            ->latest()
+            ->paginate(10)
+            ->withQueryString();
+
+        return view('companies.index', compact('companies'));
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
     public function create()
     {
-        //
+        return view('companies.create');
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request)
+    public function store(CompanyRequest $request)
     {
-        //
+        $data = $request->validated();
+
+        if ($request->hasFile('logo')) {
+            $data['logo'] = $request->file('logo')->store('companies', 'public');
+        }
+
+        if (empty($data['country'])) {
+            $data['country'] = 'India';
+        }
+
+        //dd($data);
+        Company::create($data);
+
+        return redirect()
+            ->route('companies.index')
+            ->with('success', 'Company created successfully.');
     }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(Company $company)
-    {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
     public function edit(Company $company)
     {
-        $company = Company::first();
-
         return view('companies.edit', compact('company'));
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, Company $company)
+    public function update(CompanyRequest $request, Company $company)
     {
-        $validated = $request->validate([
-            'company_name' => 'required|max:255',
-            'owner_name'   => 'nullable|max:255',
-            'gst_number'   => 'nullable|max:50',
-            'pan_number'   => 'nullable|max:50',
-            'email'        => 'nullable|email',
-            'phone'        => 'nullable|max:20',
-            'website'      => 'nullable|max:255',
-            'address'      => 'nullable',
-            'city'         => 'nullable|max:100',
-            'state'        => 'nullable|max:100',
-            'country'      => 'nullable|max:100',
-            'pincode'      => 'nullable|max:10',
-        ]);
-
-        $company = Company::first();
-
-        if (!$company) {
-            $company = Company::create($validated);
-        } else {
-            $company->update($validated);
+        $data = $request->validated();
+    
+        if ($request->hasFile('logo')) {
+    
+            if ($company->logo) {
+                Storage::disk('public')->delete($company->logo);
+            }
+    
+            $data['logo'] = $request->file('logo')->store('companies', 'public');
         }
-
+    
+        $company->update($data);
+    
         return redirect()
-            ->route('company.edit')
-            ->with('success', 'Company information saved successfully.');
+                ->route('companies.index')
+                ->with('success','Company updated successfully.');
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
     public function destroy(Company $company)
     {
-        //
+        if ($company->logo) {
+            Storage::disk('public')->delete($company->logo);
+        }
+
+        $company->delete();
+
+        return redirect()
+            ->route('companies.index')
+            ->with('success', 'Company deleted successfully.');
     }
 }

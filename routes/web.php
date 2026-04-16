@@ -27,13 +27,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
 //add the routes for company
 Route::middleware(['auth'])->group(function () {
-
-    Route::get('/company', [CompanyController::class, 'edit'])
-        ->name('company.edit');
-
-    Route::post('/company', [CompanyController::class, 'update'])
-        ->name('company.update');
-
+    Route::resource('companies', CompanyController::class);
 });
 
 //add the routes for categories

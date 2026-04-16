@@ -3,9 +3,11 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Company extends Model
 {
+
     protected $fillable = [
         'company_name',
         'owner_name',
@@ -20,5 +22,6 @@ class Company extends Model
         'country',
         'pincode',
         'logo',
+        'status',
     ];
 }
