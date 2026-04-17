@@ -83,10 +83,11 @@
             </a>
         </li>
 
-        <li>
-            <a href="#">
+        <li class="nav-item">
+            <a href="{{ route('suppliers.index') }}"
+            class="nav-link {{ request()->routeIs('suppliers.*') ? 'active' : '' }}">
                 <i class="fas fa-truck"></i>
-                <span>Suppliers</span>
+                <p>Suppliers</p>
             </a>
         </li>
 

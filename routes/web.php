@@ -11,6 +11,8 @@ use App\Http\Controllers\CompanyController;
 use App\Http\Controllers\StoreController;
 //add unit controller
 use App\Http\Controllers\UnitController;
+//add suppliers controller
+use App\Http\Controllers\SupplierController;
 
 use Illuminate\Support\Facades\Route;
 
@@ -43,6 +45,11 @@ Route::middleware(['auth'])->group(function () {
 //add the routes for store
 Route::middleware(['auth'])->group(function () {
     Route::resource('stores', StoreController::class);
+});
+
+// add the routes for suppliers
+Route::middleware(['auth'])->group(function () {
+    Route::resource('suppliers', SupplierController::class);
 });
 
 //add the page for profiles
