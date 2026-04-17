@@ -69,11 +69,17 @@
             </a>
         </li>
 
-        <li>
-            <a href="#">
-                <i class="fas fa-copyright"></i>
-                <span>Brands</span>
+        <li class="nav-item">
+
+            <a href="{{ route('brands.index') }}"
+            class="nav-link {{ request()->routeIs('brands.*') ? 'active' : '' }}">
+
+                <i class="fas fa-tags"></i>
+
+                <p>Brands</p>
+
             </a>
+
         </li>
 
         <li>

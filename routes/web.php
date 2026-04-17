@@ -13,6 +13,8 @@ use App\Http\Controllers\StoreController;
 use App\Http\Controllers\UnitController;
 //add suppliers controller
 use App\Http\Controllers\SupplierController;
+//add brand controller
+use App\Http\Controllers\BrandController;
 
 use Illuminate\Support\Facades\Route;
 
@@ -50,6 +52,11 @@ Route::middleware(['auth'])->group(function () {
 // add the routes for suppliers
 Route::middleware(['auth'])->group(function () {
     Route::resource('suppliers', SupplierController::class);
+});
+
+//add the routes for brand
+Route::middleware(['auth'])->group(function () {
+    Route::resource('brands', BrandController::class);
 });
 
 //add the page for profiles
