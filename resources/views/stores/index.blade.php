@@ -1,65 +1,142 @@
 @extends('layouts.app')
 
-@section('title','Stores')
+@section('title', 'Stores')
 
 @section('content')
 
-<div class="d-flex justify-content-between align-items-center mb-3">
+<div class="container-fluid">
 
-    <h3>Stores</h3>
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h3 class="mb-0">Stores</h3>
 
-    <a href="{{ route('stores.create') }}"
-       class="btn btn-primary">
+        <a href="{{ route('stores.create') }}" class="btn btn-primary">
+            <i class="fas fa-plus"></i> Add Store
+        </a>
+    </div>
 
-        <i class="bi bi-plus-circle"></i>
+    @if(session('success'))
+        <div class="alert alert-success alert-dismissible fade show">
+            {{ session('success') }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    @endif
 
-        Add Store
+    <div class="card shadow-sm">
 
-    </a>
+        <div class="card-body">
 
-</div>
+            <form method="GET" action="{{ route('stores.index') }}" class="row mb-3">
 
-<div class="card">
+                <div class="col-md-4">
+                    <input type="text"
+                           name="search"
+                           value="{{ request('search') }}"
+                           class="form-control"
+                           placeholder="Search Store Name / Code">
+                </div>
 
-    <div class="card-body">
+                <div class="col-md-2">
+                    <button class="btn btn-primary">
+                        <i class="fas fa-search"></i> Search
+                    </button>
+                </div>
 
-        <table class="table table-bordered table-hover">
+            </form>
 
-            <thead>
+            <div class="table-responsive">
 
-                <tr>
+                <table class="table table-bordered table-hover align-middle">
 
-                    <th>#</th>
+                    <thead class="table-dark">
+                    <tr>
+                        <th>#</th>
+                        <th>Code</th>
+                        <th>Company</th>
+                        <th>Store</th>
+                        <th>Contact</th>
+                        <th>Phone</th>
+                        <th>City</th>
+                        <th>Status</th>
+                        <th width="140">Action</th>
+                    </tr>
+                    </thead>
 
-                    <th>Store Code</th>
+                    <tbody>
 
-                    <th>Store Name</th>
+                    @forelse($stores as $store)
 
-                    <th>Phone</th>
+                        <tr>
 
-                    <th>Status</th>
+                            <td>{{ $stores->firstItem() + $loop->index }}</td>
 
-                    <th width="180">Action</th>
+                            <td>
+                                <span class="badge bg-secondary">
+                                    {{ $store->store_code }}
+                                </span>
+                            </td>
 
-                </tr>
+                            <td>{{ $store->company->company_name ?? '-' }}</td>
 
-            </thead>
+                            <td>{{ $store->store_name }}</td>
 
-            <tbody>
+                            <td>{{ $store->contact_person }}</td>
 
-                <tr>
+                            <td>{{ $store->phone }}</td>
 
-                    <td colspan="6" class="text-center">
+                            <td>{{ $store->city }}</td>
 
-                        No Stores Found
+                            <td>
+                                @if($store->status)
+                                    <span class="badge bg-success">Active</span>
+                                @else
+                                    <span class="badge bg-danger">Inactive</span>
+                                @endif
+                            </td>
 
-                    </td>
+                            <td>
 
-                </tr>
+                                <a href="{{ route('stores.edit',$store) }}"
+                                   class="btn btn-warning btn-sm">
+                                    <i class="fas fa-edit"></i>
+                                </a>
 
-            </tbody>
+                                <form action="{{ route('stores.destroy',$store) }}"
+                                      method="POST"
+                                      class="d-inline">
 
-        </table>
+                                    @csrf
+                                    @method('DELETE')
+
+                                    <button class="btn btn-danger btn-sm"
+                                            onclick="return confirm('Delete this store?')">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+
+                                </form>
+
+                            </td>
+
+                        </tr>
+
+                    @empty
+
+                        <tr>
+                            <td colspan="9" class="text-center">
+                                No Stores Found
+                            </td>
+                        </tr>
+
+                    @endforelse
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+            {{ $stores->withQueryString()->links() }}
+
+        </div>
 
     </div>
 

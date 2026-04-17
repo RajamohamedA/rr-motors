@@ -2,67 +2,87 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\StoreRequest;
+use App\Models\Company;
+use App\Models\Store;
 use Illuminate\Http\Request;
- //use store model
- use App\Models\Store;
 
 class StoreController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
-    public function index()
+    public function index(Request $request)
     {
-        $stores = Store::latest()->paginate(10);
+        $stores = Store::with('company')
+                        ->when($request->search, function ($query) use ($request) {
+
+                            $query->where('store_name', 'like', '%' . $request->search . '%')
+                                ->orWhere('store_code', 'like', '%' . $request->search . '%')
+                                ->orWhereHas('company', function ($q) use ($request) {
+                                    $q->where('company_name', 'like', '%' . $request->search . '%');
+                                });
+
+                            })
+                        ->latest()
+                        ->paginate(10);
 
         return view('stores.index', compact('stores'));
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
     public function create()
     {
-        return view('stores.create');
+        $companies = Company::where('status', 1)
+            ->orderBy('company_name')
+            ->get();
+
+        return view('stores.create', compact('companies'));
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request)
+    public function store(StoreRequest $request)
     {
-        //
+        $data = $request->validated();
+
+        // Auto Generate Store Code
+        $lastStore = Store::latest('id')->first();
+
+        if ($lastStore) {
+            $number = (int) substr($lastStore->store_code, 3);
+            $number++;
+        } else {
+            $number = 1;
+        }
+
+        $data['store_code'] = 'STR' . str_pad($number, 6, '0', STR_PAD_LEFT);
+
+        Store::create($data);
+
+        return redirect()
+            ->route('stores.index')
+            ->with('success', 'Store created successfully.');
     }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(string $id)
+    public function edit(Store $store)
     {
-        //
+        $companies = Company::where('status', 1)
+            ->orderBy('company_name')
+            ->get();
+
+        return view('stores.edit', compact('store', 'companies'));
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(string $id)
+    public function update(StoreRequest $request, Store $store)
     {
-        //
+        $store->update($request->validated());
+
+        return redirect()
+            ->route('stores.index')
+            ->with('success', 'Store updated successfully.');
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, string $id)
+    public function destroy(Store $store)
     {
-        //
-    }
+        $store->delete();
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(string $id)
-    {
-        //
+        return redirect()
+            ->route('stores.index')
+            ->with('success', 'Store deleted successfully.');
     }
 }

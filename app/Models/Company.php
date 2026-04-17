@@ -24,4 +24,9 @@ class Company extends Model
         'logo',
         'status',
     ];
+
+    public function stores()
+    {
+        return $this->hasMany(Store::class);
+    }
 }

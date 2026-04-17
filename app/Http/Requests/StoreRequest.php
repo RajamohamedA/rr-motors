@@ -19,7 +19,6 @@ class StoreRequest extends FormRequest
     {
         return [
             'company_id'      => 'required|exists:companies,id',
-            'store_code'      => 'required|max:20|unique:stores,store_code',
             'store_name'      => 'required|max:255',
             'contact_person'  => 'nullable|max:255',
             'phone'           => 'nullable|max:20',
