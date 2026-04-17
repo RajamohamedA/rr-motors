@@ -55,6 +55,7 @@
                         <th>Company</th>
                         <th>GST</th>
                         <th>Phone</th>
+                        <th>Logo</th>
                         <th>Status</th>
                         <th width="180">Action</th>
                     </tr>
@@ -73,6 +74,16 @@
                             <td>{{ $company->gst_number }}</td>
 
                             <td>{{ $company->phone }}</td>
+                            <td>
+                                @if($company->logo)
+                                    <img src="{{ asset('storage/'.$company->logo) }}"
+                                        width="50"
+                                        height="50"
+                                        class="rounded border">
+                                @else
+                                    <span class="text-muted">No Logo</span>
+                                @endif
+                            </td>
 
                             <td>
                                 @if($company->status)

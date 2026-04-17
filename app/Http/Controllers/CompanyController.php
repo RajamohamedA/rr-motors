@@ -40,7 +40,6 @@ class CompanyController extends Controller
             $data['country'] = 'India';
         }
 
-        //dd($data);
         Company::create($data);
 
         return redirect()

@@ -77,29 +77,48 @@
 
     <!-- City -->
     <div class="col-md-3 mb-3">
-        <label class="form-label">City</label>
+        <label class="form-label">City <span class="text-danger">*</span></label>
+
         <input type="text"
-               name="city"
-               class="form-control"
-               value="{{ old('city', $company->city ?? '') }}">
+            name="city"
+            value="{{ old('city', $company->city ?? '') }}"
+            class="form-control @error('city') is-invalid @enderror">
+
+        @error('city')
+            <div class="invalid-feedback">
+                {{ $message }}
+            </div>
+        @enderror
     </div>
 
     <!-- State -->
     <div class="col-md-3 mb-3">
-        <label class="form-label">State</label>
+        <label class="form-label">State<span class="text-danger">*</span></label>
         <input type="text"
                name="state"
-               class="form-control"
+               class="form-control @error('city') is-invalid @enderror"
                value="{{ old('state', $company->state ?? '') }}">
+
+        @error('state')
+            <div class="invalid-feedback">
+                {{ $message }}
+            </div>
+        @enderror
     </div>
 
     <!-- Country -->
     <div class="col-md-3 mb-3">
-        <label class="form-label">Country</label>
-        <input type="text"
-               name="country"
-               class="form-control"
-               value="{{ old('country', $company->country ?? '') }}">
+        <label class="form-label">Country<span class="text-danger">*</span></label>
+       
+            <input type="text"
+            name="country"
+            class="form-control @error('country') is-invalid @enderror"
+            value="{{ old('country', $company->country ?? 'India') }}">
+            @error('country')
+                <div class="invalid-feedback">
+                    {{ $message }}
+                </div>
+            @enderror
     </div>
 
     <!-- Pincode -->
@@ -121,19 +140,22 @@
 
     <!-- Status -->
     <div class="col-md-6 mb-3">
-        <label class="form-label">Status</label>
+        <label class="form-label">Status<span class="text-danger">*</span></label>
 
-        <select name="status" class="form-select">
-            <option value="1"
-                {{ old('status', $company->status ?? 1) == 1 ? 'selected' : '' }}>
+        <select name="status" class="form-select @error('country') is-invalid @enderror">
+            <option value="1" {{ old('status', $company->status ?? 1) ? 'selected' : '' }}>
                 Active
             </option>
 
-            <option value="0"
-                {{ old('status', $company->status ?? 1) == 0 ? 'selected' : '' }}>
+            <option value="0" {{ old('status', $company->status ?? 1) == 0 ? 'selected' : '' }}>
                 Inactive
             </option>
         </select>
+        @error('status')
+            <div class="invalid-feedback">
+                {{ $message }}
+            </div>
+        @enderror
     </div>
 
 </div>
