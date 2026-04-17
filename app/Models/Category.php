@@ -11,5 +11,6 @@ class Category extends Model
         'code',
         'description',
         'status',
+        'company_id'
     ];
 }

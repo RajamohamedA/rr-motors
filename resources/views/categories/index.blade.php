@@ -1,92 +1,168 @@
 @extends('layouts.app')
 
-@section('title', 'Categories')
+@section('title','Categories')
 
 @section('content')
 
-<div class="card">
-    <div class="card-header d-flex justify-content-between align-items-center">
-        <h3 class="card-title">Category List</h3>
+<div class="container-fluid">
+
+    <div class="d-flex justify-content-between align-items-center mb-3">
+
+        <h3>Categories</h3>
 
         <a href="{{ route('categories.create') }}" class="btn btn-primary">
-            <i class="bi bi-plus-circle"></i> Add Category
+            <i class="fas fa-plus"></i> Add Category
         </a>
+
     </div>
 
-    <div class="card-body">
+    @if(session('success'))
+        <div class="alert alert-success alert-dismissible fade show">
 
-        <table class="table table-bordered table-hover">
-            <thead class="table-dark">
-                <tr>
-                    <th width="70">ID</th>
-                    <th>Name</th>
-                    <th>Code</th>
-                    <th>Status</th>
-                    <th width="180">Action</th>
-                </tr>
-            </thead>
+            {{ session('success') }}
 
-            <tbody>
+            <button class="btn-close" data-bs-dismiss="alert"></button>
 
-                @forelse($categories as $category)
+        </div>
+    @endif
+
+    <div class="card shadow-sm">
+
+        <div class="card-body">
+
+            <form class="row mb-3">
+
+                <div class="col-md-4">
+
+                    <input
+                        type="text"
+                        name="search"
+                        value="{{ request('search') }}"
+                        class="form-control"
+                        placeholder="Search Category">
+
+                </div>
+
+                <div class="col-md-2">
+
+                    <button class="btn btn-primary">
+
+                        <i class="fas fa-search"></i>
+
+                        Search
+
+                    </button>
+
+                </div>
+
+            </form>
+
+            <div class="table-responsive">
+
+                <table class="table table-bordered table-hover align-middle">
+
+                    <thead class="table-dark">
 
                     <tr>
 
-                        <td>{{ $category->id }}</td>
+                        <th>#</th>
 
-                        <td>{{ $category->name }}</td>
+                        <th>Code</th>
 
-                        <td>{{ $category->code }}</td>
+                        <th>Name</th>
 
-                        <td>
-                            @if($category->status)
-                                <span class="badge bg-success">Active</span>
-                            @else
-                                <span class="badge bg-danger">Inactive</span>
-                            @endif
-                        </td>
+                        <th>Status</th>
 
-                        <td>
-
-                            <a href="{{ route('categories.edit',$category) }}"
-                               class="btn btn-warning btn-sm">
-                                Edit
-                            </a>
-
-                            <form action="{{ route('categories.destroy',$category) }}"
-                                  method="POST"
-                                  class="d-inline">
-
-                                @csrf
-                                @method('DELETE')
-
-                                <button class="btn btn-danger btn-sm"
-                                        onclick="return confirm('Delete this category?')">
-                                    Delete
-                                </button>
-
-                            </form>
-
-                        </td>
+                        <th width="140">Action</th>
 
                     </tr>
 
-                @empty
+                    </thead>
 
-                    <tr>
-                        <td colspan="5" class="text-center">
-                            No Categories Found
-                        </td>
-                    </tr>
+                    <tbody>
 
-                @endforelse
+                    @forelse($categories as $category)
 
-            </tbody>
+                        <tr>
 
-        </table>
+                            <td>{{ $categories->firstItem()+$loop->index }}</td>
 
-        <div class="mt-3">
-            {{ $categories->links() }}
+                            <td>{{ $category->code }}</td>
+
+                            <td>{{ $category->name }}</td>
+
+                            <td>
+
+                                @if($category->status)
+
+                                    <span class="badge bg-success">
+                                        Active
+                                    </span>
+
+                                @else
+
+                                    <span class="badge bg-danger">
+                                        Inactive
+                                    </span>
+
+                                @endif
+
+                            </td>
+
+                            <td>
+
+                                <a
+                                    href="{{ route('categories.edit',$category) }}"
+                                    class="btn btn-warning btn-sm">
+
+                                    <i class="fas fa-edit"></i>
+
+                                </a>
+
+                                <form
+                                    action="{{ route('categories.destroy',$category) }}"
+                                    method="POST"
+                                    class="d-inline">
+
+                                    @csrf
+                                    @method('DELETE')
+
+                                    <button
+                                        onclick="return confirm('Delete Category?')"
+                                        class="btn btn-danger btn-sm">
+
+                                        <i class="fas fa-trash"></i>
+
+                                    </button>
+
+                                </form>
+
+                            </td>
+
+                        </tr>
+
+                    @empty
+
+                        <tr>
+
+                            <td colspan="5" class="text-center">
+
+                                No Categories Found
+
+                            </td>
+
+                        </tr>
+
+                    @endforelse
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+            {{ $categories->withQueryString()->links() }}
+
         </div>
 
     </div>

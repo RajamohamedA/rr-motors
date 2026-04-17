@@ -2,66 +2,76 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\CategoryRequest;
 use App\Models\Category;
 use Illuminate\Http\Request;
+use App\Models\Company;
 
 class CategoryController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
-    public function index()
+    public function index(Request $request)
     {
-        $categories = Category::latest()->paginate(10);
+        $categories = Category::when($request->search, function ($query) use ($request) {
+                $query->where('name', 'like', '%' . $request->search . '%')
+                      ->orWhere('code', 'like', '%' . $request->search . '%');
+            })
+            ->latest()
+            ->paginate(10);
 
         return view('categories.index', compact('categories'));
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
     public function create()
     {
-        //
+        $companies = Company::where('status', 1)->orderBy('company_name')->get();
+        return view('categories.create', compact('companies'));
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request)
+    public function store(CategoryRequest $request)
     {
-        //
+        $data = $request->validated();
+
+        $last = Category::latest('id')->first();
+
+        if ($last && $last->code) {
+            $number = (int) substr($last->code, 3);
+            $number++;
+        } else {
+            $number = 1;
+        }
+
+        $data['code'] = 'CAT' . str_pad($number, 6, '0', STR_PAD_LEFT);
+
+        //dd($data);
+        Category::create($data);
+
+        return redirect()
+            ->route('categories.index')
+            ->with('success', 'Category created successfully.');
     }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(Category $category)
-    {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
     public function edit(Category $category)
     {
-        //
+        $companies = Company::where('status', 1)->orderBy('company_name')->get();
+    
+        return view('categories.edit', compact('category', 'companies'));
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, Category $category)
+    public function update(CategoryRequest $request, Category $category)
     {
-        //
+        $category->update($request->validated());
+
+        return redirect()
+            ->route('categories.index')
+            ->with('success', 'Category updated successfully.');
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
     public function destroy(Category $category)
     {
-        //
+        $category->delete();
+
+        return redirect()
+            ->route('categories.index')
+            ->with('success', 'Category deleted successfully.');
     }
 }
