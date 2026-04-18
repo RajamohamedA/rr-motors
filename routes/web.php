@@ -15,6 +15,10 @@ use App\Http\Controllers\UnitController;
 use App\Http\Controllers\SupplierController;
 //add brand controller
 use App\Http\Controllers\BrandController;
+//add product controller
+use App\Http\Controllers\ProductController;
+//add store model
+use App\Models\Store;
 
 use Illuminate\Support\Facades\Route;
 
@@ -58,6 +62,21 @@ Route::middleware(['auth'])->group(function () {
 Route::middleware(['auth'])->group(function () {
     Route::resource('brands', BrandController::class);
 });
+
+//add the routes for products
+Route::middleware(['auth'])->group(function () {
+    Route::resource('products', ProductController::class);
+});
+
+//add the route for get store
+Route::get('/get-stores/{company}', function ($company) {
+
+    return Store::where('company_id', $company)
+            ->where('status',1)
+            ->orderBy('store_name')
+            ->get(['id','store_name']);
+
+})->middleware('auth');
 
 //add the page for profiles
 Route::middleware('auth')->group(function () {

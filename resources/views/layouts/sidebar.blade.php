@@ -69,22 +69,25 @@
             </a>
         </li>
 
-        <li class="nav-item">
+        <li>
 
             <a href="{{ route('brands.index') }}"
             class="nav-link {{ request()->routeIs('brands.*') ? 'active' : '' }}">
 
                 <i class="fas fa-tags"></i>
 
-                <p>Brands</p>
+                <span>Brands</span>
 
             </a>
 
         </li>
 
         <li>
-            <a href="#">
-                <i class="fas fa-boxes"></i>
+            <a href="{{ route('products.index') }}"
+            class="nav-link {{ request()->routeIs('products.*') ? 'active' : '' }}">
+
+                <i class="fas fa-box"></i>
+
                 <span>Products</span>
             </a>
         </li>
@@ -93,7 +96,7 @@
             <a href="{{ route('suppliers.index') }}"
             class="nav-link {{ request()->routeIs('suppliers.*') ? 'active' : '' }}">
                 <i class="fas fa-truck"></i>
-                <p>Suppliers</p>
+                <span>Suppliers</span>
             </a>
         </li>
 
