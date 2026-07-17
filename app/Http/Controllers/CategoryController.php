@@ -13,6 +13,7 @@ class CategoryController extends Controller
     public function index()
     {
         //
+        echo 'this is test';
     }
 
     /**

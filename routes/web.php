@@ -3,6 +3,8 @@
 use App\Http\Controllers\ProfileController;
 //add dashboard controller
 use App\Http\Controllers\DashboardController;
+//add the catogary controller
+use App\Http\Controllers\CategoryController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -16,6 +18,10 @@ Route::get('/', function () {
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])
         ->name('dashboard');
+});
+
+Route::middleware(['auth'])->group(function () {
+    Route::resource('categories', CategoryController::class);
 });
 
 Route::middleware('auth')->group(function () {
