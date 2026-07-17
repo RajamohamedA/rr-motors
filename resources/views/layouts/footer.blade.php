@@ -1,3 +1,3 @@
-<footer class="text-center border-top py-3">
-    © {{ date('Y') }} RR Motors
+<footer class="main-footer">
+    <strong>© {{ date('Y') }} RR Motors</strong>
 </footer>

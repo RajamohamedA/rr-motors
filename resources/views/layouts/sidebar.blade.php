@@ -1,35 +1,49 @@
-<div class="col-md-2 bg-light vh-100 border-end">
-    <ul class="nav flex-column mt-3">
+<aside class="main-sidebar sidebar-dark-primary elevation-4">
 
-        <li class="nav-item">
-            <a href="{{ route('dashboard') }}" class="nav-link">
-                Dashboard
-            </a>
-        </li>
+    <a href="{{ route('dashboard') }}" class="brand-link">
+        <span class="brand-text fw-light">
+            RR Motors
+        </span>
+    </a>
 
-        <li class="nav-item">
-            <a href="#" class="nav-link">
-                Products
-            </a>
-        </li>
+    <div class="sidebar">
 
-        <li class="nav-item">
-            <a href="#" class="nav-link">
-                Suppliers
-            </a>
-        </li>
+        <nav class="mt-2">
 
-        <li class="nav-item">
-            <a href="#" class="nav-link">
-                Purchase
-            </a>
-        </li>
+            <ul class="nav nav-pills nav-sidebar flex-column" data-lte-toggle="treeview">
 
-        <li class="nav-item">
-            <a href="#" class="nav-link">
-                Sales
-            </a>
-        </li>
+                <li class="nav-item">
+                    <a href="{{ route('dashboard') }}" class="nav-link">
+                        <i class="bi bi-speedometer2"></i>
+                        <p>Dashboard</p>
+                    </a>
+                </li>
 
-    </ul>
-</div>
+                <li class="nav-item">
+                    <a href="#" class="nav-link">
+                        <i class="bi bi-box"></i>
+                        <p>Products</p>
+                    </a>
+                </li>
+
+                <li class="nav-item">
+                    <a href="#" class="nav-link">
+                        <i class="bi bi-truck"></i>
+                        <p>Suppliers</p>
+                    </a>
+                </li>
+
+                <li class="nav-item">
+                    <a href="#" class="nav-link">
+                        <i class="bi bi-cart"></i>
+                        <p>Purchase</p>
+                    </a>
+                </li>
+
+            </ul>
+
+        </nav>
+
+    </div>
+
+</aside>

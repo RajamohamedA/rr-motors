@@ -1,11 +1,19 @@
-<nav class="navbar navbar-dark bg-dark">
-    <div class="container-fluid">
-        <a class="navbar-brand" href="{{ route('dashboard') }}">
-            RR Motors
-        </a>
+<nav class="main-header navbar navbar-expand navbar-white navbar-light">
 
-        <span class="text-white">
-            {{ auth()->user()->name }}
-        </span>
-    </div>
+    <ul class="navbar-nav">
+        <li class="nav-item">
+            <a class="nav-link" data-lte-toggle="sidebar" href="#">
+                ☰
+            </a>
+        </li>
+    </ul>
+
+    <ul class="navbar-nav ms-auto">
+        <li class="nav-item">
+            <span class="nav-link">
+                {{ auth()->user()->name }}
+            </span>
+        </li>
+    </ul>
+
 </nav>

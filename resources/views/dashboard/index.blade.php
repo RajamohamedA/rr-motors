@@ -4,12 +4,24 @@
 
 @section('content')
 
-<div class="container-fluid">
+<div class="row">
 
-    <h2>Dashboard</h2>
+    <div class="col-md-3">
+        <div class="small-box text-bg-primary">
+            <div class="inner">
+                <h3>0</h3>
+                <p>Products</p>
+            </div>
+        </div>
+    </div>
 
-    <div class="alert alert-success">
-        Welcome {{ auth()->user()->name }}
+    <div class="col-md-3">
+        <div class="small-box text-bg-success">
+            <div class="inner">
+                <h3>0</h3>
+                <p>Suppliers</p>
+            </div>
+        </div>
     </div>
 
 </div>

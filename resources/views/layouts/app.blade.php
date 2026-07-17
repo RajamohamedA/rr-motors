@@ -3,30 +3,32 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="csrf-token" content="{{ csrf_token() }}">
-
     <title>@yield('title', 'RR Motors')</title>
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 
-<body>
+<body class="hold-transition sidebar-mini layout-fixed">
+
+<div class="wrapper">
 
     @include('layouts.navbar')
 
-    <div class="container-fluid">
-        <div class="row">
+    @include('layouts.sidebar')
 
-            @include('layouts.sidebar')
+    <div class="content-wrapper">
 
-            <main class="col-md-10 py-4">
+        <section class="content pt-3">
+            <div class="container-fluid">
                 @yield('content')
-            </main>
+            </div>
+        </section>
 
-        </div>
     </div>
 
     @include('layouts.footer')
+
+</div>
 
 </body>
 </html>
