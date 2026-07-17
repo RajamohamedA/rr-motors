@@ -23,7 +23,10 @@ class CategoryRequest extends FormRequest
     public function rules(): array
     {
         return [
-            //
+            'name' => 'required|max:100|unique:categories,name',
+            'code' => 'nullable|max:20',
+            'description' => 'nullable|max:500',
+            'status' => 'required|boolean',
         ];
     }
 }
