@@ -21,6 +21,7 @@
         "apexcharts": "^5.16.0",
         "axios": "^1.18.1",
         "bootstrap": "^5.3.8",
-        "bootstrap-icons": "^1.13.1"
+        "bootstrap-icons": "^1.13.1",
+        "jquery": "^4.0.0"
     }
 }

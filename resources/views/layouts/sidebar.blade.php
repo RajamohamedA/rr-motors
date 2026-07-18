@@ -107,10 +107,11 @@
             </a>
         </li>
 
-        <li>
-            <a href="#">
+        <li class="nav-item">
+            <a href="{{ route('purchases.index') }}"
+            class="nav-link {{ request()->routeIs('purchases.*') ? 'active' : '' }}">
                 <i class="fas fa-shopping-cart"></i>
-                <span>Purchases</span>
+                <p>Purchase</p>
             </a>
         </li>
 

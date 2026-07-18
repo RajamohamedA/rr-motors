@@ -19,6 +19,8 @@ use App\Http\Controllers\BrandController;
 use App\Http\Controllers\ProductController;
 //add store model
 use App\Models\Store;
+//add purchase controller
+use App\Http\Controllers\PurchaseController;
 
 use Illuminate\Support\Facades\Route;
 
@@ -68,6 +70,11 @@ Route::middleware(['auth'])->group(function () {
     Route::resource('products', ProductController::class);
 });
 
+//add the routes for purchase
+Route::middleware(['auth'])->group(function () {
+    Route::resource('purchases', PurchaseController::class);
+});
+
 //add the route for get store
 Route::get('/get-stores/{company}', function ($company) {
 
@@ -77,6 +84,15 @@ Route::get('/get-stores/{company}', function ($company) {
             ->get(['id','store_name']);
 
 })->middleware('auth');
+
+
+Route::get('/api/products/search', [ProductController::class, 'search'])
+    ->name('products.search');
+
+//add the route for purchases
+Route::middleware(['auth'])->group(function () {
+    Route::resource('purchases', PurchaseController::class);
+}); 
 
 //add the page for profiles
 Route::middleware('auth')->group(function () {

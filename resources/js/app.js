@@ -11,3 +11,10 @@ import './sidebar';
 
 //add common js
 import './common';
+
+//add the jquery
+import $ from 'jquery';
+window.$ = window.jQuery = $;
+
+//add purchase js
+import './purchase';

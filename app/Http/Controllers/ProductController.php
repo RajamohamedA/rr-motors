@@ -141,4 +141,28 @@ class ProductController extends Controller
             ->route('products.index')
             ->with('success','Product deleted successfully.');
     }
+
+    public function search(Request $request)
+    {
+        $search = $request->search;
+
+        $products = Product::with([
+                'unit',
+                'brand',
+                'category'
+            ])
+            ->where('status',1)
+            ->where(function($query) use ($search){
+
+                $query->where('product_code','like',"%{$search}%")
+                    ->orWhere('barcode','like',"%{$search}%")
+                    ->orWhere('product_name','like',"%{$search}%")
+                    ->orWhere('part_number','like',"%{$search}%");
+
+            })
+            ->limit(20)
+            ->get();
+
+        return response()->json($products);
+    }
 }
