@@ -5,6 +5,8 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\DashboardController;
 //add the catogary controller
 use App\Http\Controllers\CategoryController;
+//use company controller
+use App\Http\Controllers\CompanyController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -20,11 +22,14 @@ Route::middleware(['auth', 'verified'])->group(function () {
         ->name('dashboard');
 });
 
-Route::middleware('auth')->group(function () {
+//add the routes for company
+Route::middleware(['auth'])->group(function () {
 
-    Route::get('/company', function () {
-        return "Company Module - Coming Soon";
-    })->name('company.edit');
+    Route::get('/company', [CompanyController::class, 'edit'])
+        ->name('company.edit');
+
+    Route::post('/company', [CompanyController::class, 'update'])
+        ->name('company.update');
 
 });
 

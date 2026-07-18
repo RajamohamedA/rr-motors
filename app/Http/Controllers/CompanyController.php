@@ -44,7 +44,9 @@ class CompanyController extends Controller
      */
     public function edit(Company $company)
     {
-        //
+        $company = Company::first();
+
+        return view('companies.edit', compact('company'));
     }
 
     /**
@@ -52,7 +54,32 @@ class CompanyController extends Controller
      */
     public function update(Request $request, Company $company)
     {
-        //
+        $validated = $request->validate([
+            'company_name' => 'required|max:255',
+            'owner_name'   => 'nullable|max:255',
+            'gst_number'   => 'nullable|max:50',
+            'pan_number'   => 'nullable|max:50',
+            'email'        => 'nullable|email',
+            'phone'        => 'nullable|max:20',
+            'website'      => 'nullable|max:255',
+            'address'      => 'nullable',
+            'city'         => 'nullable|max:100',
+            'state'        => 'nullable|max:100',
+            'country'      => 'nullable|max:100',
+            'pincode'      => 'nullable|max:10',
+        ]);
+
+        $company = Company::first();
+
+        if (!$company) {
+            $company = Company::create($validated);
+        } else {
+            $company->update($validated);
+        }
+
+        return redirect()
+            ->route('company.edit')
+            ->with('success', 'Company information saved successfully.');
     }
 
     /**

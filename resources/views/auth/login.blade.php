@@ -1,47 +1,86 @@
-<x-guest-layout>
-    <!-- Session Status -->
-    <x-auth-session-status class="mb-4" :status="session('status')" />
+@extends('layouts.guest')
 
-    <form method="POST" action="{{ route('login') }}">
-        @csrf
+@section('title', 'Login')
 
-        <!-- Email Address -->
-        <div>
-            <x-input-label for="email" :value="__('Email')" />
-            <x-text-input id="email" class="block mt-1 w-full" type="email" name="email" :value="old('email')" required autofocus autocomplete="username" />
-            <x-input-error :messages="$errors->get('email')" class="mt-2" />
-        </div>
+@section('content')
 
-        <!-- Password -->
-        <div class="mt-4">
-            <x-input-label for="password" :value="__('Password')" />
+<div class="card shadow-lg border-0">
 
-            <x-text-input id="password" class="block mt-1 w-full"
-                            type="password"
-                            name="password"
-                            required autocomplete="current-password" />
+    <div class="card-header bg-primary text-white text-center">
 
-            <x-input-error :messages="$errors->get('password')" class="mt-2" />
-        </div>
+        <h3 class="mb-0">RR Motors ERP</h3>
 
-        <!-- Remember Me -->
-        <div class="block mt-4">
-            <label for="remember_me" class="inline-flex items-center">
-                <input id="remember_me" type="checkbox" class="rounded border-gray-300 text-indigo-600 shadow-sm focus:ring-indigo-500" name="remember">
-                <span class="ms-2 text-sm text-gray-600">{{ __('Remember me') }}</span>
-            </label>
-        </div>
+        <small>Inventory & Billing System</small>
 
-        <div class="flex items-center justify-end mt-4">
-            @if (Route::has('password.request'))
-                <a class="underline text-sm text-gray-600 hover:text-gray-900 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" href="{{ route('password.request') }}">
-                    {{ __('Forgot your password?') }}
+    </div>
+
+    <div class="card-body p-4">
+
+        @if(session('status'))
+            <div class="alert alert-success">
+                {{ session('status') }}
+            </div>
+        @endif
+
+        <form method="POST" action="{{ route('login') }}">
+            @csrf
+
+            <div class="mb-3">
+                <label class="form-label">Email Address</label>
+
+                <input
+                    type="email"
+                    name="email"
+                    class="form-control"
+                    value="{{ old('email') }}"
+                    required
+                    autofocus>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Password</label>
+
+                <input
+                    type="password"
+                    name="password"
+                    class="form-control"
+                    required>
+            </div>
+
+            <div class="form-check mb-3">
+
+                <input
+                    class="form-check-input"
+                    type="checkbox"
+                    name="remember"
+                    id="remember">
+
+                <label class="form-check-label" for="remember">
+                    Remember Me
+                </label>
+
+            </div>
+
+            <button class="btn btn-primary w-100">
+                Login
+            </button>
+
+        </form>
+
+        @if (Route::has('password.request'))
+
+            <div class="text-center mt-3">
+
+                <a href="{{ route('password.request') }}">
+                    Forgot Password?
                 </a>
-            @endif
 
-            <x-primary-button class="ms-3">
-                {{ __('Log in') }}
-            </x-primary-button>
-        </div>
-    </form>
-</x-guest-layout>
+            </div>
+
+        @endif
+
+    </div>
+
+</div>
+
+@endsection

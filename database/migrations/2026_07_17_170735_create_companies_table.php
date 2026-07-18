@@ -13,6 +13,25 @@ return new class extends Migration
     {
         Schema::create('companies', function (Blueprint $table) {
             $table->id();
+
+            $table->string('company_name');
+            $table->string('owner_name')->nullable();
+    
+            $table->string('gst_number')->nullable();
+            $table->string('pan_number')->nullable();
+    
+            $table->string('email')->nullable();
+            $table->string('phone', 20)->nullable();
+            $table->string('website')->nullable();
+    
+            $table->text('address')->nullable();
+            $table->string('city')->nullable();
+            $table->string('state')->nullable();
+            $table->string('country')->default('India');
+            $table->string('pincode', 10)->nullable();
+    
+            $table->string('logo')->nullable();
+    
             $table->timestamps();
         });
     }
