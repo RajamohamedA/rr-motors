@@ -1,19 +1,28 @@
-<nav class="main-header navbar navbar-expand navbar-white navbar-light">
+<nav class="navbar navbar-expand-lg navbar-dark bg-primary">
 
-    <ul class="navbar-nav">
-        <li class="nav-item">
-            <a class="nav-link" data-lte-toggle="sidebar" href="#">
-                ☰
-            </a>
-        </li>
-    </ul>
+    <div class="container-fluid">
 
-    <ul class="navbar-nav ms-auto">
-        <li class="nav-item">
-            <span class="nav-link">
+        <a class="navbar-brand fw-bold" href="{{ route('dashboard') }}">
+            RR Motors ERP
+        </a>
+
+        <div class="ms-auto d-flex align-items-center">
+
+            <span class="text-white me-3">
                 {{ auth()->user()->name }}
             </span>
-        </li>
-    </ul>
+
+            <form action="{{ route('logout') }}" method="POST">
+                @csrf
+
+                <button class="btn btn-light btn-sm">
+                    Logout
+                </button>
+
+            </form>
+
+        </div>
+
+    </div>
 
 </nav>

@@ -1,34 +1,37 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
     <title>@yield('title', 'RR Motors')</title>
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 
-<body class="hold-transition sidebar-mini layout-fixed">
-
-<div class="wrapper">
+<body>
 
     @include('layouts.navbar')
 
-    @include('layouts.sidebar')
+    <div class="container-fluid">
 
-    <div class="content-wrapper">
+        <div class="row">
 
-        <section class="content pt-3">
-            <div class="container-fluid">
+            @include('layouts.sidebar')
+
+            <main class="col-md-10 ms-sm-auto px-4 py-4">
+
                 @yield('content')
-            </div>
-        </section>
+
+            </main>
+
+        </div>
 
     </div>
 
     @include('layouts.footer')
 
-</div>
-
 </body>
+
 </html>

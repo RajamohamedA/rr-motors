@@ -1,56 +1,38 @@
-<aside class="main-sidebar sidebar-dark-primary elevation-4">
+<div class="col-md-2 bg-dark text-white min-vh-100">
 
-    <a href="{{ route('dashboard') }}" class="brand-link">
-        <span class="brand-text fw-light">
-            RR Motors
-        </span>
-    </a>
+    <div class="p-3">
 
-    <div class="sidebar">
+        <h5 class="text-center mb-4">
 
-        <nav class="mt-2">
+            MENU
 
-            <ul class="nav nav-pills nav-sidebar flex-column" data-lte-toggle="treeview">
+        </h5>
 
-                <li class="nav-item">
-                    <a href="{{ route('dashboard') }}" class="nav-link">
-                        <i class="bi bi-speedometer2"></i>
-                        <p>Dashboard</p>
-                    </a>
-                </li>
+        <div class="list-group">
 
-                <li class="nav-item">
-                    <a href="#" class="nav-link">
-                        <i class="bi bi-box"></i>
-                        <p>Products</p>
-                    </a>
-                </li>
+            <a href="{{ route('dashboard') }}"
+                class="list-group-item list-group-item-action">
 
-                <li class="nav-item">
-                    <a href="#" class="nav-link">
-                        <i class="bi bi-truck"></i>
-                        <p>Suppliers</p>
-                    </a>
-                </li>
+                Dashboard
 
-                <li class="nav-item">
-                    <a href="#" class="nav-link">
-                        <i class="bi bi-cart"></i>
-                        <p>Purchase</p>
-                    </a>
-                </li>
+            </a>
 
-                <li class="nav-item">
-                    <a href="{{ route('categories.index') }}" class="nav-link">
-                    <i class="bi bi-tags"></i>
-                    <p>Categories</p>
-                    </a>
-                </li>
+            <a href="{{ route('company.edit') }}"
+                class="list-group-item list-group-item-action">
 
-            </ul>
+                Company
 
-        </nav>
+            </a>
+
+            <a href="{{ route('categories.index') }}"
+                class="list-group-item list-group-item-action">
+
+                Categories
+
+            </a>
+
+        </div>
 
     </div>
 
-</aside>
+</div>

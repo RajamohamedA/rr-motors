@@ -20,6 +20,14 @@ Route::middleware(['auth', 'verified'])->group(function () {
         ->name('dashboard');
 });
 
+Route::middleware('auth')->group(function () {
+
+    Route::get('/company', function () {
+        return "Company Module - Coming Soon";
+    })->name('company.edit');
+
+});
+
 Route::middleware(['auth'])->group(function () {
     Route::resource('categories', CategoryController::class);
 });
