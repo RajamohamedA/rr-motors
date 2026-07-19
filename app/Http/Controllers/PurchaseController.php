@@ -376,8 +376,86 @@ class PurchaseController extends Controller
         }
     }
 
-    public function destroy(string $id)
+    public function destroy(Purchase $purchase)
     {
-        //
+        DB::beginTransaction();
+    
+        try {
+    
+            /*
+            |--------------------------------------------------------------------------
+            | Reverse Stock
+            |--------------------------------------------------------------------------
+            */
+    
+            foreach ($purchase->items as $item) {
+    
+                $product = Product::find($item->product_id);
+    
+                if ($product) {
+    
+                    $this->stockService->decreaseStock(
+    
+                        $product,
+    
+                        $item->quantity,
+    
+                        'Purchase',
+    
+                        $purchase->company_id,
+    
+                        $purchase->store_id,
+    
+                        $purchase->id,
+    
+                        $purchase->purchase_no,
+    
+                        $item->purchase_price,
+    
+                        'Purchase Deleted'
+    
+                    );
+                }
+            }
+    
+            /*
+            |--------------------------------------------------------------------------
+            | Delete Stock Ledger
+            |--------------------------------------------------------------------------
+            */
+    
+            StockLedger::where('reference_id', $purchase->id)
+                ->where('transaction_type', 'Purchase')
+                ->delete();
+    
+            /*
+            |--------------------------------------------------------------------------
+            | Delete Purchase Items
+            |--------------------------------------------------------------------------
+            */
+    
+            $purchase->items()->delete();
+    
+            /*
+            |--------------------------------------------------------------------------
+            | Delete Purchase
+            |--------------------------------------------------------------------------
+            */
+    
+            $purchase->delete();
+    
+            DB::commit();
+    
+            return redirect()
+                ->route('purchases.index')
+                ->with('success', 'Purchase Deleted Successfully.');
+    
+        } catch (\Exception $e) {
+    
+            DB::rollBack();
+    
+            return back()->with('error', $e->getMessage());
+    
+        }
     }
 }

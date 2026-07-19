@@ -71,6 +71,20 @@
 
                             </a>
 
+                            <form action="{{ route('purchases.destroy', $purchase->id) }}"
+                                method="POST"
+                                class="d-inline"
+                                onsubmit="return confirm('Are you sure you want to delete this purchase?')">
+
+                                @csrf
+                                @method('DELETE')
+
+                                <button class="btn btn-danger btn-sm">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+
+                            </form>
+
                         </td>
 
                     </tr>
