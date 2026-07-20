@@ -1,18 +1,16 @@
-const sidebar = document.getElementById('sidebar');
+document.addEventListener('DOMContentLoaded', function () {
 
-const toggle1 = document.getElementById('sidebarToggle');
-const toggle2 = document.getElementById('sidebarToggleTop');
+    const toggle = document.getElementById('toggleSidebar');
+    const sidebar = document.getElementById('sidebar');
 
-function toggleSidebar() {
+    if (toggle) {
 
-    sidebar.classList.toggle('collapsed');
+        toggle.addEventListener('click', function () {
 
-    document.body.classList.toggle('sidebar-collapse');
+            sidebar.classList.toggle('collapsed');
 
-}
+        });
 
-if (toggle1)
-    toggle1.onclick = toggleSidebar;
+    }
 
-if (toggle2)
-    toggle2.onclick = toggleSidebar;
+});

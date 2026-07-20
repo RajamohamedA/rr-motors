@@ -1,208 +1,206 @@
-:root {
-
-    --sidebar-width: 280px;
-    --sidebar-collapse: 80px;
-
+.wrapper {
+    display: flex;
+    min-height: 100vh;
 }
 
 .sidebar {
-
-    position: fixed;
-
-    left: 0;
-
-    top: 0;
-
-    width: var(--sidebar-width);
-
-    height: 100vh;
-
-    background: #0f172a;
-
+    width: 260px;
+    background: #1e293b;
     color: #fff;
-
-    display: flex;
-
-    flex-direction: column;
-
     transition: .3s;
+    overflow-y: auto;
+}
 
-    overflow: hidden;
+.main-wrapper {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+}
 
+.content {
+    padding: 20px;
+    background: #f4f6f9;
+    flex: 1;
 }
 
 .sidebar.collapsed {
+    width: 70px;
+}
 
-    width: var(--sidebar-collapse);
+.sidebar a {
+    color: #cbd5e1;
+    text-decoration: none;
+}
 
+.sidebar a:hover {
+    color: #fff;
 }
 
 .sidebar-header {
 
-    height: 75px;
-
-    display: flex;
-
-    align-items: center;
-
-    justify-content: space-between;
-
-    padding: 15px;
-
-    border-bottom: 1px solid rgba(255, 255, 255, .1);
+    height: 70px;
 
 }
 
-.logo {
+.sidebar .nav-link {
 
-    display: flex;
+    color: #CBD5E1;
 
-    align-items: center;
+    padding: 12px 20px;
 
-    gap: 12px;
-
-}
-
-.logo-img {
-
-    width: 45px;
+    transition: .3s;
 
 }
 
-.logo-text h4 {
+.sidebar .nav-link:hover {
 
-    margin: 0;
-
-    font-size: 22px;
-
-}
-
-.logo-text small {
-
-    color: #94a3b8;
-
-}
-
-.toggle-btn {
-
-    border: none;
-
-    background: none;
-
-    color: #fff;
-
-    font-size: 22px;
-
-}
-
-.menu {
-
-    list-style: none;
-
-    margin: 20px 0;
-
-    padding: 0 10px;
-
-    flex: 1;
-
-    overflow-y: auto;
-
-}
-
-.menu li {
-
-    margin-bottom: 8px;
-
-}
-
-.menu a {
-
-    display: flex;
-
-    align-items: center;
-
-    gap: 15px;
-
-    color: #cbd5e1;
-
-    text-decoration: none;
-
-    padding: 14px 18px;
-
-    border-radius: 12px;
-
-    transition: .2s;
-
-}
-
-.menu a:hover {
-
-    background: #2563eb;
+    background: #2563EB;
 
     color: #fff;
 
 }
 
-.menu a.active {
+.sidebar .nav-link.active {
 
-    background: #2563eb;
+    background: #0D6EFD;
 
     color: #fff;
 
 }
 
-.menu i {
+.sidebar .menu-title {
 
-    width: 24px;
+    padding: 10px 20px;
 
-    font-size: 20px;
+    font-size: 12px;
+
+    text-transform: uppercase;
+
+    color: #94A3B8;
+
+}
+
+.sidebar img {
+
+    border: 3px solid #0D6EFD;
+
+}
+
+.sidebar .collapse .nav-link {
+
+    padding-left: 45px;
+
+    font-size: 14px;
+
+}
+
+.sidebar .collapse .nav-link:hover {
+
+    background: #334155;
+
+}
+
+.sidebar .collapse .nav-link.active {
+
+    background: #0d6efd;
+
+    color: #fff;
+
+}
+
+.sidebar .fa-angle-down {
+
+    transition: 0.3s;
+
+}
+
+
+.sidebar .badge {
+
+    font-size: 10px;
+
+    padding: 3px 6px;
+
+}
+
+.sidebar .nav-link i {
+
+    width: 20px;
 
     text-align: center;
 
 }
 
-.sidebar-footer {
+.sidebar .collapse {
 
-    padding: 15px;
-
-    border-top: 1px solid rgba(255, 255, 255, .1);
+    transition: all .3s ease;
 
 }
 
-.logout-btn {
+/* add animation */
 
-    width: 100%;
-
-    border: none;
-
-    background: #dc2626;
-
-    color: white;
-
-    padding: 12px;
-
-    border-radius: 10px;
-
+.menu-arrow {
+    transition: transform .3s ease;
 }
 
-.sidebar.collapsed .logo-text,
+.menu-toggle[aria-expanded="true"] .menu-arrow {
+    transform: rotate(180deg);
+}
 
-.sidebar.collapsed span {
+.sidebar .collapse {
+    transition: all .3s ease;
+}
 
+.sidebar {
+    scrollbar-width: thin;
+}
+
+.sidebar::-webkit-scrollbar {
+    width: 6px;
+}
+
+.sidebar::-webkit-scrollbar-thumb {
+    background: #475569;
+    border-radius: 20px;
+}
+
+.sidebar {
+    width: 260px;
+    transition: all .3s ease;
+    overflow-x: hidden;
+}
+
+.sidebar.collapsed {
+    width: 70px;
+}
+
+.sidebar.collapsed .menu-text {
     display: none;
-
 }
 
-.sidebar.collapsed .menu a {
-
-    justify-content: center;
-
+.sidebar.collapsed .logo-text {
+    display: none;
 }
 
-.sidebar.collapsed .logout-btn {
+.sidebar.collapsed .badge {
+    display: none;
+}
 
-    display: flex;
+.sidebar.collapsed .menu-arrow {
+    display: none;
+}
 
+.sidebar.collapsed .nav-link {
     justify-content: center;
+    padding: 12px 0;
+}
 
+.sidebar.collapsed .nav-link i {
+    margin-right: 0 !important;
+    font-size: 18px;
+}
+
+.sidebar.collapsed .collapse {
+    display: none !important;
 }

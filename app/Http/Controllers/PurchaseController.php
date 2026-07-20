@@ -458,4 +458,16 @@ class PurchaseController extends Controller
     
         }
     }
+
+    public function print(Purchase $purchase)
+    {
+        $purchase->load([
+            'company',
+            'store',
+            'supplier',
+            'items.product'
+        ]);
+
+        return view('purchases.print', compact('purchase'));
+    }
 }

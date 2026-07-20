@@ -1,153 +1,58 @@
-<aside id="sidebar" class="sidebar">
+<aside class="sidebar" id="sidebar">
 
     <!-- Logo -->
-    <div class="sidebar-header">
+    <div class="sidebar-header d-flex align-items-center justify-content-between p-3 border-bottom">
 
-        <div class="logo">
+        <div class="d-flex align-items-center">
 
-            <!-- <img src="{{ asset('images/logo.png') }}"
-                 alt="RR Motors"
-                 class="logo-img"> -->
+            <i class="fas fa-cogs fs-4 me-2 text-warning"></i>
 
-            <div class="logo-text">
-
-                <h4>RR Motors</h4>
-
-                <small>Inventory ERP</small>
-
-            </div>
+            <span class="logo-text fw-bold fs-5">
+                RR MOTORS ERP
+            </span>
 
         </div>
 
-        <button class="toggle-btn" id="sidebarToggle">
+    </div>
 
-            <i class="fas fa-bars"></i>
+    <!-- User -->
 
-        </button>
+    <div class="text-center py-4 border-bottom">
+
+        <img src="https://ui-avatars.com/api/?name={{ urlencode(Auth::user()->name) }}"
+            width="65"
+            class="rounded-circle shadow">
+
+        <h6 class="mt-2 text-white mb-0">
+            {{ Auth::user()->name }}
+        </h6>
+
+        <small class="text-success">
+            ● Online
+        </small>
 
     </div>
 
     <!-- Menu -->
 
-    <ul class="menu">
+    <ul class="nav flex-column mt-2">
 
-        <li>
-            <a href="{{ route('dashboard') }}"
-               class="{{ request()->routeIs('dashboard') ? 'active' : '' }}">
-                <i class="fas fa-home"></i>
-                <span>Dashboard</span>
-            </a>
-        </li>
+        @include('layouts.menu.dashboard')
 
-        <li>
-            <a href="{{ route('companies.index') }}"
-               class="{{ request()->routeIs('company.*') ? 'active' : '' }}">
-                <i class="fas fa-building"></i>
-                <span>Company</span>
-            </a>
-        </li>
+        @include('layouts.menu.masters')
 
-        <li>
-            <a href="{{ route('stores.index') }}"
-               class="{{ request()->routeIs('stores.*') ? 'active' : '' }}">
-                <i class="fas fa-store"></i>
-                <span>Stores</span>
-            </a>
-        </li>
+        @include('layouts.menu.purchase')
 
-        <li>
-            <a href="{{ route('categories.index') }}">
-                <i class="fas fa-tags"></i>
-                <span>Categories</span>
-            </a>
-        </li>
+        @include('layouts.menu.sales')
 
-        <li>
-            <a href="{{ route('units.index') }}" class="{{ request()->routeIs('units.*') ? 'active' : '' }}">
-                <i class="fas fa-ruler"></i>
-                <span>Units</span>
-            </a>
-        </li>
+        @include('layouts.menu.inventory')
 
-        <li>
+        @include('layouts.menu.accounts')
 
-            <a href="{{ route('brands.index') }}"
-            class="nav-link {{ request()->routeIs('brands.*') ? 'active' : '' }}">
+        @include('layouts.menu.reports')
 
-                <i class="fas fa-tags"></i>
-
-                <span>Brands</span>
-
-            </a>
-
-        </li>
-
-        <li>
-            <a href="{{ route('products.index') }}"
-            class="nav-link {{ request()->routeIs('products.*') ? 'active' : '' }}">
-
-                <i class="fas fa-box"></i>
-
-                <span>Products</span>
-            </a>
-        </li>
-
-        <li class="nav-item">
-            <a href="{{ route('suppliers.index') }}"
-            class="nav-link {{ request()->routeIs('suppliers.*') ? 'active' : '' }}">
-                <i class="fas fa-truck"></i>
-                <span>Suppliers</span>
-            </a>
-        </li>
-
-        <li>
-            <a href="#">
-                <i class="fas fa-users"></i>
-                <span>Customers</span>
-            </a>
-        </li>
-
-        <li class="nav-item">
-            <a href="{{ route('purchases.index') }}"
-            class="nav-link {{ request()->routeIs('purchases.*') ? 'active' : '' }}">
-                <i class="fas fa-shopping-cart"></i>
-                <p>Purchase</p>
-            </a>
-        </li>
-
-        <li>
-            <a href="#">
-                <i class="fas fa-file-invoice"></i>
-                <span>Sales</span>
-            </a>
-        </li>
-
-        <li>
-            <a href="#">
-                <i class="fas fa-chart-line"></i>
-                <span>Reports</span>
-            </a>
-        </li>
+        @include('layouts.menu.settings')
 
     </ul>
-
-    <!-- Bottom -->
-
-    <div class="sidebar-footer">
-
-        <form method="POST" action="{{ route('logout') }}">
-            @csrf
-
-            <button class="logout-btn">
-
-                <i class="fas fa-sign-out-alt"></i>
-
-                <span>Logout</span>
-
-            </button>
-
-        </form>
-
-    </div>
 
 </aside>

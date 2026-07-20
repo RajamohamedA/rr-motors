@@ -85,6 +85,14 @@
 
                             </form>
 
+                            <a href="{{ route('purchases.print', $purchase->id) }}"
+                                class="btn btn-secondary btn-sm"
+                                target="_blank">
+
+                                    <i class="fas fa-print"></i>
+
+                            </a>
+
                         </td>
 
                     </tr>

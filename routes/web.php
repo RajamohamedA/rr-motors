@@ -21,6 +21,8 @@ use App\Http\Controllers\ProductController;
 use App\Models\Store;
 //add purchase controller
 use App\Http\Controllers\PurchaseController;
+//add StockLedger controller
+use App\Http\Controllers\StockLedgerController;
 
 use Illuminate\Support\Facades\Route;
 
@@ -75,6 +77,11 @@ Route::middleware(['auth'])->group(function () {
     Route::resource('purchases', PurchaseController::class);
 });
 
+//add the routes for stock-ledgers
+Route::middleware(['auth'])->group(function () {
+    Route::resource('stock-ledgers', StockLedgerController::class);
+});
+
 //add the route for get store
 Route::get('/get-stores/{company}', function ($company) {
 
@@ -93,6 +100,17 @@ Route::get('/api/products/search', [ProductController::class, 'search'])
 Route::middleware(['auth'])->group(function () {
     Route::resource('purchases', PurchaseController::class);
 }); 
+
+//add the route for purchases print
+Route::middleware(['auth'])->group(function () {
+    Route::get('/purchases/{purchase}/print', [PurchaseController::class, 'print'])
+        ->name('purchases.print');
+});
+
+//add the route for customer
+Route::middleware(['auth'])->group(function () {
+    Route::resource('customers', CustomerController::class);
+});
 
 //add the page for profiles
 Route::middleware('auth')->group(function () {

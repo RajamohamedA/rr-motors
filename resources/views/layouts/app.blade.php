@@ -1,33 +1,46 @@
+
 <!DOCTYPE html>
 <html lang="en">
 
 <head>
+
     <meta charset="UTF-8">
+
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
-    <title>@yield('title', 'RR Motors')</title>
+    <title>@yield('title','RR Motors ERP')</title>
 
-    @vite(['resources/css/app.css', 'resources/js/app.js'])
+    @vite([
+        'resources/css/app.css',
+        'resources/js/app.js'
+    ])
+
 </head>
 
 <body>
 
+<div class="wrapper">
+
     @include('layouts.sidebar')
 
-    <div class="main-content">
+    <div class="main-wrapper">
 
         @include('layouts.navbar')
 
-        <div class="container-fluid mt-4">
+        <main class="content">
 
             @yield('content')
 
-        </div>
+        </main>
 
         @include('layouts.footer')
 
     </div>
-    @stack('scripts')
+
+</div>
+
+@stack('scripts')
+
 </body>
 
 </html>

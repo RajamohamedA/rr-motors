@@ -18,3 +18,28 @@ window.$ = window.jQuery = $;
 
 //add purchase js
 import './purchase';
+
+
+document.addEventListener("DOMContentLoaded", function () {
+
+    const btn = document.getElementById("fullscreenBtn");
+
+    if (btn) {
+
+        btn.addEventListener("click", function () {
+
+            if (!document.fullscreenElement) {
+
+                document.documentElement.requestFullscreen();
+
+            } else {
+
+                document.exitFullscreen();
+
+            }
+
+        });
+
+    }
+
+});

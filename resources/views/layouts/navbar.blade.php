@@ -1,130 +1,100 @@
-<nav class="navbar navbar-expand-lg top-navbar">
+<nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm px-3">
 
-    <div class="container-fluid">
+    <!-- Sidebar Toggle -->
+    <button class="btn btn-outline-primary me-3" id="toggleSidebar">
+        <i class="fas fa-bars"></i>
+    </button>
 
-        <!-- Left -->
+    <!-- Page Title -->
+    <h5 class="mb-0 flex-grow-1">
+        @yield('title', 'Dashboard')
+    </h5>
 
-        <div class="d-flex align-items-center">
+    <!-- Search -->
+    <form class="d-none d-lg-flex me-3" style="width:300px;">
+        <input type="search"
+               class="form-control"
+               placeholder="Search Product, Customer...">
+    </form>
 
-            <button id="sidebarToggle"
-                    class="btn btn-light shadow-sm">
+    <!-- Full Screen -->
+    <button class="btn btn-light me-2" id="fullscreenBtn">
+        <i class="fas fa-expand"></i>
+    </button>
 
-                <i class="fas fa-bars"></i>
+    <!-- Notification -->
+    <button class="btn btn-light position-relative me-3">
 
-            </button>
+        <i class="fas fa-bell"></i>
 
-            <h4 class="ms-4 mb-0 fw-semibold">
+        <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
 
-                @yield('title','Dashboard')
+            3
 
-            </h4>
+        </span>
 
-        </div>
+    </button>
 
-        <!-- Right -->
+    <!-- User -->
+    <div class="dropdown">
 
-        <div class="d-flex align-items-center">
+        <a href="#"
+           class="text-decoration-none dropdown-toggle"
+           data-bs-toggle="dropdown">
 
-            <!-- Search -->
+            <i class="fas fa-user-circle fa-lg"></i>
 
-            <div class="search-box me-4">
+            {{ Auth::user()->name }}
 
-                <i class="fas fa-search"></i>
+        </a>
 
-                <input type="text"
-                       class="form-control"
-                       placeholder="Search...">
+        <ul class="dropdown-menu dropdown-menu-end">
 
-            </div>
+            <li>
 
-            <!-- Notification -->
+                <a class="dropdown-item" href="#">
 
-            <div class="icon-btn me-3">
+                    <i class="fas fa-user"></i>
 
-                <i class="far fa-bell"></i>
+                    Profile
 
-                <span class="badge bg-danger">5</span>
+                </a>
 
-            </div>
+            </li>
 
-            <!-- Fullscreen -->
+            <li>
 
-            <div class="icon-btn me-3"
-                 id="fullscreenBtn">
+                <a class="dropdown-item" href="#">
 
-                <i class="fas fa-expand"></i>
+                    <i class="fas fa-key"></i>
 
-            </div>
+                    Change Password
 
-            <!-- Profile -->
+                </a>
 
-            <div class="dropdown">
+            </li>
 
-                <button class="btn profile-btn"
+            <li><hr class="dropdown-divider"></li>
 
-                        data-bs-toggle="dropdown">
+            <li>
 
-                    <div class="avatar">
+                <form action="{{ route('logout') }}" method="POST">
 
-                        {{ strtoupper(substr(auth()->user()->name,0,1)) }}
+                    @csrf
 
-                    </div>
+                    <button class="dropdown-item">
 
-                    <span class="ms-2">
+                        <i class="fas fa-sign-out-alt"></i>
 
-                        {{ auth()->user()->name }}
+                        Logout
 
-                    </span>
+                    </button>
 
-                    <i class="fas fa-chevron-down ms-2"></i>
+                </form>
 
-                </button>
+            </li>
 
-                <ul class="dropdown-menu dropdown-menu-end">
-
-                    <li>
-
-                        <a class="dropdown-item"
-                           href="{{ route('profile.edit') }}">
-
-                            <i class="fas fa-user me-2"></i>
-
-                            Profile
-
-                        </a>
-
-                    </li>
-
-                    <li>
-
-                        <hr class="dropdown-divider">
-
-                    </li>
-
-                    <li>
-
-                        <form method="POST"
-                              action="{{ route('logout') }}">
-
-                            @csrf
-
-                            <button class="dropdown-item">
-
-                                <i class="fas fa-sign-out-alt me-2"></i>
-
-                                Logout
-
-                            </button>
-
-                        </form>
-
-                    </li>
-
-                </ul>
-
-            </div>
-
-        </div>
+        </ul>
 
     </div>
 
