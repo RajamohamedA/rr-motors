@@ -1,5 +1,13 @@
 @import 'bootstrap/dist/css/bootstrap.min.css';
 @import 'bootstrap-icons/font/bootstrap-icons.css';
+@import '@fortawesome/fontawesome-free/css/all.min.css';
+
+/* Custom CSS files */
+@import './layout.css';
+@import './sidebar.css';
+@import './navbar.css';
+@import './dashboard.css';
+@import './responsive.css';
 
 body {
     background: #f4f6f9;
@@ -41,4 +49,37 @@ body {
 
 body {
     background: #eef2f7;
+}
+
+/* Landing Page */
+
+.hero-section {
+    min-height: 80vh;
+}
+
+.card {
+    transition: all .3s ease;
+}
+
+.card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 15px 35px rgba(0, 0, 0, .15);
+}
+
+.btn {
+    border-radius: 8px;
+}
+
+footer ul li {
+    margin-bottom: 8px;
+}
+
+.display-4,
+.display-5 {
+    transition: transform .3s;
+}
+
+.card:hover .display-4,
+.card:hover .display-5 {
+    transform: scale(1.2);
 }

@@ -1,0 +1,208 @@
+:root {
+
+    --sidebar-width: 280px;
+    --sidebar-collapse: 80px;
+
+}
+
+.sidebar {
+
+    position: fixed;
+
+    left: 0;
+
+    top: 0;
+
+    width: var(--sidebar-width);
+
+    height: 100vh;
+
+    background: #0f172a;
+
+    color: #fff;
+
+    display: flex;
+
+    flex-direction: column;
+
+    transition: .3s;
+
+    overflow: hidden;
+
+}
+
+.sidebar.collapsed {
+
+    width: var(--sidebar-collapse);
+
+}
+
+.sidebar-header {
+
+    height: 75px;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: space-between;
+
+    padding: 15px;
+
+    border-bottom: 1px solid rgba(255, 255, 255, .1);
+
+}
+
+.logo {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 12px;
+
+}
+
+.logo-img {
+
+    width: 45px;
+
+}
+
+.logo-text h4 {
+
+    margin: 0;
+
+    font-size: 22px;
+
+}
+
+.logo-text small {
+
+    color: #94a3b8;
+
+}
+
+.toggle-btn {
+
+    border: none;
+
+    background: none;
+
+    color: #fff;
+
+    font-size: 22px;
+
+}
+
+.menu {
+
+    list-style: none;
+
+    margin: 20px 0;
+
+    padding: 0 10px;
+
+    flex: 1;
+
+    overflow-y: auto;
+
+}
+
+.menu li {
+
+    margin-bottom: 8px;
+
+}
+
+.menu a {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 15px;
+
+    color: #cbd5e1;
+
+    text-decoration: none;
+
+    padding: 14px 18px;
+
+    border-radius: 12px;
+
+    transition: .2s;
+
+}
+
+.menu a:hover {
+
+    background: #2563eb;
+
+    color: #fff;
+
+}
+
+.menu a.active {
+
+    background: #2563eb;
+
+    color: #fff;
+
+}
+
+.menu i {
+
+    width: 24px;
+
+    font-size: 20px;
+
+    text-align: center;
+
+}
+
+.sidebar-footer {
+
+    padding: 15px;
+
+    border-top: 1px solid rgba(255, 255, 255, .1);
+
+}
+
+.logout-btn {
+
+    width: 100%;
+
+    border: none;
+
+    background: #dc2626;
+
+    color: white;
+
+    padding: 12px;
+
+    border-radius: 10px;
+
+}
+
+.sidebar.collapsed .logo-text,
+
+.sidebar.collapsed span {
+
+    display: none;
+
+}
+
+.sidebar.collapsed .menu a {
+
+    justify-content: center;
+
+}
+
+.sidebar.collapsed .logout-btn {
+
+    display: flex;
+
+    justify-content: center;
+
+}

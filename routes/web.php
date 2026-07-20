@@ -5,18 +5,19 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\DashboardController;
 //add the catogary controller
 use App\Http\Controllers\CategoryController;
-//use company controller
+//add company controller
 use App\Http\Controllers\CompanyController;
+//add store controller
+use App\Http\Controllers\StoreController;
+
 use Illuminate\Support\Facades\Route;
 
+//landing page
 Route::get('/', function () {
     return view('welcome');
 });
 
-// Route::get('/dashboard', function () {
-//     return view('dashboard');
-// })->middleware(['auth', 'verified'])->name('dashboard');
-
+//dashboard page
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])
         ->name('dashboard');
@@ -33,10 +34,17 @@ Route::middleware(['auth'])->group(function () {
 
 });
 
+//add the routes for categories
 Route::middleware(['auth'])->group(function () {
     Route::resource('categories', CategoryController::class);
 });
 
+//add the routes for store
+Route::middleware(['auth'])->group(function () {
+    Route::resource('stores', StoreController::class);
+});
+
+//add the page for profiles
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');

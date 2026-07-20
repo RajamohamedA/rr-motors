@@ -12,26 +12,20 @@
 
 <body>
 
-    @include('layouts.navbar')
+    @include('layouts.sidebar')
 
-    <div class="container-fluid">
+    <div class="main-content">
 
-        <div class="row">
+        @include('layouts.navbar')
 
-            @include('layouts.sidebar')
+        <div class="container-fluid mt-4">
 
-            <main class="col-md-10 ms-sm-auto px-4 py-4">
-
-                @yield('content')
-
-            </main>
+            @yield('content')
 
         </div>
 
+        @include('layouts.footer')
+
     </div>
-
-    @include('layouts.footer')
-
-</body>
 
 </html>

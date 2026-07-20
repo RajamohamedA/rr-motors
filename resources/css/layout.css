@@ -1,0 +1,25 @@
+body {
+    background: #f4f6f9;
+}
+
+.main-content {
+
+    margin-left: 280px;
+
+    padding: 25px;
+
+    transition: .3s;
+
+}
+
+body.sidebar-collapse .main-content {
+
+    margin-left: 80px;
+
+}
+
+body.sidebar-collapse .navbar {
+
+    margin-left: 80px;
+
+}
