@@ -15,23 +15,19 @@
 
     </a>
 
-    <div class="collapse {{ request()->is('sales*','sales-returns*','quotations*') ? 'show' : '' }}"
+    <div class="collapse {{  request()->is('sales*','sales-returns*','quotations*') ? 'show' : '' }}"
          id="salesMenu">
 
         <ul class="nav flex-column ms-4">
 
             <li class="nav-item">
 
-                <a href="#"
-                   class="nav-link">
+            <a href="{{ route('sales.index') }}"
+           class="nav-link {{ request()->routeIs('sales.index') ? 'active' : '' }}">
 
                     <i class="fas fa-file-invoice-dollar me-2"></i>
 
                     Sales Invoice
-
-                    <span class="badge bg-warning text-dark float-end">
-                        Soon
-                    </span>
 
                 </a>
 

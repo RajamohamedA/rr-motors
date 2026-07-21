@@ -23,8 +23,10 @@ use App\Models\Store;
 use App\Http\Controllers\PurchaseController;
 //add StockLedger controller
 use App\Http\Controllers\StockLedgerController;
-//add StockLedger controller
+//add customer controller
 use App\Http\Controllers\CustomerController;
+//add sales controller
+use App\Http\Controllers\SalesController;
 
 use Illuminate\Support\Facades\Route;
 
@@ -112,6 +114,14 @@ Route::middleware(['auth'])->group(function () {
 //add the route for customer
 Route::middleware(['auth'])->group(function () {
     Route::resource('customers', CustomerController::class);
+});
+
+Route::get('/sales/{sale}/print', [SalesController::class, 'print'])
+    ->name('sales.print');
+    
+//add the route for sales
+Route::middleware(['auth'])->group(function () {
+    Route::resource('sales', SalesController::class);
 });
 
 //add the page for profiles
