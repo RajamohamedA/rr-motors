@@ -7,7 +7,7 @@
 
             <i class="fas fa-cogs fs-4 me-2 text-warning"></i>
 
-            <span class="logo-text fw-bold fs-5">
+            <span class="logo-text fw-bold">
                 RR MOTORS ERP
             </span>
 
@@ -17,7 +17,7 @@
 
     <!-- User -->
 
-    <div class="text-center py-4 border-bottom">
+    <div class="text-center user-info py-4 border-bottom">
 
         <img src="https://ui-avatars.com/api/?name={{ urlencode(Auth::user()->name) }}"
             width="65"

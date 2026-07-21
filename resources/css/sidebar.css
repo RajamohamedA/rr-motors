@@ -1,144 +1,146 @@
+/* ===========================================================
+   RR MOTORS ERP SIDEBAR
+=========================================================== */
+
+/* Layout */
+
 .wrapper {
     display: flex;
     min-height: 100vh;
 }
 
+/* Sidebar */
+
 .sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
     width: 260px;
+    height: 100vh;
     background: #1e293b;
     color: #fff;
-    transition: .3s;
     overflow-y: auto;
+    overflow-x: hidden;
+    transition: all .3s ease;
+    z-index: 1000;
+
+    scrollbar-width: thin;
+    scrollbar-color: #64748b transparent;
 }
 
+.sidebar::-webkit-scrollbar {
+    width: 6px;
+}
+
+.sidebar::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.sidebar::-webkit-scrollbar-thumb {
+    background: #64748b;
+    border-radius: 10px;
+}
+
+.sidebar::-webkit-scrollbar-thumb:hover {
+    background: #94a3b8;
+}
+
+/* Main Content */
+
 .main-wrapper {
-    flex: 1;
+    margin-left: 260px;
+    width: calc(100% - 260px);
+    min-height: 100vh;
     display: flex;
     flex-direction: column;
-    min-width: 0;
+    transition: all .3s ease;
 }
 
 .content {
+    flex: 1;
     padding: 20px;
     background: #f4f6f9;
-    flex: 1;
 }
 
-.sidebar.collapsed {
-    width: 70px;
+/* Header */
+
+.sidebar-header {
+    height: 70px;
+    display: flex;
+    align-items: center;
+    padding: 0 20px;
+    border-bottom: 1px solid #334155;
 }
 
-.sidebar a {
+.logo-text {
+    font-weight: bold;
+    font-size: 18px;
+}
+
+/* User */
+
+.user-info {
+    text-align: center;
+    padding: 20px;
+    border-bottom: 1px solid #334155;
+}
+
+.user-info img {
+    width: 65px;
+    height: 65px;
+    border-radius: 50%;
+    border: 3px solid #0d6efd;
+}
+
+.user-info h6 {
+    margin-top: 10px;
+    color: #fff;
+    margin-bottom: 5px;
+}
+
+/* Navigation */
+
+.sidebar .nav-link {
     color: #cbd5e1;
+    padding: 12px 20px;
+    display: flex;
+    align-items: center;
+    transition: all .25s;
     text-decoration: none;
 }
 
-.sidebar a:hover {
-    color: #fff;
-}
-
-.sidebar-header {
-
-    height: 70px;
-
-}
-
-.sidebar .nav-link {
-
-    color: #CBD5E1;
-
-    padding: 12px 20px;
-
-    transition: .3s;
-
+.sidebar .nav-link i:first-child {
+    width: 22px;
+    text-align: center;
 }
 
 .sidebar .nav-link:hover {
-
-    background: #2563EB;
-
+    background: #2563eb;
     color: #fff;
-
 }
 
 .sidebar .nav-link.active {
-
-    background: #0D6EFD;
-
+    background: #0d6efd;
     color: #fff;
-
+    border-left: 4px solid #ffc107;
 }
 
-.sidebar .menu-title {
-
-    padding: 10px 20px;
-
-    font-size: 12px;
-
-    text-transform: uppercase;
-
-    color: #94A3B8;
-
-}
-
-.sidebar img {
-
-    border: 3px solid #0D6EFD;
-
-}
+/* Sub Menu */
 
 .sidebar .collapse .nav-link {
-
-    padding-left: 45px;
-
+    padding-left: 50px;
     font-size: 14px;
-
 }
 
 .sidebar .collapse .nav-link:hover {
-
     background: #334155;
-
 }
 
 .sidebar .collapse .nav-link.active {
-
     background: #0d6efd;
-
-    color: #fff;
-
 }
 
-.sidebar .fa-angle-down {
-
-    transition: 0.3s;
-
-}
-
-
-.sidebar .badge {
-
-    font-size: 10px;
-
-    padding: 3px 6px;
-
-}
-
-.sidebar .nav-link i {
-
-    width: 20px;
-
-    text-align: center;
-
-}
-
-.sidebar .collapse {
-
-    transition: all .3s ease;
-
-}
-
-/* add animation */
+/* Arrow */
 
 .menu-arrow {
     transition: transform .3s ease;
@@ -148,52 +150,37 @@
     transform: rotate(180deg);
 }
 
-.sidebar .collapse {
-    transition: all .3s ease;
+/* Badge */
+
+.sidebar .badge {
+    font-size: 10px;
+    padding: 3px 6px;
 }
 
-.sidebar {
-    scrollbar-width: thin;
-}
-
-.sidebar::-webkit-scrollbar {
-    width: 6px;
-}
-
-.sidebar::-webkit-scrollbar-thumb {
-    background: #475569;
-    border-radius: 20px;
-}
-
-.sidebar {
-    width: 260px;
-    transition: all .3s ease;
-    overflow-x: hidden;
-}
+/* ===========================================================
+   COLLAPSED SIDEBAR
+=========================================================== */
 
 .sidebar.collapsed {
     width: 70px;
 }
 
-.sidebar.collapsed .menu-text {
-    display: none;
+.sidebar.collapsed+.main-wrapper {
+    margin-left: 70px;
+    width: calc(100% - 70px);
 }
 
-.sidebar.collapsed .logo-text {
-    display: none;
-}
-
-.sidebar.collapsed .badge {
-    display: none;
-}
-
-.sidebar.collapsed .menu-arrow {
+.sidebar.collapsed .logo-text,
+.sidebar.collapsed .menu-text,
+.sidebar.collapsed .menu-arrow,
+.sidebar.collapsed .badge,
+.sidebar.collapsed .user-info {
     display: none;
 }
 
 .sidebar.collapsed .nav-link {
     justify-content: center;
-    padding: 12px 0;
+    padding: 14px 0;
 }
 
 .sidebar.collapsed .nav-link i {
@@ -204,3 +191,22 @@
 .sidebar.collapsed .collapse {
     display: none !important;
 }
+
+/* Responsive */
+
+@media (max-width: 992px) {
+
+    .sidebar {
+        left: -260px;
+    }
+
+    .sidebar.show {
+        left: 0;
+    }
+    
+    .main-wrapper {
+        margin-left: 0;
+        width: 100%;
+    }
+
+}   

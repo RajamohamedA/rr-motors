@@ -23,6 +23,8 @@ use App\Models\Store;
 use App\Http\Controllers\PurchaseController;
 //add StockLedger controller
 use App\Http\Controllers\StockLedgerController;
+//add StockLedger controller
+use App\Http\Controllers\CustomerController;
 
 use Illuminate\Support\Facades\Route;
 
