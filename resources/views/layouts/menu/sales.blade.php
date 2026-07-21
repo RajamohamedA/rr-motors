@@ -35,17 +35,12 @@
 
             <li class="nav-item">
 
-                <a href="#"
+                <a href="{{ route('sales-returns.index') }}"
                    class="nav-link">
 
                     <i class="fas fa-undo me-2"></i>
 
                     Sales Return
-
-                    <span class="badge bg-warning text-dark float-end">
-                        Soon
-                    </span>
-
                 </a>
 
             </li>

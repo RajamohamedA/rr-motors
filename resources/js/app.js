@@ -19,6 +19,9 @@ window.$ = window.jQuery = $;
 //add purchase js
 import './transaction';
 
+//add purchase js
+import './sales-return';
+
 
 document.addEventListener("DOMContentLoaded", function () {
 

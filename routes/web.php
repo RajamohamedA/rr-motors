@@ -27,6 +27,9 @@ use App\Http\Controllers\StockLedgerController;
 use App\Http\Controllers\CustomerController;
 //add sales controller
 use App\Http\Controllers\SalesController;
+//add SalesReturn controller
+use App\Http\Controllers\SalesReturnController;
+
 
 use Illuminate\Support\Facades\Route;
 
@@ -123,6 +126,21 @@ Route::get('/sales/{sale}/print', [SalesController::class, 'print'])
 Route::middleware(['auth'])->group(function () {
     Route::resource('sales', SalesController::class);
 });
+
+//add the route for sales
+Route::middleware(['auth'])->group(function () {
+    Route::resource('sales-returns', SalesReturnController::class);
+});
+
+// add the route for sales return 
+Route::get(
+    '/sales-return/search-invoice',
+    [SalesReturnController::class,'searchInvoice']
+)->name('sales-return.search');
+
+Route::get('/sales-return/get-invoice/{id}',
+    [SalesReturnController::class,'getInvoice'])
+    ->name('sales-return.invoice');
 
 //add the page for profiles
 Route::middleware('auth')->group(function () {
