@@ -1,202 +1,123 @@
 document.addEventListener('DOMContentLoaded', function () {
-  $(function () {
 
-        // ===============================
-        // Search Invoice
-        // ===============================
+    // ===========================================
+    // Search Invoice
+    // ===========================================
 
-        $('#invoice_search').keyup(function () {
+    $('#invoice_search').keyup(function () {
 
-            let keyword = $(this).val();
+        let keyword = $(this).val();
 
-            if (keyword.length < 2) {
+        if (keyword.length < 2) {
+            $('#invoiceResult').hide().html('');
+            return;
+        }
 
-                $('#invoiceResult').hide().html('');
+        $.get($('#searchUrl').val(), {
+            search: keyword
+        }, function (rows) {
 
-                return;
-            }
+            let html = '';
 
-            $.get($('#searchUrl').val(), {
+            $.each(rows, function (i, row) {
 
-                search: keyword
+                html += `
+                <a href="#"
+                    class="list-group-item list-group-item-action invoiceItem"
+                    data-id="${row.id}">
 
-            }, function (rows) {
+                    <strong>${row.invoice_no}</strong><br>
 
-                let html = '';
+                    <small>${row.customer.customer_name}</small>
 
-                $.each(rows, function (i, row) {
-
-                    html += `
-
-                    <a href="#"
-
-                        class="list-group-item list-group-item-action invoiceItem"
-
-                        data-id="${row.id}">
-
-                        <strong>${row.invoice_no}</strong>
-
-                        <br>
-
-                        <small>${row.customer.customer_name}</small>
-
-                    </a>
-
-                    `;
-
-                });
-
-                $('#invoiceResult')
-
-                    .html(html)
-
-                    .show();
-
+                </a>`;
             });
+
+            $('#invoiceResult').html(html).show();
 
         });
 
-        // ===============================
-        // Select Invoice
-        // ===============================
+    });
 
-        $(document).on('click', '.invoiceItem', function (e) {
+    // ===========================================
+    // Select Invoice
+    // ===========================================
 
-            e.preventDefault();
+    $(document).on('click', '.invoiceItem', function (e) {
 
-            let id = $(this).data('id');
+        e.preventDefault();
 
-            $.get($('#invoiceUrl').val() + '/' + id, function (sale) {
+        let id = $(this).data('id');
 
-                loadInvoice(sale);
+        $.get($('#invoiceUrl').val() + '/' + id, function (sale) {
 
-                $('#invoiceResult').hide();
+            loadInvoice(sale);
 
-                $('#invoice_search').val(sale.invoice_no);
+            $('#invoice_search').val(sale.invoice_no);
 
-            });
+            $('#invoiceResult').hide();
 
         });
 
+    });
 
-        function loadInvoice(sale) {
+    // ===========================================
+    // Load Invoice
+    // ===========================================
 
-            $('#sale_id').val(sale.id);
+    function loadInvoice(sale) {
 
-            $('#customer_id').val(sale.customer_id);
-            
-            let html = `
+        $('#sale_id').val(sale.id);
 
-            <div class="card mt-3">
+        $('#customer_id').val(sale.customer_id);
 
-            <div class="card-header bg-primary text-white">
+        $('#customer_name').val(sale.customer.customer_name);
 
-            Invoice Details
+        $('#customer_mobile').val(sale.customer.mobile ?? '');
 
-            </div>
+        $('#customer_address').val(sale.customer.billing_address ?? '');
 
-            <div class="card-body">
+        let html = '';
 
-            <div class="row">
+        sale.items.forEach(function (item) {
 
-            <div class="col-md-6">
-
-            <b>Invoice :</b> ${sale.invoice_no}
-
-            </div>
-
-            <div class="col-md-6">
-
-            <b>Date :</b> ${sale.invoice_date}
-
-            </div>
-
-            <div class="col-md-6 mt-2">
-
-            <b>Customer :</b>
-
-            ${sale.customer.customer_name}
-
-            </div>
-
-            <div class="col-md-6 mt-2">
-
-            <b>Mobile :</b>
-
-            ${sale.customer.mobile ?? ''}
-
-            </div>
-
-            </div>
-
-            <hr>
-
-            <table class="table table-bordered">
-
-            <thead>
+            html += `
 
             <tr>
 
-            <th>Code</th>
+                <td>
 
-            <th>Product</th>
+                    ${item.product.product_code}
 
-            <th>Sold Qty</th>
-
-            <th>Return Qty</th>
-
-            <th>Price</th>
-
-            <th>Total</th>
-
-            </tr>
-
-            </thead>
-
-            <tbody>
-            `;
-
-                    sale.items.forEach(function (item) {
-
-                        html += `
-
-                        <tr>
-
-                        <td>
-
-                        ${item.product.product_code}
-
-                        <input type="hidden"
+                    <input type="hidden"
 
                         name="product_id[]"
 
                         value="${item.product_id}">
 
-                        </td>
+                </td>
 
-                        <td>
+                <td>
 
-                        ${item.product.product_name}
+                    ${item.product.product_name}
 
-                        </td>
+                </td>
 
-                        <td>
+                <td>
 
-                            Sold : ${item.quantity}
+                    Sold : ${item.quantity}<br>
 
-                            <br>
+                    Returned : ${item.returned_qty}<br>
 
-                            Returned : ${item.returned_qty}
+                    <strong>Balance : ${item.balance_qty}</strong>
 
-                            <br>
+                </td>
 
-                            Balance : <strong>${item.balance_qty}</strong>
+                <td>
 
-                        </td>
+                    <input
 
-                        <td>
-
-                        <input type="number"
+                        type="number"
 
                         class="form-control returnQty"
 
@@ -212,142 +133,152 @@ document.addEventListener('DOMContentLoaded', function () {
 
                         data-gst="${item.gst_percent}">
 
-                        </td>
+                </td>
 
-                        <td>
+                <td>
 
-                        <input type="hidden"
+                    ${parseFloat(item.sale_price).toFixed(2)}
+
+                    <input
+
+                        type="hidden"
 
                         name="price[]"
 
                         value="${item.sale_price}">
 
-                        ${parseFloat(item.sale_price).toFixed(2)}
+                </td>
 
-                        </td>
+                <td>
 
-                        <td>
+                    ${parseFloat(item.gst_percent).toFixed(2)} %
 
-                        <input type="hidden"
+                    <br>
+
+                    GST :
+                    <span class="gstDisplay">0.00</span>
+
+                    <input
+
+                        type="hidden"
 
                         name="gst[]"
 
                         value="${item.gst_percent}">
 
-                        ${item.gst_percent}
+                    <input
 
-                        </td>
+                        type="hidden"
 
-                        <td class="returnAmount">
+                        class="gstAmount"
 
-                        0.00
+                        name="gst_amount[]"
 
-                        <input type="hidden"
+                        value="0">
+
+                </td>
+
+                <td>
+
+                    <span class="returnAmount">0.00</span>
+
+                    <input
+
+                        type="hidden"
+
+                        class="amount"
 
                         name="amount[]"
 
                         value="0">
 
-                        </td>
-
-                        </tr>
-
-                        `;
-
-                    });
-
-                    html += `
-
-            </tbody>
-
-            </table>
-
-            <div class="row mt-3">
-
-                <div class="col-md-8"></div>
-
-                <div class="col-md-4">
-
-                <table class="table">
-
-                <tr>
-
-                <th>Total Return</th>
-
-                <td>
-
-                <input type="text"
-
-                readonly
-
-                class="form-control"
-
-                id="grand_total"
-
-                name="grand_total"
-
-                value="0">
-
                 </td>
 
-                </tr>
-
-                </table>
-
-                </div>
-
-                </div>
-
-            </div>
-
-            </div>
-
+            </tr>
             `;
-
-                    $('#invoiceDetails').html(html);
-
-        }
-
-        $(document).on('keyup change', '.returnQty', function () {
-
-            let row = $(this).closest('tr');
-
-            let qty = parseFloat($(this).val()) || 0;
-
-            let price = parseFloat($(this).data('price'));
-
-            let total = qty * price;
-
-            let max = parseFloat($(this).attr('max'));
-
-            if (qty > max) {
-
-                alert('Return quantity exceeds balance quantity.');
-
-                $(this).val(max);
-
-                qty = max;
-            }
-
-            row.find('.returnAmount').html(total.toFixed(2));
-
-            row.find('input[name="amount[]"]').val(total.toFixed(2));
-
-            calculateReturnTotal();
 
         });
 
-        function calculateReturnTotal() {
-            let total = 0;
+        $('#returnItems').html(html);
 
-            $('input[name="amount[]"]').each(function () {
+        calculateReturnTotal();
 
-                total += parseFloat($(this).val()) || 0;
+    }
 
-            });
+    // ===========================================
+    // Qty Change
+    // ===========================================
 
-            $('#grand_total').val(total.toFixed(2));
+    $(document).on('keyup change', '.returnQty', function () {
+
+        let row = $(this).closest('tr');
+
+        let qty = parseFloat($(this).val()) || 0;
+
+        let max = parseFloat($(this).attr('max'));
+
+        if (qty > max) {
+
+            alert('Return quantity exceeds available balance.');
+
+            qty = max;
+
+            $(this).val(max);
+
+        }
+
+        let price = parseFloat($(this).data('price')) || 0;
+
+        let gst = parseFloat($(this).data('gst')) || 0;
+
+        let basic = qty * price;
+
+        let gstAmount = basic * gst / 100;
+
+        let total = basic + gstAmount;
+
+        row.find('.gstDisplay').text(gstAmount.toFixed(2));
+
+        row.find('.gstAmount').val(gstAmount.toFixed(2));
+
+        row.find('.returnAmount').text(total.toFixed(2));
+
+        row.find('.amount').val(total.toFixed(2));
+
+        calculateReturnTotal();
+
+    });
+
+    // ===========================================
+    // Grand Total
+    // ===========================================
+
+    function calculateReturnTotal() {
+
+        let total = 0;
+
+        $('.amount').each(function () {
+
+            total += parseFloat($(this).val()) || 0;
+
+        });
+
+        $('#grand_total').val(total.toFixed(2));
+
+    }
+
+    // ===========================================
+    // Hide Search
+    // ===========================================
+
+    $(document).click(function (e) {
+
+        if (!$(e.target).closest('#invoice_search,#invoiceResult').length) {
+
+            $('#invoiceResult').hide();
+
         }
 
     });
+
 });

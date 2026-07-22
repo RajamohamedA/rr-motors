@@ -142,6 +142,10 @@ Route::get('/sales-return/get-invoice/{id}',
     [SalesReturnController::class,'getInvoice'])
     ->name('sales-return.invoice');
 
+Route::get('/sales-returns/{id}/print',
+    [SalesReturnController::class, 'print']
+)->name('sales-returns.print');
+
 //add the page for profiles
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');

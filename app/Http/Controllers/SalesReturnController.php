@@ -55,77 +55,118 @@ class SalesReturnController extends Controller
      */
     public function store(Request $request)
     {
+        $request->validate([
+            'sale_id'      => 'required|exists:sales,id',
+            'customer_id'  => 'required|exists:customers,id',
+            'return_date'  => 'required|date',
+            'product_id'   => 'required|array',
+            'qty'          => 'required|array',
+            'price'        => 'required|array',
+            'gst'          => 'required|array',
+            'gst_amount'   => 'required|array',
+            'amount'       => 'required|array',
+        ]);
+    
         DB::beginTransaction();
-
+    
         try {
-
-        $returnNo = 'SR-' . str_pad(
-                        (SalesReturn::max('id') ?? 0) + 1,
-                        5,
-                        '0',
-                        STR_PAD_LEFT
-                    );
-
+    
+            // Load Sale
+            $sale = Sales::with('items.product')->findOrFail($request->sale_id);
+    
+            // Company ID
+            $companyId = $request->company_id ?? $sale->company_id;
+    
+            if (!$companyId) {
+                throw new \Exception('Company ID not found.');
+            }
+    
+            // Generate Return Number
+            $returnNo = 'SR-' . str_pad(
+                (SalesReturn::max('id') ?? 0) + 1,
+                5,
+                '0',
+                STR_PAD_LEFT
+            );
+    
+            // Create Sales Return Header
             $return = SalesReturn::create([
-
-                'company_id'  => $request->company_id,
-
-                'sale_id'     => $request->sale_id,
-
-                'customer_id' => $request->customer_id,
-
-                'return_no'   => $returnNo,
-
-                'return_date' => $request->return_date,
-
-                'total_amount'=> $request->grand_total,
-
-                'remarks'     => $request->remarks,
-
+                'company_id'   => $companyId,
+                'sale_id'      => $request->sale_id,
+                'customer_id'  => $request->customer_id,
+                'return_no'    => $returnNo,
+                'return_date'  => $request->return_date,
+                'total_amount' => $request->grand_total,
+                'remarks'      => $request->remarks,
             ]);
-
+    
             foreach ($request->product_id as $key => $productId) {
-
+    
+                $qty = (float) ($request->qty[$key] ?? 0);
+    
+                // Ignore zero quantity
+                if ($qty <= 0) {
+                    continue;
+                }
+    
+                // Find Sale Item
+                $saleItem = $sale->items
+                    ->where('product_id', $productId)
+                    ->first();
+    
+                if (!$saleItem) {
+                    throw new \Exception("Product not found in Sale.");
+                }
+    
+                // Already Returned Qty
+                $returnedQty = SaleReturnItem::where('product_id', $productId)
+                    ->whereHas('salesReturn', function ($q) use ($sale) {
+                        $q->where('sale_id', $sale->id);
+                    })
+                    ->sum('quantity');
+    
+                $balanceQty = $saleItem->quantity - $returnedQty;
+    
+                if ($qty > $balanceQty) {
+                    throw new \Exception(
+                        "Return Qty exceeds Balance Qty for Product : "
+                        . $saleItem->product->product_name
+                    );
+                }
+    
+                // Save Return Item
                 SaleReturnItem::create([
-
                     'sale_return_id' => $return->id,
-
                     'product_id'     => $productId,
-
-                    'quantity'       => $request->qty[$key],
-
+                    'quantity'       => $qty,
                     'sale_price'     => $request->price[$key],
-
                     'gst_percent'    => $request->gst[$key],
-
                     'gst_amount'     => $request->gst_amount[$key],
-
                     'line_total'     => $request->amount[$key],
-
                 ]);
-
+    
                 // Restore Stock
                 $product = Product::find($productId);
-
+    
                 if ($product) {
-
-                    $product->current_stock += $request->qty[$key];
-
+                    $product->current_stock += $qty;
                     $product->save();
                 }
             }
-
+    
             DB::commit();
-
+    
             return redirect()
                 ->route('sales-returns.index')
-                ->with('success', 'Sales Return Saved Successfully');
-
+                ->with('success', 'Sales Return Saved Successfully.');
+    
         } catch (\Exception $e) {
-
+    
             DB::rollBack();
-
-            return back()->withInput()->with('error', $e->getMessage());
+    
+            return back()
+                ->withInput()
+                ->with('error', $e->getMessage());
         }
     }
 
@@ -149,9 +190,9 @@ class SalesReturnController extends Controller
     public function edit($id)
     {
         $return = SalesReturn::with([
-            'items.product',
             'customer',
-            'sale'
+            'sale',
+            'items.product.unit'
         ])->findOrFail($id);
 
         return view('sales_returns.edit', compact('return'));
@@ -197,5 +238,16 @@ class SalesReturnController extends Controller
         }
     
         return response()->json($sale);
+    }
+
+    public function print($id)
+    {
+        $return = SalesReturn::with([
+            'customer',
+            'sale',
+            'items.product.unit'
+        ])->findOrFail($id);
+
+        return view('sales_returns.print', compact('return'));
     }
 }

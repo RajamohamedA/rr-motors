@@ -74,6 +74,14 @@
 
                             </a>
 
+                            <a href="{{ route('sales-returns.print', $return->id) }}"
+                                class="btn btn-sm btn-primary"
+                                target="_blank">
+
+                                    <i class="fas fa-print"></i>
+
+                            </a>
+
                         </td>
 
                     </tr>

@@ -36,7 +36,7 @@
             <li class="nav-item">
 
                 <a href="{{ route('sales-returns.index') }}"
-                   class="nav-link">
+                   class="nav-link {{ request()->routeIs('sales-returns.index') ? 'active' : '' }}">
 
                     <i class="fas fa-undo me-2"></i>
 
