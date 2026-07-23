@@ -1,181 +1,295 @@
 <?php
 
-use App\Http\Controllers\ProfileController;
-//add dashboard controller
-use App\Http\Controllers\DashboardController;
-//add the catogary controller
-use App\Http\Controllers\CategoryController;
-//add company controller
-use App\Http\Controllers\CompanyController;
-//add store controller
-use App\Http\Controllers\StoreController;
-//add unit controller
-use App\Http\Controllers\UnitController;
-//add suppliers controller
-use App\Http\Controllers\SupplierController;
-//add brand controller
-use App\Http\Controllers\BrandController;
-//add product controller
-use App\Http\Controllers\ProductController;
-//add store model
-use App\Models\Store;
-//add purchase controller
-use App\Http\Controllers\PurchaseController;
-//add StockLedger controller
-use App\Http\Controllers\StockLedgerController;
-//add customer controller
-use App\Http\Controllers\CustomerController;
-//add sales controller
-use App\Http\Controllers\SalesController;
-//add SalesReturn controller
-use App\Http\Controllers\SalesReturnController;
-//add PurchaseReturn controller
-use App\Http\Controllers\PurchaseReturnController;
-
 use Illuminate\Support\Facades\Route;
 
-//landing page
+use App\Models\Store;
+
+use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\DashboardController;
+
+use App\Http\Controllers\CompanyController;
+use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\UnitController;
+use App\Http\Controllers\StoreController;
+use App\Http\Controllers\SupplierController;
+use App\Http\Controllers\CustomerController;
+use App\Http\Controllers\BrandController;
+use App\Http\Controllers\ProductController;
+
+use App\Http\Controllers\PurchaseController;
+use App\Http\Controllers\PurchaseReturnController;
+
+use App\Http\Controllers\SalesController;
+use App\Http\Controllers\SalesReturnController;
+
+use App\Http\Controllers\StockLedgerController;
+
+use App\Http\Controllers\PurchaseReportController;
+
+/*
+|--------------------------------------------------------------------------
+| Welcome
+|--------------------------------------------------------------------------
+*/
+
 Route::get('/', function () {
     return view('welcome');
 });
 
-//dashboard page
+/*
+|--------------------------------------------------------------------------
+| Dashboard
+|--------------------------------------------------------------------------
+*/
+
 Route::middleware(['auth', 'verified'])->group(function () {
+
     Route::get('/dashboard', [DashboardController::class, 'index'])
         ->name('dashboard');
 });
 
-//add the routes for company
-Route::middleware(['auth'])->group(function () {
+/*
+|--------------------------------------------------------------------------
+| Master Modules
+|--------------------------------------------------------------------------
+*/
+
+Route::middleware('auth')->group(function () {
+
     Route::resource('companies', CompanyController::class);
-});
 
-//add the routes for categories
-Route::middleware(['auth'])->group(function () {
     Route::resource('categories', CategoryController::class);
-});
 
-//add the routes for unit
-Route::middleware(['auth'])->group(function () {
     Route::resource('units', UnitController::class);
-});
 
-//add the routes for store
-Route::middleware(['auth'])->group(function () {
     Route::resource('stores', StoreController::class);
-});
 
-// add the routes for suppliers
-Route::middleware(['auth'])->group(function () {
     Route::resource('suppliers', SupplierController::class);
-});
 
-//add the routes for brand
-Route::middleware(['auth'])->group(function () {
+    Route::resource('customers', CustomerController::class);
+
     Route::resource('brands', BrandController::class);
-});
 
-//add the routes for products
-Route::middleware(['auth'])->group(function () {
     Route::resource('products', ProductController::class);
 });
 
-//add the routes for purchase
-Route::middleware(['auth'])->group(function () {
-    Route::resource('purchases', PurchaseController::class);
+/*
+|--------------------------------------------------------------------------
+| Ajax
+|--------------------------------------------------------------------------
+*/
+
+Route::middleware('auth')->group(function () {
+
+    Route::get('/get-stores/{company}', function ($company) {
+
+        return Store::where('company_id', $company)
+            ->where('status', 1)
+            ->orderBy('store_name')
+            ->get([
+                'id',
+                'store_name'
+            ]);
+    });
+
+    Route::get(
+        '/api/products/search',
+        [ProductController::class, 'search']
+    )
+        ->name('products.search');
 });
 
-//add the routes for stock-ledgers
-Route::middleware(['auth'])->group(function () {
+/*
+|--------------------------------------------------------------------------
+| Purchase
+|--------------------------------------------------------------------------
+*/
+
+Route::middleware('auth')->group(function () {
+
+    Route::resource('purchases', PurchaseController::class);
+
+    Route::get(
+        '/purchases/{purchase}/print',
+        [PurchaseController::class, 'print']
+    )->name('purchases.print');
+});
+
+/*
+|--------------------------------------------------------------------------
+| Purchase Return
+|--------------------------------------------------------------------------
+*/
+
+Route::middleware('auth')->group(function () {
+
+    Route::resource('purchase-returns', PurchaseReturnController::class);
+
+    Route::get(
+        '/purchase-return/search',
+        [PurchaseReturnController::class, 'search']
+    )->name('purchase-return.search');
+
+    Route::get(
+        '/purchase-return/get-invoice/{id}',
+        [PurchaseReturnController::class, 'getInvoice']
+    )->name('purchase-return.invoice');
+
+    Route::get(
+        '/purchase-returns/{id}/print',
+        [PurchaseReturnController::class, 'print']
+    )->name('purchase-returns.print');
+});
+
+/*
+|--------------------------------------------------------------------------
+| Sales
+|--------------------------------------------------------------------------
+*/
+
+Route::middleware('auth')->group(function () {
+
+    Route::resource('sales', SalesController::class);
+
+    Route::get(
+        '/sales/{sale}/print',
+        [SalesController::class, 'print']
+    )->name('sales.print');
+});
+
+/*
+|--------------------------------------------------------------------------
+| Sales Return
+|--------------------------------------------------------------------------
+*/
+
+Route::middleware('auth')->group(function () {
+
+    Route::resource('sales-returns', SalesReturnController::class);
+
+    Route::get(
+        '/sales-return/search-invoice',
+        [SalesReturnController::class, 'searchInvoice']
+    )->name('sales-return.search');
+
+    Route::get(
+        '/sales-return/get-invoice/{id}',
+        [SalesReturnController::class, 'getInvoice']
+    )->name('sales-return.invoice');
+
+    Route::get(
+        '/sales-returns/{id}/print',
+        [SalesReturnController::class, 'print']
+    )->name('sales-returns.print');
+});
+
+/*
+|--------------------------------------------------------------------------
+| Stock Ledger
+|--------------------------------------------------------------------------
+*/
+
+Route::middleware('auth')->group(function () {
+
     Route::resource('stock-ledgers', StockLedgerController::class);
 });
 
-//add the route for get store
-Route::get('/get-stores/{company}', function ($company) {
+/*
+|--------------------------------------------------------------------------
+| Purchase Reports
+|--------------------------------------------------------------------------
+*/
 
-    return Store::where('company_id', $company)
-            ->where('status',1)
-            ->orderBy('store_name')
-            ->get(['id','store_name']);
-
-})->middleware('auth');
-
-
-Route::get('/api/products/search', [ProductController::class, 'search'])
-    ->name('products.search');
-
-//add the route for purchases
-Route::middleware(['auth'])->group(function () {
-    Route::resource('purchases', PurchaseController::class);
-}); 
-
-//add the route for purchases print
-Route::middleware(['auth'])->group(function () {
-    Route::get('/purchases/{purchase}/print', [PurchaseController::class, 'print'])
-        ->name('purchases.print');
-});
-
-//add the route for customer
-Route::middleware(['auth'])->group(function () {
-    Route::resource('customers', CustomerController::class);
-});
-
-Route::get('/sales/{sale}/print', [SalesController::class, 'print'])
-    ->name('sales.print');
-    
-//add the route for sales
-Route::middleware(['auth'])->group(function () {
-    Route::resource('sales', SalesController::class);
-});
-
-//add the route for sales
-Route::middleware(['auth'])->group(function () {
-    Route::resource('sales-returns', SalesReturnController::class);
-});
-
-// add the route for sales return 
-Route::get(
-    '/sales-return/search-invoice',
-    [SalesReturnController::class,'searchInvoice']
-)->name('sales-return.search');
-
-Route::get('/sales-return/get-invoice/{id}',
-    [SalesReturnController::class,'getInvoice'])
-    ->name('sales-return.invoice');
-
-Route::get('/sales-returns/{id}/print',
-    [SalesReturnController::class, 'print']
-)->name('sales-returns.print');
-
-//purchase return
-
-Route::resource('purchase-returns', PurchaseReturnController::class);
-
-Route::get(
-    'purchase-return/search',
-    [PurchaseReturnController::class, 'search']
-)->name('purchase-return.search');
-
-Route::get(
-    'purchase-return/get-invoice/{id}',
-    [PurchaseReturnController::class, 'getInvoice']
-)->name('purchase-return.invoice');
-
-Route::get(
-    'purchase-returns/{id}/print',
-    [PurchaseReturnController::class, 'print']
-)->name('purchase-returns.print');
-
-Route::delete(
-    '/purchase-returns/{id}',
-    [PurchaseReturnController::class, 'destroy']
-)->name('purchase-returns.destroy');
-
-//add the page for profiles
 Route::middleware('auth')->group(function () {
-    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
-    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
-    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+
+    Route::get(
+        '/purchase-reports',
+        [PurchaseReportController::class, 'index']
+    )->name('purchase-reports.index');
+
+    Route::post(
+        '/purchase-reports/search',
+        [PurchaseReportController::class, 'search']
+    )->name('purchase-reports.search');
+
+    Route::get(
+        '/purchase-reports/print',
+        [PurchaseReportController::class, 'print']
+    )->name('purchase-reports.print');
+
+    Route::get(
+        '/purchase-reports/excel',
+        [PurchaseReportController::class, 'excel']
+    )->name('purchase-reports.excel');
+
+    Route::get(
+        '/purchase-reports/pdf',
+        [
+            PurchaseReportController::class,
+            'pdf'
+        ]
+    )->name('purchase-reports.pdf');
 });
 
-require __DIR__.'/auth.php';
+/*
+|--------------------------------------------------------------------------
+| Future Reports
+|--------------------------------------------------------------------------
+*/
+
+Route::middleware('auth')->group(function () {
+
+    // Sales Report
+    // Route::resource('sales-reports', SalesReportController::class);
+
+    // Purchase Return Report
+    // Route::resource('purchase-return-reports', PurchaseReturnReportController::class);
+
+    // Sales Return Report
+    // Route::resource('sales-return-reports', SalesReturnReportController::class);
+
+    // Stock Report
+    // Route::resource('stock-reports', StockReportController::class);
+
+    // Supplier Ledger
+    // Route::resource('supplier-ledgers', SupplierLedgerController::class);
+
+    // Customer Ledger
+    // Route::resource('customer-ledgers', CustomerLedgerController::class);
+
+    // GST Report
+    // Route::resource('gst-reports', GstReportController::class);
+
+});
+
+/*
+|--------------------------------------------------------------------------
+| Profile
+|--------------------------------------------------------------------------
+*/
+
+Route::middleware('auth')->group(function () {
+
+    Route::get(
+        '/profile',
+        [ProfileController::class, 'edit']
+    )->name('profile.edit');
+
+    Route::patch(
+        '/profile',
+        [ProfileController::class, 'update']
+    )->name('profile.update');
+
+    Route::delete(
+        '/profile',
+        [ProfileController::class, 'destroy']
+    )->name('profile.destroy');
+});
+
+/*
+|--------------------------------------------------------------------------
+| Authentication
+|--------------------------------------------------------------------------
+*/
+
+require __DIR__ . '/auth.php';
