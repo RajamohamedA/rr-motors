@@ -9,91 +9,90 @@
 
 <head>
 
-<meta charset="UTF-8">
+    <meta charset="UTF-8">
 
-<title>Sales Return Invoice</title>
+    <title>Sales Return Invoice</title>
 
-<style>
-
-*{
-margin:0;
-padding:0;
-box-sizing:border-box;
-}
-
-body{
-font-family:Arial,Helvetica,sans-serif;
-font-size:13px;
-padding:20px;
-color:#000;
-}
-
-.invoice{
-width:100%;
-border:2px solid #000;
-}
-
-table{
-width:100%;
-border-collapse:collapse;
-}
-
-table td,
-table th{
-border:1px solid #000;
-padding:6px;
-}
-
-.no-border{
-border:none!important;
-}
-
-.text-center{
-text-align:center;
-}
-
-.text-right{
-text-align:right;
-}
-
-.company{
-padding:15px;
-}
-
-.invoice-title{
-background:#efefef;
-font-size:22px;
-font-weight:bold;
-text-align:center;
-padding:10px;
-border-top:2px solid #000;
-border-bottom:2px solid #000;
-}
-
-
-@media print {
-
-    .main-header,
-    .main-sidebar,
-    .main-footer,
-    .navbar,
-    .sidebar,
-    footer,
-    .no-print,
-    .content-header {
-        display: none !important;
-    }
-
-    .content-wrapper {
-        margin-left: 0 !important;
-    }
-    body{
-        padding:0;
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
 
-}
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+            font-size: 13px;
+            padding: 20px;
+            color: #000;
+        }
 
-</style>
+        .invoice {
+            width: 100%;
+            border: 2px solid #000;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        table td,
+        table th {
+            border: 1px solid #000;
+            padding: 6px;
+        }
+
+        .no-border {
+            border: none !important;
+        }
+
+        .text-center {
+            text-align: center;
+        }
+
+        .text-right {
+            text-align: right;
+        }
+
+        .company {
+            padding: 15px;
+        }
+
+        .invoice-title {
+            background: #efefef;
+            font-size: 22px;
+            font-weight: bold;
+            text-align: center;
+            padding: 10px;
+            border-top: 2px solid #000;
+            border-bottom: 2px solid #000;
+        }
+
+
+        @media print {
+
+            .main-header,
+            .main-sidebar,
+            .main-footer,
+            .navbar,
+            .sidebar,
+            footer,
+            .no-print,
+            .content-header {
+                display: none !important;
+            }
+
+            .content-wrapper {
+                margin-left: 0 !important;
+            }
+
+            body {
+                padding: 0;
+            }
+
+        }
+    </style>
 
 </head>
 
@@ -102,8 +101,8 @@ border-bottom:2px solid #000;
     <div class="d-flex justify-content-end mb-3 no-print">
 
         <button type="button"
-                class="btn btn-primary"
-                onclick="window.print()">
+            class="btn btn-primary"
+            onclick="window.print()">
 
             <i class="fas fa-print"></i>
 
@@ -112,7 +111,7 @@ border-bottom:2px solid #000;
         </button>
 
         <a href="{{ route('sales-returns.index') }}"
-        class="btn btn-secondary ms-2">
+            class="btn btn-secondary ms-2">
 
             <i class="fas fa-arrow-left"></i>
 
@@ -122,340 +121,340 @@ border-bottom:2px solid #000;
 
     </div>
 
-<div class="invoice">
+    <div class="invoice">
 
-<table>
+        <table>
 
-<tr>
+            <tr>
 
-<td class="company no-border">
+                <td class="company no-border">
 
-<h2>RR MOTORS</h2>
+                    <h2>RR MOTORS</h2>
 
-Electrical & Machinery Spare Parts
+                    Electrical & Machinery Spare Parts
 
-<br>
+                    <br>
 
-Thiruthuraipoondi
+                    Thiruthuraipoondi
 
-<br>
+                    <br>
 
-GSTIN : XXXXXXXXXXXXX
+                    GSTIN : XXXXXXXXXXXXX
 
-<br>
+                    <br>
 
-Phone : +91 XXXXXXXXXX
+                    Phone : +91 XXXXXXXXXX
 
-</td>
+                </td>
 
-</tr>
+            </tr>
 
-</table>
+        </table>
 
-<div class="invoice-title">
+        <div class="invoice-title">
 
-SALES RETURN INVOICE
+            SALES RETURN INVOICE
 
-</div>
+        </div>
 
-<table>
+        <table>
 
-<tr>
+            <tr>
 
-<td>
+                <td>
 
-<b>Return No :</b>
+                    <b>Return No :</b>
 
-{{ $return->return_no }}
+                    {{ $return->return_no }}
 
-</td>
+                </td>
 
-<td>
+                <td>
 
-<b>Return Date :</b>
+                    <b>Return Date :</b>
 
-{{ \Carbon\Carbon::parse($return->return_date)->format('d-m-Y') }}
+                    {{ \Carbon\Carbon::parse($return->return_date)->format('d-m-Y') }}
 
-</td>
+                </td>
 
-</tr>
+            </tr>
 
-<tr>
+            <tr>
 
-<td>
+                <td>
 
-<b>Invoice No :</b>
+                    <b>Invoice No :</b>
 
-{{ $return->sale->invoice_no }}
+                    {{ $return->sale->invoice_no }}
 
-</td>
+                </td>
 
-<td>
+                <td>
 
-<b>Invoice Date :</b>
+                    <b>Invoice Date :</b>
 
-{{ \Carbon\Carbon::parse($return->sale->invoice_date)->format('d-m-Y') }}
+                    {{ \Carbon\Carbon::parse($return->sale->invoice_date)->format('d-m-Y') }}
 
-</td>
+                </td>
 
-</tr>
+            </tr>
 
-</table>
+        </table>
 
-<table>
+        <table>
 
-<tr>
+            <tr>
 
-<th colspan="2">
+                <th colspan="2">
 
-CUSTOMER DETAILS
+                    CUSTOMER DETAILS
 
-</th>
+                </th>
 
-</tr>
+            </tr>
 
-<tr>
+            <tr>
 
-<td width="25%">Customer</td>
+                <td width="25%">Customer</td>
 
-<td>{{ $return->customer->customer_name }}</td>
+                <td>{{ $return->customer->customer_name }}</td>
 
-</tr>
+            </tr>
 
-<tr>
+            <tr>
 
-<td>Address</td>
+                <td>Address</td>
 
-<td>{{ $return->customer->billing_address }}</td>
+                <td>{{ $return->customer->billing_address }}</td>
 
-</tr>
+            </tr>
 
-<tr>
+            <tr>
 
-<td>Mobile</td>
+                <td>Mobile</td>
 
-<td>{{ $return->customer->mobile }}</td>
+                <td>{{ $return->customer->mobile }}</td>
 
-</tr>
+            </tr>
 
-<tr>
+            <tr>
 
-<td>GST No</td>
+                <td>GST No</td>
 
-<td>{{ $return->customer->gst_number }}</td>
+                <td>{{ $return->customer->gst_number }}</td>
 
-</tr>
+            </tr>
 
-</table>
+        </table>
 
-<br>
+        <br>
 
-@php
+        @php
 
-$subTotal=0;
-$totalGST=0;
+        $subTotal=0;
+        $totalGST=0;
 
-@endphp
+        @endphp
 
-<table>
+        <table>
 
-<thead>
+            <thead>
 
-<tr>
+                <tr>
 
-<th>Sl</th>
+                    <th>Sl</th>
 
-<th>Code</th>
+                    <th>Code</th>
 
-<th>Product</th>
+                    <th>Product</th>
 
-<th>HSN</th>
+                    <th>HSN</th>
 
-<th>Qty</th>
+                    <th>Qty</th>
 
-<th>Unit</th>
+                    <th>Unit</th>
 
-<th>Rate</th>
+                    <th>Rate</th>
 
-<th>GST%</th>
+                    <th>GST%</th>
 
-<th>GST Amt</th>
+                    <th>GST Amt</th>
 
-<th>Total</th>
+                    <th>Total</th>
 
-</tr>
+                </tr>
 
-</thead>
+            </thead>
 
-<tbody>
+            <tbody>
 
-@foreach($return->items as $item)
+                @foreach($return->items as $item)
 
-@php
+                @php
 
-$basic=$item->quantity*$item->sale_price;
+                $basic=$item->quantity*$item->sale_price;
 
-$subTotal+=$basic;
+                $subTotal+=$basic;
 
-$totalGST+=$item->gst_amount;
+                $totalGST+=$item->gst_amount;
 
-@endphp
+                @endphp
 
-<tr>
+                <tr>
 
-<td>{{ $loop->iteration }}</td>
+                    <td>{{ $loop->iteration }}</td>
 
-<td>{{ $item->product->product_code }}</td>
+                    <td>{{ $item->product->product_code }}</td>
 
-<td>{{ $item->product->product_name }}</td>
+                    <td>{{ $item->product->product_name }}</td>
 
-<td>{{ $item->product->hsn_code }}</td>
+                    <td>{{ $item->product->hsn_code }}</td>
 
-<td class="text-right">{{ number_format($item->quantity,2) }}</td>
+                    <td class="text-right">{{ number_format($item->quantity,2) }}</td>
 
-<td>{{ $item->product->unit->short_name ?? '' }}</td>
+                    <td>{{ $item->product->unit->short_name ?? '' }}</td>
 
-<td class="text-right">{{ number_format($item->sale_price,2) }}</td>
+                    <td class="text-right">{{ number_format($item->sale_price,2) }}</td>
 
-<td class="text-right">{{ number_format($item->gst_percent,2) }}</td>
+                    <td class="text-right">{{ number_format($item->gst_percent,2) }}</td>
 
-<td class="text-right">{{ number_format($item->gst_amount,2) }}</td>
+                    <td class="text-right">{{ number_format($item->gst_amount,2) }}</td>
 
-<td class="text-right">{{ number_format($item->line_total,2) }}</td>
+                    <td class="text-right">{{ number_format($item->line_total,2) }}</td>
 
-</tr>
+                </tr>
 
-@endforeach
+                @endforeach
 
-</tbody>
+            </tbody>
 
-</table>
+        </table>
 
-<br>
+        <br>
 
-<table>
+        <table>
 
-<tr>
+            <tr>
 
-<td width="65%" rowspan="5" valign="top">
+                <td width="65%" rowspan="5" valign="top">
 
-<b>Remarks</b>
+                    <b>Remarks</b>
 
-<br><br>
+                    <br><br>
 
-{{ $return->remarks }}
+                    {{ $return->remarks }}
 
-</td>
+                </td>
 
-<td width="20%">Sub Total</td>
+                <td width="20%">Sub Total</td>
 
-<td class="text-right">
+                <td class="text-right">
 
-₹ {{ number_format($subTotal,2) }}
+                    ₹ {{ number_format($subTotal,2) }}
 
-</td>
+                </td>
 
-</tr>
+            </tr>
 
-<tr>
+            <tr>
 
-<td>GST Total</td>
+                <td>GST Total</td>
 
-<td class="text-right">
+                <td class="text-right">
 
-₹ {{ number_format($totalGST,2) }}
+                    ₹ {{ number_format($totalGST,2) }}
 
-</td>
+                </td>
 
-</tr>
+            </tr>
 
-<tr>
+            <tr>
 
-<td><b>Grand Total</b></td>
+                <td><b>Grand Total</b></td>
 
-<td class="text-right">
+                <td class="text-right">
 
-<b>
+                    <b>
 
-₹ {{ number_format($return->total_amount,2) }}
+                        ₹ {{ number_format($return->total_amount,2) }}
 
-</b>
+                    </b>
 
-</td>
+                </td>
 
-</tr>
+            </tr>
 
-<tr>
+            <tr>
 
-<td colspan="2">
+                <td colspan="2">
 
-<b>Amount in Words</b>
+                    <b>Amount in Words</b>
 
-<br>
+                    <br>
 
-{{ ucfirst(\NumberFormatter::create('en', \NumberFormatter::SPELLOUT)->format($return->total_amount)) }}
+                    {{ ucfirst(\NumberFormatter::create('en', \NumberFormatter::SPELLOUT)->format($return->total_amount)) }}
 
-Rupees Only
+                    Rupees Only
 
-</td>
+                </td>
 
-</tr>
+            </tr>
 
-</table>
+        </table>
 
-<br><br>
+        <br><br>
 
-<table>
+        <table>
 
-<tr>
+            <tr>
 
-<td class="text-center">
+                <td class="text-center">
 
-____________________
+                    ____________________
 
-<br>
+                    <br>
 
-Prepared By
+                    Prepared By
 
-</td>
+                </td>
 
-<td class="text-center">
+                <td class="text-center">
 
-____________________
+                    ____________________
 
-<br>
+                    <br>
 
-Checked By
+                    Checked By
 
-</td>
+                </td>
 
-<td class="text-center">
+                <td class="text-center">
 
-____________________
+                    ____________________
 
-<br>
+                    <br>
 
-Authorized Signature
+                    Authorized Signature
 
-</td>
+                </td>
 
-</tr>
+            </tr>
 
-</table>
+        </table>
 
-</div>
+    </div>
 
-<br>
+    <br>
 
-<div class="text-center">
+    <div class="text-center">
 
-<small>
+        <small>
 
-This is a computer generated Sales Return Invoice.
+            This is a computer generated Sales Return Invoice.
 
-</small>
+        </small>
 
-</div>
+    </div>
 
 </body>
 

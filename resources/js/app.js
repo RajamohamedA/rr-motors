@@ -19,8 +19,12 @@ window.$ = window.jQuery = $;
 //add purchase js
 import './transaction';
 
-//add purchase js
+//add sales return js
 import './sales-return';
+
+// add purchase return js
+import './purchase-return';
+import './purchase-return-edit';
 
 
 document.addEventListener("DOMContentLoaded", function () {

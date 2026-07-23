@@ -29,7 +29,8 @@ use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\SalesController;
 //add SalesReturn controller
 use App\Http\Controllers\SalesReturnController;
-
+//add PurchaseReturn controller
+use App\Http\Controllers\PurchaseReturnController;
 
 use Illuminate\Support\Facades\Route;
 
@@ -145,6 +146,30 @@ Route::get('/sales-return/get-invoice/{id}',
 Route::get('/sales-returns/{id}/print',
     [SalesReturnController::class, 'print']
 )->name('sales-returns.print');
+
+//purchase return
+
+Route::resource('purchase-returns', PurchaseReturnController::class);
+
+Route::get(
+    'purchase-return/search',
+    [PurchaseReturnController::class, 'search']
+)->name('purchase-return.search');
+
+Route::get(
+    'purchase-return/get-invoice/{id}',
+    [PurchaseReturnController::class, 'getInvoice']
+)->name('purchase-return.invoice');
+
+Route::get(
+    'purchase-returns/{id}/print',
+    [PurchaseReturnController::class, 'print']
+)->name('purchase-returns.print');
+
+Route::delete(
+    '/purchase-returns/{id}',
+    [PurchaseReturnController::class, 'destroy']
+)->name('purchase-returns.destroy');
 
 //add the page for profiles
 Route::middleware('auth')->group(function () {
