@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 
@@ -11,35 +10,104 @@
     <title>@yield('title','RR Motors ERP')</title>
 
     @vite([
-        'resources/css/app.css',
-        'resources/js/app.js'
+    'resources/css/app.css',
+    'resources/js/app.js'
     ])
 
 </head>
 
 <body>
 
-<div class="wrapper">
+    <div class="wrapper">
 
-    @include('layouts.sidebar')
+        @include('layouts.sidebar')
 
-    <div class="main-wrapper">
+        <div class="main-wrapper">
 
-        @include('layouts.navbar')
+            @include('layouts.navbar')
 
-        <main class="content">
+            <main class="content">
 
-            @yield('content')
+                {{-- Flash Messages --}}
+                <div class="container-fluid mt-3">
 
-        </main>
+                    @if(session('success'))
 
-        @include('layouts.footer')
+                    <div class="alert alert-success alert-dismissible fade show">
+
+                        <i class="fas fa-check-circle"></i>
+
+                        {{ session('success') }}
+
+                        <button type="button"
+                            class="btn-close"
+                            data-bs-dismiss="alert"></button>
+
+                    </div>
+
+                    @endif
+
+                    @if(session('error'))
+
+                    <div class="alert alert-danger alert-dismissible fade show">
+
+                        <i class="fas fa-times-circle"></i>
+
+                        {{ session('error') }}
+
+                        <button type="button"
+                            class="btn-close"
+                            data-bs-dismiss="alert"></button>
+
+                    </div>
+
+                    @endif
+
+                    @if(session('warning'))
+
+                    <div class="alert alert-warning alert-dismissible fade show">
+
+                        <i class="fas fa-exclamation-triangle"></i>
+
+                        {{ session('warning') }}
+
+                        <button type="button"
+                            class="btn-close"
+                            data-bs-dismiss="alert"></button>
+
+                    </div>
+
+                    @endif
+
+                    @if(session('info'))
+
+                    <div class="alert alert-info alert-dismissible fade show">
+
+                        <i class="fas fa-info-circle"></i>
+
+                        {{ session('info') }}
+
+                        <button type="button"
+                            class="btn-close"
+                            data-bs-dismiss="alert"></button>
+
+                    </div>
+
+                    @endif
+
+                </div>
+
+                @yield('content')
+
+            </main>
+
+            @include('layouts.footer')
+
+        </div>
 
     </div>
 
-</div>
-
-@stack('scripts')
+    @stack('scripts')
 
 </body>
 

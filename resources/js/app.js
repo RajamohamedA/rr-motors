@@ -22,9 +22,10 @@ import './transaction';
 //add sales return js
 import './sales-return';
 
-// add purchase return js
+// add purchase js
 import './purchase-return';
 import './purchase-return-edit';
+import './purchase_report';
 
 
 document.addEventListener("DOMContentLoaded", function () {

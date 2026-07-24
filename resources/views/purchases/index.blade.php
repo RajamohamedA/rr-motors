@@ -1,121 +1,230 @@
 @extends('layouts.app')
 
-@section('title','Purchase List')
+@section('title', 'Purchase List')
 
 @section('content')
 
-<div class="container-fluid mt-4">
+<div class="container-fluid">
 
-    <div class="d-flex justify-content-between align-items-center mb-3">
+    <div class="card shadow-sm">
 
-        <h3>Purchase List</h3>
+        <!-- Card Header -->
+        <div class="card-header bg-primary text-white">
 
-        <a href="{{ route('purchases.create') }}" class="btn btn-primary">
-            <i class="fas fa-plus"></i> New Purchase
-        </a>
+            <div class="d-flex justify-content-between align-items-center">
 
-    </div>
+                <h4 class="mb-0">
+                    <i class="fas fa-shopping-cart"></i>
+                    Purchase List
+                </h4>
 
-    <div class="card">
+                <a href="{{ route('purchases.create') }}"
+                    class="btn btn-light">
 
+                    <i class="fas fa-plus"></i>
+
+                    New Purchase
+
+                </a>
+
+            </div>
+
+        </div>
+
+        <!-- Card Body -->
         <div class="card-body">
 
-            <table class="table table-bordered table-striped">
+            <div class="table-responsive">
 
-                <thead>
+                <table class="table table-bordered table-hover table-striped align-middle">
 
-                <tr>
+                    <thead class="table-dark">
 
-                    <th>#</th>
-                    <th>Purchase No</th>
-                    <th>Date</th>
-                    <th>Supplier</th>
-                    <th>Grand Total</th>
-                    <th>Status</th>
-                    <th width="150">Action</th>
+                        <tr>
 
-                </tr>
+                            <th width="5%">#</th>
 
-                </thead>
+                            <th width="15%">Purchase No</th>
 
-                <tbody>
+                            <th width="12%">Date</th>
 
-                @forelse($purchases as $purchase)
+                            <th>Supplier</th>
 
-                    <tr>
+                            <th width="15%" class="text-end">
 
-                        <td>{{ $loop->iteration }}</td>
+                                Grand Total
 
-                        <td>{{ $purchase->purchase_no }}</td>
+                            </th>
 
-                        <td>{{ $purchase->purchase_date }}</td>
+                            <th width="10%" class="text-center">
 
-                        <td>{{ $purchase->supplier->supplier_name ?? '' }}</td>
+                                Status
 
-                        <td>{{ number_format($purchase->grand_total,2) }}</td>
+                            </th>
 
-                        <td>
-                            @if($purchase->status)
-                                <span class="badge bg-success">Active</span>
-                            @else
-                                <span class="badge bg-danger">Inactive</span>
-                            @endif
-                        </td>
+                            <th width="20%" class="text-center">
 
-                        <td>
+                                Action
 
-                            <a href="{{ route('purchases.edit',$purchase->id) }}"
-                               class="btn btn-warning btn-sm">
+                            </th>
 
-                                <i class="fas fa-edit"></i>
+                        </tr>
 
-                            </a>
+                    </thead>
 
-                            <form action="{{ route('purchases.destroy', $purchase->id) }}"
-                                method="POST"
-                                class="d-inline"
-                                onsubmit="return confirm('Are you sure you want to delete this purchase?')">
+                    <tbody>
 
-                                @csrf
-                                @method('DELETE')
+                        @forelse($purchases as $purchase)
 
-                                <button class="btn btn-danger btn-sm">
-                                    <i class="fas fa-trash"></i>
-                                </button>
+                        <tr>
 
-                            </form>
+                            <td>
 
-                            <a href="{{ route('purchases.print', $purchase->id) }}"
-                                class="btn btn-secondary btn-sm"
-                                target="_blank">
+                                {{ $loop->iteration + ($purchases->currentPage()-1) * $purchases->perPage() }}
 
-                                    <i class="fas fa-print"></i>
+                            </td>
 
-                            </a>
+                            <td>
 
-                        </td>
+                                <strong>
 
-                    </tr>
+                                    {{ $purchase->purchase_no }}
 
-                @empty
+                                </strong>
 
-                    <tr>
+                            </td>
 
-                        <td colspan="7" class="text-center">
+                            <td>
 
-                            No Purchase Found
+                                {{ date('d-m-Y',strtotime($purchase->purchase_date)) }}
 
-                        </td>
+                            </td>
 
-                    </tr>
+                            <td>
 
-                @endforelse
+                                {{ $purchase->supplier->supplier_name ?? '-' }}
 
-                </tbody>
+                            </td>
 
-            </table>
+                            <td class="text-end fw-bold">
 
-            {{ $purchases->links() }}
+                                {{ number_format($purchase->grand_total,2) }}
+
+                            </td>
+
+                            <td class="text-center">
+
+                                @if($purchase->status)
+
+                                <span class="badge bg-success">
+
+                                    Active
+
+                                </span>
+
+                                @else
+
+                                <span class="badge bg-danger">
+
+                                    Inactive
+
+                                </span>
+
+                                @endif
+
+                            </td>
+
+                            <td class="text-center">
+
+                                <div class="btn-group btn-group-sm">
+
+                                    <!-- View -->
+
+                                    <a href="{{ route('purchases.show',$purchase->id) }}"
+                                        class="btn btn-info"
+                                        title="View">
+
+                                        <i class="fas fa-eye"></i>
+
+                                    </a>
+
+                                    <!-- Edit -->
+
+                                    <a href="{{ route('purchases.edit',$purchase->id) }}"
+                                        class="btn btn-warning"
+                                        title="Edit">
+
+                                        <i class="fas fa-edit"></i>
+
+                                    </a>
+
+                                    <!-- Print -->
+
+                                    <a href="{{ route('purchases.print',$purchase->id) }}"
+                                        target="_blank"
+                                        class="btn btn-secondary"
+                                        title="Print">
+
+                                        <i class="fas fa-print"></i>
+
+                                    </a>
+
+                                    <!-- Delete -->
+
+                                    <form action="{{ route('purchases.destroy',$purchase->id) }}"
+                                        method="POST"
+                                        class="d-inline"
+                                        onsubmit="return confirm('Are you sure you want to delete this purchase?')">
+
+                                        @csrf
+                                        @method('DELETE')
+
+                                        <button class="btn btn-danger btn-sm"
+                                            title="Delete">
+
+                                            <i class="fas fa-trash"></i>
+
+                                        </button>
+
+                                    </form>
+
+                                </div>
+
+                            </td>
+
+                        </tr>
+
+                        @empty
+
+                        <tr>
+
+                            <td colspan="7" class="text-center text-muted py-4">
+
+                                <i class="fas fa-box-open fa-2x mb-2"></i>
+
+                                <br>
+
+                                No Purchase Records Found.
+
+                            </td>
+
+                        </tr>
+
+                        @endforelse
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+            <!-- Pagination -->
+
+            <div class="d-flex justify-content-end mt-3">
+
+                {{ $purchases->links() }}
+
+            </div>
 
         </div>
 

@@ -48,16 +48,12 @@
 
             <li class="nav-item">
 
-                <a href="#"
-                    class="nav-link">
+                <a href="{{ route('purchase-reports.index') }}"
+                    class="nav-link {{ request()->routeIs('purchase-reports.*') ? 'active' : '' }}">
 
                     <i class="fas fa-chart-line me-2"></i>
 
-                    Purchase Report
-
-                    <span class="badge bg-warning text-dark float-end">
-                        Soon
-                    </span>
+                     Purchase Report
 
                 </a>
 
