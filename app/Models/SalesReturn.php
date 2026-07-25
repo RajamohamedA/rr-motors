@@ -16,7 +16,6 @@ class SalesReturn extends Model
                 'total_amount',
                 'remarks'
              ];
-
     public function sale()
     {
         return $this->belongsTo(Sales::class);

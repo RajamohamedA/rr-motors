@@ -6,6 +6,7 @@ use App\Models\Sales;
 use App\Models\SalesReturn;
 use App\Models\SaleReturnItem;
 use App\Models\Product;
+use App\Models\StockLedger;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -203,20 +204,159 @@ class SalesReturnController extends Controller
      */
     public function update(Request $request, $id)
     {
-        return redirect()
-            ->route('sales-returns.index')
-            ->with('success', 'Update feature will be added next.');
+        DB::beginTransaction();
+
+        try {
+
+            $salesReturn = SalesReturn::with('items')->findOrFail($id);
+
+            $salesReturn->update([
+                'return_date' => $request->return_date,
+                'remarks'     => $request->remarks,
+            ]);
+
+            // Delete old items
+            $salesReturn->items()->delete();
+
+            $grandTotal = 0;
+
+            foreach ($request->product_id as $key => $productId) {
+
+                $qty = (float)$request->qty[$key];
+
+                if ($qty <= 0) {
+                    continue;
+                }
+
+                $price = (float)$request->price[$key];
+
+                $gst = (float)$request->gst[$key];
+
+                $amount = $qty * $price;
+
+                $gstAmount = ($amount * $gst) / 100;
+
+                $lineTotal = $amount + $gstAmount;
+
+                SaleReturnItem::create([
+
+                    'sale_return_id' => $salesReturn->id,
+                    'product_id'     => $productId,
+                    'quantity'       => $qty,
+                    'sale_price'     => $price,
+                    'gst_percent'    => $gst,
+                    'gst_amount'     => $gstAmount,
+                    'line_total'     => $lineTotal,
+
+                ]);
+
+                $grandTotal += $lineTotal;
+            }
+
+            $salesReturn->update([
+                'total_amount' => $grandTotal
+            ]);
+
+            DB::commit();
+
+            return redirect()
+                ->route('sales-returns.index')
+                ->with('success', 'Sales Return Updated Successfully.');
+        } catch (\Exception $e) {
+
+            DB::rollBack();
+
+            dd($e->getMessage());
+        }
     }
+    
 
     /**
      * Delete
      */
     public function destroy($id)
     {
-        return redirect()
-            ->route('sales-returns.index')
-            ->with('success', 'Delete feature will be added next.');
+        DB::beginTransaction();
+
+        try {
+
+            $salesReturn = SalesReturn::with('items')->findOrFail($id);
+
+            /*
+        |--------------------------------------------------------------------------
+        | Reverse Stock
+        |--------------------------------------------------------------------------
+        */
+
+            foreach ($salesReturn->items as $item) {
+
+                $product = Product::find($item->product_id);
+
+                if ($product) {
+
+                    $this->stockService->increaseStock(
+
+                        $product,
+
+                        $item->quantity,
+
+                        'Sales Return',
+
+                        $salesReturn->company_id,
+
+                        null, // store_id if available
+
+                        $salesReturn->id,
+
+                        $salesReturn->return_no,
+
+                        $item->sale_price,
+
+                        'Sales Return Deleted'
+
+                    );
+                }
+            }
+
+            /*
+        |--------------------------------------------------------------------------
+        | Delete Stock Ledger
+        |--------------------------------------------------------------------------
+        */
+
+            StockLedger::where('reference_id', $salesReturn->id)
+                ->where('transaction_type', 'Sales Return')
+                ->delete();
+
+            /*
+        |--------------------------------------------------------------------------
+        | Delete Return Items
+        |--------------------------------------------------------------------------
+        */
+
+            $salesReturn->items()->delete();
+
+            /*
+        |--------------------------------------------------------------------------
+        | Delete Return Header
+        |--------------------------------------------------------------------------
+        */
+
+            $salesReturn->delete();
+
+            DB::commit();
+
+            return redirect()
+                ->route('sales-returns.index')
+                ->with('success', 'Sales Return Deleted Successfully.');
+        } catch (\Exception $e) {
+
+            DB::rollBack();
+
+            return back()->with('error', $e->getMessage());
+        }
     }
+    
 
     public function getInvoice($id)
     {

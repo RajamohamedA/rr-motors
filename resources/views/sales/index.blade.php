@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title','Sales Invoice')
+@section('title','Sales Invoice List')
 
 @section('content')
 
@@ -8,17 +8,28 @@
 
     <div class="card shadow-sm">
 
-        <div class="card-header bg-success text-white d-flex justify-content-between align-items-center">
+        <div class="card-header bg-success text-white">
 
-            <h5 class="mb-0">
-                <i class="fas fa-file-invoice-dollar"></i>
-                Sales Invoice
-            </h5>
+            <div class="d-flex justify-content-between align-items-center">
 
-            <a href="{{ route('sales.create') }}" class="btn btn-light btn-sm">
-                <i class="fas fa-plus"></i>
-                New Sales Invoice
-            </a>
+                <h4 class="mb-0">
+
+                    <i class="fas fa-file-invoice-dollar"></i>
+
+                    Sales Invoice List
+
+                </h4>
+
+                <a href="{{ route('sales.create') }}"
+                    class="btn btn-light">
+
+                    <i class="fas fa-plus"></i>
+
+                    New Sales Invoice
+
+                </a>
+
+            </div>
 
         </div>
 
@@ -26,20 +37,49 @@
 
             <div class="table-responsive">
 
-                <table class="table table-bordered table-hover">
+                <table class="table table-bordered table-hover table-striped align-middle">
 
-                    <thead class="table-light">
+                    <thead class="table-dark">
 
                         <tr>
 
-                            <th width="60">#</th>
-                            <th>Invoice No</th>
-                            <th>Date</th>
+                            <th width="5%">#</th>
+
+                            <th width="15%">Invoice No</th>
+
+                            <th width="12%">Date</th>
+
                             <th>Customer</th>
-                            <th class="text-end">Grand Total</th>
-                            <th class="text-end">Paid</th>
-                            <th class="text-end">Balance</th>
-                            <th width="180">Action</th>
+
+                            <th class="text-end" width="12%">
+
+                                Grand Total
+
+                            </th>
+
+                            <th class="text-end" width="12%">
+
+                                Paid
+
+                            </th>
+
+                            <th class="text-end" width="12%">
+
+                                Balance
+
+                            </th>
+
+                            <th class="text-center" width="10%">
+
+                                Status
+
+                            </th>
+
+                            <th class="text-center" width="20%">
+
+                                Action
+
+                            </th>
 
                         </tr>
 
@@ -47,81 +87,148 @@
 
                     <tbody>
 
-                    @forelse($sales as $sale)
+                        @forelse($sales as $sale)
 
                         <tr>
 
-                            <td>{{ $loop->iteration }}</td>
+                            <td>
 
-                            <td>{{ $sale->invoice_no }}</td>
+                                {{ $loop->iteration + ($sales->currentPage()-1) * $sales->perPage() }}
 
-                            <td>{{ date('d-m-Y', strtotime($sale->invoice_date)) }}</td>
-
-                            <td>{{ $sale->customer->customer_name ?? '' }}</td>
-
-                            <td class="text-end">
-                                {{ number_format($sale->grand_total,2) }}
-                            </td>
-
-                            <td class="text-end">
-                                {{ number_format($sale->paid_amount,2) }}
-                            </td>
-
-                            <td class="text-end">
-                                {{ number_format($sale->balance_amount,2) }}
                             </td>
 
                             <td>
 
-                                <a href="{{ route('sales.show',$sale->id) }}"
-                                   class="btn btn-info btn-sm">
-                                    <i class="fas fa-eye"></i>
-                                </a>
+                                <strong>
 
-                                <a href="{{ route('sales.edit',$sale->id) }}"
-                                   class="btn btn-warning btn-sm">
-                                    <i class="fas fa-edit"></i>
-                                </a>
+                                    {{ $sale->invoice_no }}
 
-                                <a href="{{ route('sales.print',$sale->id) }}"
-                                   class="btn btn-secondary btn-sm"
-                                   target="_blank">
-                                    <i class="fas fa-print"></i>
-                                </a>
+                                </strong>
 
-                                <form action="{{ route('sales.destroy',$sale->id) }}"
-                                      method="POST"
-                                      class="d-inline">
+                            </td>
 
-                                    @csrf
-                                    @method('DELETE')
+                            <td>
 
-                                    <button class="btn btn-danger btn-sm"
-                                            onclick="return confirm('Delete this invoice?')">
+                                {{ date('d-m-Y',strtotime($sale->invoice_date)) }}
 
-                                        <i class="fas fa-trash"></i>
+                            </td>
 
-                                    </button>
+                            <td>
 
-                                </form>
+                                {{ $sale->customer->customer_name ?? '-' }}
+
+                            </td>
+
+                            <td class="text-end fw-bold">
+
+                                {{ number_format($sale->grand_total,2) }}
+
+                            </td>
+
+                            <td class="text-end text-success fw-bold">
+
+                                {{ number_format($sale->paid_amount,2) }}
+
+                            </td>
+
+                            <td class="text-end text-danger fw-bold">
+
+                                {{ number_format($sale->balance_amount,2) }}
+
+                            </td>
+
+                            <td class="text-center">
+
+                                @if($sale->status)
+
+                                <span class="badge bg-success">
+
+                                    Completed
+
+                                </span>
+
+                                @else
+
+                                <span class="badge bg-danger">
+
+                                    Cancelled
+
+                                </span>
+
+                                @endif
+
+                            </td>
+
+                            <td class="text-center">
+
+                                <div class="btn-group btn-group-sm">
+
+                                    <a href="{{ route('sales.show',$sale->id) }}"
+                                        class="btn btn-info"
+                                        title="View">
+
+                                        <i class="fas fa-eye"></i>
+
+                                    </a>
+
+                                    <a href="{{ route('sales.edit',$sale->id) }}"
+                                        class="btn btn-warning"
+                                        title="Edit">
+
+                                        <i class="fas fa-edit"></i>
+
+                                    </a>
+
+                                    <a href="{{ route('sales.print',$sale->id) }}"
+                                        target="_blank"
+                                        class="btn btn-secondary"
+                                        title="Print">
+
+                                        <i class="fas fa-print"></i>
+
+                                    </a>
+
+                                    <form action="{{ route('sales.destroy',$sale->id) }}"
+                                        method="POST"
+                                        class="d-inline"
+                                        onsubmit="return confirm('Are you sure you want to delete this Sales Invoice?')">
+
+                                        @csrf
+                                        @method('DELETE')
+
+                                        <button type="submit"
+                                            class="btn btn-danger btn-sm"
+                                            title="Delete">
+
+                                            <i class="fas fa-trash"></i>
+
+                                        </button>
+
+                                    </form>
+
+                                </div>
 
                             </td>
 
                         </tr>
 
-                    @empty
+                        @empty
 
                         <tr>
 
-                            <td colspan="8" class="text-center">
+                            <td colspan="9" class="text-center text-muted py-4">
 
-                                No Sales Invoice Found
+                                <i class="fas fa-file-invoice-dollar fa-2x mb-2"></i>
+
+                                <br>
+
+                                No Sales Invoice Found.
 
                             </td>
 
                         </tr>
 
-                    @endforelse
+                        @endforelse
 
                     </tbody>
 
@@ -129,7 +236,7 @@
 
             </div>
 
-            <div class="mt-3">
+            <div class="d-flex justify-content-end mt-3">
 
                 {{ $sales->links() }}
 
@@ -141,4 +248,4 @@
 
 </div>
 
-@endsection 
+@endsection
