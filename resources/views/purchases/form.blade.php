@@ -21,10 +21,10 @@
                 <label class="form-label">Purchase No</label>
 
                 <input type="text"
-                       class="form-control"
-                       name="purchase_no"
-                       readonly
-                       value="{{ old('purchase_no',$purchase->purchase_no ?? $purchaseNo) }}">
+                    class="form-control"
+                    name="purchase_no"
+                    readonly
+                    value="{{ old('purchase_no',$purchase->purchase_no ?? $purchaseNo) }}">
 
             </div>
 
@@ -35,9 +35,9 @@
                 <label class="form-label">Purchase Date</label>
 
                 <input type="date"
-                       class="form-control"
-                       name="purchase_date"
-                       value="{{ old('purchase_date',$purchase->purchase_date ?? date('Y-m-d')) }}">
+                    class="form-control"
+                    name="purchase_date"
+                    value="{{ old('purchase_date',$purchase->purchase_date ?? date('Y-m-d')) }}">
 
             </div>
 
@@ -56,13 +56,13 @@
 
                     @foreach($companies as $company)
 
-                        <option
-                            value="{{ $company->id }}"
-                            {{ old('company_id',$purchase->company_id ?? '')==$company->id?'selected':'' }}>
+                    <option
+                        value="{{ $company->id }}"
+                        {{ old('company_id',$purchase->company_id ?? '')==$company->id?'selected':'' }}>
 
-                            {{ $company->company_name }}
+                        {{ $company->company_name }}
 
-                        </option>
+                    </option>
 
                     @endforeach
 
@@ -85,13 +85,13 @@
 
                     @foreach($stores as $store)
 
-                        <option
-                            value="{{ $store->id }}"
-                            {{ old('store_id',$purchase->store_id ?? '')==$store->id?'selected':'' }}>
+                    <option
+                        value="{{ $store->id }}"
+                        {{ old('store_id',$purchase->store_id ?? '')==$store->id?'selected':'' }}>
 
-                            {{ $store->store_name }}
+                        {{ $store->store_name }}
 
-                        </option>
+                    </option>
 
                     @endforeach
 
@@ -113,13 +113,13 @@
 
                     @foreach($suppliers as $supplier)
 
-                        <option
-                            value="{{ $supplier->id }}"
-                            {{ old('supplier_id',$purchase->supplier_id ?? '')==$supplier->id?'selected':'' }}>
+                    <option
+                        value="{{ $supplier->id }}"
+                        {{ old('supplier_id',$purchase->supplier_id ?? '')==$supplier->id?'selected':'' }}>
 
-                            {{ $supplier->supplier_name }}
+                        {{ $supplier->supplier_name }}
 
-                        </option>
+                    </option>
 
                     @endforeach
 
@@ -189,8 +189,8 @@
                     placeholder="Search Product Code / Barcode / Product Name">
 
                 <div id="searchResult"
-                     class="list-group mt-2"
-                     style="display:none;
+                    class="list-group mt-2"
+                    style="display:none;
                             max-height:300px;
                             overflow-y:auto;">
                 </div>
@@ -204,11 +204,14 @@
 </div>
 
 <input type="hidden"
-       id="productSearchUrl"
-       value="{{ route('products.search') }}">
+    id="productSearchUrl"
+    value="{{ route('products.search') }}">
+
+<input type="hidden" id="transactionType" value="purchase">
+<input type="hidden" id="itemContainer" value="purchaseItems">
 
 
-       <!-- Purchase Items -->
+<!-- Purchase Items -->
 
 <div class="card shadow-sm">
 
@@ -234,29 +237,29 @@
 
                 <thead class="table-light">
 
-                <tr>
+                    <tr>
 
-                    <th width="120">Code</th>
+                        <th width="120">Code</th>
 
-                    <th>Product</th>
+                        <th>Product</th>
 
-                    <th width="90">Qty</th>
+                        <th width="90">Qty</th>
 
-                    <th width="120">Price</th>
+                        <th width="120">Price</th>
 
-                    <th width="80">GST%</th>
+                        <th width="80">GST%</th>
 
-                    <th width="130">Amount</th>
+                        <th width="130">Amount</th>
 
-                    <th width="60"></th>
+                        <th width="60"></th>
 
-                </tr>
+                    </tr>
 
                 </thead>
 
                 <tbody id="purchaseItems">
 
-                @if(isset($purchase))
+                    @if(isset($purchase))
 
                     @foreach($purchase->items as $item)
 
@@ -337,35 +340,35 @@
 
                     @endforeach
 
-                @endif
+                    @endif
 
                 </tbody>
 
                 <tfoot>
 
-                <tr>
+                    <tr>
 
-                    <th colspan="5" class="text-end">
+                        <th colspan="5" class="text-end">
 
-                        Grand Total
+                            Grand Total
 
-                    </th>
+                        </th>
 
-                    <th>
+                        <th>
 
-                        <input
-                            type="text"
-                            class="form-control"
-                            id="grand_total"
-                            name="grand_total"
-                            readonly
-                            value="{{ old('grand_total',$purchase->grand_total ?? 0) }}">
+                            <input
+                                type="text"
+                                class="form-control"
+                                id="grand_total"
+                                name="grand_total"
+                                readonly
+                                value="{{ old('grand_total',$purchase->grand_total ?? 0) }}">
 
-                    </th>
+                        </th>
 
-                    <th></th>
+                        <th></th>
 
-                </tr>
+                    </tr>
 
                 </tfoot>
 

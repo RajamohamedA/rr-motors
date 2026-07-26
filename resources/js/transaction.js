@@ -2,11 +2,18 @@ document.addEventListener('DOMContentLoaded', function () {
 
     $(function () {
 
+        const transactionType = $('#transactionType').val() || 'sale';
+
+        const itemContainer = $('#itemContainer').val() || 'purchaseItems';
+
         calculateGrandTotal();
 
-        // ==========================
-        // Product Search
-        // ==========================
+        /*
+        |--------------------------------------------------------------------------
+        | Product Search
+        |--------------------------------------------------------------------------
+        */
+
         $('#product_search').keyup(function () {
 
             let keyword = $(this).val();
@@ -16,75 +23,101 @@ document.addEventListener('DOMContentLoaded', function () {
                 return;
             }
 
-            $.get($('#productSearchUrl').val(), {
-                search: keyword
-            }, function (products) {
+            $.ajax({
 
-                let html = '';
+                url: $('#productSearchUrl').val(),
 
-                let type = $('#transactionType').val();
+                type: 'GET',
 
-                $.each(products, function (i, product) {
+                data: {
+                    search: keyword
+                },
 
-                    let price = type === 'sale'
-                        ? parseFloat(product.sale_price)
-                        : parseFloat(product.purchase_price);
+                success: function (products) {
 
-                    html += `
-                    <a href="#"
-                       class="list-group-item list-group-item-action productItem"
+                    let html = '';
+                    const type = $('#transactionType').val() || 'sale';
 
-                       data-id="${product.id}"
-                       data-code="${product.product_code}"
-                       data-name="${product.product_name}"
-                       data-price="${price}"
-                       data-gst="${product.gst_percent}"
-                       data-stock="${product.current_stock}">
+                    $.each(products, function (i, product) {
 
-                        <strong>${product.product_code}</strong>
+                        let price = (type === 'purchase')
+                            ? parseFloat(product.purchase_price)
+                            : parseFloat(product.selling_price);
 
-                        - ${product.product_name}
+                        html += `
+                        <a href="#"
+                           class="list-group-item list-group-item-action productItem"
 
-                        <br>
+                           data-id="${product.id}"
+                           data-code="${product.product_code}"
+                           data-name="${product.product_name}"
+                           data-price="${price}"
+                           data-gst="${product.gst_percent}"
+                           data-stock="${product.current_stock}">
 
-                        <small>
+                            <strong>${product.product_code}</strong>
 
-                            Stock : ${product.current_stock}
+                            - ${product.product_name}
 
-                            | ₹${price.toFixed(2)}
+                            <br>
 
-                        </small>
+                            <small>
 
-                    </a>`;
-                });
+                                Stock : ${product.current_stock}
 
-                $('#searchResult').html(html).show();
+                                | Price : ${price.toFixed(2)}
+
+                            </small>
+
+                        </a>`;
+                    });
+
+                    $('#searchResult').html(html).show();
+
+                }
 
             });
 
         });
 
-        // ==========================
-        // Add Product
-        // ==========================
+        /*
+        |--------------------------------------------------------------------------
+        | Add Product
+        |--------------------------------------------------------------------------
+        */
+
         $(document).on('click', '.productItem', function (e) {
 
             e.preventDefault();
 
             let id = $(this).data('id');
+
             let code = $(this).data('code');
+
             let name = $(this).data('name');
+
             let price = parseFloat($(this).data('price'));
+
             let gst = parseFloat($(this).data('gst'));
+
             let stock = parseFloat($(this).data('stock'));
 
-            // Duplicate Check
+            /*
+            |--------------------------------------------------------------------------
+            | Duplicate Product Check
+            |--------------------------------------------------------------------------
+            */
+
             let exists = false;
 
             $('input[name="product_id[]"]').each(function () {
 
                 if ($(this).val() == id) {
+
                     exists = true;
+
+                    return false;
+
                 }
 
             });
@@ -94,7 +127,14 @@ document.addEventListener('DOMContentLoaded', function () {
                 alert('Product already added.');
 
                 return;
+
             }
+
+            /*
+            |--------------------------------------------------------------------------
+            | Row HTML
+            |--------------------------------------------------------------------------
+            */
 
             let row = `
 
@@ -119,6 +159,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     <small class="text-success">
 
                         Stock :
+
                         <span class="stock">${stock}</span>
 
                     </small>
@@ -174,9 +215,10 @@ document.addEventListener('DOMContentLoaded', function () {
 
                 </td>
 
-            </tr>`;
+            </tr>
+            `;
 
-            $('#purchaseItems').append(row);
+            $('#' + itemContainer).append(row);
 
             $('#product_search').val('');
 
@@ -186,10 +228,13 @@ document.addEventListener('DOMContentLoaded', function () {
 
         });
 
-        // ==========================
-        // Qty / Price Change
-        // ==========================
-        $(document).on('keyup change', '.qty,.price', function () {
+        /*
+        |--------------------------------------------------------------------------
+        | Qty / Price / GST Change
+        |--------------------------------------------------------------------------
+        */
+
+        $(document).on('keyup change', '.qty,.price,.gst', function () {
 
             let row = $(this).closest('tr');
 
@@ -197,8 +242,15 @@ document.addEventListener('DOMContentLoaded', function () {
 
             let price = parseFloat(row.find('.price').val()) || 0;
 
-            // Sales Stock Validation
-            if ($('#transactionType').val() === 'sale') {
+            let gst = parseFloat(row.find('.gst').val()) || 0;
+
+            /*
+            |--------------------------------------------------------------------------
+            | Sales Stock Validation
+            |--------------------------------------------------------------------------
+            */
+
+            if (transactionType === 'sale') {
 
                 let stock = parseFloat(row.find('.stock').text()) || 0;
 
@@ -214,51 +266,213 @@ document.addEventListener('DOMContentLoaded', function () {
 
             }
 
-            let amount = qty * price;
+            /*
+            |--------------------------------------------------------------------------
+            | Amount Calculation
+            |--------------------------------------------------------------------------
+            */
 
-            row.find('.amount').val(amount.toFixed(2));
+            let basic = qty * price;
+
+            let gstAmount = basic * gst / 100;
+
+            let total = basic + gstAmount;
+
+            row.find('.amount').val(total.toFixed(2));
 
             calculateGrandTotal();
 
         });
 
-        // ==========================
-        // Remove Row
-        // ==========================
+        /*
+        |--------------------------------------------------------------------------
+        | Remove Item
+        |--------------------------------------------------------------------------
+        */
+
         $(document).on('click', '.removeRow', function () {
 
-            $(this).closest('tr').remove();
+            if (confirm('Remove this product?')) {
 
-            calculateGrandTotal();
+                $(this).closest('tr').remove();
+
+                calculateGrandTotal();
+
+            }
 
         });
 
-        // ==========================
-        // Grand Total
-        // ==========================
+        /*
+        |--------------------------------------------------------------------------
+        | Grand Total
+        |--------------------------------------------------------------------------
+        */
+
         function calculateGrandTotal() {
 
-            let total = 0;
+            let grandTotal = 0;
 
             $('.amount').each(function () {
 
-                total += parseFloat($(this).val()) || 0;
+                grandTotal += parseFloat($(this).val()) || 0;
 
             });
 
-            $('#grand_total').val(total.toFixed(2));
+            $('#grand_total').val(grandTotal.toFixed(2));
 
-            calculateBalance();
+            /*
+            |--------------------------------------------------------------------------
+            | Sales Payment
+            |--------------------------------------------------------------------------
+            */
+
+            if ($('#paid_amount').length) {
+
+                calculateBalance();
+
+            }
 
         }
 
-        // ==========================
-        // Balance
-        // ==========================
+        /*
+        |--------------------------------------------------------------------------
+        | Balance
+        |--------------------------------------------------------------------------
+        */
+
         function calculateBalance() {
 
-            if ($('#paid_amount').length === 0)
-                return;
+            let grand = parseFloat($('#grand_total').val()) || 0;
+
+            let paid = parseFloat($('#paid_amount').val()) || 0;
+
+            let balance = grand - paid;
+
+            console.log("Qty :", qty);
+            console.log("Price :", price);
+            console.log("GST :", gst);
+
+            $('#balance_amount').val(balance.toFixed(2));
+
+        }
+
+        $(document).on('keyup change', '#paid_amount', function () {
+
+            calculateBalance();
+
+        });        /*
+        |--------------------------------------------------------------------------
+        | Qty / Price / GST Change
+        |--------------------------------------------------------------------------
+        */
+
+        $(document).on('keyup change', '.qty,.price,.gst', function () {
+
+            let row = $(this).closest('tr');
+
+            let qty = parseFloat(row.find('.qty').val()) || 0;
+
+            let price = parseFloat(row.find('.price').val()) || 0;
+
+            let gst = parseFloat(row.find('.gst').val()) || 0;
+
+            /*
+            |--------------------------------------------------------------------------
+            | Sales Stock Validation
+            |--------------------------------------------------------------------------
+            */
+
+            if (transactionType === 'sale') {
+
+                let stock = parseFloat(row.find('.stock').text()) || 0;
+
+                if (qty > stock) {
+
+                    alert('Only ' + stock + ' stock available.');
+
+                    qty = stock;
+
+                    row.find('.qty').val(stock);
+
+                }
+
+            }
+
+            /*
+            |--------------------------------------------------------------------------
+            | Amount Calculation
+            |--------------------------------------------------------------------------
+            */
+
+            let basic = qty * price;
+
+            let gstAmount = basic * gst / 100;
+
+            let total = basic + gstAmount;
+
+            row.find('.amount').val(total.toFixed(2));
+
+            calculateGrandTotal();
+
+        });
+
+        /*
+        |--------------------------------------------------------------------------
+        | Remove Item
+        |--------------------------------------------------------------------------
+        */
+
+        $(document).on('click', '.removeRow', function () {
+
+            if (confirm('Remove this product?')) {
+
+                $(this).closest('tr').remove();
+
+                calculateGrandTotal();
+
+            }
+
+        });
+
+        /*
+        |--------------------------------------------------------------------------
+        | Grand Total
+        |--------------------------------------------------------------------------
+        */
+
+        function calculateGrandTotal() {
+
+            let grandTotal = 0;
+
+            $('.amount').each(function () {
+
+                grandTotal += parseFloat($(this).val()) || 0;
+
+            });
+
+            $('#grand_total').val(grandTotal.toFixed(2));
+
+            /*
+            |--------------------------------------------------------------------------
+            | Sales Payment
+            |--------------------------------------------------------------------------
+            */
+
+            if ($('#paid_amount').length) {
+
+                calculateBalance();
+
+            }
+
+        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | Balance
+        |--------------------------------------------------------------------------
+        */
+
+        function calculateBalance() {
 
             let grand = parseFloat($('#grand_total').val()) || 0;
 
@@ -270,11 +484,50 @@ document.addEventListener('DOMContentLoaded', function () {
 
         }
 
-        $(document).on('keyup change', '#paid_amount', calculateBalance);
+        $(document).on('keyup change', '#paid_amount', function () {
 
-        // ==========================
-        // Hide Search
-        // ==========================
+            calculateBalance();
+
+        });
+
+        /*
+        |--------------------------------------------------------------------------
+        | Recalculate Existing Rows (Edit Mode)
+        |--------------------------------------------------------------------------
+        */
+
+        function recalculateRows() {
+
+            $('#' + itemContainer + ' tr').each(function () {
+
+                let row = $(this);
+
+                let qty = parseFloat(row.find('.qty').val()) || 0;
+
+                let price = parseFloat(row.find('.price').val()) || 0;
+
+                let gst = parseFloat(row.find('.gst').val()) || 0;
+
+                let basic = qty * price;
+
+                let gstAmount = basic * gst / 100;
+
+                let total = basic + gstAmount;
+
+                row.find('.amount').val(total.toFixed(2));
+
+            });
+
+            calculateGrandTotal();
+
+        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | Hide Product Search
+        |--------------------------------------------------------------------------
+        */
+
         $(document).click(function (e) {
 
             if (!$(e.target).closest('#product_search,#searchResult').length) {
@@ -284,6 +537,48 @@ document.addEventListener('DOMContentLoaded', function () {
             }
 
         });
+
+        /*
+        |--------------------------------------------------------------------------
+        | ESC Key Hide Search
+        |--------------------------------------------------------------------------
+        */
+
+        $(document).keyup(function (e) {
+
+            if (e.key === "Escape") {
+
+                $('#searchResult').hide();
+
+            }
+
+        });
+
+        /*
+        |--------------------------------------------------------------------------
+        | Enter Key Prevent Submit
+        |--------------------------------------------------------------------------
+        */
+
+        $('#product_search').keypress(function (e) {
+
+            if (e.which === 13) {
+
+                e.preventDefault();
+
+            }
+
+        });
+
+        /*
+        |--------------------------------------------------------------------------
+        | Initial Load
+        |--------------------------------------------------------------------------
+        */
+
+        recalculateRows();
+
+        calculateGrandTotal();
 
     });
 

@@ -139,23 +139,14 @@
 
                             <td class="text-center">
 
-                                @if($sale->status)
-
-                                <span class="badge bg-success">
-
-                                    Completed
-
-                                </span>
-
+                                @if($sale->status == 'Completed')
+                                    <span class="badge bg-success">Completed</span>
+                                @elseif($sale->status == 'Pending')
+                                    <span class="badge bg-warning">Pending</span>
                                 @else
-
-                                <span class="badge bg-danger">
-
-                                    Cancelled
-
-                                </span>
-
+                                    <span class="badge bg-danger">Cancelled</span>
                                 @endif
+
 
                             </td>
 

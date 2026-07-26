@@ -26,10 +26,10 @@
                 <label class="form-label">Invoice No</label>
 
                 <input type="text"
-                       class="form-control"
-                       name="invoice_no"
-                       readonly
-                       value="{{ old('invoice_no',$sale->invoice_no ?? $invoiceNo) }}">
+                    class="form-control"
+                    name="invoice_no"
+                    readonly
+                    value="{{ old('invoice_no',$sale->invoice_no ?? $invoiceNo) }}">
 
             </div>
 
@@ -40,9 +40,9 @@
                 <label class="form-label">Invoice Date</label>
 
                 <input type="date"
-                       class="form-control"
-                       name="invoice_date"
-                       value="{{ old('invoice_date',$sale->invoice_date ?? date('Y-m-d')) }}">
+                    class="form-control"
+                    name="invoice_date"
+                    value="{{ old('invoice_date',$sale->invoice_date ?? date('Y-m-d')) }}">
 
             </div>
 
@@ -53,18 +53,18 @@
                 <label class="form-label">Company</label>
 
                 <select class="form-select"
-                        name="company_id">
+                    name="company_id">
 
                     <option value="">Select Company</option>
 
                     @foreach($companies as $company)
 
-                        <option value="{{ $company->id }}"
-                            {{ old('company_id',$sale->company_id ?? '')==$company->id ? 'selected':'' }}>
+                    <option value="{{ $company->id }}"
+                        {{ old('company_id',$sale->company_id ?? '')==$company->id ? 'selected':'' }}>
 
-                            {{ $company->company_name }}
+                        {{ $company->company_name }}
 
-                        </option>
+                    </option>
 
                     @endforeach
 
@@ -79,18 +79,18 @@
                 <label class="form-label">Store</label>
 
                 <select class="form-select"
-                        name="store_id">
+                    name="store_id">
 
                     <option value="">Select Store</option>
 
                     @foreach($stores as $store)
 
-                        <option value="{{ $store->id }}"
-                            {{ old('store_id',$sale->store_id ?? '')==$store->id ? 'selected':'' }}>
+                    <option value="{{ $store->id }}"
+                        {{ old('store_id',$sale->store_id ?? '')==$store->id ? 'selected':'' }}>
 
-                            {{ $store->store_name }}
+                        {{ $store->store_name }}
 
-                        </option>
+                    </option>
 
                     @endforeach
 
@@ -105,18 +105,18 @@
                 <label class="form-label">Customer</label>
 
                 <select class="form-select"
-                        name="customer_id">
+                    name="customer_id">
 
                     <option value="">Select Customer</option>
 
                     @foreach($customers as $customer)
 
-                        <option value="{{ $customer->id }}"
-                            {{ old('customer_id',$sale->customer_id ?? '')==$customer->id ? 'selected':'' }}>
+                    <option value="{{ $customer->id }}"
+                        {{ old('customer_id',$sale->customer_id ?? '')==$customer->id ? 'selected':'' }}>
 
-                            {{ $customer->customer_name }}
+                        {{ $customer->customer_name }}
 
-                        </option>
+                    </option>
 
                     @endforeach
 
@@ -149,14 +149,14 @@
     <div class="card-body">
 
         <input type="text"
-               id="product_search"
-               class="form-control form-control-lg"
-               autocomplete="off"
-               placeholder="Search Product Code / Barcode / Product Name">
+            id="product_search"
+            class="form-control form-control-lg"
+            autocomplete="off"
+            placeholder="Search Product Code / Barcode / Product Name">
 
         <div id="searchResult"
-             class="list-group mt-2"
-             style="display:none;max-height:300px;overflow-y:auto;">
+            class="list-group mt-2"
+            style="display:none;max-height:300px;overflow-y:auto;">
         </div>
 
     </div>
@@ -164,8 +164,10 @@
 </div>
 
 <input type="hidden"
-       id="productSearchUrl"
-       value="{{ route('products.search') }}">
+    id="productSearchUrl"
+    value="{{ route('products.search') }}">
+<input type="hidden" id="transactionType" value="sale">
+<input type="hidden" id="itemContainer" value="purchaseItems">
 
 <!-- Sales Items -->
 
@@ -188,33 +190,33 @@
         <div class="table-responsive">
 
             <table class="table table-bordered table-hover"
-                   id="purchaseTable">
+                id="purchaseTable">
 
                 <thead>
 
-                <tr>
+                    <tr>
 
-                    <th width="120">Code</th>
+                        <th width="120">Code</th>
 
-                    <th>Product</th>
+                        <th>Product</th>
 
-                    <th width="90">Qty</th>
+                        <th width="90">Qty</th>
 
-                    <th width="120">Price</th>
+                        <th width="120">Price</th>
 
-                    <th width="80">GST%</th>
+                        <th width="80">GST%</th>
 
-                    <th width="130">Amount</th>
+                        <th width="130">Amount</th>
 
-                    <th width="60"></th>
+                        <th width="60"></th>
 
-                </tr>
+                    </tr>
 
                 </thead>
 
                 <tbody id="purchaseItems">
 
-                @if(isset($sale))
+                    @if(isset($sale))
 
                     @foreach($sale->items as $item)
 
@@ -225,8 +227,8 @@
                             {{ $item->product->product_code }}
 
                             <input type="hidden"
-                                   name="product_id[]"
-                                   value="{{ $item->product_id }}">
+                                name="product_id[]"
+                                value="{{ $item->product_id }}">
 
                         </td>
 
@@ -239,43 +241,43 @@
                         <td>
 
                             <input type="number"
-                                   class="form-control qty"
-                                   name="qty[]"
-                                   value="{{ $item->quantity }}">
+                                class="form-control qty"
+                                name="qty[]"
+                                value="{{ $item->quantity }}">
 
                         </td>
 
                         <td>
 
                             <input type="number"
-                                   class="form-control price"
-                                   name="price[]"
-                                   value="{{ $item->sale_price }}">
+                                class="form-control price"
+                                name="price[]"
+                                value="{{ $item->sale_price }}">
 
                         </td>
 
                         <td>
 
                             <input type="number"
-                                   class="form-control gst"
-                                   name="gst[]"
-                                   value="{{ $item->gst_percent }}">
+                                class="form-control gst"
+                                name="gst[]"
+                                value="{{ $item->gst_percent }}">
 
                         </td>
 
                         <td>
 
                             <input type="text"
-                                   class="form-control amount"
-                                   readonly
-                                   value="{{ number_format($item->line_total,2,'.','') }}">
+                                class="form-control amount"
+                                readonly
+                                value="{{ number_format($item->line_total,2,'.','') }}">
 
                         </td>
 
                         <td>
 
                             <button type="button"
-                                    class="btn btn-danger btn-sm removeRow">
+                                class="btn btn-danger btn-sm removeRow">
 
                                 <i class="fas fa-trash"></i>
 
@@ -287,34 +289,34 @@
 
                     @endforeach
 
-                @endif
+                    @endif
 
                 </tbody>
 
                 <tfoot>
 
-                <tr>
+                    <tr>
 
-                    <th colspan="5" class="text-end">
+                        <th colspan="5" class="text-end">
 
-                        Grand Total
+                            Grand Total
 
-                    </th>
+                        </th>
 
-                    <th>
+                        <th>
 
-                        <input type="text"
-                               id="grand_total"
-                               class="form-control"
-                               name="grand_total"
-                               readonly
-                               value="{{ old('grand_total',$sale->grand_total ?? 0) }}">
+                            <input type="text"
+                                id="grand_total"
+                                class="form-control"
+                                name="grand_total"
+                                readonly
+                                value="{{ old('grand_total',$sale->grand_total ?? 0) }}">
 
-                    </th>
+                        </th>
 
-                    <th></th>
+                        <th></th>
 
-                </tr>
+                    </tr>
 
                 </tfoot>
 
@@ -339,11 +341,11 @@
                 <label>Paid Amount</label>
 
                 <input type="number"
-                       step="0.01"
-                       id="paid_amount"
-                       name="paid_amount"
-                       class="form-control"
-                       value="{{ old('paid_amount',$sale->paid_amount ?? 0) }}">
+                    step="0.01"
+                    id="paid_amount"
+                    name="paid_amount"
+                    class="form-control"
+                    value="{{ old('paid_amount',$sale->paid_amount ?? 0) }}">
 
             </div>
 
@@ -352,10 +354,10 @@
                 <label>Balance Amount</label>
 
                 <input type="text"
-                       id="balance_amount"
-                       class="form-control"
-                       readonly
-                       value="{{ old('balance_amount',$sale->balance_amount ?? 0) }}">
+                    id="balance_amount"
+                    class="form-control"
+                    readonly
+                    value="{{ old('balance_amount',$sale->balance_amount ?? 0) }}">
 
             </div>
 
@@ -374,8 +376,8 @@
         <label>Remarks</label>
 
         <textarea class="form-control"
-                  rows="3"
-                  name="remarks">{{ old('remarks',$sale->remarks ?? '') }}</textarea>
+            rows="3"
+            name="remarks">{{ old('remarks',$sale->remarks ?? '') }}</textarea>
 
     </div>
 
@@ -386,7 +388,7 @@
 <div class="d-flex justify-content-end mt-3">
 
     <a href="{{ route('sales.index') }}"
-       class="btn btn-secondary me-2">
+        class="btn btn-secondary me-2">
 
         Cancel
 
@@ -400,4 +402,4 @@
 
     </button>
 
-</div>  
+</div>

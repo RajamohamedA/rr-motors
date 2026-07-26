@@ -52,6 +52,7 @@ document.addEventListener('DOMContentLoaded', function () {
         $.get($('#invoiceUrl').val() + '/' + id, function (sale) {
 
             loadInvoice(sale);
+            console.log(sale);
 
             $('#invoice_search').val(sale.invoice_no);
 

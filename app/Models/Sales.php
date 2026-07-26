@@ -55,4 +55,13 @@ class Sales extends Model
     {
         return $this->hasMany(SaleItems::class,'sale_id', 'id');
     }
+
+    public static function generateInvoiceNo()
+    {
+        $last = self::latest('id')->first();
+
+        $number = $last ? $last->id + 1 : 1;
+
+        return 'INV' . str_pad($number, 6, '0', STR_PAD_LEFT);
+    }
 }

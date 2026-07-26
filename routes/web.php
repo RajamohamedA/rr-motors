@@ -26,6 +26,8 @@ use App\Http\Controllers\StockLedgerController;
 
 use App\Http\Controllers\PurchaseReportController;
 
+use App\Http\Controllers\QuotationController;
+
 
 /*
 |--------------------------------------------------------------------------
@@ -269,6 +271,27 @@ Route::middleware('auth')->group(function () {
             'pdf'
         ]
     )->name('purchase-reports.pdf');
+});
+
+/*
+|--------------------------------------------------------------------------
+| Quotations
+|--------------------------------------------------------------------------
+*/
+
+Route::middleware(['auth'])->group(function () {
+
+    Route::resource('quotations', QuotationController::class);
+
+    Route::get(
+        'quotations/{quotation}/print',
+        [QuotationController::class, 'print']
+    )->name('quotations.print');
+
+    Route::get(
+        'quotations/{quotation}/convert',
+        [QuotationController::class, 'convertToSales']
+    )->name('quotations.convert');
 });
 
 /*
