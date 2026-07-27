@@ -58,16 +58,12 @@
 
             <li class="nav-item">
 
-                <a href="#"
-                    class="nav-link">
+                <a href="{{ route('reports.sales') }}"
+                    class="nav-link {{ request()->routeIs('quotations.index') ? 'active' : '' }}">
 
                     <i class="fas fa-chart-line me-2"></i>
 
                     Sales Report
-
-                    <span class="badge bg-warning text-dark float-end">
-                        Soon
-                    </span>
 
                 </a>
 
