@@ -47,7 +47,7 @@
 
             <li class="nav-item">
 
-                <a href="{{ route('quotations.index') }}" class="nav-link">
+                <a href="{{ route('quotations.index') }}" class="nav-link {{ request()->routeIs('quotations.index') ? 'active' : '' }}">
 
                     <i class="fas fa-file-alt me-2"></i>
 

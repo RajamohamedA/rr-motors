@@ -56,6 +56,11 @@ class Sales extends Model
         return $this->hasMany(SaleItems::class,'sale_id', 'id');
     }
 
+    public function payments()
+    {
+        return $this->hasMany(CustomerPayment::class);
+    }
+
     public static function generateInvoiceNo()
     {
         $last = self::latest('id')->first();

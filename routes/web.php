@@ -27,6 +27,7 @@ use App\Http\Controllers\StockLedgerController;
 use App\Http\Controllers\PurchaseReportController;
 
 use App\Http\Controllers\QuotationController;
+use App\Http\Controllers\CustomerPaymentController;
 
 
 /*
@@ -292,6 +293,40 @@ Route::middleware(['auth'])->group(function () {
         'quotations/{quotation}/convert',
         [QuotationController::class, 'convertToSales']
     )->name('quotations.convert');
+});
+
+/*
+|--------------------------------------------------------------------------
+| customer-payments
+|--------------------------------------------------------------------------
+*/
+
+Route::middleware('auth')->group(function () {
+
+    Route::resource('customer-payments', CustomerPaymentController::class);
+
+    // Search Sales Invoice
+    Route::get(
+        'customer-payments/search/invoice',
+        [CustomerPaymentController::class, 'searchInvoice']
+    )->name('customer-payments.search');
+
+    // Get Invoice Details
+    Route::get(
+        'customer-payments/invoice/{id}',
+        [CustomerPaymentController::class, 'invoiceDetails']
+    )->name('customer-payments.invoice');
+
+    // Print Receipt
+    Route::get(
+        'customer-payments/{customer_payment}/print',
+        [CustomerPaymentController::class, 'print']
+    )->name('customer-payments.print');
+
+    Route::get(
+        'customer-ledger',
+        [CustomerPaymentController::class, 'customerLedger']
+    )->name('customer-ledger');
 });
 
 /*
