@@ -29,6 +29,10 @@ use App\Http\Controllers\PurchaseReportController;
 
 use App\Http\Controllers\QuotationController;
 use App\Http\Controllers\CustomerPaymentController;
+use App\Http\Controllers\StockReportController;
+use App\Http\Controllers\StockAdjustmentController;
+
+
 
 
 /*
@@ -250,6 +254,43 @@ Route::middleware('auth')->group(function () {
     )->name('reports.sales.csv');
 
 });
+
+/*
+|--------------------------------------------------------------------------
+| stock Report
+|--------------------------------------------------------------------------
+*/
+
+Route::middleware('auth')->group(function () {
+
+    Route::get(
+        '/inventory/current-stock',
+        [StockReportController::class, 'currentStock']
+    )
+        ->name('inventory.current-stock');
+
+    Route::get(
+        '/inventory/current-stock/print',
+        [StockReportController::class, 'print']
+    )
+        ->name('inventory.current-stock.print');
+
+    Route::get(
+        '/inventory/current-stock/pdf',
+        [StockReportController::class, 'pdf']
+    )
+        ->name('inventory.current-stock.pdf');
+
+    Route::get(
+        '/inventory/current-stock/csv',
+        [StockReportController::class, 'csv']
+    )
+        ->name('inventory.current-stock.csv');
+});
+
+Route::resource('stock-adjustments', StockAdjustmentController::class);
+
+
 
 /*
 |--------------------------------------------------------------------------
