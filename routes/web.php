@@ -31,6 +31,10 @@ use App\Http\Controllers\QuotationController;
 use App\Http\Controllers\CustomerPaymentController;
 use App\Http\Controllers\StockReportController;
 use App\Http\Controllers\StockAdjustmentController;
+use App\Http\Controllers\RoleController;
+use App\Http\Controllers\UserController;
+
+
 
 
 
@@ -447,6 +451,16 @@ Route::middleware('auth')->group(function () {
     // Route::resource('gst-reports', GstReportController::class);
 
 });
+
+Route::resource('roles', RoleController::class);
+
+Route::resource('users', UserController::class);
+
+Route::post('/users/{user}/deactivate', [UserController::class, 'deactivate'])
+    ->name('users.deactivate');
+
+Route::post('/users/{user}/activate', [UserController::class, 'activate'])
+    ->name('users.activate');
 
 /*
 |--------------------------------------------------------------------------

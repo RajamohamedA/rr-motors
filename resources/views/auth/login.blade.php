@@ -17,9 +17,19 @@
     <div class="card-body p-4">
 
         @if(session('status'))
-            <div class="alert alert-success">
-                {{ session('status') }}
-            </div>
+        <div class="alert alert-success">
+            {{ session('status') }}
+        </div>
+        @endif
+
+        @if($errors->any())
+        <div class="alert alert-danger">
+            <ul class="mb-0">
+                @foreach($errors->all() as $error)
+                <li>{{ $error }}</li>
+                @endforeach
+            </ul>
+        </div>
         @endif
 
         <form method="POST" action="{{ route('login') }}">
@@ -69,13 +79,13 @@
 
         @if (Route::has('password.request'))
 
-            <div class="text-center mt-3">
+        <div class="text-center mt-3">
 
-                <a href="{{ route('password.request') }}">
-                    Forgot Password?
-                </a>
+            <a href="{{ route('password.request') }}">
+                Forgot Password?
+            </a>
 
-            </div>
+        </div>
 
         @endif
 
