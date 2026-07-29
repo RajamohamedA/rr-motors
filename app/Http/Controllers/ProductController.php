@@ -165,4 +165,16 @@ class ProductController extends Controller
 
         return response()->json($products);
     }
+
+
+    public function show($id)
+    {
+        $product = Product::with([
+            'company',
+            'category',
+            'unit'
+        ])->findOrFail($id);
+
+        return view('products.show', compact('product'));
+    }
 }

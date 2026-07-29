@@ -54,16 +54,12 @@
 
             <li class="nav-item">
 
-                <a href="#"
-                    class="nav-link">
+                <a href="{{route('stock-adjustments.index')}}"
+                    class=" nav-link {{ request()->routeIs('stock-ledgers.*') ? 'active' : '' }}">
 
                     <i class="fas fa-balance-scale me-2"></i>
 
                     Stock Adjustment
-
-                    <span class="badge bg-warning text-dark float-end">
-                        Soon
-                    </span>
 
                 </a>
 

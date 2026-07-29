@@ -288,9 +288,31 @@ Route::middleware('auth')->group(function () {
         ->name('inventory.current-stock.csv');
 });
 
-Route::resource('stock-adjustments', StockAdjustmentController::class);
+/*
+|--------------------------------------------------------------------------
+| Stock Adjustment
+|--------------------------------------------------------------------------
+*/
 
+Route::middleware(['auth'])->group(function () {
 
+    Route::resource('stock-adjustments', StockAdjustmentController::class);
+
+    Route::get(
+        'stock-adjustments/product-stock/{product}/{company}/{store}',
+        [StockAdjustmentController::class, 'productStock']
+    )->name('stock-adjustments.product-stock');
+
+    Route::get(
+        'stock-adjustments/create/{store}/{product}',
+        [StockAdjustmentController::class, 'create']
+    )->name('stock-adjustments.create.product');
+
+    Route::get(
+        'ajax/product-stock',
+        [StockAdjustmentController::class, 'getProductStock']
+    )->name('ajax.product-stock');
+});
 
 /*
 |--------------------------------------------------------------------------

@@ -12,7 +12,30 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('stock_adjustments', function (Blueprint $table) {
+
             $table->id();
+
+            $table->foreignId('company_id')
+                ->constrained()
+                ->cascadeOnDelete();
+
+            $table->foreignId('store_id')
+                ->constrained()
+                ->cascadeOnDelete();
+
+            $table->date('adjustment_date');
+
+            $table->string('adjustment_no')->unique();
+
+            $table->string('type');
+            // increase / decrease
+
+            $table->text('remarks')->nullable();
+
+            $table->foreignId('created_by')
+                ->nullable()
+                ->constrained('users');
+
             $table->timestamps();
         });
     }

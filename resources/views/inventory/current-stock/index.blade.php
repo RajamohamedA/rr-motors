@@ -616,7 +616,12 @@
 
                                                 </a>
 
-                                                <a href="{{ route('stock-adjustments.create',['product'=>$stock->product_id]) }}"
+                                                <a href="{{ route('stock-adjustments.create',
+                                                    [
+                                                        'store'=>$stock->store_id,
+                                                        'product'=>$stock->product_id
+                                                    ]
+                                                ) }}"
                                                     class="btn btn-warning"
                                                     title="Adjust">
 
