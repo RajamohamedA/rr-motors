@@ -5,9 +5,22 @@ namespace App\Http\Controllers;
 use App\Models\Company;
 use App\Models\Customer;
 use Illuminate\Http\Request;
+use Illuminate\Routing\Controllers\HasMiddleware;
+use Illuminate\Routing\Controllers\Middleware;
 
-class CustomerController extends Controller
+
+class CustomerController extends Controller implements HasMiddleware
 {
+    public static function middleware(): array
+    {
+        return [
+            new Middleware('permission:customer.view', only: ['index']),
+            new Middleware('permission:customer.show', only: ['show']),
+            new Middleware('permission:customer.create', only: ['create', 'store']),
+            new Middleware('permission:customer.edit', only: ['edit', 'update']),
+            new Middleware('permission:customer.delete', only: ['destroy']),
+        ];
+    }
     /**
      * Display customers
      */

@@ -8,17 +8,18 @@
 
     <div class="d-flex justify-content-between align-items-center mb-3">
         <h3>Supplier List</h3>
-
+        @can('supplier.create')
         <a href="{{ route('suppliers.create') }}" class="btn btn-primary">
             <i class="fas fa-plus"></i> Add Supplier
         </a>
+        @endcan
     </div>
 
     @if(session('success'))
-        <div class="alert alert-success alert-dismissible fade show">
-            {{ session('success') }}
-            <button class="btn-close" data-bs-dismiss="alert"></button>
-        </div>
+    <div class="alert alert-success alert-dismissible fade show">
+        {{ session('success') }}
+        <button class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
     @endif
 
     <div class="card shadow-sm">
@@ -50,22 +51,22 @@
 
                     <thead class="table-dark">
 
-                    <tr>
-                        <th>#</th>
-                        <th>Code</th>
-                        <th>Supplier</th>
-                        <th>Company</th>
-                        <th>Phone</th>
-                        <th>City</th>
-                        <th>Status</th>
-                        <th width="160">Action</th>
-                    </tr>
+                        <tr>
+                            <th>#</th>
+                            <th>Code</th>
+                            <th>Supplier</th>
+                            <th>Company</th>
+                            <th>Phone</th>
+                            <th>City</th>
+                            <th>Status</th>
+                            <th width="160">Action</th>
+                        </tr>
 
                     </thead>
 
                     <tbody>
 
-                    @forelse($suppliers as $supplier)
+                        @forelse($suppliers as $supplier)
 
                         <tr>
 
@@ -84,23 +85,25 @@
                             <td>
 
                                 @if($supplier->status)
-                                    <span class="badge bg-success">Active</span>
+                                <span class="badge bg-success">Active</span>
                                 @else
-                                    <span class="badge bg-danger">Inactive</span>
+                                <span class="badge bg-danger">Inactive</span>
                                 @endif
 
                             </td>
 
                             <td>
-
+                                @can('supplier.edit')
                                 <a href="{{ route('suppliers.edit',$supplier) }}"
-                                   class="btn btn-warning btn-sm">
+                                    class="btn btn-warning btn-sm">
                                     <i class="fas fa-edit"></i>
                                 </a>
+                                @endcan
 
+                                @can('supplier.delete')
                                 <form action="{{ route('suppliers.destroy',$supplier) }}"
-                                      method="POST"
-                                      class="d-inline">
+                                    method="POST"
+                                    class="d-inline">
 
                                     @csrf
                                     @method('DELETE')
@@ -114,12 +117,13 @@
                                     </button>
 
                                 </form>
+                                @endcan
 
                             </td>
 
                         </tr>
 
-                    @empty
+                        @empty
 
                         <tr>
 
@@ -129,7 +133,7 @@
 
                         </tr>
 
-                    @endforelse
+                        @endforelse
 
                     </tbody>
 

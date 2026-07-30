@@ -44,6 +44,7 @@ class PermissionSeeder extends Seeder
             'supplier.delete',
 
             'customer.view',
+            'customer.show',
             'customer.create',
             'customer.edit',
             'customer.delete',

@@ -6,9 +6,20 @@ use App\Http\Requests\BrandRequest;
 use App\Models\Brand;
 use App\Models\Company;
 use Illuminate\Http\Request;
+use Illuminate\Routing\Controllers\HasMiddleware;
+use Illuminate\Routing\Controllers\Middleware;
 
-class BrandController extends Controller
+class BrandController extends Controller implements HasMiddleware
 {
+    public static function middleware(): array
+    {
+        return [
+            new Middleware('permission:brand.view', only: ['index']),
+            new Middleware('permission:brand.create', only: ['create', 'store']),
+            new Middleware('permission:brand.edit', only: ['edit', 'update']),
+            new Middleware('permission:brand.delete', only: ['destroy']),
+        ];
+    }
     public function index(Request $request)
     {
         $brands = Brand::with('company')

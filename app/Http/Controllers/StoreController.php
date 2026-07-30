@@ -6,9 +6,20 @@ use App\Http\Requests\StoreRequest;
 use App\Models\Company;
 use App\Models\Store;
 use Illuminate\Http\Request;
+use Illuminate\Routing\Controllers\HasMiddleware;
+use Illuminate\Routing\Controllers\Middleware;
 
-class StoreController extends Controller
+class StoreController extends Controller implements HasMiddleware
 {
+    public static function middleware(): array
+    {
+        return [
+            new Middleware('permission:store.view', only: ['index']),
+            new Middleware('permission:store.create', only: ['create', 'store']),
+            new Middleware('permission:store.edit', only: ['edit', 'update']),
+            new Middleware('permission:store.delete', only: ['destroy']),
+        ];
+    }
     public function index(Request $request)
     {
         $stores = Store::with('company')

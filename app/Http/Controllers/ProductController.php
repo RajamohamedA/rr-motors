@@ -12,9 +12,37 @@ use App\Models\Unit;
 use App\Models\Supplier;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Routing\Controllers\HasMiddleware;
+use Illuminate\Routing\Controllers\Middleware;
 
-class ProductController extends Controller
+class ProductController extends Controller  implements HasMiddleware
 {
+    public static function middleware(): array
+    {
+        return [
+
+            new Middleware(
+                'permission:product.view',
+                only: ['index', 'show']
+            ),
+
+            new Middleware(
+                'permission:product.create',
+                only: ['create', 'store']
+            ),
+
+            new Middleware(
+                'permission:product.edit',
+                only: ['edit', 'update']
+            ),
+
+            new Middleware(
+                'permission:product.delete',
+                only: ['destroy']
+            ),
+
+        ];
+    }
     public function index(Request $request)
     {
         $products = Product::with([

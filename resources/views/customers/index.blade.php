@@ -8,13 +8,13 @@
 
     @if(session('success'))
 
-        <div class="alert alert-success alert-dismissible fade show">
+    <div class="alert alert-success alert-dismissible fade show">
 
-            {{ session('success') }}
+        {{ session('success') }}
 
-            <button class="btn-close" data-bs-dismiss="alert"></button>
+        <button class="btn-close" data-bs-dismiss="alert"></button>
 
-        </div>
+    </div>
 
     @endif
 
@@ -27,14 +27,16 @@
                 Customer List
             </h5>
 
+            @can('customer.create')
             <a href="{{ route('customers.create') }}"
-               class="btn btn-light">
+                class="btn btn-light">
 
                 <i class="fas fa-plus"></i>
 
                 New Customer
 
             </a>
+            @endcan
 
         </div>
 
@@ -45,9 +47,9 @@
                 <div class="col-md-4">
 
                     <input type="text"
-                           id="customerSearch"
-                           class="form-control"
-                           placeholder="Search Customer...">
+                        id="customerSearch"
+                        class="form-control"
+                        placeholder="Search Customer...">
 
                 </div>
 
@@ -56,35 +58,35 @@
             <div class="table-responsive">
 
                 <table class="table table-bordered table-hover align-middle"
-                       id="customerTable">
+                    id="customerTable">
 
                     <thead class="table-dark">
 
-                    <tr>
+                        <tr>
 
-                        <th width="60">#</th>
+                            <th width="60">#</th>
 
-                        <th>Code</th>
+                            <th>Code</th>
 
-                        <th>Name</th>
+                            <th>Name</th>
 
-                        <th>Mobile</th>
+                            <th>Mobile</th>
 
-                        <th>City</th>
+                            <th>City</th>
 
-                        <th>Credit Limit</th>
+                            <th>Credit Limit</th>
 
-                        <th>Status</th>
+                            <th>Status</th>
 
-                        <th width="180">Action</th>
+                            <th width="180">Action</th>
 
-                    </tr>
+                        </tr>
 
                     </thead>
 
                     <tbody>
 
-                    @forelse($customers as $customer)
+                        @forelse($customers as $customer)
 
                         <tr>
 
@@ -106,15 +108,15 @@
 
                                 @if($customer->status)
 
-                                    <span class="badge bg-success">
-                                        Active
-                                    </span>
+                                <span class="badge bg-success">
+                                    Active
+                                </span>
 
                                 @else
 
-                                    <span class="badge bg-danger">
-                                        Inactive
-                                    </span>
+                                <span class="badge bg-danger">
+                                    Inactive
+                                </span>
 
                                 @endif
 
@@ -122,42 +124,48 @@
 
                             <td>
 
+                                @can('customer.show')
                                 <a href="{{ route('customers.show',$customer->id) }}"
-                                   class="btn btn-info btn-sm">
+                                    class="btn btn-info btn-sm">
 
                                     <i class="fas fa-eye"></i>
 
                                 </a>
+                                @endcan
 
+                                @can('customer.edit')
                                 <a href="{{ route('customers.edit',$customer->id) }}"
-                                   class="btn btn-warning btn-sm">
+                                    class="btn btn-warning btn-sm">
 
                                     <i class="fas fa-edit"></i>
 
                                 </a>
+                                @endcan
 
+                                @can('customer.delete')
                                 <form action="{{ route('customers.destroy',$customer->id) }}"
-                                      method="POST"
-                                      class="d-inline">
+                                    method="POST"
+                                    class="d-inline">
 
                                     @csrf
 
                                     @method('DELETE')
 
                                     <button class="btn btn-danger btn-sm"
-                                            onclick="return confirm('Delete this customer?')">
+                                        onclick="return confirm('Delete this customer?')">
 
                                         <i class="fas fa-trash"></i>
 
                                     </button>
 
                                 </form>
+                                @endcan
 
                             </td>
 
                         </tr>
 
-                    @empty
+                        @empty
 
                         <tr>
 
@@ -170,7 +178,7 @@
 
                         </tr>
 
-                    @endforelse
+                        @endforelse
 
                     </tbody>
 
@@ -195,19 +203,17 @@
 @push('scripts')
 
 <script>
+    $('#customerSearch').on('keyup', function() {
 
-$('#customerSearch').on('keyup', function () {
+        let value = $(this).val().toLowerCase();
 
-    let value = $(this).val().toLowerCase();
+        $('#customerTable tbody tr').filter(function() {
 
-    $('#customerTable tbody tr').filter(function () {
+            $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1);
 
-        $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1);
+        });
 
     });
-
-});
-
 </script>
 
 @endpush

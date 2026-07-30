@@ -22,24 +22,26 @@
             Units
         </h3>
 
+        @can('unit.create')
         <a href="{{ route('units.create') }}"
-           class="btn btn-primary">
+            class="btn btn-primary">
 
             <i class="fas fa-plus"></i>
 
             Add Unit
 
         </a>
+        @endcan
 
     </div>
 
     @if(session('success'))
 
-        <div class="alert alert-success">
+    <div class="alert alert-success">
 
-            {{ session('success') }}
+        {{ session('success') }}
 
-        </div>
+    </div>
 
     @endif
 
@@ -78,25 +80,25 @@
 
                     <thead class="table-dark">
 
-                    <tr>
+                        <tr>
 
-                        <th>#</th>
+                            <th>#</th>
 
-                        <th>Unit Name</th>
+                            <th>Unit Name</th>
 
-                        <th>Short Name</th>
+                            <th>Short Name</th>
 
-                        <th>Status</th>
+                            <th>Status</th>
 
-                        <th width="180">Action</th>
+                            <th width="180">Action</th>
 
-                    </tr>
+                        </tr>
 
                     </thead>
 
                     <tbody>
 
-                    @forelse($units as $unit)
+                        @forelse($units as $unit)
 
                         <tr>
 
@@ -110,19 +112,19 @@
 
                                 @if($unit->status)
 
-                                    <span class="badge bg-success">
+                                <span class="badge bg-success">
 
-                                        Active
+                                    Active
 
-                                    </span>
+                                </span>
 
                                 @else
 
-                                    <span class="badge bg-danger">
+                                <span class="badge bg-danger">
 
-                                        Inactive
+                                    Inactive
 
-                                    </span>
+                                </span>
 
                                 @endif
 
@@ -130,12 +132,16 @@
 
                             <td>
 
+                                @can('unit.edit')
                                 <a href="{{ route('units.edit',$unit) }}"
-                                   class="btn btn-warning btn-sm">
+                                    class="btn btn-warning btn-sm">
 
                                     <i class="fas fa-edit"></i>
 
                                 </a>
+                                @endcan
+
+                                @can('unit.delete')
 
                                 <form
                                     action="{{ route('units.destroy',$unit) }}"
@@ -154,12 +160,13 @@
                                     </button>
 
                                 </form>
+                                @endcan
 
                             </td>
 
                         </tr>
 
-                    @empty
+                        @empty
 
                         <tr>
 
@@ -172,7 +179,7 @@
 
                         </tr>
 
-                    @endforelse
+                        @endforelse
 
                     </tbody>
 

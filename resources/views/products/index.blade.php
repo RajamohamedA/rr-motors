@@ -10,21 +10,23 @@
 
         <h3 class="mb-0">Products</h3>
 
+        @can('product.create')
         <a href="{{ route('products.create') }}" class="btn btn-primary">
             <i class="fas fa-plus"></i> Add Product
         </a>
+        @endcan
 
     </div>
 
     @if(session('success'))
 
-        <div class="alert alert-success alert-dismissible fade show">
+    <div class="alert alert-success alert-dismissible fade show">
 
-            {{ session('success') }}
+        {{ session('success') }}
 
-            <button class="btn-close" data-bs-dismiss="alert"></button>
+        <button class="btn-close" data-bs-dismiss="alert"></button>
 
-        </div>
+    </div>
 
     @endif
 
@@ -33,16 +35,16 @@
         <div class="card-body">
 
             <form method="GET"
-                  action="{{ route('products.index') }}"
-                  class="row mb-3">
+                action="{{ route('products.index') }}"
+                class="row mb-3">
 
                 <div class="col-md-5">
 
                     <input type="text"
-                           name="search"
-                           value="{{ request('search') }}"
-                           class="form-control"
-                           placeholder="Search by Code, Name, Barcode, Part Number">
+                        name="search"
+                        value="{{ request('search') }}"
+                        class="form-control"
+                        placeholder="Search by Code, Name, Barcode, Part Number">
 
                 </div>
 
@@ -62,37 +64,37 @@
 
                     <thead class="table-dark">
 
-                    <tr>
+                        <tr>
 
-                        <th width="70">Image</th>
+                            <th width="70">Image</th>
 
-                        <th>Code</th>
+                            <th>Code</th>
 
-                        <th>Product</th>
+                            <th>Product</th>
 
-                        <th>Category</th>
+                            <th>Category</th>
 
-                        <th>Brand</th>
+                            <th>Brand</th>
 
-                        <th>Unit</th>
+                            <th>Unit</th>
 
-                        <th>Stock</th>
+                            <th>Stock</th>
 
-                        <th>Purchase</th>
+                            <th>Purchase</th>
 
-                        <th>Sale</th>
+                            <th>Sale</th>
 
-                        <th>Status</th>
+                            <th>Status</th>
 
-                        <th width="140">Action</th>
+                            <th width="140">Action</th>
 
-                    </tr>
+                        </tr>
 
                     </thead>
 
                     <tbody>
 
-                    @forelse($products as $product)
+                        @forelse($products as $product)
 
                         <tr>
 
@@ -100,17 +102,17 @@
 
                                 @if($product->image)
 
-                                    <img src="{{ asset('storage/'.$product->image) }}"
-                                         width="50"
-                                         height="50"
-                                         class="rounded border">
+                                <img src="{{ asset('storage/'.$product->image) }}"
+                                    width="50"
+                                    height="50"
+                                    class="rounded border">
 
                                 @else
 
-                                    <img src="{{ asset('images/no-image.png') }}"
-                                         width="50"
-                                         height="50"
-                                         class="rounded border">
+                                <img src="{{ asset('images/no-image.png') }}"
+                                    width="50"
+                                    height="50"
+                                    class="rounded border">
 
                                 @endif
 
@@ -124,11 +126,11 @@
 
                                 @if($product->part_number)
 
-                                    <br>
+                                <br>
 
-                                    <small class="text-muted">
-                                        {{ $product->part_number }}
-                                    </small>
+                                <small class="text-muted">
+                                    {{ $product->part_number }}
+                                </small>
 
                                 @endif
 
@@ -150,15 +152,15 @@
 
                                 @if($product->status)
 
-                                    <span class="badge bg-success">
-                                        Active
-                                    </span>
+                                <span class="badge bg-success">
+                                    Active
+                                </span>
 
                                 @else
 
-                                    <span class="badge bg-danger">
-                                        Inactive
-                                    </span>
+                                <span class="badge bg-danger">
+                                    Inactive
+                                </span>
 
                                 @endif
 
@@ -166,35 +168,41 @@
 
                             <td>
 
+                                @can('product.edit')
+
                                 <a href="{{ route('products.edit',$product) }}"
-                                   class="btn btn-warning btn-sm">
+                                    class="btn btn-warning btn-sm">
 
                                     <i class="fas fa-edit"></i>
 
                                 </a>
+                                @endcan
+
+                                @can('product.delete')
 
                                 <form action="{{ route('products.destroy',$product) }}"
-                                      method="POST"
-                                      class="d-inline">
+                                    method="POST"
+                                    class="d-inline">
 
                                     @csrf
 
                                     @method('DELETE')
 
                                     <button class="btn btn-danger btn-sm"
-                                            onclick="return confirm('Delete this product?')">
+                                        onclick="return confirm('Delete this product?')">
 
                                         <i class="fas fa-trash"></i>
 
                                     </button>
 
                                 </form>
+                                @endcan
 
                             </td>
 
                         </tr>
 
-                    @empty
+                        @empty
 
                         <tr>
 
@@ -207,7 +215,7 @@
 
                         </tr>
 
-                    @endforelse
+                        @endforelse
 
                     </tbody>
 

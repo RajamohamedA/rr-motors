@@ -6,9 +6,20 @@ use App\Http\Requests\CategoryRequest;
 use App\Models\Category;
 use Illuminate\Http\Request;
 use App\Models\Company;
+use Illuminate\Routing\Controllers\HasMiddleware;
+use Illuminate\Routing\Controllers\Middleware;
 
-class CategoryController extends Controller
+class CategoryController extends Controller implements HasMiddleware
 {
+    public static function middleware(): array
+    {
+        return [
+            new Middleware('permission:category.view', only: ['index']),
+            new Middleware('permission:category.create', only: ['create', 'store']),
+            new Middleware('permission:category.edit', only: ['edit', 'update']),
+            new Middleware('permission:category.delete', only: ['destroy']),
+        ];
+    }
     public function index(Request $request)
     {
         $categories = Category::when($request->search, function ($query) use ($request) {

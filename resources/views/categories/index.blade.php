@@ -10,20 +10,22 @@
 
         <h3>Categories</h3>
 
+        @can('category.create')
         <a href="{{ route('categories.create') }}" class="btn btn-primary">
             <i class="fas fa-plus"></i> Add Category
         </a>
+        @endcan
 
     </div>
 
     @if(session('success'))
-        <div class="alert alert-success alert-dismissible fade show">
+    <div class="alert alert-success alert-dismissible fade show">
 
-            {{ session('success') }}
+        {{ session('success') }}
 
-            <button class="btn-close" data-bs-dismiss="alert"></button>
+        <button class="btn-close" data-bs-dismiss="alert"></button>
 
-        </div>
+    </div>
     @endif
 
     <div class="card shadow-sm">
@@ -63,25 +65,25 @@
 
                     <thead class="table-dark">
 
-                    <tr>
+                        <tr>
 
-                        <th>#</th>
+                            <th>#</th>
 
-                        <th>Code</th>
+                            <th>Code</th>
 
-                        <th>Name</th>
+                            <th>Name</th>
 
-                        <th>Status</th>
+                            <th>Status</th>
 
-                        <th width="140">Action</th>
+                            <th width="140">Action</th>
 
-                    </tr>
+                        </tr>
 
                     </thead>
 
                     <tbody>
 
-                    @forelse($categories as $category)
+                        @forelse($categories as $category)
 
                         <tr>
 
@@ -95,15 +97,15 @@
 
                                 @if($category->status)
 
-                                    <span class="badge bg-success">
-                                        Active
-                                    </span>
+                                <span class="badge bg-success">
+                                    Active
+                                </span>
 
                                 @else
 
-                                    <span class="badge bg-danger">
-                                        Inactive
-                                    </span>
+                                <span class="badge bg-danger">
+                                    Inactive
+                                </span>
 
                                 @endif
 
@@ -111,6 +113,7 @@
 
                             <td>
 
+                                @can('category.edit')
                                 <a
                                     href="{{ route('categories.edit',$category) }}"
                                     class="btn btn-warning btn-sm">
@@ -118,7 +121,9 @@
                                     <i class="fas fa-edit"></i>
 
                                 </a>
+                                @endcan
 
+                                @can('category.delete')
                                 <form
                                     action="{{ route('categories.destroy',$category) }}"
                                     method="POST"
@@ -136,12 +141,13 @@
                                     </button>
 
                                 </form>
+                                @endcan
 
                             </td>
 
                         </tr>
 
-                    @empty
+                        @empty
 
                         <tr>
 
@@ -153,7 +159,7 @@
 
                         </tr>
 
-                    @endforelse
+                        @endforelse
 
                     </tbody>
 

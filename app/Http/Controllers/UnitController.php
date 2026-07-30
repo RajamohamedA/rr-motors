@@ -6,9 +6,20 @@ use App\Models\Unit;
 use App\Http\Requests\UnitRequest;
 use Illuminate\Http\Request;
 use App\Models\Company;
+use Illuminate\Routing\Controllers\HasMiddleware;
+use Illuminate\Routing\Controllers\Middleware;
 
-class UnitController extends Controller
+class UnitController extends Controller implements HasMiddleware
 {
+    public static function middleware(): array
+    {
+        return [
+            new Middleware('permission:unit.view', only: ['index']),
+            new Middleware('permission:unit.create', only: ['create', 'store']),
+            new Middleware('permission:unit.edit', only: ['edit', 'update']),
+            new Middleware('permission:unit.delete', only: ['destroy']),
+        ];
+    }
     public function index(Request $request)
     {
         $query = Unit::query();

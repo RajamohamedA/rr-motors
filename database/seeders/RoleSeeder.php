@@ -77,6 +77,7 @@ class RoleSeeder extends Seeder
             'dashboard.view',
 
             'customer.view',
+            'customer.show',
             'customer.create',
             'customer.edit',
 

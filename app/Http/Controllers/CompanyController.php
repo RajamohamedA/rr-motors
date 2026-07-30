@@ -6,9 +6,20 @@ use App\Http\Requests\CompanyRequest;
 use App\Models\Company;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Routing\Controllers\HasMiddleware;
+use Illuminate\Routing\Controllers\Middleware;
 
-class CompanyController extends Controller
+class CompanyController extends Controller implements HasMiddleware
 {
+    public static function middleware(): array
+    {
+        return [
+            new Middleware('permission:company.view', only: ['index']),
+            new Middleware('permission:company.create', only: ['create', 'store']),
+            new Middleware('permission:company.edit', only: ['edit', 'update']),
+            new Middleware('permission:company.delete', only: ['destroy']),
+        ];
+    }
     public function index(Request $request)
     {
         $companies = Company::when($request->search, function ($query) use ($request) {

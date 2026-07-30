@@ -6,9 +6,21 @@ use App\Http\Requests\SupplierRequest;
 use App\Models\Company;
 use App\Models\Supplier;
 use Illuminate\Http\Request;
+use Illuminate\Routing\Controllers\HasMiddleware;
+use Illuminate\Routing\Controllers\Middleware;
 
-class SupplierController extends Controller
+class SupplierController extends Controller implements HasMiddleware
 {
+    public static function middleware(): array
+    {
+        return [
+            new Middleware('permission:supplier.view', only: ['index']),
+            new Middleware('permission:supplier.create', only: ['create', 'store']),
+            new Middleware('permission:supplier.edit', only: ['edit', 'update']),
+            new Middleware('permission:supplier.delete', only: ['destroy']),
+        ];
+    }
+
     public function index(Request $request)
     {
         $suppliers = Supplier::with('company')
