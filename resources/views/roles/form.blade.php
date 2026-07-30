@@ -138,7 +138,9 @@
 
                     <div class="row">
 
+
                         @foreach($items as $permission)
+
 
                         <div class="col-md-3 mb-2">
 

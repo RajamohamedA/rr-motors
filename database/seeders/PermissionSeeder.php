@@ -2,56 +2,90 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
-use App\Models\Permission;
+use Spatie\Permission\Models\Permission;
 
 class PermissionSeeder extends Seeder
 {
-    /**
-     * Run the database seeds.
-     */
     public function run(): void
     {
         $permissions = [
 
-            // Company
-            ['module' => 'Company', 'permission' => 'View'],
-            ['module' => 'Company', 'permission' => 'Create'],
-            ['module' => 'Company', 'permission' => 'Edit'],
-            ['module' => 'Company', 'permission' => 'Delete'],
+            'dashboard.view',
 
-            // Store
-            ['module' => 'Store', 'permission' => 'View'],
-            ['module' => 'Store', 'permission' => 'Create'],
-            ['module' => 'Store', 'permission' => 'Edit'],
-            ['module' => 'Store', 'permission' => 'Delete'],
+            'company.view',
+            'company.create',
+            'company.edit',
+            'company.delete',
 
-            // Product
-            ['module' => 'Product', 'permission' => 'View'],
-            ['module' => 'Product', 'permission' => 'Create'],
-            ['module' => 'Product', 'permission' => 'Edit'],
-            ['module' => 'Product', 'permission' => 'Delete'],
+            'store.view',
+            'store.create',
+            'store.edit',
+            'store.delete',
 
-            // Purchase
-            ['module' => 'Purchase', 'permission' => 'View'],
-            ['module' => 'Purchase', 'permission' => 'Create'],
-            ['module' => 'Purchase', 'permission' => 'Approve'],
+            'unit.view',
+            'unit.create',
+            'unit.edit',
+            'unit.delete',
 
-            // Sales
-            ['module' => 'Sales', 'permission' => 'View'],
-            ['module' => 'Sales', 'permission' => 'Create'],
+            'category.view',
+            'category.create',
+            'category.edit',
+            'category.delete',
 
-            // Stock
-            ['module' => 'Stock', 'permission' => 'View'],
-            ['module' => 'Stock', 'permission' => 'Adjust'],
+            'product.view',
+            'product.create',
+            'product.edit',
+            'product.delete',
 
-            // Reports
-            ['module' => 'Reports', 'permission' => 'View'],
+            'supplier.view',
+            'supplier.create',
+            'supplier.edit',
+            'supplier.delete',
+
+            'customer.view',
+            'customer.create',
+            'customer.edit',
+            'customer.delete',
+
+            'purchase.view',
+            'purchase.create',
+            'purchase.edit',
+            'purchase.delete',
+            'purchase.approve',
+
+            'sales.view',
+            'sales.create',
+            'sales.edit',
+            'sales.delete',
+
+            'quotation.view',
+            'quotation.create',
+            'quotation.edit',
+            'quotation.delete',
+
+            'stock.view',
+            'stock.adjust',
+
+            'reports.view',
+
+            'users.view',
+            'users.create',
+            'users.edit',
+            'users.delete',
+
+            'roles.view',
+            'roles.create',
+            'roles.edit',
+            'roles.delete',
         ];
 
         foreach ($permissions as $permission) {
-            Permission::firstOrCreate($permission);
+
+            Permission::firstOrCreate([
+                'name' => $permission,
+                'guard_name' => 'web',
+            ]);
         }
     }
 }
