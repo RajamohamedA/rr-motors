@@ -5,7 +5,6 @@ use Illuminate\Support\Facades\Route;
 
 use App\Http\Controllers\SalesController;
 use App\Http\Controllers\SalesReturnController;
-use App\Http\Controllers\SalesReportController;
 use App\Http\Controllers\QuotationController;
 
 Route::middleware(['auth'])->group(function () {
@@ -46,25 +45,6 @@ Route::middleware(['auth'])->group(function () {
         [SalesReturnController::class, 'print']
     )->name('sales-returns.print');
 
-
-    /*
-    |--------------------------------------------------------------------------
-    | Sales Report
-    |--------------------------------------------------------------------------
-    */
-    Route::get('/reports/sales', [SalesReportController::class, 'index'])
-        ->name('reports.sales');
-
-    Route::get('/reports/sales/print', [SalesReportController::class, 'print'])
-        ->name('reports.sales.print');
-
-    Route::get('/reports/sales/pdf', [SalesReportController::class, 'pdf'])
-        ->name('reports.sales.pdf');
-
-    Route::get(
-        '/reports/sales/csv',
-        [SalesReportController::class, 'csv']
-    )->name('reports.sales.csv');
 
     /*
     |--------------------------------------------------------------------------

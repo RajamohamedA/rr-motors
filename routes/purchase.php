@@ -3,7 +3,6 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\PurchaseController;
 use App\Http\Controllers\PurchaseReturnController;
-use App\Http\Controllers\PurchaseReportController;
 
 Route::middleware(['auth'])->group(function () {
 
@@ -42,42 +41,5 @@ Route::middleware(['auth'])->group(function () {
         '/purchase-returns/{id}/print',
         [PurchaseReturnController::class, 'print']
     )->name('purchase-returns.print');
-
-
-    /*
-    |--------------------------------------------------------------------------
-    | Purchase Report
-    |--------------------------------------------------------------------------
-    */
-
-    // Report screen
-    Route::get(
-        '/purchase-reports',
-        [PurchaseReportController::class, 'index']
-    )->name('purchase-reports.index');
-
-    // AJAX search
-    Route::post(
-        '/purchase-reports/search',
-        [PurchaseReportController::class, 'search']
-    )->name('purchase-reports.search');
-
-    // Print Report
-    Route::get(
-        '/purchase-reports/print',
-        [PurchaseReportController::class, 'print']
-    )->name('purchase-reports.print');
-
-    // Excel Export
-    Route::get(
-        '/purchase-reports/excel',
-        [PurchaseReportController::class, 'excel']
-    )->name('purchase-reports.excel');
-
-    // PDF Export
-    Route::get(
-        '/purchase-reports/pdf',
-        [PurchaseReportController::class, 'pdf']
-    )->name('purchase-reports.pdf');
 
 });
