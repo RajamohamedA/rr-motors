@@ -10,9 +10,21 @@ use App\Models\PurchaseReturnItem;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Exception;
+use Illuminate\Routing\Controllers\HasMiddleware;
+use Illuminate\Routing\Controllers\Middleware;
 
-class PurchaseReturnController extends Controller
+class PurchaseReturnController extends Controller implements HasMiddleware
 {
+    public static function middleware(): array
+    {
+        return [
+            new Middleware('permission:purchase-return.view', only: ['index', 'show', 'print']),
+            new Middleware('permission:purchase-return.create', only: ['create', 'store','search','getInvoice']),
+            new Middleware('permission:purchase-return.edit', only: ['edit', 'update']),
+            new Middleware('permission:purchase-return.delete', only: ['destroy']),
+        ];
+    }
+
     public function index(Request $request)
     {
         $returns = PurchaseReturn::with(['purchase', 'supplier'])
@@ -113,9 +125,9 @@ class PurchaseReturnController extends Controller
                 'supplier_id'  => $request->supplier_id,
                 'return_no'    => $returnNo,
                 'return_date'  => $request->return_date,
-                'sub_total'   => $request->sub_total,
-                'gst_total'   => $request->gst_total,
-                'total_amount' => $request->grand_total,
+                'sub_total'   => $request->total_sub_total,
+                'gst_total'   => $request->total_gst,
+                'total_amount' => $request->total_grand_total,
                 'remarks'      => $request->remarks,
             ]);
     
@@ -132,7 +144,13 @@ class PurchaseReturnController extends Controller
                     ->first();
     
                 if (!$purchaseItem) {
-                    throw new Exception("Product not found in Purchase.");
+                    return redirect()
+                        ->back()
+                        ->withInput()
+                        ->with(
+                            'error',
+                            'Purchase Item not found.'
+                        );
                 }
     
                 $returnedQty = PurchaseReturnItem::where('product_id', $productId)
@@ -144,10 +162,14 @@ class PurchaseReturnController extends Controller
                 $balanceQty = $purchaseItem->quantity - $returnedQty;
     
                 if ($qty > $balanceQty) {
-                    throw new Exception(
-                        "Return quantity exceeds balance for product : "
-                        . $purchaseItem->product->product_name
-                    );
+                    return redirect()
+                        ->back()
+                        ->withInput()
+                        ->with(
+                            'error',
+                            'Return quantity exceeds balance for product: '
+                                . $purchaseItem->product->product_name
+                        );
                 }
     
                 PurchaseReturnItem::create([
@@ -287,7 +309,13 @@ class PurchaseReturnController extends Controller
                     ->first();
 
                 if (!$purchaseItem) {
-                    throw new \Exception("Purchase Item not found.");
+                    return redirect()
+                        ->back()
+                        ->withInput()
+                        ->with(
+                            'error',
+                            'Purchase Item not found.'
+                        );
                 }
 
                 // Previous returns excluding current return
@@ -301,10 +329,14 @@ class PurchaseReturnController extends Controller
 
                 if ($qty > $balance) {
 
-                    throw new \Exception(
-                        "Return quantity exceeds balance for product: " .
-                            $purchaseItem->product->product_name
-                    );
+                    return redirect()
+                        ->back()
+                        ->withInput()
+                        ->with(
+                            'error',
+                            'Return quantity exceeds balance for product: '
+                                . $purchaseItem->product->product_name
+                        );
                 }
 
                 PurchaseReturnItem::create([

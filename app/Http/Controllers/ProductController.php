@@ -172,6 +172,16 @@ class ProductController extends Controller  implements HasMiddleware
 
     public function search(Request $request)
     {
+
+        abort_unless(
+            auth()->user()->can('product.view') ||
+                auth()->user()->can('purchase.create') ||
+                auth()->user()->can('sales.create') ||
+                auth()->user()->can('quotation.create') ||
+                auth()->user()->can('stock-adjustment.create'),
+            403
+        );
+
         $search = $request->search;
 
         $products = Product::with([

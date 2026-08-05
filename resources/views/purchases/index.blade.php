@@ -18,6 +18,7 @@
                     Purchase List
                 </h4>
 
+                @can('purchase.create')
                 <a href="{{ route('purchases.create') }}"
                     class="btn btn-light">
 
@@ -26,6 +27,7 @@
                     New Purchase
 
                 </a>
+                @endcan
 
             </div>
 
@@ -140,6 +142,7 @@
 
                                     <!-- View -->
 
+                                    @can('purchase.view')
                                     <a href="{{ route('purchases.show',$purchase->id) }}"
                                         class="btn btn-info"
                                         title="View">
@@ -147,8 +150,10 @@
                                         <i class="fas fa-eye"></i>
 
                                     </a>
+                                    @endcan
 
                                     <!-- Edit -->
+                                    @can('purchase.edit')
 
                                     <a href="{{ route('purchases.edit',$purchase->id) }}"
                                         class="btn btn-warning"
@@ -157,8 +162,10 @@
                                         <i class="fas fa-edit"></i>
 
                                     </a>
+                                    @endcan
 
                                     <!-- Print -->
+                                    @can('purchase.view')
 
                                     <a href="{{ route('purchases.print',$purchase->id) }}"
                                         target="_blank"
@@ -168,8 +175,10 @@
                                         <i class="fas fa-print"></i>
 
                                     </a>
+                                    @endcan
 
                                     <!-- Delete -->
+                                    @can('purchase.delete')
 
                                     <form action="{{ route('purchases.destroy',$purchase->id) }}"
                                         method="POST"
@@ -187,6 +196,7 @@
                                         </button>
 
                                     </form>
+                                    @endcan
 
                                 </div>
 

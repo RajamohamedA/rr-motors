@@ -29,6 +29,7 @@
 
                     </a>
 
+                    @can('purchase.view')
                     <a href="{{ route('purchases.print',$purchase->id) }}"
                         target="_blank"
                         class="btn btn-success btn-sm">
@@ -38,6 +39,7 @@
                         Print
 
                     </a>
+                    @endcan
 
                 </div>
 

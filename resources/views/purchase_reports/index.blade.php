@@ -20,34 +20,28 @@
 
                 </h4>
 
-                <div>
+                <div id="purchase-report-buttons">
 
-                    <button id="btnPrint"
-                        class="btn btn-light btn-sm">
+                    @can('purchase-report.print')
+                    <a href="{{ route('purchase-reports.report.print') }}"
+                        class="btn btn-light btn-sm" target="_blank">
+                        <i class="fas fa-print"></i> Print
+                    </a>
+                    @endcan
 
-                        <i class="fas fa-print"></i>
+                    @can('purchase-report.excel')
+                    <a href="{{ route('purchase-reports.report.csv') }}"
+                        class="btn btn-success btn-sm" id="btnCsv" target="_blank">
+                        <i class="fas fa-file-excel"></i> CSV
+                    </a>
+                    @endcan
 
-                        Print
-
-                    </button>
-
-                    <button id="btnExcel"
-                        class="btn btn-success btn-sm">
-
-                        <i class="fas fa-file-excel"></i>
-
-                        Excel
-
-                    </button>
-
-                    <button id="btnPdf"
-                        class="btn btn-danger btn-sm">
-
-                        <i class="fas fa-file-pdf"></i>
-
-                        PDF
-
-                    </button>
+                    @can('purchase-report.pdf')
+                    <a href="{{ route('purchase-reports.report.pdf') }}"
+                        class="btn btn-danger btn-sm" target="_blank">
+                        <i class="fas fa-file-pdf"></i> PDF
+                    </a>
+                    @endcan
 
                 </div>
 

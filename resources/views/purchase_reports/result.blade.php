@@ -66,20 +66,22 @@ $grandTotal = 0;
 
                 <td class="text-center">
 
-                    <a href="{{ route('purchases.show',$purchase->id) }}"
-                        class="btn btn-sm btn-primary">
-
+                    @can('purchase-report.view')
+                    <a href="{{ route('purchase-reports.show', $purchase->id) }}"
+                        class="btn btn-sm btn-primary"
+                        title="View">
                         <i class="fas fa-eye"></i>
-
                     </a>
+                    @endcan
 
-                    <a href="{{ route('purchases.print',$purchase->id) }}"
+                    @can('purchase-report.print')
+                    <a href="{{ route('purchase-reports.print', $purchase->id) }}"
                         target="_blank"
-                        class="btn btn-sm btn-success">
-
+                        class="btn btn-sm btn-success"
+                        title="Print">
                         <i class="fas fa-print"></i>
-
                     </a>
+                    @endcan
 
                 </td>
 

@@ -24,6 +24,7 @@
                     Purchase Return List
                 </h4>
 
+                @can('purchase-return.create')
                 <a href="{{ route('purchase-returns.create') }}"
                     class="btn btn-light btn-sm">
 
@@ -32,6 +33,7 @@
                     New Return
 
                 </a>
+                @endcan
 
             </div>
 
@@ -117,12 +119,17 @@
 
                             <td class="text-center">
 
+                                @can('purchase-return.view')
+
                                 <a href="{{ route('purchase-returns.show',$return->id) }}"
                                     class="btn btn-info btn-sm">
 
                                     <i class="fas fa-eye"></i>
 
                                 </a>
+                                @endcan
+
+                                @can('purchase-return.edit')
 
                                 <a href="{{ route('purchase-returns.edit',$return->id) }}"
                                     class="btn btn-warning btn-sm">
@@ -130,7 +137,9 @@
                                     <i class="fas fa-edit"></i>
 
                                 </a>
+                                @endcan
 
+                                @can('purchase-return.view')
                                 <a href="{{ route('purchase-returns.print',$return->id) }}"
                                     target="_blank"
                                     class="btn btn-primary btn-sm">
@@ -138,7 +147,9 @@
                                     <i class="fas fa-print"></i>
 
                                 </a>
+                                @endcan
 
+                                @can('purchase-return.delete')
                                 <form action="{{ route('purchase-returns.destroy',$return->id) }}"
                                     method="POST"
                                     class="d-inline">
@@ -154,6 +165,7 @@
                                     </button>
 
                                 </form>
+                                @endcan
 
                             </td>
 

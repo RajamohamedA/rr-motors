@@ -2,6 +2,10 @@
 
 namespace App\Models;
 
+use App\Models\Unit;
+use App\Models\Purchase;
+use App\Models\Product;
+
 use Illuminate\Database\Eloquent\Model;
 
 class PurchaseItem extends Model
@@ -36,5 +40,10 @@ class PurchaseItem extends Model
     public function product()
     {
         return $this->belongsTo(Product::class);
+    }
+
+    public function unit()
+    {
+        return $this->belongsTo(Unit::class);
     }
 }

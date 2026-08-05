@@ -42,4 +42,5 @@ Route::middleware(['auth'])->group(function () {
         [PurchaseReturnController::class, 'print']
     )->name('purchase-returns.print');
 
+
 });

@@ -35,6 +35,7 @@
 
                     <div>
 
+                        @can('purchase-return.view')
                         <a href="{{ route('purchase-returns.show',$purchaseReturn->id) }}"
                             class="btn btn-primary btn-sm">
 
@@ -43,6 +44,7 @@
                             View
 
                         </a>
+                        @endcan
 
                         <a href="{{ route('purchase-returns.index') }}"
                             class="btn btn-secondary btn-sm">
@@ -412,6 +414,7 @@
 
             </button>
 
+            @can('purchase-return.view')
             <a href="{{ route('purchase-returns.show',$purchaseReturn->id) }}"
                 class="btn btn-info">
 
@@ -420,6 +423,7 @@
                 View
 
             </a>
+            @endcan
 
             <a href="{{ route('purchase-returns.index') }}"
                 class="btn btn-secondary">

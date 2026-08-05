@@ -1,3 +1,10 @@
+@canany([
+'purchase.view',
+'purchase-return.view',
+'purchase-report.view'
+])
+
+
 <li class="nav-item">
 
     <a class="nav-link d-flex justify-content-between align-items-center"
@@ -21,7 +28,7 @@
         <ul class="nav flex-column ms-4">
 
             <li class="nav-item">
-
+                @can('purchase.view')
                 <a href="{{ route('purchases.index') }}"
                     class="nav-link {{ request()->routeIs('purchases.*') ? 'active' : '' }}">
 
@@ -30,10 +37,13 @@
                     Purchase Entry
 
                 </a>
+                @endcan
 
             </li>
 
             <li class="nav-item">
+
+                @can('purchase-return.view')
 
                 <a href="{{ route('purchase-returns.index') }}"
                     class="nav-link {{ request()->routeIs('purchase-returns.*') ? 'active' : '' }}">
@@ -43,19 +53,23 @@
                     Purchase Return
 
                 </a>
+                @endcan
 
             </li>
 
             <li class="nav-item">
+
+                @can('purchase-report.view')
 
                 <a href="{{ route('purchase-reports.index') }}"
                     class="nav-link {{ request()->routeIs('purchase-reports.*') ? 'active' : '' }}">
 
                     <i class="fas fa-chart-line me-2"></i>
 
-                     Purchase Report
+                    Purchase Report
 
                 </a>
+                @endcan
 
             </li>
 
@@ -64,3 +78,5 @@
     </div>
 
 </li>
+
+@endcanany

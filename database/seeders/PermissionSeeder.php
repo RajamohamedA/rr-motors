@@ -55,6 +55,18 @@ class PermissionSeeder extends Seeder
             'purchase.delete',
             'purchase.approve',
 
+            // Purchase Return
+            'purchase-return.view',
+            'purchase-return.create',
+            'purchase-return.edit',
+            'purchase-return.delete',
+
+            // Purchase Report
+            'purchase-report.view',
+            'purchase-report.print',
+            'purchase-report.pdf',
+            'purchase-report.excel',
+
             'sales.view',
             'sales.create',
             'sales.edit',

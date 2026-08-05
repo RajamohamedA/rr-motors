@@ -28,6 +28,7 @@
 
                     </a>
 
+                    @can('purchase-return.view')
                     <a href="{{ route('purchase-returns.print',$return->id) }}"
                         target="_blank"
                         class="btn btn-primary btn-sm">
@@ -37,7 +38,9 @@
                         Print
 
                     </a>
+                    @endcan
 
+                    @can('purchase-return.edit')
                     <a href="{{ route('purchase-returns.edit',$return->id) }}"
                         class="btn btn-warning btn-sm">
 
@@ -46,6 +49,7 @@
                         Edit
 
                     </a>
+                    @endcan
 
                 </div>
 

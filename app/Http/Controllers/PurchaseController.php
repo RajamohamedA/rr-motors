@@ -14,9 +14,11 @@ use App\Models\Supplier;
 use App\Services\StockService;
 use App\Models\StockLedger;
 use App\Models\PurchaseReturn;
+use Illuminate\Routing\Controllers\HasMiddleware;
+use Illuminate\Routing\Controllers\Middleware;
 
 
-class PurchaseController extends Controller
+class PurchaseController extends Controller implements HasMiddleware
 {
 
     protected $stockService;
@@ -25,6 +27,17 @@ class PurchaseController extends Controller
     {
         $this->stockService = $stockService;
     }
+
+    public static function middleware(): array
+    {
+        return [
+            new Middleware('permission:purchase.view', only: ['index', 'show', 'search', 'print']),
+            new Middleware('permission:purchase.create', only: ['create', 'store']),
+            new Middleware('permission:purchase.edit', only: ['edit', 'update']),
+            new Middleware('permission:purchase.delete', only: ['destroy']),
+        ];
+    }
+
     public function index()
     {
         $purchases = Purchase::with([

@@ -63,34 +63,36 @@ Route::middleware(['auth'])->group(function () {
     |--------------------------------------------------------------------------
     */
 
-    // Report screen
-    Route::get(
-        '/purchase-reports',
-        [PurchaseReportController::class, 'index']
-    )->name('purchase-reports.index');
-
-    // AJAX search
-    Route::post(
-        '/purchase-reports/search',
-        [PurchaseReportController::class, 'search']
-    )->name('purchase-reports.search');
-
-    // Print Report
-    Route::get(
-        '/purchase-reports/print',
-        [PurchaseReportController::class, 'print']
-    )->name('purchase-reports.print');
-
-    // Excel Export
-    Route::get(
-        '/purchase-reports/excel',
-        [PurchaseReportController::class, 'excel']
-    )->name('purchase-reports.excel');
-
-    // PDF Export
-    Route::get(
-        '/purchase-reports/pdf',
-        [PurchaseReportController::class, 'pdf']
-    )->name('purchase-reports.pdf');
+    // Report Screen
+    Route::get('/purchase-reports', [PurchaseReportController::class, 'index'])
+        ->name('purchase-reports.index');
+    
+    // AJAX Search
+    Route::post('/purchase-reports/search', [PurchaseReportController::class, 'search'])
+        ->name('purchase-reports.search');
+    
+    // Report Print
+    Route::get('/purchase-reports/print', [PurchaseReportController::class, 'printReport'])
+        ->name('purchase-reports.report.print');
+    
+    // Report PDF
+    Route::get('/purchase-reports/pdf', [PurchaseReportController::class, 'pdfReport'])
+        ->name('purchase-reports.report.pdf');
+    
+    // ✅ CSV (must come before {purchase})
+    Route::get('/purchase-reports/csv', [PurchaseReportController::class, 'csvReport'])
+        ->name('purchase-reports.report.csv');
+    
+    // Purchase Details
+    Route::get('/purchase-reports/{purchase}', [PurchaseReportController::class, 'show'])
+        ->name('purchase-reports.show');
+    
+    // Single Purchase Print
+    Route::get('/purchase-reports/{purchase}/print', [PurchaseReportController::class, 'print'])
+        ->name('purchase-reports.print');
+    
+    // Single Purchase PDF
+    Route::get('/purchase-reports/{purchase}/pdf', [PurchaseReportController::class, 'pdf'])
+        ->name('purchase-reports.pdf');
 
 });

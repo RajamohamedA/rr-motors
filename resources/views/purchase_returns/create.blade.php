@@ -242,7 +242,7 @@
 
                         <td>
 
-                            <input type="text"
+                            <input type="text" name='total_sub_total'
                                 id="purchase_return_sub_total"
                                 class="form-control text-end"
                                 value="0.00"
@@ -262,7 +262,7 @@
 
                         <td>
 
-                            <input type="text"
+                            <input type="text" name='total_gst'
                                 id="purchase_return_gst_total"
                                 class="form-control text-end"
                                 value="0.00"
@@ -283,7 +283,7 @@
                         <td>
 
                             <input
-                                type="text"
+                                type="text" name='total_grand_total'
                                 id="purchase_return_grand_total"
                                 name="grand_total"
                                 class="form-control text-end fw-bold"
