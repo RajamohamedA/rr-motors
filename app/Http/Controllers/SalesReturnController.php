@@ -9,9 +9,22 @@ use App\Models\Product;
 use App\Models\StockLedger;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Routing\Controllers\HasMiddleware;
+use Illuminate\Routing\Controllers\Middleware;
 
-class SalesReturnController extends Controller
+class SalesReturnController extends Controller implements HasMiddleware
 {
+    public static function middleware(): array
+    {
+        return [
+            new Middleware('permission:sales-return.view', only: ['index']),
+            new Middleware('permission:sales-return.create', only: ['create', 'store']),
+            new Middleware('permission:sales-return.edit', only: ['edit', 'update']),
+            new Middleware('permission:sales-return.delete', only: ['destroy']),
+            new Middleware('permission:sales-return.show', only: ['show']),
+            new Middleware('permission:sales-return.print', only: ['print']),
+        ];
+    }
     /**
      * Display a listing.
      */
@@ -270,7 +283,6 @@ class SalesReturnController extends Controller
         }
     }
     
-
     /**
      * Delete
      */

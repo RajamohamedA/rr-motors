@@ -8,9 +8,47 @@ use App\Models\Customer;
 use App\Models\Company;
 use App\Models\Store;
 use Barryvdh\DomPDF\Facade\Pdf;
+use Illuminate\Routing\Controllers\HasMiddleware;
+use Illuminate\Routing\Controllers\Middleware;
 
-class SalesReportController extends Controller
+class SalesReportController extends Controller implements HasMiddleware
 {
+    public static function middleware(): array
+    {
+        return [
+
+            new Middleware(
+                'permission:sales-report.view',
+                only: [
+                    'index',
+                    'search'
+                ]
+            ),
+
+            new Middleware(
+                'permission:sales-report.print',
+                only: [
+                    'print'
+                ]
+            ),
+
+            new Middleware(
+                'permission:sales-report.pdf',
+                only: [
+                    'pdf'
+                ]
+            ),
+
+            new Middleware(
+                'permission:sales-report.excel',
+                only: [
+                    'csv'
+                ]
+            ),
+
+        ];
+    }
+
     public function index(Request $request)
     {
         $query = Sales::with([

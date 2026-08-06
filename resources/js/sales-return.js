@@ -236,6 +236,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
         let gstAmount = basic * gst / 100;
 
+
         let total = basic + gstAmount;
 
         row.find('.gstDisplay').text(gstAmount.toFixed(2));
@@ -257,6 +258,7 @@ document.addEventListener('DOMContentLoaded', function () {
     function calculateReturnTotal() {
 
         let total = 0;
+        let grand_gst = 0;
 
         $('.amount').each(function () {
 
@@ -264,7 +266,14 @@ document.addEventListener('DOMContentLoaded', function () {
 
         });
 
+        $('.gstAmount').each(function () {
+
+            grand_gst += parseFloat($(this).val()) || 0;
+
+        });
+
         $('#grand_total').val(total.toFixed(2));
+        $('#gst_total').val(grand_gst);
 
     }
 

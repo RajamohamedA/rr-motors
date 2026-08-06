@@ -67,10 +67,39 @@ class PermissionSeeder extends Seeder
             'purchase-report.pdf',
             'purchase-report.excel',
 
+            /*
+            |--------------------------------------------------------------------------
+            | Sales
+            |--------------------------------------------------------------------------
+            */
+
             'sales.view',
             'sales.create',
             'sales.edit',
             'sales.delete',
+            'sales.show',
+            'sales.print',
+
+            /*
+            |--------------------------------------------------------------------------
+            | Sales Return
+            |--------------------------------------------------------------------------
+            */
+            'sales-return.view',
+            'sales-return.create',
+            'sales-return.edit',
+            'sales-return.delete',
+            'sales-return.show',
+            'sales-return.print',
+            /*
+            |--------------------------------------------------------------------------
+            | Sales Report
+            |--------------------------------------------------------------------------
+            */
+            'sales-report.view',
+            'sales-report.print',
+            'sales-report.pdf',
+            'sales-report.excel',
 
             'quotation.view',
             'quotation.create',

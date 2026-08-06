@@ -12,10 +12,23 @@ use App\Models\StockLedger;
 use App\Services\StockService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Routing\Controllers\HasMiddleware;
+use Illuminate\Routing\Controllers\Middleware;
 
-class SalesController extends Controller
+class SalesController extends Controller implements HasMiddleware
 {
     protected $stockService;
+    public static function middleware(): array
+    {
+        return [
+            new Middleware('permission:sales.view', only: ['index']),
+            new Middleware('permission:sales.create', only: ['create', 'store']),
+            new Middleware('permission:sales.edit', only: ['edit', 'update']),
+            new Middleware('permission:sales.delete', only: ['destroy']),
+            new Middleware('permission:sales.show', only: ['show']),
+            new Middleware('permission:sales.print', only: ['print']),
+        ];
+    }
 
     public function __construct(StockService $stockService)
     {

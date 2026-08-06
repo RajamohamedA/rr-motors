@@ -20,27 +20,32 @@
 
             <div>
 
+                @can('sales.print')
                 <a href="{{ route('sales.print', $sale->id) }}"
-                   target="_blank"
-                   class="btn btn-light btn-sm">
+                    target="_blank"
+                    class="btn btn-light btn-sm">
 
                     <i class="fas fa-print"></i>
 
                     Print
 
                 </a>
+                @endcan
+
+                @can('sales.edit')
 
                 <a href="{{ route('sales.edit', $sale->id) }}"
-                   class="btn btn-warning btn-sm">
+                    class="btn btn-warning btn-sm">
 
                     <i class="fas fa-edit"></i>
 
                     Edit
 
                 </a>
+                @endcan
 
                 <a href="{{ route('sales.index') }}"
-                   class="btn btn-secondary btn-sm">
+                    class="btn btn-secondary btn-sm">
 
                     Back
 

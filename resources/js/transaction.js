@@ -253,6 +253,7 @@ document.addEventListener('DOMContentLoaded', function () {
             if (transactionType === 'sale') {
 
                 let stock = parseFloat(row.find('.stock').text()) || 0;
+                console.log(stock);
 
                 if (qty > stock) {
 

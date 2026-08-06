@@ -7,8 +7,13 @@
             <div class="d-flex justify-content-between align-items-center">
                 <h4 class="mb-0"> <i class="fas fa-undo">
 
-                </i> Sales Return List </h4> 
-                <a href="{{ route('sales-returns.create') }}" class="btn btn-light"> <i class="fas fa-plus"></i> New Return </a>
+                    </i> Sales Return List </h4>
+                @can('sales-return.create')
+                <a href="{{ route('sales-returns.create') }}" class="btn btn-light">
+                    <i class="fas fa-plus"></i> 
+                    New Return
+                </a>
+                @endcan
             </div>
         </div>
         <div class="card-body">
@@ -27,7 +32,7 @@
                         </tr>
                     </thead>
                     <tbody> @forelse($returns as $return)
-                         <tr>
+                        <tr>
                             <td> {{ $loop->iteration + ($returns->currentPage()-1) * $returns->perPage() }} </td>
                             <td> <strong> {{ $return->return_no }} </strong> </td>
                             <td> {{ date('d-m-Y',strtotime($return->return_date)) }} </td>
@@ -36,18 +41,36 @@
                             <td class="text-end fw-bold text-danger"> {{ number_format($return->total_amount,2) }} </td>
                             <td class="text-center"> <span class="badge bg-success"> Completed </span> </td>
                             <td class="text-center">
-                                <div class="btn-group btn-group-sm"> <a href="{{ route('sales-returns.show',$return->id) }}" class="btn btn-info" title="View"> <i class="fas fa-eye"></i> </a> <a href="{{ route('sales-returns.print',$return->id) }}" target="_blank" class="btn btn-secondary" title="Print"> <i class="fas fa-print"></i> </a> <a href="{{ route('sales-returns.edit',$return->id) }}" class="btn btn-warning" title="Edit"> <i class="fas fa-edit"></i> </a>
-                                    <form action="{{ route('sales-returns.destroy',$return->id) }}" method="POST" class="d-inline" onsubmit="return confirm('Delete this Sales Return?')"> 
-                                        @csrf @method('DELETE') 
-                                        <button type="submit" class="btn btn-danger btn-sm" title="Delete"> 
-                                            <i class="fas fa-trash"></i> 
-                                        </button> 
+                                <div class="btn-group btn-group-sm">
+                                    @can('sales-return.show')
+                                    <a href="{{ route('sales-returns.show',$return->id) }}" class="btn btn-info" title="View">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+                                    @endcan
+                                    @can('sales-return.print')
+                                    <a href="{{ route('sales-returns.print',$return->id) }}" target="_blank" class="btn btn-secondary" title="Print">
+                                        <i class="fas fa-print"></i>
+                                    </a>
+                                    @endcan
+                                    @can('sales-return.edit')
+                                    <a href="{{ route('sales-returns.edit',$return->id) }}" class="btn btn-warning" title="Edit">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                    @endcan
+                                    @can('sales-return.delete')
+                                    <form action="{{ route('sales-returns.destroy',$return->id) }}" method="POST" class="d-inline" onsubmit="return confirm('Delete this Sales Return?')">
+                                        @csrf @method('DELETE')
+                                        <button type="submit" class="btn btn-danger btn-sm" title="Delete">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
                                     </form>
+                                    @endcan
                                 </div>
                             </td>
                         </tr> @empty <tr>
                             <td colspan="8" class="text-center text-muted py-4"> <i class="fas fa-undo fa-2x mb-2"></i> <br> No Sales Return Found. </td>
-                        </tr> @endforelse </tbody>
+                        </tr> @endforelse
+                    </tbody>
                 </table>
             </div>
             <div class="d-flex justify-content-end mt-3"> {{ $returns->links() }} </div>

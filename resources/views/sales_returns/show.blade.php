@@ -18,21 +18,23 @@
             <div>
 
                 <a href="{{ route('sales-returns.index') }}"
-                class="btn btn-secondary btn-sm">
+                    class="btn btn-secondary btn-sm">
 
                     <i class="fas fa-arrow-left"></i>
                     Back
 
                 </a>
 
+                @can('sales-return.print')
                 <a href="{{ route('sales-returns.print', $return->id) }}"
-                target="_blank"
-                class="btn btn-primary btn-sm">
+                    target="_blank"
+                    class="btn btn-primary btn-sm">
 
                     <i class="fas fa-print"></i>
                     Print
 
                 </a>
+                @endcan
 
             </div>
 
@@ -68,44 +70,44 @@
 
                 <thead class="table-dark">
 
-                <tr>
-                    <th>#</th>
-                    <th>Product Code</th>
-                    <th>Product</th>
-                    <th>Qty</th>
-                    <th>Price</th>
-                    <th>GST%</th>
-                    <th>GST Amt</th>
-                    <th>Total</th>
-                </tr>
+                    <tr>
+                        <th>#</th>
+                        <th>Product Code</th>
+                        <th>Product</th>
+                        <th>Qty</th>
+                        <th>Price</th>
+                        <th>GST%</th>
+                        <th>GST Amt</th>
+                        <th>Total</th>
+                    </tr>
 
                 </thead>
 
                 <tbody>
 
-                @foreach($return->items as $item)
+                    @foreach($return->items as $item)
 
-                <tr>
+                    <tr>
 
-                    <td>{{ $loop->iteration }}</td>
+                        <td>{{ $loop->iteration }}</td>
 
-                    <td>{{ $item->product->product_code }}</td>
+                        <td>{{ $item->product->product_code }}</td>
 
-                    <td>{{ $item->product->product_name }}</td>
+                        <td>{{ $item->product->product_name }}</td>
 
-                    <td>{{ number_format($item->quantity,2) }}</td>
+                        <td>{{ number_format($item->quantity,2) }}</td>
 
-                    <td>{{ number_format($item->sale_price,2) }}</td>
+                        <td>{{ number_format($item->sale_price,2) }}</td>
 
-                    <td>{{ number_format($item->gst_percent,2) }}</td>
+                        <td>{{ number_format($item->gst_percent,2) }}</td>
 
-                    <td>{{ number_format($item->gst_amount,2) }}</td>
+                        <td>{{ number_format($item->gst_amount,2) }}</td>
 
-                    <td>{{ number_format($item->line_total,2) }}</td>
+                        <td>{{ number_format($item->line_total,2) }}</td>
 
-                </tr>
+                    </tr>
 
-                @endforeach
+                    @endforeach
 
                 </tbody>
 

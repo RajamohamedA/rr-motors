@@ -13,18 +13,23 @@
         </h3>
 
         <div>
+            @can('sales-report.print')
             <a href="{{ route('reports.sales.print', request()->all()) }}"
                 target="_blank"
                 class="btn btn-primary">
                 <i class="fas fa-print"></i> Print
             </a>
+            @endcan
 
+            @can('sales-report.pdf')
             <a href="{{ route('reports.sales.pdf', request()->all()) }}"
                 target="_blank"
                 class="btn btn-danger">
                 <i class="fas fa-file-pdf"></i> PDF
             </a>
+            @endcan
 
+            @can('sales-report.excel')
             <a href="{{ route('reports.sales.csv', request()->query()) }}"
                 class="btn btn-success">
 
@@ -33,6 +38,7 @@
                 Export CSV
 
             </a>
+            @endcan
         </div>
 
     </div>

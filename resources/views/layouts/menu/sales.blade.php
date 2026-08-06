@@ -1,3 +1,11 @@
+@canany([
+'sales.view',
+'sales-return.view',
+'sales-report.view',
+'quotation.view'
+])
+
+
 <li class="nav-item">
 
     <a class="nav-link d-flex justify-content-between align-items-center"
@@ -20,6 +28,7 @@
 
         <ul class="nav flex-column ms-4">
 
+            @can('sales.view')
             <li class="nav-item">
 
                 <a href="{{ route('sales.index') }}"
@@ -32,6 +41,9 @@
                 </a>
 
             </li>
+            @endcan
+
+            @can('sales-return.view')
 
             <li class="nav-item">
 
@@ -44,6 +56,9 @@
                 </a>
 
             </li>
+            @endcan
+
+            @can('quotation.view')
 
             <li class="nav-item">
 
@@ -55,7 +70,10 @@
                 </a>
 
             </li>
+            @endcan
 
+
+            @can('sales-report.view')
             <li class="nav-item">
 
                 <a href="{{ route('reports.sales') }}"
@@ -69,8 +87,12 @@
 
             </li>
 
+            @endcan
+
         </ul>
 
     </div>
 
 </li>
+
+@endcanany

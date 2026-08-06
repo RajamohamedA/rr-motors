@@ -218,6 +218,7 @@
 
                     @if(isset($sale))
 
+
                     @foreach($sale->items as $item)
 
                     <tr>
@@ -233,8 +234,15 @@
                         </td>
 
                         <td>
-
                             {{ $item->product->product_name }}
+                            <br>
+                            <small class="text-success">
+
+                                Stock :
+
+                                <span class="stock">{{ $item->product->current_stock }}</span>
+
+                            </small>
 
                         </td>
 

@@ -20,6 +20,7 @@
 
                 </h4>
 
+                @can('sales.create')
                 <a href="{{ route('sales.create') }}"
                     class="btn btn-light">
 
@@ -28,6 +29,7 @@
                     New Sales Invoice
 
                 </a>
+                @endcan
 
             </div>
 
@@ -140,11 +142,11 @@
                             <td class="text-center">
 
                                 @if($sale->status == 'Completed')
-                                    <span class="badge bg-success">Completed</span>
+                                <span class="badge bg-success">Completed</span>
                                 @elseif($sale->status == 'Pending')
-                                    <span class="badge bg-warning">Pending</span>
+                                <span class="badge bg-warning">Pending</span>
                                 @else
-                                    <span class="badge bg-danger">Cancelled</span>
+                                <span class="badge bg-danger">Cancelled</span>
                                 @endif
 
 
@@ -154,6 +156,7 @@
 
                                 <div class="btn-group btn-group-sm">
 
+                                    @can('sales.show')
                                     <a href="{{ route('sales.show',$sale->id) }}"
                                         class="btn btn-info"
                                         title="View">
@@ -161,7 +164,9 @@
                                         <i class="fas fa-eye"></i>
 
                                     </a>
+                                    @endcan
 
+                                    @can('sales.edit')
                                     <a href="{{ route('sales.edit',$sale->id) }}"
                                         class="btn btn-warning"
                                         title="Edit">
@@ -169,7 +174,9 @@
                                         <i class="fas fa-edit"></i>
 
                                     </a>
+                                    @endcan
 
+                                    @can('sales.print')
                                     <a href="{{ route('sales.print',$sale->id) }}"
                                         target="_blank"
                                         class="btn btn-secondary"
@@ -178,7 +185,9 @@
                                         <i class="fas fa-print"></i>
 
                                     </a>
+                                    @endcan
 
+                                    @can('sales.delete')
                                     <form action="{{ route('sales.destroy',$sale->id) }}"
                                         method="POST"
                                         class="d-inline"
@@ -196,6 +205,7 @@
                                         </button>
 
                                     </form>
+                                    @endcan
 
                                 </div>
 
