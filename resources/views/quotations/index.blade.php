@@ -17,6 +17,7 @@
                     Quotation List
                 </h5>
 
+                @can('quotation.create')
                 <a href="{{ route('quotations.create') }}"
                     class="btn btn-light btn-sm">
 
@@ -25,6 +26,7 @@
                     New Quotation
 
                 </a>
+                @endcan
 
             </div>
 
@@ -113,20 +115,25 @@
 
                             <td>
 
+                                @can('quotation.show')
                                 <a href="{{ route('quotations.show',$quotation->id) }}"
                                     class="btn btn-info btn-sm">
 
                                     <i class="fas fa-eye"></i>
 
                                 </a>
+                                @endcan
 
+                                @can('quotation.edit')
                                 <a href="{{ route('quotations.edit',$quotation->id) }}"
                                     class="btn btn-warning btn-sm">
 
                                     <i class="fas fa-edit"></i>
 
                                 </a>
+                                @endcan
 
+                                @can('quotation.print')
                                 <a href="{{ route('quotations.print',$quotation->id) }}"
                                     class="btn btn-secondary btn-sm"
                                     target="_blank">
@@ -134,14 +141,18 @@
                                     <i class="fas fa-print"></i>
 
                                 </a>
+                                @endcan
 
+                                @can('quotation.convert-sale')
                                 <a href="{{ route('quotations.convert',$quotation->id) }}"
                                     class="btn btn-success btn-sm">
 
                                     <i class="fas fa-exchange-alt"></i>
 
                                 </a>
+                                @endcan
 
+                                @can('quotation.delete')
                                 <form action="{{ route('quotations.destroy',$quotation->id) }}"
                                     method="POST"
                                     class="d-inline"
@@ -157,6 +168,7 @@
                                     </button>
 
                                 </form>
+                                @endcan
 
                             </td>
 

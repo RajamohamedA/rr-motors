@@ -101,10 +101,19 @@ class PermissionSeeder extends Seeder
             'sales-report.pdf',
             'sales-report.excel',
 
+            /*
+            |--------------------------------------------------------------------------
+            | Quotation
+            |--------------------------------------------------------------------------
+            */
+
             'quotation.view',
             'quotation.create',
             'quotation.edit',
             'quotation.delete',
+            'quotation.show',
+            'quotation.print',
+            'quotation.convert-sale',
 
             'stock.view',
             'stock.adjust',

@@ -20,6 +20,7 @@
 
             <div>
 
+                @can('quotation.edit')
                 <a href="{{ route('quotations.edit',$quotation->id) }}"
                     class="btn btn-warning">
 
@@ -28,6 +29,9 @@
                     Edit
 
                 </a>
+                @endcan
+
+                @can('quotation.print')
                 <a href="{{ route('quotations.print',$quotation->id) }}"
                     target="_blank"
                     class="btn btn-primary">
@@ -37,6 +41,9 @@
                     Print
 
                 </a>
+                @endcan
+
+                @can('quotation.convert-sale')
                 <a href="{{ route('quotations.convert',$quotation->id) }}"
                     class="btn btn-success"
                     onclick="return confirm('Convert this quotation to Sales Invoice?')">
@@ -46,6 +53,9 @@
                     Convert To Sales
 
                 </a>
+                @endcan
+
+
 
                 <a href="{{ route('quotations.index') }}"
                     class="btn btn-light">

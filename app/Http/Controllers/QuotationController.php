@@ -12,9 +12,69 @@ use App\Models\Customer;
 use App\Models\Product;
 use App\Models\Sales;
 use App\Models\SaleItems;
+use Illuminate\Routing\Controllers\HasMiddleware;
+use Illuminate\Routing\Controllers\Middleware;
 
-class QuotationController extends Controller
+class QuotationController extends Controller implements HasMiddleware
 {
+    public static function middleware(): array
+    {
+        return [
+
+            new Middleware(
+                'permission:quotation.view',
+                only: ['index']
+            ),
+
+            new Middleware(
+                'permission:quotation.create',
+                only: [
+                    'create',
+                    'store',
+                    'searchProduct',
+                    'getCustomer'
+                ]
+            ),
+
+            new Middleware(
+                'permission:quotation.edit',
+                only: [
+                    'edit',
+                    'update'
+                ]
+            ),
+
+            new Middleware(
+                'permission:quotation.delete',
+                only: [
+                    'destroy'
+                ]
+            ),
+
+            new Middleware(
+                'permission:quotation.show',
+                only: [
+                    'show'
+                ]
+            ),
+
+            new Middleware(
+                'permission:quotation.print',
+                only: [
+                    'print',
+                    'pdf'
+                ]
+            ),
+
+            new Middleware(
+                'permission:quotation.convert-sale',
+                only: [
+                    'convertToSales'
+                ]
+            ),
+
+        ];
+    }
     /**
      * Display a listing of the resource.
      */
@@ -384,9 +444,17 @@ class QuotationController extends Controller
 
             DB::commit();
 
+            if (auth()->user()->can('sales.edit')) {
+
+                return redirect()
+                    ->route('sales.edit', $sale->id)
+                    ->with('success', 'Quotation converted successfully.');
+            }
+
             return redirect()
-                ->route('sales.edit', $sale->id)
-                ->with('success', 'Quotation Converted Successfully.');
+                ->route('quotations.index')
+                ->with('success', 'Quotation converted successfully.');
+
         } catch (\Exception $e) {
 
             DB::rollBack();
