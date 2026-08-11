@@ -141,11 +141,15 @@
                         <td>{{ $ledger->transaction_type }}</td>
 
                         <td>
+                            @can('stock-ledger.show')
                             <a href="{{ route('stock-ledgers.show',$ledger->product_id) }}">
 
                                 {{ $ledger->product->product_name }}
 
                             </a>
+                            @else
+                                {{ $ledger->product->product_name }}
+                            @endif
                         </td>
 
                         <td class="text-end text-success">

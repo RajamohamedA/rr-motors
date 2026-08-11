@@ -1,5 +1,6 @@
 @canany([
-'current-stock.view'
+'current-stock.view',
+'stock-ledger.view'
 ])
 
 <li class="nav-item">
