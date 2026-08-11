@@ -109,16 +109,13 @@ class StockAdjustmentController extends Controller implements HasMiddleware
 
 
         if ($selectedProduct && $selectedStore) {
-            $currentStock = Stock::where('store_id', $selectedStore->id)
+            $currentStock = StockLedger::where('store_id', $selectedStore->id)
                 ->where('product_id', $selectedProduct->id)
-                ->sum('qty_in')
-                -
-                Stock::where('store_id', $selectedStore->id)
-                ->where('product_id', $selectedProduct->id)
-                ->sum('qty_out');
+                ->latest('id')
+                ->value('balance_qty');
+
+            $currentStock = (float) ($currentStock ?? 0);
         }
-
-
 
         return view(
             'stock_adjustments.create',
@@ -138,16 +135,21 @@ class StockAdjustmentController extends Controller implements HasMiddleware
     public function store(Request $request)
     {
         $request->validate([
-            'store_id'  => 'required|exists:stores,id',
+            'store_id'   => 'required|exists:stores,id',
             'product_id' => 'required|exists:products,id',
-            'qty'       => 'required|numeric|min:0.01',
-            'type'      => 'required|in:increase,decrease',
-            'unit_cost' => 'required|numeric|min:0',
-            'remarks'   => 'nullable|string|max:500',
+            'qty'        => 'required|numeric|min:0.01',
+            'type'       => 'required|in:increase,decrease',
+            'unit_cost'  => 'required|numeric|min:0',
+            'remarks'    => 'nullable|string|max:500',
         ]);
 
-        // Get current stock from stock ledger
-        $currentStock = Stock::where('store_id', $request->store_id)
+        /*
+        |--------------------------------------------------------------------------
+        | Get Current Stock From Stock Ledger
+        |--------------------------------------------------------------------------
+        */
+
+        $currentStock = StockLedger::where('store_id', $request->store_id)
             ->where('product_id', $request->product_id)
             ->latest('id')
             ->value('balance_qty');
@@ -155,7 +157,12 @@ class StockAdjustmentController extends Controller implements HasMiddleware
         $currentStock = (float) ($currentStock ?? 0);
 
 
-        // Prevent negative stock
+        /*
+        |--------------------------------------------------------------------------
+        | Prevent Negative Stock
+        |--------------------------------------------------------------------------
+        */
+
         if (
             $request->type === 'decrease' &&
             $request->qty > $currentStock
@@ -167,19 +174,22 @@ class StockAdjustmentController extends Controller implements HasMiddleware
                 ]);
         }
 
+
         DB::transaction(function () use ($request, $currentStock) {
 
             $product = Product::findOrFail($request->product_id);
 
+
             /*
             |--------------------------------------------------------------------------
-            | New Stock Balance
+            | Calculate New Balance
             |--------------------------------------------------------------------------
             */
 
             $newBalance = $request->type === 'increase'
                 ? $currentStock + $request->qty
                 : $currentStock - $request->qty;
+
 
             /*
             |--------------------------------------------------------------------------
@@ -214,16 +224,17 @@ class StockAdjustmentController extends Controller implements HasMiddleware
 
             /*
             |--------------------------------------------------------------------------
-            | Create Stock Ledger Transaction
+            | Create Stock Ledger
             |--------------------------------------------------------------------------
             */
 
-            Stock::create([
+            StockLedger::create([
                 'company_id'       => auth()->user()->company_id,
                 'store_id'         => $request->store_id,
                 'product_id'       => $product->id,
                 'transaction_date' => now(),
                 'transaction_type' => 'Stock Adjustment',
+
                 'reference_id'     => $adjustment->id,
                 'reference_no'     => $adjustment->adjustment_no,
 
@@ -285,7 +296,7 @@ class StockAdjustmentController extends Controller implements HasMiddleware
     {
         $product = Product::findOrFail($request->product_id);
 
-        $currentStock = Stock::where('store_id', $request->store_id)
+        $currentStock = StockLedger::where('store_id', $request->store_id)
             ->where('product_id', $request->product_id)
             ->latest('id')
             ->value('balance_qty');
