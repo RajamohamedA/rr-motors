@@ -10,9 +10,47 @@ use App\Models\StockLedger;
 use App\Models\Store;
 use Illuminate\Http\Request;
 use Barryvdh\DomPDF\Facade\Pdf;
+use Illuminate\Routing\Controllers\HasMiddleware;
+use Illuminate\Routing\Controllers\Middleware;
 
-class StockReportController extends Controller
+class StockReportController extends Controller implements HasMiddleware
 {
+    public static function middleware(): array
+    {
+        return [
+
+            new Middleware(
+                'permission:current-stock.view',
+                only: [
+                    'index',
+                    'search',
+                    'currentStock'
+                ]
+            ),
+
+            new Middleware(
+                'permission:current-stock.print',
+                only: [
+                    'print'
+                ]
+            ),
+
+            new Middleware(
+                'permission:current-stock.pdf',
+                only: [
+                    'pdf'
+                ]
+            ),
+
+            new Middleware(
+                'permission:current-stock.excel',
+                only: [
+                    'csv'
+                ]
+            ),
+
+        ];
+    }
     /**
      * Build Current Stock Query
      */

@@ -1,3 +1,7 @@
+@canany([
+'current-stock.view'
+])
+
 <li class="nav-item">
 
     <a class="nav-link d-flex justify-content-between align-items-center"
@@ -24,6 +28,7 @@
 
             <li class="nav-item">
 
+                @can('current-stock.view')
                 <a href="{{ route('inventory.current-stock') }}"
                     class="nav-link {{ request()->routeIs('inventory.current-stock') ? 'active' : '' }}">
 
@@ -32,6 +37,7 @@
                     Current Stock
 
                 </a>
+                @endcan
 
             </li>
 
@@ -39,6 +45,7 @@
 
             <li class="nav-item">
 
+                @can('stock-ledger.view')
                 <a href="{{ route('stock-ledgers.index') }}"
                     class="nav-link {{ request()->routeIs('stock-ledgers.*') ? 'active' : '' }}">
 
@@ -47,6 +54,7 @@
                     Stock Ledger
 
                 </a>
+                @endcan
 
             </li>
 
@@ -54,6 +62,7 @@
 
             <li class="nav-item">
 
+                @can('stock-adjustment.view')
                 <a href="{{route('stock-adjustments.index')}}"
                     class=" nav-link {{ request()->routeIs('stock-ledgers.*') ? 'active' : '' }}">
 
@@ -62,6 +71,7 @@
                     Stock Adjustment
 
                 </a>
+                @endcan
 
             </li>
 
@@ -69,6 +79,7 @@
 
             <li class="nav-item">
 
+                @can('stock-transfer.view')
                 <a href="#"
                     class="nav-link">
 
@@ -81,6 +92,7 @@
                     </span>
 
                 </a>
+                @endcan
 
             </li>
 
@@ -89,3 +101,5 @@
     </div>
 
 </li>
+
+@endcanany

@@ -4,17 +4,18 @@
 
 @section('content')
 
-<div class="card shadow-sm">
+<div class="card shadow-sm ">
 
-    <div class="card-header bg-success text-white">
-
-        <h5>
-
-            <i class="fas fa-box"></i>
-
+    <div class="d-flex card-header align-items-center bg-success text-white justify-content-between mb-3">
+        <h4>
+            <i class="bi bi-box-seam"></i>
             Product Stock Card
-
-        </h5>
+        </h4>
+        <a href="{{ url()->previous() }}"
+            class="btn btn-secondary">
+            <i class="bi bi-arrow-left"></i>
+            Back
+        </a>
 
     </div>
 

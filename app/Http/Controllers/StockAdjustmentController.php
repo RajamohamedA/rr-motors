@@ -10,11 +10,62 @@ use App\Models\StockLedger;
 use App\Models\Stock;
 use App\Models\StockAdjustment;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Routing\Controllers\HasMiddleware;
+use Illuminate\Routing\Controllers\Middleware;
 
 
 
-class StockAdjustmentController extends Controller
+class StockAdjustmentController extends Controller implements HasMiddleware
 {
+    public static function middleware(): array
+    {
+        return [
+
+            new Middleware(
+                'permission:stock-adjustment.view',
+                only: ['index']
+            ),
+
+            new Middleware(
+                'permission:stock-adjustment.create',
+                only: [
+                    'create',
+                    'store',
+                    'searchProduct'
+                ]
+            ),
+
+            new Middleware(
+                'permission:stock-adjustment.edit',
+                only: [
+                    'edit',
+                    'update'
+                ]
+            ),
+
+            new Middleware(
+                'permission:stock-adjustment.delete',
+                only: [
+                    'destroy'
+                ]
+            ),
+
+            new Middleware(
+                'permission:stock-adjustment.show',
+                only: [
+                    'show'
+                ]
+            ),
+
+            new Middleware(
+                'permission:stock-adjustment.print',
+                only: [
+                    'print'
+                ]
+            ),
+
+        ];
+    }
 
 
     public function index()
@@ -151,8 +202,15 @@ class StockAdjustmentController extends Controller
             ]);
         });
 
+        if (auth()->user()->can('stock-adjustment.view')) {
+
+            return redirect()
+                ->route('stock-adjustments.index')
+                ->with('success', 'Stock adjusted successfully.');
+        }
+
         return redirect()
-            ->route('stock-adjustments.index')
+            ->route('inventory.current-stock')
             ->with('success', 'Stock adjusted successfully.');
     }
 

@@ -23,9 +23,12 @@ class ProductController extends Controller  implements HasMiddleware
 
             new Middleware(
                 'permission:product.view',
-                only: ['index', 'show']
+                only: ['index']
             ),
-
+            new Middleware(
+                'permission:product.show',
+                only: ['show']
+            ),
             new Middleware(
                 'permission:product.create',
                 only: ['create', 'store']

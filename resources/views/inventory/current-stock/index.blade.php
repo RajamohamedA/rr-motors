@@ -65,6 +65,7 @@
 
         <div>
 
+            @can('current-stock.print')
             <a href="{{ route('inventory.current-stock.print',request()->query()) }}"
                 target="_blank"
                 class="btn btn-primary">
@@ -73,6 +74,9 @@
                 Print
 
             </a>
+            @endcan
+
+            @can('current-stock.pdf')
 
             <a href="{{ route('inventory.current-stock.pdf',request()->query()) }}"
                 target="_blank"
@@ -82,6 +86,9 @@
                 PDF
 
             </a>
+            @endcan
+
+            @can('current-stock.excel')
 
             <a href="{{ route('inventory.current-stock.csv',request()->query()) }}"
                 class="btn btn-success">
@@ -90,6 +97,8 @@
                 CSV
 
             </a>
+
+            @endcan
 
         </div>
 
@@ -600,6 +609,7 @@
 
                                             <div class="btn-group btn-group-sm">
 
+                                                @can('stock-ledger.show')
                                                 <a href="{{ route('stock-ledgers.show',$stock->product_id) }}"
                                                     class="btn btn-info"
                                                     title="Ledger">
@@ -607,7 +617,9 @@
                                                     <i class="fas fa-history"></i>
 
                                                 </a>
+                                                @endcan
 
+                                                @can('product.show')
                                                 <a href="{{ route('products.show',$stock->product_id) }}"
                                                     class="btn btn-primary"
                                                     title="View">
@@ -615,19 +627,23 @@
                                                     <i class="fas fa-eye"></i>
 
                                                 </a>
+                                                @endcanany
+
+                                                @can('stock-adjustment.create')
 
                                                 <a href="{{ route('stock-adjustments.create',
-                                                    [
-                                                        'store'=>$stock->store_id,
-                                                        'product'=>$stock->product_id
-                                                    ]
-                                                ) }}"
+                                            [
+                                                'store'=>$stock->store_id,
+                                                'product'=>$stock->product_id
+                                            ]
+                                        ) }}"
                                                     class="btn btn-warning"
                                                     title="Adjust">
 
                                                     <i class="fas fa-edit"></i>
 
                                                 </a>
+                                                @endcan
 
                                             </div>
 
@@ -670,11 +686,11 @@
                                 <th class="text-end">
 
                                     {{ number_format(
-                $stocks->sum(function($stock){
-                    return $stock->current_stock *
-                           ($stock->product->purchase_price ?? 0);
-                }),2)
-            }}
+                                $stocks->sum(function($stock){
+                                    return $stock->current_stock *
+                                        ($stock->product->purchase_price ?? 0);
+                                }),2)
+                            }}
 
                                 </th>
 
@@ -761,11 +777,11 @@
                             <h3 class="text-primary">
 
                                 {{ number_format(
-                        $stocks->sum(function($stock){
-                            return $stock->current_stock *
-                                   ($stock->product->purchase_price ?? 0);
-                        }),2)
-                    }}
+                $stocks->sum(function($stock){
+                    return $stock->current_stock *
+                            ($stock->product->purchase_price ?? 0);
+                }),2)
+            }}
 
                             </h3>
 
@@ -786,9 +802,10 @@
                             <h3 class="text-success">
 
                                 {{ number_format(
-                        $stocks->sum('current_stock'),
-                        2
-                    ) }}
+                                    $stocks->sum('current_stock'),
+                                    2
+                                    ) 
+                                }}
 
                             </h3>
 
@@ -839,9 +856,10 @@
                 </div>
 
             </div>
+</div>
 
-            @endsection
+@endsection
 
-            @vite([
-            'resources/js/current-stock.js'
-            ])
+@vite([
+'resources/js/current-stock.js'
+])

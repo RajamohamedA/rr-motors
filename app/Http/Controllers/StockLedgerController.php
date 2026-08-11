@@ -7,9 +7,53 @@ use App\Models\Product;
 use App\Models\Store;
 use App\Models\Company;
 use Illuminate\Http\Request;
+use Illuminate\Routing\Controllers\HasMiddleware;
+use Illuminate\Routing\Controllers\Middleware;
 
-class StockLedgerController extends Controller
+class StockLedgerController extends Controller implements HasMiddleware
 {
+    public static function middleware(): array
+    {
+        return [
+
+            new Middleware(
+                'permission:stock-ledger.view',
+                only: [
+                    'index',
+                    'search'
+                ]
+            ),
+            new Middleware(
+                'permission:stock-ledger.show',
+                only: [
+                    'show'
+                ]
+            ),
+
+            new Middleware(
+                'permission:stock-ledger.print',
+                only: [
+                    'printReport'
+                ]
+            ),
+
+            new Middleware(
+                'permission:stock-ledger.pdf',
+                only: [
+                    'pdfReport'
+                ]
+            ),
+
+            new Middleware(
+                'permission:stock-ledger.excel',
+                only: [
+                    'csvReport'
+                ]
+            ),
+
+        ];
+    }
+
     public function index(Request $request)
     {
         $query = StockLedger::with([

@@ -11,7 +11,7 @@
             Product Details
         </h4>
 
-        <a href="{{ route('products.index') }}"
+        <a href="{{ url()->previous() }}"
             class="btn btn-secondary">
             <i class="bi bi-arrow-left"></i>
             Back

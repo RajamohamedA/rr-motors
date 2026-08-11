@@ -36,6 +36,7 @@ class PermissionSeeder extends Seeder
             'product.view',
             'product.create',
             'product.edit',
+            'product.show',
             'product.delete',
 
             'supplier.view',
@@ -114,6 +115,54 @@ class PermissionSeeder extends Seeder
             'quotation.show',
             'quotation.print',
             'quotation.convert-sale',
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | Current Stock
+            |--------------------------------------------------------------------------
+            */
+            'current-stock.view',
+            'current-stock.print',
+            'current-stock.pdf',
+            'current-stock.excel',
+
+            /*
+            |--------------------------------------------------------------------------
+            | Stock Ledger
+            |--------------------------------------------------------------------------
+            */
+            'stock-ledger.view',
+            'stock-ledger.show',
+            'stock-ledger.print',
+            'stock-ledger.pdf',
+            'stock-ledger.excel',
+
+            /*
+            |--------------------------------------------------------------------------
+            | Stock Adjustment
+            |--------------------------------------------------------------------------
+            */
+            'stock-adjustment.view',
+            'stock-adjustment.create',
+            'stock-adjustment.edit',
+            'stock-adjustment.delete',
+            'stock-adjustment.show',
+            'stock-adjustment.print',
+
+            /*
+            |--------------------------------------------------------------------------
+            | Stock Transfer
+            |--------------------------------------------------------------------------
+            */
+            'stock-transfer.view',
+            'stock-transfer.create',
+            'stock-transfer.edit',
+            'stock-transfer.delete',
+            'stock-transfer.show',
+            'stock-transfer.print',
+
+            
 
             'stock.view',
             'stock.adjust',
