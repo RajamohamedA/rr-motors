@@ -10,6 +10,8 @@
             Stock Adjustments
         </h4>
 
+        @can('stock-adjustment.create')
+
         <a href="{{ route('stock-adjustments.create') }}"
             class="btn btn-primary">
 
@@ -17,6 +19,7 @@
             New Adjustment
 
         </a>
+        @endif
 
     </div>
 

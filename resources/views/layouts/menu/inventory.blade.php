@@ -1,6 +1,7 @@
 @canany([
 'current-stock.view',
-'stock-ledger.view'
+'stock-ledger.view',
+'stock-adjustment.view'
 ])
 
 <li class="nav-item">
@@ -65,7 +66,7 @@
 
                 @can('stock-adjustment.view')
                 <a href="{{route('stock-adjustments.index')}}"
-                    class=" nav-link {{ request()->routeIs('stock-ledgers.*') ? 'active' : '' }}">
+                    class=" nav-link {{ request()->routeIs('stock-adjustments.*') ? 'active' : '' }}">
 
                     <i class="fas fa-balance-scale me-2"></i>
 
