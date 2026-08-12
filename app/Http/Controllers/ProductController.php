@@ -10,6 +10,7 @@ use App\Models\Category;
 use App\Models\Brand;
 use App\Models\Unit;
 use App\Models\Supplier;
+use App\Models\Stock;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Routing\Controllers\HasMiddleware;
@@ -82,7 +83,7 @@ class ProductController extends Controller  implements HasMiddleware
     {
         $product = new Product();
         $companies = Company::where('status',1)->orderBy('company_name')->get();
-        $stores     = Store::where('status',1)->orderBy('store_name')->get();
+        $stores     = [];
         $categories = Category::where('status',1)->orderBy('name')->get();
         $brands     = Brand::where('status',1)->orderBy('brand_name')->get();
         $units      = Unit::where('status',1)->orderBy('unit_name')->get();
@@ -119,6 +120,7 @@ class ProductController extends Controller  implements HasMiddleware
 
     public function edit(Product $product)
     {
+        //dd($product);
         $companies = Company::where('status',1)->orderBy('company_name')->get();
         $stores     = Store::where('status',1)->orderBy('store_name')->get();
         $categories = Category::where('status',1)->orderBy('name')->get();
@@ -162,6 +164,19 @@ class ProductController extends Controller  implements HasMiddleware
 
     public function destroy(Product $product)
     {
+
+        $hasStock = Stock::where('product_id', $product->id)->exists();
+
+        if ($hasStock) {
+
+            return redirect()
+                ->route('products.index')
+                ->with(
+                    'error',
+                    'This product cannot be deleted because stock transactions exist. Please deactivate the product instead.'
+                );
+        }
+
         if ($product->image) {
             Storage::disk('public')->delete($product->image);
         }
