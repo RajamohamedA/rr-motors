@@ -31,6 +31,8 @@ return new class extends Migration
             $table->string('pincode', 10)->nullable();
     
             $table->string('logo')->nullable();
+            $table->boolean('status')->default(true);
+            $table->softDeletes();
     
             $table->timestamps();
         });
