@@ -18,27 +18,27 @@
 
     @if ($errors->any())
 
-        <div class="alert alert-danger">
+    <div class="alert alert-danger">
 
-            <strong>Please fix the following errors:</strong>
+        <strong>Please fix the following errors:</strong>
 
-            <ul class="mb-0">
+        <ul class="mb-0">
 
-                @foreach($errors->all() as $error)
+            @foreach($errors->all() as $error)
 
-                    <li>{{ $error }}</li>
+            <li>{{ $error }}</li>
 
-                @endforeach
+            @endforeach
 
-            </ul>
+        </ul>
 
-        </div>
+    </div>
 
     @endif
 
     <form action="{{ route('products.update', $product->id) }}"
-          method="POST"
-          enctype="multipart/form-data">
+        method="POST"
+        enctype="multipart/form-data">
 
         @csrf
         @method('PUT')
@@ -70,46 +70,47 @@
 @push('scripts')
 
 <script>
+    document.addEventListener('DOMContentLoaded', function() {
+                $(document).ready(function() {
 
-$(document).ready(function () {
+                    $('#company_id').change(function() {
 
-    $('#company_id').change(function () {
+                        let companyId = $(this).val();
 
-        let companyId = $(this).val();
+                        if (companyId == '') {
 
-        if(companyId == ''){
+                            $('#store_id').html('<option value="">Select Store</option>');
+                            return;
 
-            $('#store_id').html('<option value="">Select Store</option>');
-            return;
+                        }
 
-        }
+                        $.get('/get-stores/' + companyId, function(stores) {
 
-        $.get('/get-stores/' + companyId, function (stores) {
+                            let options = '<option value="">Select Store</option>';
 
-            let options = '<option value="">Select Store</option>';
+                            $.each(stores, function(index, store) {
 
-            $.each(stores, function (index, store) {
+                                let selected = (store.id == "{{ old('store_id', $product->store_id) }}") ?
+                                    'selected' :
+                                    '';
 
-                let selected = (store.id == "{{ old('store_id', $product->store_id) }}")
-                    ? 'selected'
-                    : '';
+                                options += '<option value="' + store.id + '" ' + selected + '>' +
+                                    store.store_name +
+                                    '</option>';
 
-                options += '<option value="' + store.id + '" ' + selected + '>' +
-                    store.store_name +
-                    '</option>';
+                            });
 
-            });
+                            $('#store_id').html(options);
 
-            $('#store_id').html(options);
+                        });
 
-        });
+                    });
 
-    });
+                    $('#company_id').trigger('change');
 
-    $('#company_id').trigger('change');
+                });
 
 });
-
 </script>
 
 @endpush

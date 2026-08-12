@@ -17,21 +17,21 @@
     </div>
 
     @if ($errors->any())
-        <div class="alert alert-danger">
-            <strong>Please fix the following errors:</strong>
+    <div class="alert alert-danger">
+        <strong>Please fix the following errors:</strong>
 
-            <ul class="mb-0">
-                @foreach($errors->all() as $error)
-                    <li>{{ $error }}</li>
-                @endforeach
-            </ul>
+        <ul class="mb-0">
+            @foreach($errors->all() as $error)
+            <li>{{ $error }}</li>
+            @endforeach
+        </ul>
 
-        </div>
+    </div>
     @endif
 
     <form action="{{ route('products.store') }}"
-          method="POST"
-          enctype="multipart/form-data">
+        method="POST"
+        enctype="multipart/form-data">
 
         @csrf
 
@@ -62,36 +62,36 @@
 @push('scripts')
 
 <script>
+    document.addEventListener('DOMContentLoaded', function() {
+                $(document).ready(function() {
 
-$(document).ready(function () {
+                    $('#company_id').change(function() {
 
-    $('#company_id').change(function () {
+                        let companyId = $(this).val();
 
-        let companyId = $(this).val();
+                        if (companyId == '') {
+                            $('#store_id').html('<option value="">Select Store</option>');
+                            return;
+                        }
 
-        if(companyId == ''){
-            $('#store_id').html('<option value="">Select Store</option>');
-            return;
-        }
+                        $.get('/get-stores/' + companyId, function(stores) {
 
-        $.get('/get-stores/' + companyId, function (stores) {
+                            let options = '<option value="">Select Store</option>';
 
-            let options = '<option value="">Select Store</option>';
+                            $.each(stores, function(index, store) {
 
-            $.each(stores, function(index, store){
+                                options += '<option value="' + store.id + '">' + store.store_name + '</option>';
 
-                options += '<option value="'+store.id+'">'+store.store_name+'</option>';
+                            });
 
-            });
+                            $('#store_id').html(options);
 
-            $('#store_id').html(options);
+                        });
 
-        });
+                    });
 
+                });
     });
-
-});
-
 </script>
 
 @endpush
