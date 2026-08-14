@@ -190,7 +190,6 @@ class ProductController extends Controller  implements HasMiddleware
 
     public function search(Request $request)
     {
-
         abort_unless(
             auth()->user()->can('product.view') ||
                 auth()->user()->can('purchase.create') ||
@@ -202,20 +201,59 @@ class ProductController extends Controller  implements HasMiddleware
 
         $search = $request->search;
 
+        /*
+        |--------------------------------------------------------------------------
+        | Determine Company
+        |--------------------------------------------------------------------------
+        */
+
+        if (auth()->user()->is_super_user) {
+
+            // Super Admin can select company
+            $companyId = $request->company_id;
+        } else {
+
+            // Normal Admin/User uses assigned company
+            $companyId = auth()->user()->company_id;
+        }
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Company Required
+        |--------------------------------------------------------------------------
+        */
+
+        if (!$companyId) {
+
+            return response()->json([
+                'message' => 'Please select a company first.'
+            ], 422);
+        }
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Product Search
+        |--------------------------------------------------------------------------
+        */
+
         $products = Product::with([
-                'unit',
-                'brand',
-                'category'
-            ])
-            ->where('status',1)
-            ->where(function($query) use ($search){
+            'unit',
+            'brand',
+            'category'
+        ])
+            ->where('status', 1)
+            ->where('company_id', $companyId)
 
-                $query->where('product_code','like',"%{$search}%")
-                    ->orWhere('barcode','like',"%{$search}%")
-                    ->orWhere('product_name','like',"%{$search}%")
-                    ->orWhere('part_number','like',"%{$search}%");
+            ->where(function ($query) use ($search) {
 
+                $query->where('product_code', 'like', "%{$search}%")
+                    ->orWhere('barcode', 'like', "%{$search}%")
+                    ->orWhere('product_name', 'like', "%{$search}%")
+                    ->orWhere('part_number', 'like', "%{$search}%");
             })
+
             ->limit(20)
             ->get();
 

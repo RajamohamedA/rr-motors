@@ -330,6 +330,30 @@ document.addEventListener('DOMContentLoaded', function () {
                 const companyId =
                     this.value;
 
+                /*
+                |--------------------------------------------------------------------------
+                | Clear Purchase Items when Company changes
+                |--------------------------------------------------------------------------
+                */
+
+                const purchaseItems = document.getElementById('purchaseItems');
+
+                if (purchaseItems) {
+                    purchaseItems.innerHTML = '';
+                }
+
+                /*
+                |--------------------------------------------------------------------------
+                | Reset Grand Total
+                |--------------------------------------------------------------------------
+                */
+
+                const grandTotal = document.getElementById('grand_total');
+
+                if (grandTotal) {
+                    grandTotal.value = '0.00';
+                }
+
 
                 /*
                 |--------------------------------------------------------------------------
@@ -642,6 +666,19 @@ document.addEventListener('DOMContentLoaded', function () {
             'input',
             function () {
 
+                const companyId = document.getElementById('company_id').value;
+
+                if (!companyId) {
+                    searchResult.innerHTML =
+                        '<div class="list-group-item text-danger">' +
+                        'Please select company first.' +
+                        '</div>';
+
+                    searchResult.style.display = 'block';
+
+                    return;
+                }
+
                 const keyword =
                     this.value.trim();
 
@@ -680,7 +717,7 @@ document.addEventListener('DOMContentLoaded', function () {
                         function () {
 
                             searchProducts(
-                                keyword
+                                keyword, companyId
                             );
 
                         },
@@ -699,7 +736,7 @@ document.addEventListener('DOMContentLoaded', function () {
     |--------------------------------------------------------------------------
     */
 
-    function searchProducts(keyword) {
+    function searchProducts(keyword, companyId) {
 
         if (!productSearchUrl) {
             return;
@@ -721,7 +758,7 @@ document.addEventListener('DOMContentLoaded', function () {
         const url =
             productSearchUrl +
             '?search=' +
-            encodeURIComponent(keyword);
+            encodeURIComponent(keyword) + '&company_id=' + encodeURIComponent(companyId);
 
 
         fetch(url, {
