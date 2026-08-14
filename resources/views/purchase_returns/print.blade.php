@@ -50,6 +50,12 @@
 
         }
 
+        .table {
+
+            color: #000;
+
+        }
+
         .table th {
 
             background: #f1f1f1;
@@ -82,15 +88,41 @@
             footer,
             .no-print,
             .content-header {
+
                 display: none !important;
+
             }
 
             .content-wrapper {
+
                 margin-left: 0 !important;
+
             }
 
             body {
+
                 padding: 0;
+
+                margin: 0;
+
+            }
+
+            .container-fluid {
+
+                width: 100% !important;
+
+                padding: 0 !important;
+
+            }
+
+            .table th {
+
+                background: #f1f1f1 !important;
+
+                -webkit-print-color-adjust: exact;
+
+                print-color-adjust: exact;
+
             }
 
         }
@@ -102,9 +134,14 @@
 
     <div class="container-fluid">
 
+        <!-- =========================================================
+         PRINT BUTTONS
+    ========================================================== -->
+
         <div class="text-end mb-3 no-print">
 
-            <button class="btn btn-success"
+            <button
+                class="btn btn-success"
                 onclick="window.print()">
 
                 <i class="fas fa-print"></i>
@@ -113,7 +150,8 @@
 
             </button>
 
-            <button class="btn btn-secondary"
+            <button
+                class="btn btn-secondary"
                 onclick="window.close()">
 
                 Close
@@ -122,17 +160,35 @@
 
         </div>
 
+
+        <!-- =========================================================
+         COMPANY HEADER
+    ========================================================== -->
+
+        @php
+
+        /*
+        |--------------------------------------------------------------------------
+        | Use Purchase Company
+        |--------------------------------------------------------------------------
+        */
+
+        $company = $purchaseReturn->purchase->company ?? null;
+
+        @endphp
+
+
         <div class="text-center mb-4">
 
             <div class="company-title">
 
-                {{ auth()->user()->company->company_name ?? 'RR MOTORS' }}
+                {{ $company->company_name ?? 'RR MOTORS' }}
 
             </div>
 
             <div class="company-address">
 
-                {{ auth()->user()->company->address ?? '' }}
+                {{ $company->address ?? '' }}
 
             </div>
 
@@ -140,25 +196,36 @@
 
                 Phone :
 
-                {{ auth()->user()->company->phone ?? '' }}
+                {{ $company->phone ?? '' }}
 
                 &nbsp;&nbsp;
 
                 GST :
 
-                {{ auth()->user()->company->gst_number ?? '' }}
+                {{ $company->gst_number ?? '' }}
 
             </div>
 
         </div>
 
+
         <hr>
+
+
+        <!-- =========================================================
+         TITLE
+    ========================================================== -->
 
         <h3 class="text-center">
 
             PURCHASE RETURN
 
         </h3>
+
+
+        <!-- =========================================================
+         RETURN INFORMATION
+    ========================================================== -->
 
         <table class="table table-bordered">
 
@@ -184,7 +251,10 @@
 
                 <td>
 
-                    {{ date('d-m-Y',strtotime($purchaseReturn->return_date)) }}
+                    {{ date(
+                    'd-m-Y',
+                    strtotime($purchaseReturn->return_date)
+                ) }}
 
                 </td>
 
@@ -200,7 +270,7 @@
 
                 <td>
 
-                    {{ $purchaseReturn->purchase->purchase_no }}
+                    {{ $purchaseReturn->purchase->purchase_no ?? '-' }}
 
                 </td>
 
@@ -212,7 +282,44 @@
 
                 <td>
 
-                    {{ date('d-m-Y',strtotime($purchaseReturn->purchase->purchase_date)) }}
+                    {{ $purchaseReturn->purchase &&
+                   $purchaseReturn->purchase->purchase_date
+                    ? date(
+                        'd-m-Y',
+                        strtotime(
+                            $purchaseReturn->purchase->purchase_date
+                        )
+                    )
+                    : '-'
+                }}
+
+                </td>
+
+            </tr>
+
+            <tr>
+
+                <th>
+
+                    Store
+
+                </th>
+
+                <td>
+
+                    {{ $purchaseReturn->purchase->store->store_name ?? '-' }}
+
+                </td>
+
+                <th>
+
+                    Company
+
+                </th>
+
+                <td>
+
+                    {{ $company->company_name ?? '-' }}
 
                 </td>
 
@@ -220,11 +327,17 @@
 
         </table>
 
+
+        <!-- =========================================================
+         SUPPLIER DETAILS
+    ========================================================== -->
+
         <h5 class="mt-4">
 
             Supplier Details
 
         </h5>
+
 
         <table class="table table-bordered">
 
@@ -238,7 +351,7 @@
 
                 <td>
 
-                    {{ $purchaseReturn->supplier->supplier_name }}
+                    {{ $purchaseReturn->supplier->supplier_name ?? '-' }}
 
                 </td>
 
@@ -254,7 +367,7 @@
 
                 <td>
 
-                    {{ $purchaseReturn->supplier->mobile }}
+                    {{ $purchaseReturn->supplier->mobile ?? '-' }}
 
                 </td>
 
@@ -270,7 +383,10 @@
 
                 <td>
 
-                    {{ $purchaseReturn->supplier->billing_address }}
+                    {{ $purchaseReturn->supplier->billing_address
+                    ?? $purchaseReturn->supplier->address
+                    ?? '-'
+                }}
 
                 </td>
 
@@ -278,13 +394,18 @@
 
         </table>
 
+
+        <!-- =========================================================
+         RETURN ITEMS
+    ========================================================== -->
+
         <table class="table table-bordered">
 
             <thead>
 
                 <tr>
 
-                    <th width="5%">
+                    <th width="4%">
 
                         #
 
@@ -299,6 +420,12 @@
                     <th>
 
                         Code
+
+                    </th>
+
+                    <th>
+
+                        Godown
 
                     </th>
 
@@ -336,31 +463,83 @@
 
             </thead>
 
+
             <tbody>
+
                 @php
 
                 $sl = 1;
+
                 $subTotal = 0;
+
                 $gstTotal = 0;
+
                 $grandTotal = 0;
 
                 @endphp
 
-                @foreach($purchaseReturn->items as $item)
+
+                @forelse($purchaseReturn->items as $item)
 
                 @php
 
-                $sub = $item->quantity * $item->purchase_price;
+                /*
+                |--------------------------------------------------------------------------
+                | Find Original Purchase Item
+                |--------------------------------------------------------------------------
+                */
+
+                $purchaseItem = $purchaseReturn
+                ->purchase
+                ->items
+                ->firstWhere(
+                'product_id',
+                $item->product_id
+                );
+
+
+                /*
+                |--------------------------------------------------------------------------
+                | Get Godown
+                |--------------------------------------------------------------------------
+                */
+
+                $godownName = 'Shop / No Godown';
+
+                if ($purchaseItem && $purchaseItem->godown) {
+
+                $godownName =
+                $purchaseItem->godown->godown_name;
+
+                }
+
+
+                /*
+                |--------------------------------------------------------------------------
+                | Totals
+                |--------------------------------------------------------------------------
+                */
+
+                $sub =
+
+                $item->quantity
+                *
+                $item->purchase_price;
 
                 $subTotal += $sub;
 
-                $gstTotal += $item->gst_amount;
+                $gstTotal +=
+                (float) $item->gst_amount;
 
-                $grandTotal += $item->line_total;
+                $grandTotal +=
+                (float) $item->line_total;
 
                 @endphp
 
+
                 <tr>
+
+                    <!-- Serial -->
 
                     <td class="text-center">
 
@@ -368,59 +547,127 @@
 
                     </td>
 
-                    <td>
 
-                        {{ $item->product->product_name }}
-
-                    </td>
+                    <!-- Product -->
 
                     <td>
 
-                        {{ $item->product->product_code }}
+                        {{ $item->product->product_name ?? '-' }}
 
                     </td>
 
-                    <td class="text-end">
 
-                        {{ number_format($item->quantity,2) }}
+                    <!-- Code -->
 
-                    </td>
+                    <td>
 
-                    <td class="text-end">
-
-                        {{ number_format($item->purchase_price,2) }}
+                        {{ $item->product->product_code ?? '-' }}
 
                     </td>
 
-                    <td class="text-end">
 
-                        {{ number_format($item->gst_percent,2) }}
+                    <!-- =================================================
+                         GODOWN
+                    ================================================== -->
+
+                    <td>
+
+                        {{ $godownName }}
 
                     </td>
 
+
+                    <!-- Quantity -->
+
                     <td class="text-end">
 
-                        {{ number_format($item->gst_amount,2) }}
+                        {{ number_format(
+                            $item->quantity,
+                            2
+                        ) }}
 
                     </td>
 
+
+                    <!-- Rate -->
+
                     <td class="text-end">
 
-                        {{ number_format($item->line_total,2) }}
+                        {{ number_format(
+                            $item->purchase_price,
+                            2
+                        ) }}
+
+                    </td>
+
+
+                    <!-- GST -->
+
+                    <td class="text-end">
+
+                        {{ number_format(
+                            $item->gst_percent,
+                            2
+                        ) }}
+
+                    </td>
+
+
+                    <!-- GST Amount -->
+
+                    <td class="text-end">
+
+                        {{ number_format(
+                            $item->gst_amount,
+                            2
+                        ) }}
+
+                    </td>
+
+
+                    <!-- Line Total -->
+
+                    <td class="text-end">
+
+                        {{ number_format(
+                            $item->line_total,
+                            2
+                        ) }}
 
                     </td>
 
                 </tr>
 
-                @endforeach
+                @empty
+
+                <tr>
+
+                    <td
+                        colspan="9"
+                        class="text-center">
+
+                        No return items found.
+
+                    </td>
+
+                </tr>
+
+                @endforelse
 
             </tbody>
+
+
+            <!-- =========================================================
+             TOTALS
+        ========================================================== -->
 
             <tfoot>
 
                 <tr>
 
-                    <th colspan="7" class="text-end">
+                    <th
+                        colspan="8"
+                        class="text-end">
 
                         Sub Total
 
@@ -428,15 +675,21 @@
 
                     <th class="text-end">
 
-                        {{ number_format($subTotal,2) }}
+                        {{ number_format(
+                        $subTotal,
+                        2
+                    ) }}
 
                     </th>
 
                 </tr>
 
+
                 <tr>
 
-                    <th colspan="7" class="text-end">
+                    <th
+                        colspan="8"
+                        class="text-end">
 
                         GST Total
 
@@ -444,15 +697,21 @@
 
                     <th class="text-end">
 
-                        {{ number_format($gstTotal,2) }}
+                        {{ number_format(
+                        $gstTotal,
+                        2
+                    ) }}
 
                     </th>
 
                 </tr>
 
+
                 <tr>
 
-                    <th colspan="7" class="text-end">
+                    <th
+                        colspan="8"
+                        class="text-end">
 
                         Grand Total
 
@@ -460,7 +719,10 @@
 
                     <th class="text-end">
 
-                        {{ number_format($grandTotal,2) }}
+                        {{ number_format(
+                        $grandTotal,
+                        2
+                    ) }}
 
                     </th>
 
@@ -469,6 +731,11 @@
             </tfoot>
 
         </table>
+
+
+        <!-- =========================================================
+         REMARKS
+    ========================================================== -->
 
         <div class="row mt-4">
 
@@ -480,11 +747,16 @@
 
                 </strong>
 
-                {{ $purchaseReturn->remarks }}
+                {{ $purchaseReturn->remarks ?? '-' }}
 
             </div>
 
         </div>
+
+
+        <!-- =========================================================
+         SIGNATURES
+    ========================================================== -->
 
         <div class="row mt-5">
 
@@ -498,6 +770,7 @@
 
             </div>
 
+
             <div class="col-4 text-center">
 
                 _______________________
@@ -507,6 +780,7 @@
                 Checked By
 
             </div>
+
 
             <div class="col-4 text-center">
 
@@ -522,6 +796,7 @@
 
     </div>
 
+
     <script>
         window.onload = function() {
 
@@ -529,6 +804,7 @@
 
         };
     </script>
+
 
 </body>
 

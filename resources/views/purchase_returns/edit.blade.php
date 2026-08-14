@@ -6,18 +6,34 @@
 
 <div class="container-fluid">
 
-    <form action="{{ route('purchase-returns.update',$purchaseReturn->id) }}" method="POST">
+    <form
+        action="{{ route('purchase-returns.update', $purchaseReturn->id) }}"
+        method="POST"
+        id="purchaseReturnForm">
 
         @csrf
         @method('PUT')
 
-        <input type="hidden"
+        {{-- Hidden Header Values --}}
+        <input
+            type="hidden"
             name="purchase_id"
             value="{{ $purchaseReturn->purchase_id }}">
 
-        <input type="hidden"
+        <input
+            type="hidden"
             name="supplier_id"
             value="{{ $purchaseReturn->supplier_id }}">
+
+        <input
+            type="hidden"
+            name="company_id"
+            value="{{ $purchaseReturn->company_id }}">
+
+
+        {{-- =========================================================
+             Header
+        ========================================================== --}}
 
         <div class="card shadow-sm">
 
@@ -36,7 +52,9 @@
                     <div>
 
                         @can('purchase-return.view')
-                        <a href="{{ route('purchase-returns.show',$purchaseReturn->id) }}"
+
+                        <a
+                            href="{{ route('purchase-returns.show', $purchaseReturn->id) }}"
                             class="btn btn-primary btn-sm">
 
                             <i class="fas fa-eye"></i>
@@ -44,10 +62,15 @@
                             View
 
                         </a>
+
                         @endcan
 
-                        <a href="{{ route('purchase-returns.index') }}"
+
+                        <a
+                            href="{{ route('purchase-returns.index') }}"
                             class="btn btn-secondary btn-sm">
+
+                            <i class="fas fa-list"></i>
 
                             Back
 
@@ -59,51 +82,120 @@
 
             </div>
 
+
             <div class="card-body">
 
                 <div class="row">
 
+                    {{-- Company --}}
+
                     <div class="col-md-3">
 
-                        <label>Return No</label>
+                        <label class="form-label">
+                            Company
+                        </label>
 
-                        <input type="text"
+                        <input
+                            type="text"
+                            class="form-control"
+                            value="{{ $purchaseReturn->purchase->company->company_name ?? '-' }}"
+                            readonly>
+
+                    </div>
+
+
+                    {{-- Return No --}}
+
+                    <div class="col-md-3">
+
+                        <label class="form-label">
+                            Return No
+                        </label>
+
+                        <input
+                            type="text"
                             class="form-control"
                             value="{{ $purchaseReturn->return_no }}"
                             readonly>
 
                     </div>
 
+
+                    {{-- Purchase No --}}
+
                     <div class="col-md-3">
 
-                        <label>Purchase No</label>
+                        <label class="form-label">
+                            Purchase No
+                        </label>
 
-                        <input type="text"
+                        <input
+                            type="text"
                             class="form-control"
                             value="{{ $purchaseReturn->purchase->purchase_no }}"
                             readonly>
 
                     </div>
 
+
+                    {{-- Return Date --}}
+
                     <div class="col-md-3">
 
-                        <label>Return Date</label>
+                        <label class="form-label">
+                            Return Date
+                        </label>
 
-                        <input type="date"
+                        <input
+                            type="date"
                             name="return_date"
                             class="form-control"
-                            value="{{ old('return_date',$purchaseReturn->return_date) }}">
+                            value="{{ old(
+                                'return_date',
+                                \Carbon\Carbon::parse($purchaseReturn->return_date)->format('Y-m-d')
+                            ) }}"
+                            required>
 
                     </div>
 
+                </div>
+
+
+                <div class="row mt-3">
+
+                    {{-- Store --}}
+
                     <div class="col-md-3">
 
-                        <label>Remarks</label>
+                        <label class="form-label">
+                            Store
+                        </label>
 
-                        <input type="text"
+                        <input
+                            type="text"
+                            class="form-control"
+                            value="{{ $purchaseReturn->purchase->store->store_name ?? '-' }}"
+                            readonly>
+
+                    </div>
+
+
+                    {{-- Remarks --}}
+
+                    <div class="col-md-9">
+
+                        <label class="form-label">
+                            Remarks
+                        </label>
+
+                        <input
+                            type="text"
                             name="remarks"
                             class="form-control"
-                            value="{{ old('remarks',$purchaseReturn->remarks) }}">
+                            value="{{ old(
+                                'remarks',
+                                $purchaseReturn->remarks
+                            ) }}">
 
                     </div>
 
@@ -114,14 +206,24 @@
         </div>
 
 
+        {{-- =========================================================
+             Supplier Details
+        ========================================================== --}}
 
-        <div class="card mt-3">
+        <div class="card mt-3 shadow-sm">
 
-            <div class="card-header">
+            <div class="card-header bg-light">
 
-                Supplier Details
+                <strong>
+
+                    <i class="fas fa-user"></i>
+
+                    Supplier Details
+
+                </strong>
 
             </div>
+
 
             <div class="card-body">
 
@@ -129,33 +231,44 @@
 
                     <div class="col-md-4">
 
-                        <label>Supplier</label>
+                        <label class="form-label">
+                            Supplier
+                        </label>
 
-                        <input type="text"
+                        <input
+                            type="text"
                             class="form-control"
-                            value="{{ $purchaseReturn->supplier->supplier_name }}"
+                            value="{{ $purchaseReturn->supplier->supplier_name ?? '-' }}"
                             readonly>
 
                     </div>
+
 
                     <div class="col-md-3">
 
-                        <label>Mobile</label>
+                        <label class="form-label">
+                            Mobile
+                        </label>
 
-                        <input type="text"
+                        <input
+                            type="text"
                             class="form-control"
-                            value="{{ $purchaseReturn->supplier->mobile }}"
+                            value="{{ $purchaseReturn->supplier->mobile ?? '-' }}"
                             readonly>
 
                     </div>
 
+
                     <div class="col-md-5">
 
-                        <label>Address</label>
+                        <label class="form-label">
+                            Address
+                        </label>
 
-                        <input type="text"
+                        <input
+                            type="text"
                             class="form-control"
-                            value="{{ $purchaseReturn->supplier->billing_address }}"
+                            value="{{ $purchaseReturn->supplier->billing_address ?? $purchaseReturn->supplier->address ?? '-' }}"
                             readonly>
 
                     </div>
@@ -167,138 +280,421 @@
         </div>
 
 
+        {{-- =========================================================
+             Returned Items
+        ========================================================== --}}
 
-        <div class="card mt-3">
+        <div class="card mt-3 shadow-sm">
 
-            <div class="card-header">
+            <div class="card-header bg-secondary text-white">
 
-                Returned Items
+                <strong>
+
+                    <i class="fas fa-box"></i>
+
+                    Returned Items
+
+                </strong>
 
             </div>
+
 
             <div class="card-body p-0">
 
                 <div class="table-responsive">
 
-                    <table class="table table-bordered table-striped mb-0">
+                    <table
+                        class="table table-bordered table-striped table-hover mb-0"
+                        id="returnTable">
 
                         <thead class="table-dark">
 
                             <tr>
 
-                                <th>Code</th>
+                                <th width="4%">
+                                    #
+                                </th>
 
-                                <th>Product</th>
+                                <th width="9%">
+                                    Code
+                                </th>
 
-                                <th>Purchased</th>
+                                <th>
+                                    Product
+                                </th>
 
-                                <th>Returned</th>
+                                <th width="16%">
+                                    Godown
+                                </th>
 
-                                <th>Balance</th>
+                                <th width="8%"
+                                    class="text-end">
 
-                                <th width="120">Return Qty</th>
+                                    Purchased
 
-                                <th class="text-end">Rate</th>
+                                </th>
 
-                                <th class="text-end">GST%</th>
+                                <th width="8%"
+                                    class="text-end">
 
-                                <th class="text-end">GST Amt</th>
+                                    Returned
 
-                                <th class="text-end">Total</th>
+                                </th>
+
+                                <th width="8%"
+                                    class="text-end">
+
+                                    Balance
+
+                                </th>
+
+                                <th width="110">
+
+                                    Return Qty
+
+                                </th>
+
+                                <th width="110"
+                                    class="text-end">
+
+                                    Rate
+
+                                </th>
+
+                                <th width="80"
+                                    class="text-end">
+
+                                    GST %
+
+                                </th>
+
+                                <th width="110"
+                                    class="text-end">
+
+                                    GST Amt
+
+                                </th>
+
+                                <th width="120"
+                                    class="text-end">
+
+                                    Total
+
+                                </th>
 
                             </tr>
 
                         </thead>
 
+
                         <tbody>
 
                             @foreach($purchaseReturn->items as $item)
 
+                            @php
+
+                            /*
+                            |--------------------------------------------------------------------------
+                            | Purchase information
+                            |--------------------------------------------------------------------------
+                            */
+
+                            $purchaseQty =
+                            (float) ($item->purchaseItem->quantity ?? 0);
+
+                            $alreadyReturned =
+                            (float) ($item->purchaseItem->returned_qty ?? 0);
+
+                            $balanceQty =
+                            (float) ($item->purchaseItem->balance_qty ?? 0);
+
+                            /*
+                            |--------------------------------------------------------------------------
+                            | Current return quantity
+                            |--------------------------------------------------------------------------
+                            */
+
+                            $currentReturnQty =
+                            (float) $item->quantity;
+
+                            /*
+                            |--------------------------------------------------------------------------
+                            | Maximum editable quantity
+                            |--------------------------------------------------------------------------
+                            |
+                            | Example:
+                            |
+                            | Purchase = 100
+                            | Other returns = 20
+                            | Current return = 10
+                            |
+                            | Balance excluding current = 80
+                            |
+                            | Maximum while editing = 80 + 10 = 90
+                            |
+                            */
+
+                            $maxReturnQty =
+                            $balanceQty + $currentReturnQty;
+
+                            @endphp
+
+
                             <tr>
 
-                                <td>
-                                    {{ $item->product->product_code }}
+                                {{-- # --}}
 
-                                    <input type="hidden"
+                                <td>
+                                    {{ $loop->iteration }}
+                                </td>
+
+
+                                {{-- Product Code --}}
+
+                                <td>
+
+                                    {{ $item->product->product_code ?? '-' }}
+
+                                    <input
+                                        type="hidden"
                                         name="product_id[]"
                                         value="{{ $item->product_id }}">
+
                                 </td>
+
+
+                                {{-- Product --}}
 
                                 <td>
-                                    {{ $item->product->product_name }}
+
+                                    <strong>
+                                        {{ $item->product->product_name ?? '-' }}
+                                    </strong>
+
+                                    @if($item->product->unit)
+
+                                    <br>
+
+                                    <small class="text-muted">
+
+                                        {{ $item->product->unit->unit_name }}
+
+                                    </small>
+
+                                    @endif
+
                                 </td>
 
-                                <td class="text-center">
-                                    {{ $item->purchaseItem->quantity }}
+
+                                {{-- =====================================================
+                                         GODOWN
+                                    ====================================================== --}}
+
+                                <td>
+
+                                    <select
+                                        name="godown_id[]"
+                                        class="form-select form-select-sm"
+                                        required>
+
+                                        <option value="">
+
+                                            Shop / No Godown
+
+                                        </option>
+
+
+                                        @if($item->godown)
+
+                                        <option
+                                            value="{{ $item->godown_id }}"
+                                            selected>
+
+                                            {{ $item->godown->godown_name }}
+
+                                        </option>
+
+                                        @endif
+
+                                    </select>
+
+
+                                    {{-- Keep current Godown ID visible for debugging if needed --}}
+
+                                    {{--
+
+                                        <small class="text-muted">
+                                            ID:
+                                            {{ $item->godown_id ?? 'NULL' }}
+                                    </small>
+
+                                    --}}
+
                                 </td>
 
-                                <td class="text-center">
-                                    {{ $item->purchaseItem->returned_qty }}
+
+                                {{-- Purchased --}}
+
+                                <td class="text-end">
+
+                                    {{ number_format(
+                                            $purchaseQty,
+                                            2
+                                        ) }}
+
                                 </td>
 
-                                <td class="text-center">
-                                    <strong>{{ $item->purchaseItem->balance_qty }}</strong>
+
+                                {{-- Already Returned --}}
+
+                                <td class="text-end">
+
+                                    {{ number_format(
+                                            $alreadyReturned,
+                                            2
+                                        ) }}
+
                                 </td>
+
+
+                                {{-- Balance --}}
+
+                                <td class="text-end">
+
+                                    <strong class="balanceQty">
+
+                                        {{ number_format(
+                                                $balanceQty,
+                                                2
+                                            ) }}
+
+                                    </strong>
+
+                                </td>
+
+
+                                {{-- Return Qty --}}
 
                                 <td>
 
                                     <input
                                         type="number"
-                                        class="form-control returnQty text-end"
                                         name="qty[]"
-                                        value="{{ $item->quantity }}"
+                                        class="form-control form-control-sm returnQty text-end"
+                                        value="{{ number_format(
+                                                $currentReturnQty,
+                                                2,
+                                                '.',
+                                                ''
+                                            ) }}"
                                         min="0"
-                                        max="{{ $item->purchaseItem->balance_qty + $item->quantity }}"
+                                        max="{{ $maxReturnQty }}"
+                                        step="0.01"
                                         data-price="{{ $item->purchase_price }}"
                                         data-gst="{{ $item->gst_percent }}">
 
+
+                                    <small class="text-muted">
+
+                                        Max:
+                                        {{ number_format(
+                                                $maxReturnQty,
+                                                2
+                                            ) }}
+
+                                    </small>
+
                                 </td>
+
+
+                                {{-- Rate --}}
 
                                 <td class="text-end">
 
-                                    {{ number_format($item->purchase_price,2) }}
+                                    {{ number_format(
+                                            $item->purchase_price,
+                                            2
+                                        ) }}
 
-                                    <input type="hidden"
+
+                                    <input
+                                        type="hidden"
                                         name="price[]"
                                         value="{{ $item->purchase_price }}">
 
                                 </td>
 
+
+                                {{-- GST --}}
+
                                 <td class="text-end">
 
-                                    {{ number_format($item->gst_percent,2) }}
+                                    {{ number_format(
+                                            $item->gst_percent,
+                                            2
+                                        ) }}
 
-                                    <input type="hidden"
+
+                                    <input
+                                        type="hidden"
                                         name="gst[]"
                                         value="{{ $item->gst_percent }}">
 
                                 </td>
 
+
+                                {{-- GST Amount --}}
+
                                 <td class="text-end">
 
                                     <span class="gstAmount">
 
-                                        {{ number_format($item->gst_amount,2) }}
+                                        {{ number_format(
+                                                $item->gst_amount,
+                                                2
+                                            ) }}
 
                                     </span>
 
-                                    <input type="hidden"
+
+                                    <input
+                                        type="hidden"
                                         name="gst_amount[]"
-                                        value="{{ $item->gst_amount }}">
+                                        class="gstAmountInput"
+                                        value="{{ number_format(
+                                                $item->gst_amount,
+                                                2,
+                                                '.',
+                                                ''
+                                            ) }}">
 
                                 </td>
+
+
+                                {{-- Total --}}
 
                                 <td class="text-end">
 
                                     <span class="returnAmount">
 
-                                        {{ number_format($item->line_total,2) }}
+                                        {{ number_format(
+                                                $item->line_total,
+                                                2
+                                            ) }}
 
                                     </span>
 
-                                    <input type="hidden"
+
+                                    <input
+                                        type="hidden"
                                         name="amount[]"
-                                        value="{{ $item->line_total }}">
+                                        class="amountInput"
+                                        value="{{ number_format(
+                                                $item->line_total,
+                                                2,
+                                                '.',
+                                                ''
+                                            ) }}">
 
                                 </td>
 
@@ -316,20 +712,23 @@
 
         </div>
 
+
+        {{-- =========================================================
+             Totals
+        ========================================================== --}}
+
         <div class="row mt-3">
 
             <div class="col-md-8"></div>
 
             <div class="col-md-4">
 
-                <table class="table table-bordered">
+                <table class="table table-bordered shadow-sm">
 
                     <tr>
 
                         <th width="50%">
-
                             Sub Total
-
                         </th>
 
                         <td>
@@ -338,19 +737,23 @@
                                 type="text"
                                 id="purchase_return_sub_total"
                                 class="form-control text-end"
-                                value="{{ number_format($purchaseReturn->sub_total,2,'.','') }}"
+                                value="{{ number_format(
+                                    $purchaseReturn->sub_total,
+                                    2,
+                                    '.',
+                                    ''
+                                ) }}"
                                 readonly>
 
                         </td>
 
                     </tr>
 
+
                     <tr>
 
                         <th>
-
                             GST Total
-
                         </th>
 
                         <td>
@@ -359,19 +762,23 @@
                                 type="text"
                                 id="purchase_return_gst_total"
                                 class="form-control text-end"
-                                value="{{ number_format($purchaseReturn->gst_total,2,'.','') }}"
+                                value="{{ number_format(
+                                    $purchaseReturn->gst_total,
+                                    2,
+                                    '.',
+                                    ''
+                                ) }}"
                                 readonly>
 
                         </td>
 
                     </tr>
 
+
                     <tr class="table-primary">
 
                         <th>
-
                             Grand Total
-
                         </th>
 
                         <td>
@@ -379,28 +786,50 @@
                             <input
                                 type="text"
                                 id="purchase_return_grand_total"
-                                name="grand_total"
                                 class="form-control text-end fw-bold"
-                                value="{{ number_format($purchaseReturn->total_amount,2,'.','') }}"
+                                value="{{ number_format(
+                                    $purchaseReturn->total_amount,
+                                    2,
+                                    '.',
+                                    ''
+                                ) }}"
                                 readonly>
 
                         </td>
 
-                        <input type="hidden"
-                            name="sub_total"
-                            id="purchase_return_sub_total_hidden">
-
-                        <input type="hidden"
-                            name="gst_total"
-                            id="purchase_return_gst_total_hidden">
-
                     </tr>
+
+
+                    {{-- Values submitted to controller --}}
+
+                    <input
+                        type="hidden"
+                        name="sub_total"
+                        id="purchase_return_sub_total_hidden"
+                        value="{{ $purchaseReturn->sub_total }}">
+
+                    <input
+                        type="hidden"
+                        name="gst_total"
+                        id="purchase_return_gst_total_hidden"
+                        value="{{ $purchaseReturn->gst_total }}">
+
+                    <input
+                        type="hidden"
+                        name="grand_total"
+                        id="purchase_return_grand_total_hidden"
+                        value="{{ $purchaseReturn->total_amount }}">
 
                 </table>
 
             </div>
 
         </div>
+
+
+        {{-- =========================================================
+             Buttons
+        ========================================================== --}}
 
         <div class="text-end mt-3 mb-4">
 
@@ -414,8 +843,14 @@
 
             </button>
 
+
             @can('purchase-return.view')
-            <a href="{{ route('purchase-returns.show',$purchaseReturn->id) }}"
+
+            <a
+                href="{{ route(
+                        'purchase-returns.show',
+                        $purchaseReturn->id
+                    ) }}"
                 class="btn btn-info">
 
                 <i class="fas fa-eye"></i>
@@ -423,10 +858,15 @@
                 View
 
             </a>
+
             @endcan
 
-            <a href="{{ route('purchase-returns.index') }}"
+
+            <a
+                href="{{ route('purchase-returns.index') }}"
                 class="btn btn-secondary">
+
+                <i class="fas fa-times"></i>
 
                 Cancel
 
@@ -439,3 +879,510 @@
 </div>
 
 @endsection
+
+
+@push('scripts')
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+
+        /*
+        |--------------------------------------------------------------------------
+        | Elements
+        |--------------------------------------------------------------------------
+        */
+
+        const rows =
+            document.querySelectorAll(
+                '#returnTable tbody tr'
+            );
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Calculate Row
+        |--------------------------------------------------------------------------
+        */
+
+        function calculateRow(row) {
+
+            const qtyInput =
+                row.querySelector('.returnQty');
+
+            const priceInput =
+                row.querySelector(
+                    'input[name="price[]"]'
+                );
+
+            const gstInput =
+                row.querySelector(
+                    'input[name="gst[]"]'
+                );
+
+            const gstAmountDisplay =
+                row.querySelector('.gstAmount');
+
+            const gstAmountInput =
+                row.querySelector('.gstAmountInput');
+
+            const amountDisplay =
+                row.querySelector('.returnAmount');
+
+            const amountInput =
+                row.querySelector('.amountInput');
+
+
+            if (
+                !qtyInput ||
+                !priceInput ||
+                !gstInput
+            ) {
+
+                return;
+
+            }
+
+
+            let qty =
+                parseFloat(
+                    qtyInput.value
+                ) || 0;
+
+
+            const maxQty =
+                parseFloat(
+                    qtyInput.max
+                ) || 0;
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | Validate Quantity
+            |--------------------------------------------------------------------------
+            */
+
+            if (qty < 0) {
+
+                qty = 0;
+
+                qtyInput.value = '0.00';
+
+            }
+
+
+            if (qty > maxQty) {
+
+                qty = maxQty;
+
+                qtyInput.value =
+                    maxQty.toFixed(2);
+
+            }
+
+
+            const price =
+                parseFloat(
+                    priceInput.value
+                ) || 0;
+
+
+            const gst =
+                parseFloat(
+                    gstInput.value
+                ) || 0;
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | Sub Total
+            |--------------------------------------------------------------------------
+            */
+
+            const subTotal =
+                qty * price;
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | GST
+            |--------------------------------------------------------------------------
+            */
+
+            const gstAmount =
+                subTotal *
+                gst /
+                100;
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | Grand Total
+            |--------------------------------------------------------------------------
+            */
+
+            const total =
+                subTotal +
+                gstAmount;
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | Update Display
+            |--------------------------------------------------------------------------
+            */
+
+            gstAmountDisplay.textContent =
+                gstAmount.toFixed(2);
+
+
+            gstAmountInput.value =
+                gstAmount.toFixed(2);
+
+
+            amountDisplay.textContent =
+                total.toFixed(2);
+
+
+            amountInput.value =
+                total.toFixed(2);
+
+        }
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Calculate All Totals
+        |--------------------------------------------------------------------------
+        */
+
+        function calculateTotals() {
+
+            let subTotal = 0;
+
+            let gstTotal = 0;
+
+            let grandTotal = 0;
+
+
+            rows.forEach(function(row) {
+
+                const qtyInput =
+                    row.querySelector('.returnQty');
+
+                const priceInput =
+                    row.querySelector(
+                        'input[name="price[]"]'
+                    );
+
+                const gstInput =
+                    row.querySelector(
+                        'input[name="gst[]"]'
+                    );
+
+
+                if (
+                    !qtyInput ||
+                    !priceInput ||
+                    !gstInput
+                ) {
+
+                    return;
+
+                }
+
+
+                const qty =
+                    parseFloat(
+                        qtyInput.value
+                    ) || 0;
+
+
+                const price =
+                    parseFloat(
+                        priceInput.value
+                    ) || 0;
+
+
+                const gst =
+                    parseFloat(
+                        gstInput.value
+                    ) || 0;
+
+
+                const lineSubTotal =
+                    qty * price;
+
+
+                const lineGst =
+                    lineSubTotal *
+                    gst /
+                    100;
+
+
+                const lineTotal =
+                    lineSubTotal +
+                    lineGst;
+
+
+                subTotal +=
+                    lineSubTotal;
+
+
+                gstTotal +=
+                    lineGst;
+
+
+                grandTotal +=
+                    lineTotal;
+
+            });
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | Display Totals
+            |--------------------------------------------------------------------------
+            */
+
+            document.getElementById(
+                    'purchase_return_sub_total'
+                ).value =
+                subTotal.toFixed(2);
+
+
+            document.getElementById(
+                    'purchase_return_gst_total'
+                ).value =
+                gstTotal.toFixed(2);
+
+
+            document.getElementById(
+                    'purchase_return_grand_total'
+                ).value =
+                grandTotal.toFixed(2);
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | Hidden Values
+            |--------------------------------------------------------------------------
+            */
+
+            document.getElementById(
+                    'purchase_return_sub_total_hidden'
+                ).value =
+                subTotal.toFixed(2);
+
+
+            document.getElementById(
+                    'purchase_return_gst_total_hidden'
+                ).value =
+                gstTotal.toFixed(2);
+
+
+            document.getElementById(
+                    'purchase_return_grand_total_hidden'
+                ).value =
+                grandTotal.toFixed(2);
+
+        }
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Quantity Change
+        |--------------------------------------------------------------------------
+        */
+
+        rows.forEach(function(row) {
+
+            const qtyInput =
+                row.querySelector('.returnQty');
+
+
+            if (!qtyInput) {
+
+                return;
+
+            }
+
+
+            qtyInput.addEventListener(
+                'input',
+                function() {
+
+                    calculateRow(row);
+
+                    calculateTotals();
+
+                }
+            );
+
+
+            qtyInput.addEventListener(
+                'change',
+                function() {
+
+                    calculateRow(row);
+
+                    calculateTotals();
+
+                }
+            );
+
+        });
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Initial Calculation
+        |--------------------------------------------------------------------------
+        */
+
+        rows.forEach(function(row) {
+
+            calculateRow(row);
+
+        });
+
+
+        calculateTotals();
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Form Validation
+        |--------------------------------------------------------------------------
+        */
+
+        document.getElementById(
+            'purchaseReturnForm'
+        ).addEventListener(
+            'submit',
+            function(event) {
+
+                let hasQuantity = false;
+
+                let invalidQuantity = false;
+
+
+                rows.forEach(function(row) {
+
+                    const qtyInput =
+                        row.querySelector('.returnQty');
+
+                    const godownSelect =
+                        row.querySelector(
+                            'select[name="godown_id[]"]'
+                        );
+
+
+                    if (!qtyInput) {
+
+                        return;
+
+                    }
+
+
+                    const qty =
+                        parseFloat(
+                            qtyInput.value
+                        ) || 0;
+
+
+                    const maxQty =
+                        parseFloat(
+                            qtyInput.max
+                        ) || 0;
+
+
+                    /*
+                    |--------------------------------------------------------------------------
+                    | Quantity
+                    |--------------------------------------------------------------------------
+                    */
+
+                    if (qty > 0) {
+
+                        hasQuantity = true;
+
+                    }
+
+
+                    if (
+                        qty < 0 ||
+                        qty > maxQty
+                    ) {
+
+                        invalidQuantity = true;
+
+                    }
+
+
+                    /*
+                    |--------------------------------------------------------------------------
+                    | Godown
+                    |--------------------------------------------------------------------------
+                    */
+
+                    if (
+                        qty > 0 &&
+                        godownSelect &&
+                        godownSelect.value === ''
+                    ) {
+
+                        invalidQuantity = true;
+
+                        godownSelect.classList.add(
+                            'is-invalid'
+                        );
+
+                    }
+
+                });
+
+
+                /*
+                |--------------------------------------------------------------------------
+                | No Items
+                |--------------------------------------------------------------------------
+                */
+
+                if (!hasQuantity) {
+
+                    event.preventDefault();
+
+                    alert(
+                        'Please enter return quantity for at least one product.'
+                    );
+
+                    return;
+
+                }
+
+
+                /*
+                |--------------------------------------------------------------------------
+                | Invalid Quantity / Godown
+                |--------------------------------------------------------------------------
+                */
+
+                if (invalidQuantity) {
+
+                    event.preventDefault();
+
+                    alert(
+                        'Please check return quantity and Godown.'
+                    );
+
+                    return;
+
+                }
+
+            }
+        );
+
+    });
+</script>
+
+@endpush

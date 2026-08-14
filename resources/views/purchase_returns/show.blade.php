@@ -8,6 +8,7 @@
 
     <div class="card shadow-sm">
 
+        <!-- Header -->
         <div class="card-header bg-primary text-white">
 
             <div class="d-flex justify-content-between align-items-center">
@@ -23,7 +24,6 @@
                         class="btn btn-secondary btn-sm">
 
                         <i class="fas fa-arrow-left"></i>
-
                         Back
 
                     </a>
@@ -31,10 +31,9 @@
                     @can('purchase-return.view')
                     <a href="{{ route('purchase-returns.print',$return->id) }}"
                         target="_blank"
-                        class="btn btn-primary btn-sm">
+                        class="btn btn-light btn-sm">
 
                         <i class="fas fa-print"></i>
-
                         Print
 
                     </a>
@@ -45,7 +44,6 @@
                         class="btn btn-warning btn-sm">
 
                         <i class="fas fa-edit"></i>
-
                         Edit
 
                     </a>
@@ -59,11 +57,17 @@
 
         <div class="card-body">
 
+            <!-- =========================================================
+                 RETURN / PURCHASE INFORMATION
+            ========================================================== -->
+
             <div class="row">
 
-                <div class="col-md-3">
+                <div class="col-md-3 mb-3">
 
-                    <label class="fw-bold">Return No</label>
+                    <label class="fw-bold">
+                        Return No
+                    </label>
 
                     <input type="text"
                         class="form-control"
@@ -72,9 +76,11 @@
 
                 </div>
 
-                <div class="col-md-3">
+                <div class="col-md-3 mb-3">
 
-                    <label class="fw-bold">Return Date</label>
+                    <label class="fw-bold">
+                        Return Date
+                    </label>
 
                     <input type="text"
                         class="form-control"
@@ -83,24 +89,30 @@
 
                 </div>
 
-                <div class="col-md-3">
+                <div class="col-md-3 mb-3">
 
-                    <label class="fw-bold">Purchase No</label>
+                    <label class="fw-bold">
+                        Purchase No
+                    </label>
 
                     <input type="text"
                         class="form-control"
-                        value="{{ $return->purchase->purchase_no }}"
+                        value="{{ $return->purchase->purchase_no ?? '-' }}"
                         readonly>
 
                 </div>
 
-                <div class="col-md-3">
+                <div class="col-md-3 mb-3">
 
-                    <label class="fw-bold">Purchase Date</label>
+                    <label class="fw-bold">
+                        Purchase Date
+                    </label>
 
                     <input type="text"
                         class="form-control"
-                        value="{{ \Carbon\Carbon::parse($return->purchase->purchase_date)->format('d-m-Y') }}"
+                        value="{{ $return->purchase && $return->purchase->purchase_date
+                            ? \Carbon\Carbon::parse($return->purchase->purchase_date)->format('d-m-Y')
+                            : '-' }}"
                         readonly>
 
                 </div>
@@ -108,38 +120,48 @@
             </div>
 
             <hr>
+
+            <!-- =========================================================
+                 COMPANY / STORE
+            ========================================================== -->
 
             <div class="row">
 
-                <div class="col-md-4">
+                <div class="col-md-4 mb-3">
 
-                    <label class="fw-bold">Supplier</label>
+                    <label class="fw-bold">
+                        Company
+                    </label>
 
                     <input type="text"
                         class="form-control"
-                        value="{{ $return->supplier->supplier_name }}"
+                        value="{{ $return->purchase->company->company_name ?? '-' }}"
                         readonly>
 
                 </div>
 
-                <div class="col-md-3">
+                <div class="col-md-4 mb-3">
 
-                    <label class="fw-bold">Mobile</label>
+                    <label class="fw-bold">
+                        Store
+                    </label>
 
                     <input type="text"
                         class="form-control"
-                        value="{{ $return->supplier->mobile }}"
+                        value="{{ $return->purchase->store->store_name ?? '-' }}"
                         readonly>
 
                 </div>
 
-                <div class="col-md-5">
+                <div class="col-md-4 mb-3">
 
-                    <label class="fw-bold">Address</label>
+                    <label class="fw-bold">
+                        Supplier
+                    </label>
 
                     <input type="text"
                         class="form-control"
-                        value="{{ $return->supplier->address }}"
+                        value="{{ $return->supplier->supplier_name ?? '-' }}"
                         readonly>
 
                 </div>
@@ -148,9 +170,70 @@
 
             <hr>
 
+            <!-- =========================================================
+                 SUPPLIER DETAILS
+            ========================================================== -->
+
+            <div class="row">
+
+                <div class="col-md-4 mb-3">
+
+                    <label class="fw-bold">
+                        Supplier
+                    </label>
+
+                    <input type="text"
+                        class="form-control"
+                        value="{{ $return->supplier->supplier_name ?? '-' }}"
+                        readonly>
+
+                </div>
+
+                <div class="col-md-3 mb-3">
+
+                    <label class="fw-bold">
+                        Mobile
+                    </label>
+
+                    <input type="text"
+                        class="form-control"
+                        value="{{ $return->supplier->mobile ?? '-' }}"
+                        readonly>
+
+                </div>
+
+                <div class="col-md-5 mb-3">
+
+                    <label class="fw-bold">
+                        Address
+                    </label>
+
+                    <input type="text"
+                        class="form-control"
+                        value="{{ $return->supplier->address ?? '-' }}"
+                        readonly>
+
+                </div>
+
+            </div>
+
+            <hr>
+
+            <!-- =========================================================
+                 RETURN ITEMS
+            ========================================================== -->
+
+            <h5 class="mb-3">
+
+                <i class="fas fa-box-open"></i>
+
+                Returned Items
+
+            </h5>
+
             <div class="table-responsive">
 
-                <table class="table table-bordered table-striped">
+                <table class="table table-bordered table-striped align-middle">
 
                     <thead class="table-dark">
 
@@ -166,15 +249,27 @@
 
                             <th>Unit</th>
 
-                            <th class="text-end">Qty</th>
+                            <th>Godown</th>
 
-                            <th class="text-end">Rate</th>
+                            <th class="text-end">
+                                Qty
+                            </th>
 
-                            <th class="text-end">GST %</th>
+                            <th class="text-end">
+                                Rate
+                            </th>
 
-                            <th class="text-end">GST Amt</th>
+                            <th class="text-end">
+                                GST %
+                            </th>
 
-                            <th class="text-end">Total</th>
+                            <th class="text-end">
+                                GST Amt
+                            </th>
+
+                            <th class="text-end">
+                                Total
+                            </th>
 
                         </tr>
 
@@ -189,43 +284,152 @@
 
                         @endphp
 
-                        @foreach($return->items as $item)
+                        @forelse($return->items as $item)
 
                         @php
 
-                        $basic = $item->quantity * $item->purchase_price;
+                        $basicAmount =
+                        $item->quantity *
+                        $item->purchase_price;
 
-                        $subTotal += $basic;
+                        $subTotal += $basicAmount;
 
-                        $gstTotal += $item->gst_amount;
+                        $gstTotal +=
+                        (float) $item->gst_amount;
 
                         @endphp
 
                         <tr>
 
-                            <td>{{ $loop->iteration }}</td>
+                            <!-- # -->
 
-                            <td>{{ $item->product->product_code }}</td>
+                            <td>
+                                {{ $loop->iteration }}
+                            </td>
 
-                            <td>{{ $item->product->product_name }}</td>
+                            <!-- Product Code -->
 
-                            <td>{{ $item->product->hsn_code }}</td>
+                            <td>
+                                {{ $item->product->product_code ?? '-' }}
+                            </td>
 
-                            <td>{{ $item->product->unit->short_name ?? '' }}</td>
+                            <!-- Product -->
 
-                            <td class="text-end">{{ number_format($item->quantity,2) }}</td>
+                            <td>
 
-                            <td class="text-end">{{ number_format($item->purchase_price,2) }}</td>
+                                <strong>
+                                    {{ $item->product->product_name ?? '-' }}
+                                </strong>
 
-                            <td class="text-end">{{ number_format($item->gst_percent,2) }}</td>
+                            </td>
 
-                            <td class="text-end">{{ number_format($item->gst_amount,2) }}</td>
+                            <!-- HSN -->
 
-                            <td class="text-end">{{ number_format($item->line_total,2) }}</td>
+                            <td>
+                                {{ $item->product->hsn_code ?? '-' }}
+                            </td>
+
+                            <!-- Unit -->
+
+                            <td>
+                                {{ $item->product->unit->short_name ?? '-' }}
+                            </td>
+
+                            <!-- =================================================
+                                     GODOWN
+                                ================================================== -->
+
+                            <td>
+
+                                @php
+                                $purchaseItem = $return->purchase
+                                ->items
+                                ->firstWhere('product_id', $item->product_id);
+                                @endphp
+
+                                @if($purchaseItem && $purchaseItem->godown)
+                                <span class="badge bg-info text-dark">
+                                    {{ $purchaseItem->godown->godown_name }}
+                                </span>
+                                @else
+                                <span class="badge bg-secondary">
+                                    Shop / No Godown
+                                </span>
+                                @endif
+
+                            </td>
+
+                            <!-- Quantity -->
+
+                            <td class="text-end">
+
+                                {{ number_format(
+                                        $item->quantity,
+                                        2
+                                    ) }}
+
+                            </td>
+
+                            <!-- Rate -->
+
+                            <td class="text-end">
+
+                                ₹ {{ number_format(
+                                        $item->purchase_price,
+                                        2
+                                    ) }}
+
+                            </td>
+
+                            <!-- GST -->
+
+                            <td class="text-end">
+
+                                {{ number_format(
+                                        $item->gst_percent,
+                                        2
+                                    ) }}%
+
+                            </td>
+
+                            <!-- GST Amount -->
+
+                            <td class="text-end">
+
+                                ₹ {{ number_format(
+                                        $item->gst_amount,
+                                        2
+                                    ) }}
+
+                            </td>
+
+                            <!-- Total -->
+
+                            <td class="text-end fw-bold">
+
+                                ₹ {{ number_format(
+                                        $item->line_total,
+                                        2
+                                    ) }}
+
+                            </td>
 
                         </tr>
 
-                        @endforeach
+                        @empty
+
+                        <tr>
+
+                            <td colspan="11"
+                                class="text-center text-muted">
+
+                                No return items found.
+
+                            </td>
+
+                        </tr>
+
+                        @endforelse
 
                     </tbody>
 
@@ -233,17 +437,28 @@
 
             </div>
 
-            <div class="row">
+            <!-- =========================================================
+                 REMARKS + TOTALS
+            ========================================================== -->
+
+            <div class="row mt-4">
+
+                <!-- Remarks -->
 
                 <div class="col-md-8">
 
-                    <label class="fw-bold">Remarks</label>
+                    <label class="fw-bold">
+                        Remarks
+                    </label>
 
-                    <textarea class="form-control"
-                        rows="4"
-                        readonly>{{ $return->remarks }}</textarea>
+                    <textarea
+                        class="form-control"
+                        rows="5"
+                        readonly>{{ $return->remarks ?? '' }}</textarea>
 
                 </div>
+
+                <!-- Totals -->
 
                 <div class="col-md-4">
 
@@ -251,30 +466,51 @@
 
                         <tr>
 
-                            <th>Sub Total</th>
+                            <th>
+                                Sub Total
+                            </th>
 
                             <td class="text-end">
-                                ₹ {{ number_format($subTotal,2) }}
+
+                                ₹ {{ number_format(
+                                    $subTotal,
+                                    2
+                                ) }}
+
                             </td>
 
                         </tr>
 
                         <tr>
 
-                            <th>GST Total</th>
+                            <th>
+                                GST Total
+                            </th>
 
                             <td class="text-end">
-                                ₹ {{ number_format($gstTotal,2) }}
+
+                                ₹ {{ number_format(
+                                    $gstTotal,
+                                    2
+                                ) }}
+
                             </td>
 
                         </tr>
 
                         <tr class="table-primary">
 
-                            <th>Grand Total</th>
+                            <th>
+                                Grand Total
+                            </th>
 
                             <th class="text-end">
-                                ₹ {{ number_format($return->total_amount,2) }}
+
+                                ₹ {{ number_format(
+                                    $return->total_amount,
+                                    2
+                                ) }}
+
                             </th>
 
                         </tr>
