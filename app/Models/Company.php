@@ -34,4 +34,9 @@ class Company extends Model
     {
         return $this->hasMany(Purchase::class);
     }
+
+    public function godowns()
+    {
+        return $this->hasMany(Godown::class);
+    }
 }

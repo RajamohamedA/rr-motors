@@ -38,4 +38,9 @@ class Store extends Model
             'user_stores'
         );
     }
+    
+    public function godowns()
+    {
+        return $this->hasMany(Godown::class);
+    }
 }

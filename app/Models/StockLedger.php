@@ -9,6 +9,7 @@ class StockLedger extends Model
     protected $fillable = [
         'company_id',
         'store_id',
+        'godown_id',
         'product_id',
         'transaction_date',
         'transaction_type',
@@ -30,6 +31,10 @@ class StockLedger extends Model
     public function store()
     {
         return $this->belongsTo(Store::class);
+    }
+    public function godown()
+    {
+        return $this->belongsTo(Godown::class);
     }
 
     public function product()

@@ -1,586 +1,1632 @@
 document.addEventListener('DOMContentLoaded', function () {
 
-    $(function () {
+    /*
+    |--------------------------------------------------------------------------
+    | Transaction Configuration
+    |--------------------------------------------------------------------------
+    */
 
-        const transactionType = $('#transactionType').val() || 'sale';
+    const transactionTypeElement =
+        document.getElementById('transactionType');
 
-        const itemContainer = $('#itemContainer').val() || 'purchaseItems';
+    const itemContainer =
+        document.getElementById('purchaseItems');
 
-        calculateGrandTotal();
+    const productSearch =
+        document.getElementById('product_search');
 
-        /*
-        |--------------------------------------------------------------------------
-        | Product Search
-        |--------------------------------------------------------------------------
-        */
+    const searchResult =
+        document.getElementById('searchResult');
 
-        $('#product_search').keyup(function () {
+    const productSearchUrlElement =
+        document.getElementById('productSearchUrl');
 
-            let keyword = $(this).val();
+    const companySelect =
+        document.getElementById('company_id');
 
-            if (keyword.length < 2) {
-                $('#searchResult').hide().html('');
-                return;
-            }
+    const storeSelect =
+        document.getElementById('store_id');
 
-            $.ajax({
+    const supplierSelect =
+        document.getElementById('supplier_id');
 
-                url: $('#productSearchUrl').val(),
+    const grandTotalInput =
+        document.getElementById('grand_total');
 
-                type: 'GET',
 
-                data: {
-                    search: keyword
-                },
+    /*
+    |--------------------------------------------------------------------------
+    | Stop If Transaction Form Is Not Present
+    |--------------------------------------------------------------------------
+    */
 
-                success: function (products) {
+    if (!itemContainer) {
+        return;
+    }
 
-                    let html = '';
-                    const type = $('#transactionType').val() || 'sale';
 
-                    $.each(products, function (i, product) {
+    /*
+    |--------------------------------------------------------------------------
+    | Transaction Type
+    |--------------------------------------------------------------------------
+    */
 
-                        let price = (type === 'purchase')
-                            ? parseFloat(product.purchase_price)
-                            : parseFloat(product.selling_price);
+    const transactionType =
+        transactionTypeElement
+            ? transactionTypeElement.value
+            : 'purchase';
 
-                        html += `
-                        <a href="#"
-                           class="list-group-item list-group-item-action productItem"
 
-                           data-id="${product.id}"
-                           data-code="${product.product_code}"
-                           data-name="${product.product_name}"
-                           data-price="${price}"
-                           data-gst="${product.gst_percent}"
-                           data-stock="${product.current_stock}">
+    /*
+    |--------------------------------------------------------------------------
+    | Product Search URL
+    |--------------------------------------------------------------------------
+    */
 
-                            <strong>${product.product_code}</strong>
+    const productSearchUrl =
+        productSearchUrlElement
+            ? productSearchUrlElement.value
+            : '';
 
-                            - ${product.product_name}
 
-                            <br>
+    /*
+    |--------------------------------------------------------------------------
+    | Godown Data
+    |--------------------------------------------------------------------------
+    */
 
-                            <small>
+    let godowns = [];
 
-                                Stock : ${product.current_stock}
 
-                                | Price : ${price.toFixed(2)}
+    /*
+    |--------------------------------------------------------------------------
+    | Helper - Escape HTML
+    |--------------------------------------------------------------------------
+    */
 
-                            </small>
+    function escapeHtml(value) {
 
-                        </a>`;
-                    });
+        if (value === null || value === undefined) {
+            return '';
+        }
 
-                    $('#searchResult').html(html).show();
+        return String(value)
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#039;');
 
-                }
+    }
 
-            });
 
-        });
-
-        /*
-        |--------------------------------------------------------------------------
-        | Add Product
-        |--------------------------------------------------------------------------
-        */
-
-        $(document).on('click', '.productItem', function (e) {
-
-            e.preventDefault();
-
-            let id = $(this).data('id');
-
-            let code = $(this).data('code');
-
-            let name = $(this).data('name');
-
-            let price = parseFloat($(this).data('price'));
-
-            let gst = parseFloat($(this).data('gst'));
-
-            let stock = parseFloat($(this).data('stock'));
-
-            /*
-            |--------------------------------------------------------------------------
-            | Duplicate Product Check
-            |--------------------------------------------------------------------------
-            */
-
-            let exists = false;
-
-            $('input[name="product_id[]"]').each(function () {
-
-                if ($(this).val() == id) {
-
-                    exists = true;
-
-                    return false;
-
-                }
-
-            });
-
-            if (exists) {
-
-                alert('Product already added.');
-
-                return;
-
-            }
-
-            /*
-            |--------------------------------------------------------------------------
-            | Row HTML
-            |--------------------------------------------------------------------------
-            */
-
-            let row = `
-
-            <tr>
-
-                <td>
-
-                    ${code}
-
-                    <input type="hidden"
-                           name="product_id[]"
-                           value="${id}">
-
-                </td>
-
-                <td>
-
-                    ${name}
-
-                    <br>
-
-                    <small class="text-success">
-
-                        Stock :
-
-                        <span class="stock">${stock}</span>
-
-                    </small>
-
-                </td>
-
-                <td>
-
-                    <input type="number"
-                           class="form-control qty"
-                           name="qty[]"
-                           value="1"
-                           min="1">
-
-                </td>
-
-                <td>
-
-                    <input type="number"
-                           class="form-control price"
-                           name="price[]"
-                           value="${price}"
-                           step="0.01">
-
-                </td>
-
-                <td>
-
-                    <input type="number"
-                           class="form-control gst"
-                           name="gst[]"
-                           value="${gst}">
-
-                </td>
-
-                <td>
-
-                    <input type="text"
-                           class="form-control amount"
-                           readonly
-                           value="${price.toFixed(2)}">
-
-                </td>
-
-                <td>
-
-                    <button type="button"
-                            class="btn btn-danger btn-sm removeRow">
-
-                        <i class="fas fa-trash"></i>
-
-                    </button>
-
-                </td>
-
-            </tr>
+    /*
+    |--------------------------------------------------------------------------
+    | Get Godown Options
+    |--------------------------------------------------------------------------
+    */
+
+    function getGodownOptions(selectedGodownId = '') {
+
+        let html = `
+            <option value="">
+                Shop / No Godown
+            </option>
+        `;
+
+        godowns.forEach(function (godown) {
+
+            const selected =
+                String(selectedGodownId) ===
+                    String(godown.id)
+                    ? 'selected'
+                    : '';
+
+            html += `
+                <option
+                    value="${godown.id}"
+                    ${selected}>
+
+                    ${escapeHtml(godown.godown_name)}
+
+                </option>
             `;
 
-            $('#' + itemContainer).append(row);
-
-            $('#product_search').val('');
-
-            $('#searchResult').hide();
-
-            calculateGrandTotal();
-
         });
 
-        /*
-        |--------------------------------------------------------------------------
-        | Qty / Price / GST Change
-        |--------------------------------------------------------------------------
-        */
+        return html;
+    }
 
-        $(document).on('keyup change', '.qty,.price,.gst', function () {
 
-            let row = $(this).closest('tr');
+    /*
+    |--------------------------------------------------------------------------
+    | Refresh All Godown Dropdowns
+    |--------------------------------------------------------------------------
+    */
 
-            let qty = parseFloat(row.find('.qty').val()) || 0;
+    function refreshAllGodownDropdowns(clearExisting = false) {
 
-            let price = parseFloat(row.find('.price').val()) || 0;
+        const selects =
+            itemContainer.querySelectorAll('.godown-item');
 
-            let gst = parseFloat(row.find('.gst').val()) || 0;
+
+        selects.forEach(function (select) {
+
+            let selectedGodownId = '';
+
 
             /*
             |--------------------------------------------------------------------------
-            | Sales Stock Validation
+            | Existing Edit Value
             |--------------------------------------------------------------------------
             */
 
-            if (transactionType === 'sale') {
+            if (!clearExisting) {
 
-                let stock = parseFloat(row.find('.stock').text()) || 0;
-                console.log(stock);
+                selectedGodownId =
+                    select.dataset.existingGodown || '';
 
-                if (qty > stock) {
+            }
 
-                    alert('Only ' + stock + ' stock available.');
 
-                    qty = stock;
+            /*
+            |--------------------------------------------------------------------------
+            | Rebuild Options
+            |--------------------------------------------------------------------------
+            */
 
-                    row.find('.qty').val(stock);
+            select.innerHTML =
+                getGodownOptions(selectedGodownId);
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | Remove Temporary Existing Value
+            |--------------------------------------------------------------------------
+            */
+
+            if (clearExisting) {
+
+                delete select.dataset.existingGodown;
+
+            }
+
+        });
+
+    }
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Set Godown Dropdowns Loading
+    |--------------------------------------------------------------------------
+    */
+
+    function setGodownDropdownsLoading() {
+
+        itemContainer
+            .querySelectorAll('.godown-item')
+            .forEach(function (select) {
+
+                select.innerHTML = `
+                    <option value="">
+                        Loading godowns...
+                    </option>
+                `;
+
+            });
+
+    }
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Load Godowns
+    |--------------------------------------------------------------------------
+    */
+
+    function loadGodowns(storeId, preserveExisting = false) {
+
+        /*
+        |--------------------------------------------------------------------------
+        | No Store
+        |--------------------------------------------------------------------------
+        */
+
+        if (!storeId) {
+
+            godowns = [];
+
+            refreshAllGodownDropdowns(!preserveExisting);
+
+            return;
+
+        }
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Loading
+        |--------------------------------------------------------------------------
+        */
+
+        setGodownDropdownsLoading();
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | AJAX
+        |--------------------------------------------------------------------------
+        */
+
+        fetch(`/purchases/godowns/${storeId}`, {
+            headers: {
+                'Accept': 'application/json'
+            }
+        })
+
+            .then(function (response) {
+
+                if (!response.ok) {
+                    throw new Error(
+                        'Unable to load godowns'
+                    );
+                }
+
+                return response.json();
+
+            })
+
+            .then(function (data) {
+
+                godowns =
+                    Array.isArray(data)
+                        ? data
+                        : [];
+
+
+                /*
+                |--------------------------------------------------------------------------
+                | Preserve Existing Godown On Edit
+                |--------------------------------------------------------------------------
+                */
+
+                refreshAllGodownDropdowns(
+                    !preserveExisting
+                );
+
+            })
+
+            .catch(function (error) {
+
+                console.error(
+                    'Godown loading error:',
+                    error
+                );
+
+                godowns = [];
+
+                refreshAllGodownDropdowns(
+                    !preserveExisting
+                );
+
+            });
+
+    }
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Company → Stores
+    |--------------------------------------------------------------------------
+    */
+
+    if (companySelect) {
+
+        companySelect.addEventListener(
+            'change',
+            function () {
+
+                const companyId =
+                    this.value;
+
+
+                /*
+                |--------------------------------------------------------------------------
+                | Clear Store
+                |--------------------------------------------------------------------------
+                */
+
+                if (storeSelect) {
+
+                    storeSelect.innerHTML = `
+                        <option value="">
+                            Loading stores...
+                        </option>
+                    `;
 
                 }
 
-            }
 
-            /*
-            |--------------------------------------------------------------------------
-            | Amount Calculation
-            |--------------------------------------------------------------------------
-            */
+                /*
+                |--------------------------------------------------------------------------
+                | Clear Supplier
+                |--------------------------------------------------------------------------
+                */
 
-            let basic = qty * price;
+                if (supplierSelect) {
 
-            let gstAmount = basic * gst / 100;
-
-            let total = basic + gstAmount;
-
-            row.find('.amount').val(total.toFixed(2));
-
-            calculateGrandTotal();
-
-        });
-
-        /*
-        |--------------------------------------------------------------------------
-        | Remove Item
-        |--------------------------------------------------------------------------
-        */
-
-        $(document).on('click', '.removeRow', function () {
-
-            if (confirm('Remove this product?')) {
-
-                $(this).closest('tr').remove();
-
-                calculateGrandTotal();
-
-            }
-
-        });
-
-        /*
-        |--------------------------------------------------------------------------
-        | Grand Total
-        |--------------------------------------------------------------------------
-        */
-
-        function calculateGrandTotal() {
-
-            let grandTotal = 0;
-
-            $('.amount').each(function () {
-
-                grandTotal += parseFloat($(this).val()) || 0;
-
-            });
-
-            $('#grand_total').val(grandTotal.toFixed(2));
-
-            /*
-            |--------------------------------------------------------------------------
-            | Sales Payment
-            |--------------------------------------------------------------------------
-            */
-
-            if ($('#paid_amount').length) {
-
-                calculateBalance();
-
-            }
-
-        }
-
-        /*
-        |--------------------------------------------------------------------------
-        | Balance
-        |--------------------------------------------------------------------------
-        */
-
-        function calculateBalance() {
-
-            let grand = parseFloat($('#grand_total').val()) || 0;
-
-            let paid = parseFloat($('#paid_amount').val()) || 0;
-
-            let balance = grand - paid;
-
-            console.log("Qty :", qty);
-            console.log("Price :", price);
-            console.log("GST :", gst);
-
-            $('#balance_amount').val(balance.toFixed(2));
-
-        }
-
-        $(document).on('keyup change', '#paid_amount', function () {
-
-            calculateBalance();
-
-        });        /*
-        |--------------------------------------------------------------------------
-        | Qty / Price / GST Change
-        |--------------------------------------------------------------------------
-        */
-
-        $(document).on('keyup change', '.qty,.price,.gst', function () {
-
-            let row = $(this).closest('tr');
-
-            let qty = parseFloat(row.find('.qty').val()) || 0;
-
-            let price = parseFloat(row.find('.price').val()) || 0;
-
-            let gst = parseFloat(row.find('.gst').val()) || 0;
-
-            /*
-            |--------------------------------------------------------------------------
-            | Sales Stock Validation
-            |--------------------------------------------------------------------------
-            */
-
-            if (transactionType === 'sale') {
-
-                let stock = parseFloat(row.find('.stock').text()) || 0;
-
-                if (qty > stock) {
-
-                    alert('Only ' + stock + ' stock available.');
-
-                    qty = stock;
-
-                    row.find('.qty').val(stock);
+                    supplierSelect.innerHTML = `
+                        <option value="">
+                            Loading suppliers...
+                        </option>
+                    `;
 
                 }
 
+
+                /*
+                |--------------------------------------------------------------------------
+                | IMPORTANT
+                |--------------------------------------------------------------------------
+                | Company change must clear godowns.
+                | Godowns are loaded ONLY after Store selection.
+                |--------------------------------------------------------------------------
+                */
+
+                godowns = [];
+
+                refreshAllGodownDropdowns(true);
+
+
+                /*
+                |--------------------------------------------------------------------------
+                | No Company
+                |--------------------------------------------------------------------------
+                */
+
+                if (!companyId) {
+
+                    if (storeSelect) {
+
+                        storeSelect.innerHTML = `
+                            <option value="">
+                                Select Store
+                            </option>
+                        `;
+
+                    }
+
+                    if (supplierSelect) {
+
+                        supplierSelect.innerHTML = `
+                            <option value="">
+                                Select Supplier
+                            </option>
+                        `;
+
+                    }
+
+                    return;
+
+                }
+
+
+                /*
+                |--------------------------------------------------------------------------
+                | Load Stores
+                |--------------------------------------------------------------------------
+                */
+
+                fetch(
+                    `/purchases/stores/${companyId}`,
+                    {
+                        headers: {
+                            'Accept': 'application/json'
+                        }
+                    }
+                )
+
+                    .then(function (response) {
+
+                        if (!response.ok) {
+                            throw new Error(
+                                'Unable to load stores'
+                            );
+                        }
+
+                        return response.json();
+
+                    })
+
+                    .then(function (stores) {
+
+                        if (!storeSelect) {
+                            return;
+                        }
+
+                        storeSelect.innerHTML = `
+                            <option value="">
+                                Select Store
+                            </option>
+                        `;
+
+
+                        stores.forEach(
+                            function (store) {
+
+                                const option =
+                                    document.createElement(
+                                        'option'
+                                    );
+
+                                option.value =
+                                    store.id;
+
+                                option.textContent =
+                                    store.store_name;
+
+                                storeSelect.appendChild(
+                                    option
+                                );
+
+                            }
+                        );
+
+                    })
+
+                    .catch(function (error) {
+
+                        console.error(error);
+
+                        if (storeSelect) {
+
+                            storeSelect.innerHTML = `
+                                <option value="">
+                                    Unable to load stores
+                                </option>
+                            `;
+
+                        }
+
+                    });
+
+
+                /*
+                |--------------------------------------------------------------------------
+                | Load Suppliers
+                |--------------------------------------------------------------------------
+                */
+
+                fetch(
+                    `/purchases/suppliers/${companyId}`,
+                    {
+                        headers: {
+                            'Accept': 'application/json'
+                        }
+                    }
+                )
+
+                    .then(function (response) {
+
+                        if (!response.ok) {
+                            throw new Error(
+                                'Unable to load suppliers'
+                            );
+                        }
+
+                        return response.json();
+
+                    })
+
+                    .then(function (suppliers) {
+
+                        if (!supplierSelect) {
+                            return;
+                        }
+
+                        supplierSelect.innerHTML = `
+                            <option value="">
+                                Select Supplier
+                            </option>
+                        `;
+
+
+                        suppliers.forEach(
+                            function (supplier) {
+
+                                const option =
+                                    document.createElement(
+                                        'option'
+                                    );
+
+                                option.value =
+                                    supplier.id;
+
+                                option.textContent =
+                                    supplier.supplier_name;
+
+                                supplierSelect.appendChild(
+                                    option
+                                );
+
+                            }
+                        );
+
+                    })
+
+                    .catch(function (error) {
+
+                        console.error(error);
+
+                        if (supplierSelect) {
+
+                            supplierSelect.innerHTML = `
+                                <option value="">
+                                    Unable to load suppliers
+                                </option>
+                            `;
+
+                        }
+
+                    });
+
             }
+        );
 
-            /*
-            |--------------------------------------------------------------------------
-            | Amount Calculation
-            |--------------------------------------------------------------------------
-            */
+    }
 
-            let basic = qty * price;
 
-            let gstAmount = basic * gst / 100;
+    /*
+    |--------------------------------------------------------------------------
+    | Store → Godowns
+    |--------------------------------------------------------------------------
+    */
 
-            let total = basic + gstAmount;
+    if (storeSelect) {
 
-            row.find('.amount').val(total.toFixed(2));
+        storeSelect.addEventListener(
+            'change',
+            function () {
 
-            calculateGrandTotal();
+                const storeId =
+                    this.value;
 
-        });
 
-        /*
-        |--------------------------------------------------------------------------
-        | Remove Item
-        |--------------------------------------------------------------------------
-        */
+                /*
+                |--------------------------------------------------------------------------
+                | Store Changed
+                |--------------------------------------------------------------------------
+                | Existing godown values are no longer valid.
+                |--------------------------------------------------------------------------
+                */
 
-        $(document).on('click', '.removeRow', function () {
+                itemContainer
+                    .querySelectorAll('.godown-item')
+                    .forEach(function (select) {
 
-            if (confirm('Remove this product?')) {
+                        delete select.dataset.existingGodown;
 
-                $(this).closest('tr').remove();
+                    });
 
-                calculateGrandTotal();
+
+                /*
+                |--------------------------------------------------------------------------
+                | Load New Store Godowns
+                |--------------------------------------------------------------------------
+                */
+
+                loadGodowns(
+                    storeId,
+                    false
+                );
 
             }
+        );
 
-        });
+    }
 
-        /*
-        |--------------------------------------------------------------------------
-        | Grand Total
-        |--------------------------------------------------------------------------
-        */
 
-        function calculateGrandTotal() {
+    /*
+    |--------------------------------------------------------------------------
+    | Product Search
+    |--------------------------------------------------------------------------
+    */
 
-            let grandTotal = 0;
+    let searchTimer = null;
 
-            $('.amount').each(function () {
 
-                grandTotal += parseFloat($(this).val()) || 0;
+    if (productSearch) {
+
+        productSearch.addEventListener(
+            'input',
+            function () {
+
+                const keyword =
+                    this.value.trim();
+
+
+                /*
+                |--------------------------------------------------------------------------
+                | Minimum 2 Characters
+                |--------------------------------------------------------------------------
+                */
+
+                if (keyword.length < 2) {
+
+                    clearTimeout(searchTimer);
+
+                    searchResult.innerHTML = '';
+
+                    searchResult.style.display =
+                        'none';
+
+                    return;
+
+                }
+
+
+                /*
+                |--------------------------------------------------------------------------
+                | Delay
+                |--------------------------------------------------------------------------
+                */
+
+                clearTimeout(searchTimer);
+
+
+                searchTimer =
+                    setTimeout(
+                        function () {
+
+                            searchProducts(
+                                keyword
+                            );
+
+                        },
+                        300
+                    );
+
+            }
+        );
+
+    }
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Search Products
+    |--------------------------------------------------------------------------
+    */
+
+    function searchProducts(keyword) {
+
+        if (!productSearchUrl) {
+            return;
+        }
+
+
+        searchResult.style.display =
+            'block';
+
+
+        searchResult.innerHTML = `
+            <div class="list-group-item text-center">
+                <i class="fas fa-spinner fa-spin"></i>
+                Searching...
+            </div>
+        `;
+
+
+        const url =
+            productSearchUrl +
+            '?search=' +
+            encodeURIComponent(keyword);
+
+
+        fetch(url, {
+            headers: {
+                'Accept': 'application/json'
+            }
+        })
+
+            .then(function (response) {
+
+                if (!response.ok) {
+                    throw new Error(
+                        'Product search failed'
+                    );
+                }
+
+                return response.json();
+
+            })
+
+            .then(function (products) {
+
+                searchResult.innerHTML = '';
+
+
+                if (
+                    !Array.isArray(products) ||
+                    products.length === 0
+                ) {
+
+                    searchResult.innerHTML = `
+                        <div class="list-group-item text-danger">
+                            No product found
+                        </div>
+                    `;
+
+                    return;
+
+                }
+
+
+                products.forEach(
+                    function (product) {
+
+                        const item =
+                            document.createElement(
+                                'button'
+                            );
+
+                        item.type = 'button';
+
+                        item.className =
+                            'list-group-item list-group-item-action';
+
+
+                        const productCode =
+                            product.product_code ?? '';
+
+                        const productName =
+                            product.product_name ?? '';
+
+                        const barcode =
+                            product.barcode ?? '';
+
+                        let price;
+
+
+                        if (
+                            transactionType ===
+                            'purchase'
+                        ) {
+
+                            price =
+                                parseFloat(
+                                    product.purchase_price ??
+                                    product.cost_price ??
+                                    product.price ??
+                                    0
+                                );
+
+                        } else {
+
+                            price =
+                                parseFloat(
+                                    product.selling_price ??
+                                    product.price ??
+                                    0
+                                );
+
+                        }
+
+
+                        const gst =
+                            parseFloat(
+                                product.gst_percent ??
+                                product.gst ??
+                                0
+                            );
+
+
+                        const stock =
+                            parseFloat(
+                                product.current_stock ??
+                                0
+                            );
+
+
+                        item.innerHTML = `
+
+                            <div class="d-flex justify-content-between">
+
+                                <div>
+
+                                    <strong>
+                                        ${escapeHtml(productCode)}
+                                    </strong>
+
+                                    -
+                                    ${escapeHtml(productName)}
+
+                                    ${barcode
+                                ? `
+                                            <small class="text-muted ms-2">
+                                                Barcode:
+                                                ${escapeHtml(barcode)}
+                                            </small>
+                                            `
+                                : ''
+                            }
+
+                                    <br>
+
+                                    <small>
+
+                                        Stock:
+                                        ${stock}
+
+                                        |
+                                        Price:
+                                        ${price.toFixed(2)}
+
+                                    </small>
+
+                                </div>
+
+                                <span class="badge bg-primary align-self-center">
+                                    Add
+                                </span>
+
+                            </div>
+
+                        `;
+
+
+                        item.addEventListener(
+                            'click',
+                            function () {
+
+                                addProductRow(
+                                    product
+                                );
+
+                                productSearch.value =
+                                    '';
+
+                                searchResult.innerHTML =
+                                    '';
+
+                                searchResult.style.display =
+                                    'none';
+
+                            }
+                        );
+
+
+                        searchResult.appendChild(
+                            item
+                        );
+
+                    }
+                );
+
+            })
+
+            .catch(function (error) {
+
+                console.error(error);
+
+                searchResult.innerHTML = `
+                    <div class="list-group-item text-danger">
+                        Unable to search products
+                    </div>
+                `;
 
             });
 
-            $('#grand_total').val(grandTotal.toFixed(2));
+    }
 
-            /*
-            |--------------------------------------------------------------------------
-            | Sales Payment
-            |--------------------------------------------------------------------------
-            */
 
-            if ($('#paid_amount').length) {
+    /*
+    |--------------------------------------------------------------------------
+    | Add Product Row
+    |--------------------------------------------------------------------------
+    */
 
-                calculateBalance();
+    function addProductRow(product) {
+
+        const productId =
+            product.id;
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Duplicate Product
+        |--------------------------------------------------------------------------
+        */
+
+        const existingProduct =
+            itemContainer.querySelector(
+                `input[name="product_id[]"][value="${productId}"]`
+            );
+
+
+        if (existingProduct) {
+
+            const row =
+                existingProduct.closest('tr');
+
+            const qtyInput =
+                row.querySelector('.qty');
+
+
+            qtyInput.value =
+                (
+                    parseFloat(
+                        qtyInput.value || 0
+                    ) + 1
+                );
+
+
+            calculateRow(row);
+
+            return;
+
+        }
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Product Data
+        |--------------------------------------------------------------------------
+        */
+
+        const productCode =
+            product.product_code ?? '';
+
+        const productName =
+            product.product_name ?? '';
+
+
+        const purchasePrice =
+            parseFloat(
+                product.purchase_price ??
+                product.cost_price ??
+                product.price ??
+                0
+            );
+
+
+        const sellingPrice =
+            parseFloat(
+                product.selling_price ??
+                product.price ??
+                0
+            );
+
+
+        const price =
+            transactionType === 'purchase'
+                ? purchasePrice
+                : sellingPrice;
+
+
+        const gst =
+            parseFloat(
+                product.gst_percent ??
+                product.gst ??
+                0
+            );
+
+
+        const stock =
+            parseFloat(
+                product.current_stock ??
+                0
+            );
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Create Row
+        |--------------------------------------------------------------------------
+        */
+
+        const row =
+            document.createElement('tr');
+
+
+        row.innerHTML = `
+
+            <!-- Product Code -->
+
+            <td>
+
+                ${escapeHtml(productCode)}
+
+                <input
+                    type="hidden"
+                    name="product_id[]"
+                    value="${productId}">
+
+            </td>
+
+
+            <!-- Product -->
+
+            <td>
+
+                ${escapeHtml(productName)}
+
+                ${transactionType === 'sale'
+                ? `
+                            <br>
+                            <small class="text-success">
+                                Stock:
+                                <span class="stock">
+                                    ${stock}
+                                </span>
+                            </small>
+                        `
+                : ''
+            }
+
+            </td>
+
+
+            <!-- Godown -->
+
+            <td>
+
+                <select
+                    name="godown_id[]"
+                    class="form-select godown-item">
+
+                    ${getGodownOptions('')}
+
+                </select>
+
+            </td>
+
+
+            <!-- Quantity -->
+
+            <td>
+
+                <input
+                    type="number"
+                    class="form-control qty"
+                    name="qty[]"
+                    value="1"
+                    min="0.001"
+                    step="0.001"
+                    required>
+
+            </td>
+
+
+            <!-- Price -->
+
+            <td>
+
+                <input
+                    type="number"
+                    class="form-control price"
+                    name="price[]"
+                    value="${price.toFixed(2)}"
+                    min="0"
+                    step="0.01"
+                    required>
+
+            </td>
+
+
+            <!-- GST -->
+
+            <td>
+
+                <input
+                    type="number"
+                    class="form-control gst"
+                    name="gst[]"
+                    value="${gst}"
+                    min="0"
+                    step="0.01">
+
+            </td>
+
+
+            <!-- Amount -->
+
+            <td>
+
+                <input
+                    type="text"
+                    class="form-control amount"
+                    readonly
+                    value="0.00">
+
+            </td>
+
+
+            <!-- Remove -->
+
+            <td>
+
+                <button
+                    type="button"
+                    class="btn btn-danger btn-sm removeRow">
+
+                    <i class="fas fa-trash"></i>
+
+                </button>
+
+            </td>
+
+        `;
+
+
+        itemContainer.appendChild(row);
+
+
+        calculateRow(row);
+
+    }
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Qty / Price / GST
+    |--------------------------------------------------------------------------
+    */
+
+    itemContainer.addEventListener(
+        'input',
+        function (event) {
+
+            if (
+                event.target.classList.contains('qty') ||
+                event.target.classList.contains('price') ||
+                event.target.classList.contains('gst')
+            ) {
+
+                const row =
+                    event.target.closest('tr');
+
+                calculateRow(row);
 
             }
 
         }
+    );
 
-        /*
-        |--------------------------------------------------------------------------
-        | Balance
-        |--------------------------------------------------------------------------
-        */
 
-        function calculateBalance() {
+    /*
+    |--------------------------------------------------------------------------
+    | Sales Stock Validation
+    |--------------------------------------------------------------------------
+    */
 
-            let grand = parseFloat($('#grand_total').val()) || 0;
+    function validateSaleStock(row) {
 
-            let paid = parseFloat($('#paid_amount').val()) || 0;
+        if (transactionType !== 'sale') {
+            return;
+        }
 
-            let balance = grand - paid;
 
-            $('#balance_amount').val(balance.toFixed(2));
+        const qtyInput =
+            row.querySelector('.qty');
+
+
+        const stockElement =
+            row.querySelector('.stock');
+
+
+        if (!qtyInput || !stockElement) {
+            return;
+        }
+
+
+        let qty =
+            parseFloat(
+                qtyInput.value || 0
+            );
+
+
+        const stock =
+            parseFloat(
+                stockElement.textContent || 0
+            );
+
+
+        if (qty > stock) {
+
+            alert(
+                'Only ' +
+                stock +
+                ' stock available.'
+            );
+
+
+            qty =
+                stock;
+
+
+            qtyInput.value =
+                stock;
 
         }
 
-        $(document).on('keyup change', '#paid_amount', function () {
+    }
 
-            calculateBalance();
 
-        });
+    /*
+    |--------------------------------------------------------------------------
+    | Calculate Row
+    |--------------------------------------------------------------------------
+    */
 
-        /*
-        |--------------------------------------------------------------------------
-        | Recalculate Existing Rows (Edit Mode)
-        |--------------------------------------------------------------------------
-        */
+    function calculateRow(row) {
 
-        function recalculateRows() {
+        if (!row) {
+            return;
+        }
 
-            $('#' + itemContainer + ' tr').each(function () {
 
-                let row = $(this);
+        validateSaleStock(row);
 
-                let qty = parseFloat(row.find('.qty').val()) || 0;
 
-                let price = parseFloat(row.find('.price').val()) || 0;
+        const qty =
+            parseFloat(
+                row.querySelector('.qty')?.value || 0
+            );
 
-                let gst = parseFloat(row.find('.gst').val()) || 0;
 
-                let basic = qty * price;
+        const price =
+            parseFloat(
+                row.querySelector('.price')?.value || 0
+            );
 
-                let gstAmount = basic * gst / 100;
 
-                let total = basic + gstAmount;
+        const gst =
+            parseFloat(
+                row.querySelector('.gst')?.value || 0
+            );
 
-                row.find('.amount').val(total.toFixed(2));
 
-            });
+        const basicAmount =
+            qty * price;
 
-            calculateGrandTotal();
+
+        const gstAmount =
+            basicAmount * gst / 100;
+
+
+        const lineTotal =
+            basicAmount + gstAmount;
+
+
+        const amountInput =
+            row.querySelector('.amount');
+
+
+        if (amountInput) {
+
+            amountInput.value =
+                lineTotal.toFixed(2);
 
         }
 
-        /*
-        |--------------------------------------------------------------------------
-        | Hide Product Search
-        |--------------------------------------------------------------------------
-        */
-
-        $(document).click(function (e) {
-
-            if (!$(e.target).closest('#product_search,#searchResult').length) {
-
-                $('#searchResult').hide();
-
-            }
-
-        });
-
-        /*
-        |--------------------------------------------------------------------------
-        | ESC Key Hide Search
-        |--------------------------------------------------------------------------
-        */
-
-        $(document).keyup(function (e) {
-
-            if (e.key === "Escape") {
-
-                $('#searchResult').hide();
-
-            }
-
-        });
-
-        /*
-        |--------------------------------------------------------------------------
-        | Enter Key Prevent Submit
-        |--------------------------------------------------------------------------
-        */
-
-        $('#product_search').keypress(function (e) {
-
-            if (e.which === 13) {
-
-                e.preventDefault();
-
-            }
-
-        });
-
-        /*
-        |--------------------------------------------------------------------------
-        | Initial Load
-        |--------------------------------------------------------------------------
-        */
-
-        recalculateRows();
 
         calculateGrandTotal();
 
-    });
+    }
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Remove Product Row
+    |--------------------------------------------------------------------------
+    */
+
+    itemContainer.addEventListener(
+        'click',
+        function (event) {
+
+            const button =
+                event.target.closest('.removeRow');
+
+
+            if (!button) {
+                return;
+            }
+
+
+            const row =
+                button.closest('tr');
+
+
+            if (
+                confirm(
+                    'Remove this product?'
+                )
+            ) {
+
+                row.remove();
+
+                calculateGrandTotal();
+
+            }
+
+        }
+    );
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Grand Total
+    |--------------------------------------------------------------------------
+    */
+
+    function calculateGrandTotal() {
+
+        let total = 0;
+
+
+        itemContainer
+            .querySelectorAll('.amount')
+            .forEach(function (input) {
+
+                total +=
+                    parseFloat(
+                        input.value || 0
+                    );
+
+            });
+
+
+        if (grandTotalInput) {
+
+            grandTotalInput.value =
+                total.toFixed(2);
+
+        }
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Sales Payment
+        |--------------------------------------------------------------------------
+        */
+
+        calculateBalance();
+
+    }
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Balance
+    |--------------------------------------------------------------------------
+    */
+
+    function calculateBalance() {
+
+        const paidInput =
+            document.getElementById(
+                'paid_amount'
+            );
+
+
+        const balanceInput =
+            document.getElementById(
+                'balance_amount'
+            );
+
+
+        if (!paidInput || !balanceInput) {
+            return;
+        }
+
+
+        const grandTotal =
+            parseFloat(
+                grandTotalInput?.value || 0
+            );
+
+
+        const paid =
+            parseFloat(
+                paidInput.value || 0
+            );
+
+
+        const balance =
+            grandTotal - paid;
+
+
+        balanceInput.value =
+            balance.toFixed(2);
+
+    }
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Paid Amount
+    |--------------------------------------------------------------------------
+    */
+
+    document.addEventListener(
+        'input',
+        function (event) {
+
+            if (
+                event.target.id ===
+                'paid_amount'
+            ) {
+
+                calculateBalance();
+
+            }
+
+        }
+    );
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Close Search Result
+    |--------------------------------------------------------------------------
+    */
+
+    document.addEventListener(
+        'click',
+        function (event) {
+
+            if (
+                productSearch &&
+                searchResult &&
+                !productSearch.contains(event.target) &&
+                !searchResult.contains(event.target)
+            ) {
+
+                searchResult.style.display =
+                    'none';
+
+            }
+
+        }
+    );
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | ESC - Close Search
+    |--------------------------------------------------------------------------
+    */
+
+    document.addEventListener(
+        'keydown',
+        function (event) {
+
+            if (
+                event.key === 'Escape' &&
+                searchResult
+            ) {
+
+                searchResult.style.display =
+                    'none';
+
+            }
+
+        }
+    );
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Enter - Don't Submit While Searching
+    |--------------------------------------------------------------------------
+    */
+
+    if (productSearch) {
+
+        productSearch.addEventListener(
+            'keydown',
+            function (event) {
+
+                if (event.key === 'Enter') {
+
+                    event.preventDefault();
+
+                }
+
+            }
+        );
+
+    }
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | INITIAL EDIT PAGE
+    |--------------------------------------------------------------------------
+    |
+    | Blade puts the existing godown_id into:
+    |
+    | data-existing-godown="ID"
+    |
+    | We load the current store's godowns and automatically
+    | select the matching godown.
+    |
+    */
+
+    if (storeSelect && storeSelect.value) {
+
+        itemContainer
+            .querySelectorAll('.godown-item')
+            .forEach(function (select) {
+
+                /*
+                |--------------------------------------------------------------------------
+                | Save currently selected Blade value
+                |--------------------------------------------------------------------------
+                */
+
+                if (select.value) {
+
+                    select.dataset.existingGodown =
+                        select.value;
+
+                }
+
+            });
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Load Current Store Godowns
+        |--------------------------------------------------------------------------
+        */
+
+        loadGodowns(
+            storeSelect.value,
+            true
+        );
+
+    } else {
+
+        /*
+        |--------------------------------------------------------------------------
+        | Create Page Without Store
+        |--------------------------------------------------------------------------
+        */
+
+        godowns = [];
+
+        refreshAllGodownDropdowns(
+            true
+        );
+
+    }
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Initial Row Calculations
+    |--------------------------------------------------------------------------
+    */
+
+    itemContainer
+        .querySelectorAll('tr')
+        .forEach(function (row) {
+
+            calculateRow(row);
+
+        });
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Initial Grand Total
+    |--------------------------------------------------------------------------
+    */
+
+    calculateGrandTotal();
 
 });

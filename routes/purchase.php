@@ -19,6 +19,21 @@ Route::middleware(['auth'])->group(function () {
         [PurchaseController::class, 'print']
     )->name('purchases.print');
 
+    Route::get(
+        '/purchases/stores/{company}',
+        [PurchaseController::class, 'getStores']
+    )->name('purchases.stores');
+
+    Route::get(
+        '/purchases/godowns/{store}',
+        [PurchaseController::class, 'getGodowns']
+    )->name('purchases.godowns');
+
+    Route::get(
+        '/purchases/suppliers/{company}',
+        [PurchaseController::class, 'getSuppliers']
+    )->name('purchases.suppliers');
+
     /*
     |--------------------------------------------------------------------------
     | Purchase Return

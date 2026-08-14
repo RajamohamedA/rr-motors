@@ -11,6 +11,7 @@ use App\Http\Controllers\BrandController;
 use App\Http\Controllers\UnitController;
 use App\Http\Controllers\ProductController;
 use App\Models\Store;
+use App\Http\Controllers\GodownController;
 
 /*
 |--------------------------------------------------------------------------
@@ -28,6 +29,7 @@ Route::middleware(['auth'])->group(function () {
     Route::resource('brands', BrandController::class);
     Route::resource('units', UnitController::class);
     Route::resource('products', ProductController::class);
+    Route::resource('godowns', GodownController::class);
 });
 
 

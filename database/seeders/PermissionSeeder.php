@@ -23,6 +23,16 @@ class PermissionSeeder extends Seeder
             'store.edit',
             'store.delete',
 
+            'godown.view',
+            'godown.create',
+            'godown.edit',
+            'godown.delete',
+
+            'brand.view',
+            'brand.create',
+            'brand.edit',
+            'brand.delete',
+
             'unit.view',
             'unit.create',
             'unit.edit',

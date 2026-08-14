@@ -2,63 +2,89 @@
 <div class="card shadow-sm mb-3">
 
     <div class="card-header bg-primary text-white">
+
         <h5 class="mb-0">
+
             <i class="fas fa-shopping-cart"></i>
 
             {{ isset($purchase) ? 'Edit Purchase' : 'Create Purchase' }}
 
         </h5>
+
     </div>
+
 
     <div class="card-body">
 
         <div class="row">
 
             <!-- Purchase No -->
-
             <div class="col-md-3 mb-3">
 
-                <label class="form-label">Purchase No</label>
+                <label class="form-label">
+                    Purchase No
+                </label>
 
-                <input type="text"
+                <input
+                    type="text"
                     class="form-control"
                     name="purchase_no"
                     readonly
-                    value="{{ old('purchase_no',$purchase->purchase_no ?? $purchaseNo) }}">
+                    value="{{ old(
+                        'purchase_no',
+                        $purchase->purchase_no ?? $purchaseNo
+                    ) }}">
 
             </div>
+
 
             <!-- Purchase Date -->
-
             <div class="col-md-3 mb-3">
 
-                <label class="form-label">Purchase Date</label>
+                <label class="form-label">
+                    Purchase Date
+                </label>
 
-                <input type="date"
+                <input
+                    type="date"
                     class="form-control"
                     name="purchase_date"
-                    value="{{ old('purchase_date',$purchase->purchase_date ?? date('Y-m-d')) }}">
+                    value="{{ old(
+                        'purchase_date',
+                        $purchase->purchase_date ?? date('Y-m-d')
+                    ) }}"
+                    required>
 
             </div>
 
-            <!-- Company -->
 
+            <!-- Company -->
             <div class="col-md-3 mb-3">
 
-                <label class="form-label">Company</label>
+                <label class="form-label">
+                    Company
+                </label>
 
                 <select
                     class="form-select"
                     name="company_id"
-                    id="company_id">
+                    id="company_id"
+                    required>
 
-                    <option value="">Select Company</option>
+                    <option value="">
+                        Select Company
+                    </option>
 
                     @foreach($companies as $company)
 
                     <option
                         value="{{ $company->id }}"
-                        {{ old('company_id',$purchase->company_id ?? '')==$company->id?'selected':'' }}>
+                        {{ old(
+                                'company_id',
+                                $purchase->company_id ?? ''
+                            ) == $company->id
+                                ? 'selected'
+                                : '' }}>
 
                         {{ $company->company_name }}
 
@@ -70,24 +96,34 @@
 
             </div>
 
-            <!-- Store -->
 
+            <!-- Store -->
             <div class="col-md-3 mb-3">
 
-                <label class="form-label">Store</label>
+                <label class="form-label">
+                    Store
+                </label>
 
                 <select
                     class="form-select"
                     name="store_id"
-                    id="store_id">
+                    id="store_id"
+                    required>
 
-                    <option value="">Select Store</option>
+                    <option value="">
+                        Select Store
+                    </option>
 
                     @foreach($stores as $store)
 
                     <option
                         value="{{ $store->id }}"
-                        {{ old('store_id',$purchase->store_id ?? '')==$store->id?'selected':'' }}>
+                        {{ old(
+                                'store_id',
+                                $purchase->store_id ?? ''
+                            ) == $store->id
+                                ? 'selected'
+                                : '' }}>
 
                         {{ $store->store_name }}
 
@@ -99,23 +135,34 @@
 
             </div>
 
-            <!-- Supplier -->
 
+            <!-- Supplier -->
             <div class="col-md-4 mb-3">
 
-                <label class="form-label">Supplier</label>
+                <label class="form-label">
+                    Supplier
+                </label>
 
                 <select
+                    name="supplier_id"
+                    id="supplier_id"
                     class="form-select"
-                    name="supplier_id">
+                    required>
 
-                    <option value="">Select Supplier</option>
+                    <option value="">
+                        Select Supplier
+                    </option>
 
                     @foreach($suppliers as $supplier)
 
                     <option
                         value="{{ $supplier->id }}"
-                        {{ old('supplier_id',$purchase->supplier_id ?? '')==$supplier->id?'selected':'' }}>
+                        {{ old(
+                                'supplier_id',
+                                $purchase->supplier_id ?? ''
+                            ) == $supplier->id
+                                ? 'selected'
+                                : '' }}>
 
                         {{ $supplier->supplier_name }}
 
@@ -127,31 +174,41 @@
 
             </div>
 
-            <!-- Invoice No -->
 
+            <!-- Invoice No -->
             <div class="col-md-4 mb-3">
 
-                <label class="form-label">Invoice No</label>
+                <label class="form-label">
+                    Invoice No
+                </label>
 
                 <input
                     type="text"
                     class="form-control"
                     name="invoice_no"
-                    value="{{ old('invoice_no',$purchase->invoice_no ?? '') }}">
+                    value="{{ old(
+                        'invoice_no',
+                        $purchase->invoice_no ?? ''
+                    ) }}">
 
             </div>
 
-            <!-- Invoice Date -->
 
+            <!-- Invoice Date -->
             <div class="col-md-4 mb-3">
 
-                <label class="form-label">Invoice Date</label>
+                <label class="form-label">
+                    Invoice Date
+                </label>
 
                 <input
                     type="date"
                     class="form-control"
                     name="invoice_date"
-                    value="{{ old('invoice_date',$purchase->invoice_date ?? '') }}">
+                    value="{{ old(
+                        'invoice_date',
+                        $purchase->invoice_date ?? ''
+                    ) }}">
 
             </div>
 
@@ -160,59 +217,75 @@
     </div>
 
 </div>
+
 
 <!-- Product Search -->
 <div class="card shadow-sm mb-3">
 
     <div class="card-header bg-secondary text-white">
+
         <h5 class="mb-0">
+
             <i class="fas fa-search"></i>
+
             Product Search
+
         </h5>
+
     </div>
+
 
     <div class="card-body">
 
-        <div class="row">
+        <label class="form-label">
+            Search Product
+        </label>
 
-            <div class="col-md-12">
 
-                <label class="form-label">
-                    Search Product
-                </label>
+        <input
+            type="text"
+            id="product_search"
+            class="form-control form-control-lg"
+            autocomplete="off"
+            placeholder="Search Product Code / Barcode / Product Name">
 
-                <input
-                    type="text"
-                    id="product_search"
-                    class="form-control form-control-lg"
-                    autocomplete="off"
-                    placeholder="Search Product Code / Barcode / Product Name">
 
-                <div id="searchResult"
-                    class="list-group mt-2"
-                    style="display:none;
-                            max-height:300px;
-                            overflow-y:auto;">
-                </div>
-
-            </div>
-
+        <div
+            id="searchResult"
+            class="list-group mt-2"
+            style="
+                display:none;
+                max-height:300px;
+                overflow-y:auto;
+            ">
         </div>
 
     </div>
 
 </div>
 
-<input type="hidden"
+
+<!-- Transaction Configuration -->
+
+<input
+    type="hidden"
     id="productSearchUrl"
     value="{{ route('products.search') }}">
 
-<input type="hidden" id="transactionType" value="purchase">
-<input type="hidden" id="itemContainer" value="purchaseItems">
+
+<input
+    type="hidden"
+    id="transactionType"
+    value="purchase">
+
+
+<input
+    type="hidden"
+    id="itemContainer"
+    value="purchaseItems">
 
 
 <!-- Purchase Items -->
-
 <div class="card shadow-sm">
 
     <div class="card-header bg-info text-white">
@@ -227,6 +300,7 @@
 
     </div>
 
+
     <div class="card-body">
 
         <div class="table-responsive">
@@ -239,23 +313,41 @@
 
                     <tr>
 
-                        <th width="120">Code</th>
+                        <th width="110">
+                            Code
+                        </th>
 
-                        <th>Product</th>
+                        <th>
+                            Product
+                        </th>
 
-                        <th width="90">Qty</th>
+                        <th width="180">
+                            Godown
+                        </th>
 
-                        <th width="120">Price</th>
+                        <th width="100">
+                            Qty
+                        </th>
 
-                        <th width="80">GST%</th>
+                        <th width="120">
+                            Price
+                        </th>
 
-                        <th width="130">Amount</th>
+                        <th width="80">
+                            GST%
+                        </th>
 
-                        <th width="60"></th>
+                        <th width="130">
+                            Amount
+                        </th>
+
+                        <th width="60">
+                        </th>
 
                     </tr>
 
                 </thead>
+
 
                 <tbody id="purchaseItems">
 
@@ -265,6 +357,7 @@
 
                     <tr>
 
+                        <!-- Product Code -->
                         <td>
 
                             {{ $item->product->product_code }}
@@ -276,12 +369,48 @@
 
                         </td>
 
+
+                        <!-- Product -->
                         <td>
 
                             {{ $item->product->product_name }}
 
                         </td>
 
+
+                        <!-- Godown -->
+                        <td>
+
+                            <select
+                                name="godown_id[]"
+                                class="form-select godown-item"
+                                data-existing-godown="{{ $item->godown_id ?? '' }}">
+
+                                <option value="">
+                                    Shop / No Godown
+                                </option>
+
+                                @foreach($godowns as $godown)
+
+                                <option
+                                    value="{{ $godown->id }}"
+                                    {{ (string)($item->godown_id ?? '') ===
+                                                   (string)$godown->id
+                                                    ? 'selected'
+                                                    : '' }}>
+
+                                    {{ $godown->godown_name }}
+
+                                </option>
+
+                                @endforeach
+
+                            </select>
+
+                        </td>
+
+
+                        <!-- Quantity -->
                         <td>
 
                             <input
@@ -289,10 +418,14 @@
                                 class="form-control qty"
                                 name="qty[]"
                                 value="{{ $item->quantity }}"
-                                min="1">
+                                min="0.001"
+                                step="0.001"
+                                required>
 
                         </td>
 
+
+                        <!-- Price -->
                         <td>
 
                             <input
@@ -300,30 +433,45 @@
                                 class="form-control price"
                                 name="price[]"
                                 value="{{ $item->purchase_price }}"
-                                step="0.01">
+                                min="0"
+                                step="0.01"
+                                required>
 
                         </td>
 
+
+                        <!-- GST -->
                         <td>
 
                             <input
                                 type="number"
                                 class="form-control gst"
                                 name="gst[]"
-                                value="{{ $item->gst_percent }}">
+                                value="{{ $item->gst_percent }}"
+                                min="0"
+                                step="0.01">
 
                         </td>
 
+
+                        <!-- Amount -->
                         <td>
 
                             <input
                                 type="text"
                                 class="form-control amount"
                                 readonly
-                                value="{{ number_format($item->line_total,2,'.','') }}">
+                                value="{{ number_format(
+                                            $item->line_total,
+                                            2,
+                                            '.',
+                                            ''
+                                        ) }}">
 
                         </td>
 
+
+                        <!-- Remove -->
                         <td>
 
                             <button
@@ -344,11 +492,14 @@
 
                 </tbody>
 
+
                 <tfoot>
 
                     <tr>
 
-                        <th colspan="5" class="text-end">
+                        <th
+                            colspan="6"
+                            class="text-end">
 
                             Grand Total
 
@@ -362,7 +513,10 @@
                                 id="grand_total"
                                 name="grand_total"
                                 readonly
-                                value="{{ old('grand_total',$purchase->grand_total ?? 0) }}">
+                                value="{{ old(
+                                    'grand_total',
+                                    $purchase->grand_total ?? 0
+                                ) }}">
 
                         </th>
 
@@ -374,35 +528,52 @@
 
             </table>
 
+
             <!-- Remarks -->
             <div class="card shadow-sm mt-3">
 
                 <div class="card-body">
 
-                    <label class="form-label">Remarks</label>
+                    <label class="form-label">
+                        Remarks
+                    </label>
 
                     <textarea
                         name="remarks"
                         class="form-control"
-                        rows="3">{{ old('remarks', $purchase->remarks ?? '') }}</textarea>
+                        rows="3">{{ old(
+                            'remarks',
+                            $purchase->remarks ?? ''
+                        ) }}</textarea>
 
                 </div>
 
             </div>
 
+
             <!-- Action Buttons -->
             <div class="d-flex justify-content-end mt-4">
 
-                <a href="{{ route('purchases.index') }}" class="btn btn-secondary me-2">
+                <a
+                    href="{{ route('purchases.index') }}"
+                    class="btn btn-secondary me-2">
+
                     <i class="fas fa-times"></i>
+
                     Cancel
+
                 </a>
 
-                <button type="submit" class="btn btn-success">
+
+                <button
+                    type="submit"
+                    class="btn btn-success">
 
                     <i class="fas fa-save"></i>
 
-                    {{ isset($purchase) ? 'Update Purchase' : 'Save Purchase' }}
+                    {{ isset($purchase)
+                        ? 'Update Purchase'
+                        : 'Save Purchase' }}
 
                 </button>
 

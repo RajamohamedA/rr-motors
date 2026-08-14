@@ -1,288 +1,591 @@
 @extends('layouts.app')
 
-@section('title','Purchase Details')
-
 @section('content')
 
 <div class="container-fluid">
 
-    <!-- Header -->
-    <div class="card shadow-sm">
+    <!-- Page Header -->
+    <div class="d-flex justify-content-between align-items-center mb-3 no-print">
 
-        <div class="card-header bg-primary text-white">
+        <div>
+            <h4 class="mb-1">
+                <i class="fas fa-file-invoice"></i>
+                Purchase Details
+            </h4>
 
-            <div class="d-flex justify-content-between align-items-center">
-
-                <h4 class="mb-0">
-                    <i class="fas fa-file-invoice"></i>
-                    Purchase Details
-                </h4>
-
-                <div>
-
-                    <a href="{{ route('purchases.index') }}"
-                        class="btn btn-secondary btn-sm">
-
-                        <i class="fas fa-arrow-left"></i>
-
-                        Back
-
-                    </a>
-
-                    @can('purchase.view')
-                    <a href="{{ route('purchases.print',$purchase->id) }}"
-                        target="_blank"
-                        class="btn btn-success btn-sm">
-
-                        <i class="fas fa-print"></i>
-
-                        Print
-
-                    </a>
-                    @endcan
-
-                </div>
-
-            </div>
-
+            <small class="text-muted">
+                Purchase No: {{ $purchase->purchase_no }}
+            </small>
         </div>
 
-        <div class="card-body">
+        <div class="d-flex gap-2">
 
-            <div class="row">
+            <a
+                href="{{ route('purchases.index') }}"
+                class="btn btn-secondary">
 
-                <!-- Purchase Info -->
+                <i class="fas fa-arrow-left"></i>
+                Back
 
-                <div class="col-md-4">
+            </a>
 
-                    <table class="table table-bordered">
+            @can('purchase.edit')
+            <a
+                href="{{ route('purchases.edit', $purchase->id) }}"
+                class="btn btn-warning">
 
-                        <tr>
-                            <th width="45%">Purchase No</th>
-                            <td>{{ $purchase->purchase_no }}</td>
-                        </tr>
+                <i class="fas fa-edit"></i>
+                Edit
 
-                        <tr>
-                            <th>Date</th>
-                            <td>{{ date('d-m-Y',strtotime($purchase->purchase_date)) }}</td>
-                        </tr>
+            </a>
 
-                        <tr>
-                            <th>Invoice No</th>
-                            <td>{{ $purchase->invoice_no }}</td>
-                        </tr>
-
-                        <tr>
-                            <th>Store</th>
-                            <td>{{ $purchase->store->store_name ?? '-' }}</td>
-                        </tr>
-
-                    </table>
-
-                </div>
-
-                <!-- Supplier -->
-
-                <div class="col-md-4">
-
-                    <table class="table table-bordered">
-
-                        <tr>
-                            <th width="45%">Supplier</th>
-                            <td>{{ $purchase->supplier->supplier_name }}</td>
-                        </tr>
-
-                        <tr>
-                            <th>Mobile</th>
-                            <td>{{ $purchase->supplier->mobile }}</td>
-                        </tr>
-
-                        <tr>
-                            <th>GST No</th>
-                            <td>{{ $purchase->supplier->gst_no }}</td>
-                        </tr>
-
-                        <tr>
-                            <th>Address</th>
-                            <td>{{ $purchase->supplier->address }}</td>
-                        </tr>
-
-                    </table>
-
-                </div>
-
-                <!-- Company -->
-
-                <div class="col-md-4">
-
-                    <table class="table table-bordered">
-
-                        <tr>
-                            <th width="45%">Company</th>
-                            <td>{{ $purchase->company->company_name ?? '' }}</td>
-                        </tr>
-
-                        <tr>
-                            <th>Created By</th>
-                            <td>{{ $purchase->created_by ?? '-' }}</td>
-                        </tr>
-
-                        <tr>
-                            <th>Status</th>
-                            <td>
-
-                                <span class="badge bg-success">
-
-                                    Completed
-
-                                </span>
-
-                            </td>
-                        </tr>
-
-                        <tr>
-                            <th>Remarks</th>
-                            <td>{{ $purchase->remarks }}</td>
-                        </tr>
-
-                    </table>
-
-                </div>
-
-            </div>
+            @endcan
+            
+            @can('purchase.view')
+            <a href="{{ route('purchases.print',$purchase->id) }}" target="_blank" class="btn btn-success btn-sm">
+                <i class="fas fa-print"></i> Print </a>
+            @endcan
 
         </div>
 
     </div>
 
-    <!-- Purchase Items -->
 
-    <div class="card mt-3 shadow-sm">
+    <!-- Purchase Details -->
+    <div class="card shadow-sm">
 
-        <div class="card-header">
+        <!-- Header -->
+        <div class="card-header bg-primary text-white">
 
-            <strong>Purchase Items</strong>
+            <div class="row align-items-center">
+
+                <div class="col-md-6">
+
+                    <h4 class="mb-0">
+                        <i class="fas fa-shopping-cart"></i>
+                        PURCHASE
+                    </h4>
+
+                </div>
+
+                <div class="col-md-6 text-md-end">
+
+                    <strong>
+                        {{ $purchase->purchase_no }}
+                    </strong>
+
+                </div>
+
+            </div>
 
         </div>
 
-        <div class="card-body p-0">
 
+        <div class="card-body">
+
+
+            <!-- Company / Purchase Information -->
+            <div class="row mb-4">
+
+                <!-- Company -->
+                <div class="col-md-4">
+
+                    <div class="border rounded p-3 h-100">
+
+                        <h6 class="text-primary border-bottom pb-2">
+                            <i class="fas fa-building"></i>
+                            Company
+                        </h6>
+
+                        <h5 class="mb-1">
+
+                            {{ $purchase->company->company_name ?? '-' }}
+
+                        </h5>
+
+                    </div>
+
+                </div>
+
+
+                <!-- Store -->
+                <div class="col-md-4">
+
+                    <div class="border rounded p-3 h-100">
+
+                        <h6 class="text-primary border-bottom pb-2">
+                            <i class="fas fa-store"></i>
+                            Store
+                        </h6>
+
+                        <h5 class="mb-1">
+
+                            {{ $purchase->store->store_name ?? '-' }}
+
+                        </h5>
+
+                    </div>
+
+                </div>
+
+
+                <!-- Purchase Date -->
+                <div class="col-md-4">
+
+                    <div class="border rounded p-3 h-100">
+
+                        <h6 class="text-primary border-bottom pb-2">
+                            <i class="fas fa-calendar"></i>
+                            Purchase Date
+                        </h6>
+
+                        <h5 class="mb-1">
+
+                            {{ $purchase->purchase_date
+                                ? \Carbon\Carbon::parse($purchase->purchase_date)->format('d-m-Y')
+                                : '-' }}
+
+                        </h5>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- Supplier / Invoice Information -->
+            <div class="row mb-4">
+
+                <!-- Supplier -->
+                <div class="col-md-4">
+
+                    <div class="border rounded p-3">
+
+                        <h6 class="text-primary">
+                            <i class="fas fa-user"></i>
+                            Supplier
+                        </h6>
+
+                        <div class="fw-bold">
+
+                            {{ $purchase->supplier->supplier_name ?? '-' }}
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <!-- Invoice No -->
+                <div class="col-md-4">
+
+                    <div class="border rounded p-3">
+
+                        <h6 class="text-primary">
+                            <i class="fas fa-file-alt"></i>
+                            Invoice No
+                        </h6>
+
+                        <div class="fw-bold">
+
+                            {{ $purchase->invoice_no ?: '-' }}
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <!-- Invoice Date -->
+                <div class="col-md-4">
+
+                    <div class="border rounded p-3">
+
+                        <h6 class="text-primary">
+                            <i class="fas fa-calendar-alt"></i>
+                            Invoice Date
+                        </h6>
+
+                        <div class="fw-bold">
+
+                            {{ $purchase->invoice_date
+                                ? \Carbon\Carbon::parse($purchase->invoice_date)->format('d-m-Y')
+                                : '-' }}
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- Purchase Items -->
             <div class="table-responsive">
 
-                <table class="table table-bordered table-striped mb-0">
+                <table class="table table-bordered table-hover align-middle">
 
-                    <thead class="table-dark">
+                    <thead class="table-light">
 
                         <tr>
 
-                            <th>#</th>
+                            <th width="50">
+                                #
+                            </th>
 
-                            <th>Code</th>
+                            <th width="120">
+                                Product Code
+                            </th>
 
-                            <th>Product</th>
+                            <th>
+                                Product
+                            </th>
 
-                            <th class="text-end">Qty</th>
+                            <th width="180">
+                                Godown
+                            </th>
 
-                            <th class="text-end">Rate</th>
+                            <th width="100" class="text-end">
+                                Qty
+                            </th>
 
-                            <th class="text-end">GST %</th>
+                            <th width="130" class="text-end">
+                                Price
+                            </th>
 
-                            <th class="text-end">GST Amt</th>
+                            <th width="90" class="text-end">
+                                GST %
+                            </th>
 
-                            <th class="text-end">Total</th>
+                            <th width="150" class="text-end">
+                                Amount
+                            </th>
 
                         </tr>
 
                     </thead>
 
+
                     <tbody>
 
-                        @foreach($purchase->items as $item)
+                        @forelse($purchase->items as $index => $item)
 
                         <tr>
 
-                            <td>{{ $loop->iteration }}</td>
+                            <!-- S.No -->
+                            <td>
 
-                            <td>{{ $item->product->product_code }}</td>
+                                {{ $index + 1 }}
 
-                            <td>{{ $item->product->product_name }}</td>
+                            </td>
 
-                            <td class="text-end">{{ number_format($item->quantity,2) }}</td>
 
-                            <td class="text-end">{{ number_format($item->purchase_price,2) }}</td>
+                            <!-- Product Code -->
+                            <td>
 
-                            <td class="text-end">{{ number_format($item->gst_percent,2) }}</td>
+                                {{ $item->product->product_code ?? '-' }}
 
-                            <td class="text-end">{{ number_format($item->gst_amount,2) }}</td>
+                            </td>
 
-                            <td class="text-end">{{ number_format($item->total_amount,2) }}</td>
+
+                            <!-- Product -->
+                            <td>
+
+                                <strong>
+                                    {{ $item->product->product_name ?? '-' }}
+                                </strong>
+
+                            </td>
+
+
+                            <!-- Godown -->
+                            <td>
+
+                                @if($item->godown)
+
+                                <span class="badge bg-info text-dark">
+
+                                    <i class="fas fa-warehouse"></i>
+
+                                    {{ $item->godown->godown_name }}
+
+                                </span>
+
+                                @else
+
+                                <span class="badge bg-secondary">
+
+                                    Shop / No Godown
+
+                                </span>
+
+                                @endif
+
+                            </td>
+
+
+                            <!-- Quantity -->
+                            <td class="text-end">
+
+                                {{ number_format(
+                                        $item->quantity,
+                                        3,
+                                        '.',
+                                        ''
+                                    ) }}
+
+                            </td>
+
+
+                            <!-- Price -->
+                            <td class="text-end">
+
+                                ₹{{ number_format(
+                                        $item->purchase_price,
+                                        2
+                                    ) }}
+
+                            </td>
+
+
+                            <!-- GST -->
+                            <td class="text-end">
+
+                                {{ number_format(
+                                        $item->gst_percent,
+                                        2
+                                    ) }}%
+
+                            </td>
+
+
+                            <!-- Amount -->
+                            <td class="text-end fw-bold">
+
+                                ₹{{ number_format(
+                                        $item->line_total,
+                                        2
+                                    ) }}
+
+                            </td>
 
                         </tr>
 
-                        @endforeach
+                        @empty
+
+                        <tr>
+
+                            <td
+                                colspan="8"
+                                class="text-center text-muted py-4">
+
+                                No purchase items found.
+
+                            </td>
+
+                        </tr>
+
+                        @endforelse
 
                     </tbody>
+
+
+                    <!-- Totals -->
+                    <tfoot>
+
+                        <tr>
+
+                            <th
+                                colspan="7"
+                                class="text-end">
+
+                                Grand Total
+
+                            </th>
+
+                            <th class="text-end">
+
+                                ₹{{ number_format(
+                                    $purchase->grand_total ?? 0,
+                                    2
+                                ) }}
+
+                            </th>
+
+                        </tr>
+
+                    </tfoot>
 
                 </table>
 
             </div>
 
-        </div>
 
-    </div>
+            <!-- Remarks -->
+            @if($purchase->remarks)
 
-    <!-- Totals -->
+            <div class="border rounded p-3 mt-4">
 
-    <div class="row mt-3">
+                <h6 class="text-primary">
 
-        <div class="col-md-8"></div>
+                    <i class="fas fa-comment-alt"></i>
 
-        <div class="col-md-4">
+                    Remarks
 
-            <table class="table table-bordered">
+                </h6>
 
-                <tr>
+                <div class="text-muted">
 
-                    <th>Sub Total</th>
+                    {{ $purchase->remarks }}
 
-                    <td class="text-end">
+                </div>
 
-                        {{ number_format($purchase->sub_total,2) }}
+            </div>
 
-                    </td>
+            @endif
 
-                </tr>
 
-                <tr>
+            <!-- Bottom Summary -->
+            <div class="row justify-content-end mt-4">
 
-                    <th>GST Total</th>
+                <div class="col-md-4">
 
-                    <td class="text-end">
+                    <table class="table table-bordered">
 
-                        {{ number_format($purchase->gst_total,2) }}
+                        <tr>
 
-                    </td>
+                            <th>
+                                Total Items
+                            </th>
 
-                </tr>
+                            <td class="text-end">
 
-                <tr class="table-primary">
+                                {{ $purchase->items->count() }}
 
-                    <th>Grand Total</th>
+                            </td>
 
-                    <th class="text-end">
+                        </tr>
 
-                        {{ number_format($purchase->grand_total,2) }}
+                        <tr>
 
-                    </th>
+                            <th>
+                                Total Quantity
+                            </th>
 
-                </tr>
+                            <td class="text-end">
 
-            </table>
+                                {{ number_format(
+                                    $purchase->items->sum('quantity'),
+                                    3,
+                                    '.',
+                                    ''
+                                ) }}
+
+                            </td>
+
+                        </tr>
+
+                        <tr class="table-primary">
+
+                            <th>
+                                Grand Total
+                            </th>
+
+                            <th class="text-end">
+
+                                ₹{{ number_format(
+                                    $purchase->grand_total ?? 0,
+                                    2
+                                ) }}
+
+                            </th>
+
+                        </tr>
+
+                    </table>
+
+                </div>
+
+            </div>
+
+
+            <!-- Footer -->
+            <div class="text-center text-muted mt-4">
+
+                <small>
+                    Purchase No:
+                    {{ $purchase->purchase_no }}
+                </small>
+
+            </div>
 
         </div>
 
     </div>
 
 </div>
+
+
+<!-- Print CSS -->
+<style>
+    @media print {
+
+        body {
+            background: #fff !important;
+        }
+
+        .no-print,
+        nav,
+        .navbar,
+        .sidebar,
+        .main-sidebar,
+        .app-sidebar,
+        footer {
+            display: none !important;
+        }
+
+        .container-fluid {
+            width: 100% !important;
+            max-width: 100% !important;
+            margin: 0 !important;
+            padding: 0 !important;
+        }
+
+        .card {
+            border: none !important;
+            box-shadow: none !important;
+        }
+
+        .card-header {
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+        }
+
+        .table {
+            width: 100% !important;
+        }
+
+        .table-bordered th,
+        .table-bordered td {
+            border: 1px solid #000 !important;
+        }
+
+        .badge {
+            border: 1px solid #000;
+            color: #000 !important;
+            background: transparent !important;
+        }
+
+        @page {
+            size: A4;
+            margin: 10mm;
+        }
+
+    }
+</style>
 
 @endsection

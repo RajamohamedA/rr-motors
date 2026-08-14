@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Models\Unit;
 use App\Models\Purchase;
 use App\Models\Product;
+use App\Models\Godown;
 
 use Illuminate\Database\Eloquent\Model;
 
@@ -15,6 +16,8 @@ class PurchaseItem extends Model
         'purchase_id',
 
         'product_id',
+        
+        'godown_id',
 
         'quantity',
 
@@ -45,5 +48,10 @@ class PurchaseItem extends Model
     public function unit()
     {
         return $this->belongsTo(Unit::class);
+    }
+
+    public function godown()
+    {
+        return $this->belongsTo(Godown::class);
     }
 }

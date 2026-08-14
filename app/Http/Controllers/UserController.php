@@ -56,9 +56,10 @@ class UserController extends Controller
             ->get();
 
         $stores = auth()->user()->is_super_user
-            ? Store::where('status', 1)->get()
+            ? collect()
             : Store::where('company_id', auth()->user()->company_id)
             ->where('status', 1)
+            ->orderBy('store_name')
             ->get();
 
         return view('users.create', compact(
@@ -73,9 +74,16 @@ class UserController extends Controller
      */
     public function store(Request $request)
     {
-        $companyId = auth()->user()->is_super_user
-            ? $request->company_id
-            : auth()->user()->company_id;
+        $isCreatingSuperAdmin = in_array(
+            'Super Admin',
+            $request->input('roles', [])
+        );
+
+        /*
+        |--------------------------------------------------------------------------
+        | Validate common fields
+        |--------------------------------------------------------------------------
+        */
 
         $request->validate([
             'name' => 'required|string|max:255',
@@ -92,35 +100,105 @@ class UserController extends Controller
 
             'roles' => 'required|array|min:1',
 
-            'stores' => 'required|array|min:1',
+            'roles.*' => 'exists:roles,name',
 
             'status' => 'required|boolean',
-
-            'company_id' => auth()->user()->is_super_user
-                ? 'required|exists:companies,id'
-                : 'nullable',
         ]);
 
-        DB::transaction(function () use ($request, $companyId) {
+        /*
+        |--------------------------------------------------------------------------
+        | Super Admin validation
+        |--------------------------------------------------------------------------
+        */
 
-            $isSuperUser = in_array('Super Admin', $request->roles ?? []);
+        if ($isCreatingSuperAdmin) {
 
-            if ($isSuperUser) {
-
-                $exists = User::where('is_super_user', true)->exists();
-
-                if ($exists) {
-
-                    return back()
-                        ->withInput()
-                        ->withErrors([
-                            'roles' => 'Only one Super Admin is allowed.'
-                        ]);
-                }
+            // Only existing Super Admin can create another Super Admin
+            if (!auth()->user()->is_super_user) {
+                abort(403);
             }
 
-            $user = User::create([
+            // Only one Super Admin
+            if (User::where('is_super_user', true)->exists()) {
 
+                return back()
+                    ->withInput()
+                    ->withErrors([
+                        'roles' => 'Only one Super Admin is allowed.',
+                    ]);
+            }
+
+            // Super Admin does NOT need company/store
+            $companyId = null;
+            $storeIds = [];
+        } else {
+
+            /*
+            |--------------------------------------------------------------------------
+            | Normal User
+            |--------------------------------------------------------------------------
+            */
+
+            if (auth()->user()->is_super_user) {
+
+                $request->validate([
+                    'company_id' => 'required|exists:companies,id',
+
+                    'stores' => 'required|array|min:1',
+
+                    'stores.*' => 'exists:stores,id',
+                ]);
+
+                $companyId = $request->company_id;
+            } else {
+
+                // Company Admin
+                $companyId = auth()->user()->company_id;
+
+                $request->validate([
+                    'stores' => 'required|array|min:1',
+
+                    'stores.*' => 'exists:stores,id',
+                ]);
+            }
+
+            $storeIds = $request->stores;
+
+            /*
+            |--------------------------------------------------------------------------
+            | Make sure selected stores belong to selected company
+            |--------------------------------------------------------------------------
+            */
+
+            $validStoreCount = Store::whereIn('id', $storeIds)
+                ->where('company_id', $companyId)
+                ->where('status', 1)
+                ->count();
+
+            if ($validStoreCount != count($storeIds)) {
+
+                return back()
+                    ->withInput()
+                    ->withErrors([
+                        'stores' => 'One or more selected stores do not belong to the selected company.',
+                    ]);
+            }
+        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | Create User
+        |--------------------------------------------------------------------------
+        */
+
+        DB::transaction(function () use (
+            $request,
+            $isCreatingSuperAdmin,
+            $companyId,
+            $storeIds
+        ) {
+
+            $user = User::create([
                 'company_id' => $companyId,
 
                 'name' => $request->name,
@@ -133,16 +211,34 @@ class UserController extends Controller
 
                 'status' => $request->status,
 
-                'is_super_user' => $isSuperUser,
-
+                'is_super_user' => $isCreatingSuperAdmin,
             ]);
 
-            // Assign Roles
+            /*
+            |--------------------------------------------------------------------------
+            | Assign Role
+            |--------------------------------------------------------------------------
+            */
+
             $user->syncRoles($request->roles);
 
-            // Assign Stores
-            $user->stores()->sync($request->stores);
+            /*
+            |--------------------------------------------------------------------------
+            | Assign Stores
+            |--------------------------------------------------------------------------
+            */
+
+            if (!$isCreatingSuperAdmin) {
+
+                $user->stores()->sync($storeIds);
+            }
         });
+
+        /*
+        |--------------------------------------------------------------------------
+        | Redirect
+        |--------------------------------------------------------------------------
+        */
 
         return redirect()
             ->route('users.index')
@@ -185,7 +281,12 @@ class UserController extends Controller
      */
     public function edit(User $user)
     {
-        // Company Admin cannot edit users from other companies
+        /*
+        |--------------------------------------------------------------------------
+        | Company Admin cannot edit users from another company
+        |--------------------------------------------------------------------------
+        */
+
         if (
             !auth()->user()->is_super_user &&
             $user->company_id != auth()->user()->company_id
@@ -193,42 +294,115 @@ class UserController extends Controller
             abort(403);
         }
 
+
+        /*
+        |--------------------------------------------------------------------------
+        | Companies
+        |--------------------------------------------------------------------------
+        */
+
         $companies = auth()->user()->is_super_user
-            ? Company::where('status', 1)->orderBy('company_name')->get()
+            ? Company::where('status', 1)
+            ->orderBy('company_name')
+            ->get()
             : collect();
 
+
+        /*
+        |--------------------------------------------------------------------------
+        | Roles
+        |--------------------------------------------------------------------------
+        */
+
         $roles = auth()->user()->is_super_user
-            ? Role::where('status', 1)->orderBy('name')->get()
+            ? Role::where('status', 1)
+            ->orderBy('name')
+            ->get()
             : Role::where('company_id', auth()->user()->company_id)
             ->where('status', 1)
             ->orderBy('name')
             ->get();
 
-        $stores = auth()->user()->is_super_user
-            ? Store::where('status', 1)->orderBy('store_name')->get()
-            : Store::where('company_id', auth()->user()->company_id)
-            ->where('status', 1)
-            ->orderBy('store_name')
-            ->get();
+
+        /*
+        |--------------------------------------------------------------------------
+        | Stores
+        |--------------------------------------------------------------------------
+        */
+
+        if (auth()->user()->is_super_user) {
+
+            /*
+            | Super Admin:
+            | Load stores belonging to the user's current company.
+            |
+            | If the user being edited is Super Admin,
+            | company_id is NULL, so don't load stores.
+            */
+
+            $stores = $user->company_id
+                ? Store::where('company_id', $user->company_id)
+                ->where('status', 1)
+                ->orderBy('store_name')
+                ->get()
+                : collect();
+        } else {
+
+            /*
+            | Company Admin:
+            | Only stores from their own company.
+            */
+
+            $stores = Store::where(
+                'company_id',
+                auth()->user()->company_id
+            )
+                ->where('status', 1)
+                ->orderBy('store_name')
+                ->get();
+        }
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Load User Relationships
+        |--------------------------------------------------------------------------
+        */
 
         $user->load([
+            'company',
             'roles',
-            'stores'
+            'stores',
         ]);
 
-        return view('users.edit', compact(
-            'user',
-            'companies',
-            'roles',
-            'stores'
-        ));
+
+        /*
+        |--------------------------------------------------------------------------
+        | Return Edit View
+        |--------------------------------------------------------------------------
+        */
+
+        return view(
+            'users.edit',
+            compact(
+                'user',
+                'companies',
+                'roles',
+                'stores'
+            )
+        );
     }
     /**
      * Update the specified resource in storage.
      */
     public function update(Request $request, User $user)
     {
-        // Company Admin cannot edit another company's users
+        /*
+        |--------------------------------------------------------------------------
+        | Company Admin cannot edit users from another company
+        |--------------------------------------------------------------------------
+        */
+
         if (
             !auth()->user()->is_super_user &&
             $user->company_id != auth()->user()->company_id
@@ -236,9 +410,24 @@ class UserController extends Controller
             abort(403);
         }
 
-        $companyId = auth()->user()->is_super_user
-            ? $request->company_id
-            : auth()->user()->company_id;
+
+        /*
+        |--------------------------------------------------------------------------
+        | Check selected role
+        |--------------------------------------------------------------------------
+        */
+
+        $isSuperUser = in_array(
+            'Super Admin',
+            $request->input('roles', [])
+        );
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Common validation
+        |--------------------------------------------------------------------------
+        */
 
         $request->validate([
 
@@ -247,7 +436,8 @@ class UserController extends Controller
             'email' => [
                 'required',
                 'email',
-                Rule::unique('users', 'email')->ignore($user->id),
+                Rule::unique('users', 'email')
+                    ->ignore($user->id),
             ],
 
             'mobile' => 'nullable|string|max:20',
@@ -256,35 +446,136 @@ class UserController extends Controller
 
             'roles' => 'required|array|min:1',
 
-            'stores' => 'required|array|min:1',
-
-            'company_id' => auth()->user()->is_super_user
-                ? 'required|exists:companies,id'
-                : 'nullable',
+            'roles.*' => 'exists:roles,name',
 
             'password' => 'nullable|confirmed|min:6',
-
         ]);
 
-        DB::transaction(function () use ($request, $user, $companyId) {
-            
-            $isSuperUser = in_array('Super Admin', $request->roles ?? []);
 
-            if ($isSuperUser) {
+        /*
+        |--------------------------------------------------------------------------
+        | Super Admin
+        |--------------------------------------------------------------------------
+        */
 
-                $exists = User::where('is_super_user', true)
-                    ->where('id', '!=', $user->id)
-                    ->exists();
+        if ($isSuperUser) {
 
-                if ($exists) {
+            /*
+            | Only Super Admin can assign Super Admin role
+            */
 
-                    return back()
-                        ->withInput()
-                        ->withErrors([
-                            'roles' => 'Only one Super Admin is allowed.'
-                        ]);
-                }
+            if (!auth()->user()->is_super_user) {
+                abort(403);
             }
+
+
+            /*
+            | Check if another Super Admin already exists
+            */
+
+            $exists = User::where('is_super_user', true)
+                ->where('id', '!=', $user->id)
+                ->exists();
+
+            if ($exists) {
+
+                return back()
+                    ->withInput()
+                    ->withErrors([
+                        'roles' => 'Only one Super Admin is allowed.',
+                    ]);
+            }
+
+
+            /*
+            | Super Admin does NOT need Company
+            | Super Admin does NOT need Store
+            */
+
+            $companyId = null;
+
+            $storeIds = [];
+        } else {
+
+            /*
+            |--------------------------------------------------------------------------
+            | Normal User
+            |--------------------------------------------------------------------------
+            */
+
+            if (auth()->user()->is_super_user) {
+
+                /*
+                | Super Admin editing a normal user
+                */
+
+                $request->validate([
+
+                    'company_id' => 'required|exists:companies,id',
+
+                    'stores' => 'required|array|min:1',
+
+                    'stores.*' => 'exists:stores,id',
+                ]);
+
+                $companyId = $request->company_id;
+            } else {
+
+                /*
+                | Company Admin editing a normal user
+                */
+
+                $companyId = auth()->user()->company_id;
+
+                $request->validate([
+
+                    'stores' => 'required|array|min:1',
+
+                    'stores.*' => 'exists:stores,id',
+                ]);
+            }
+
+
+            $storeIds = $request->stores;
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | Verify Stores belong to selected Company
+            |--------------------------------------------------------------------------
+            */
+
+            $validStoreCount = Store::whereIn('id', $storeIds)
+                ->where('company_id', $companyId)
+                ->where('status', 1)
+                ->count();
+
+
+            if ($validStoreCount != count($storeIds)) {
+
+                return back()
+                    ->withInput()
+                    ->withErrors([
+                        'stores' =>
+                        'One or more selected stores do not belong to the selected company.',
+                    ]);
+            }
+        }
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Update User
+        |--------------------------------------------------------------------------
+        */
+
+        DB::transaction(function () use (
+            $request,
+            $user,
+            $isSuperUser,
+            $companyId,
+            $storeIds
+        ) {
 
             $data = [
 
@@ -299,27 +590,74 @@ class UserController extends Controller
                 'status' => $request->status,
 
                 'is_super_user' => $isSuperUser,
-
             ];
 
-            // Update password only if entered
+
+            /*
+            |--------------------------------------------------------------------------
+            | Update Password
+            |--------------------------------------------------------------------------
+            */
+
             if ($request->filled('password')) {
 
-                $data['password'] = Hash::make($request->password);
+                $data['password'] = Hash::make(
+                    $request->password
+                );
             }
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | Update User
+            |--------------------------------------------------------------------------
+            */
 
             $user->update($data);
 
-            // Sync Roles
-            $user->syncRoles($request->roles);
 
-            // Sync Stores
-            $user->stores()->sync($request->stores);
+            /*
+            |--------------------------------------------------------------------------
+            | Sync Roles
+            |--------------------------------------------------------------------------
+            */
+
+            $user->syncRoles(
+                $request->roles
+            );
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | Sync Stores
+            |--------------------------------------------------------------------------
+            */
+
+            if ($isSuperUser) {
+
+                // Super Admin has no store restrictions
+                $user->stores()->sync([]);
+            } else {
+
+                $user->stores()->sync(
+                    $storeIds
+                );
+            }
         });
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Redirect
+        |--------------------------------------------------------------------------
+        */
 
         return redirect()
             ->route('users.index')
-            ->with('success', 'User updated successfully.');
+            ->with(
+                'success',
+                'User updated successfully.'
+            );
     }
 
     /**

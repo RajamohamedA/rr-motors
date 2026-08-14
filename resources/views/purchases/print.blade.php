@@ -1,558 +1,583 @@
-<!DOCTYPE html>
-<html lang="en">
+@extends('layouts.app')
 
-<head>
+@section('title', 'Purchase Print')
 
-    <meta charset="UTF-8">
+@section('content')
 
-    <title>Purchase Invoice</title>
+<div class="container-fluid">
 
-    <style>
+    <!-- Print / Close Buttons -->
+    <div class="d-flex justify-content-end gap-2 mb-3 no-print">
 
-        *{
-            margin:0;
-            padding:0;
-            box-sizing:border-box;
-        }
+        <button
+            type="button"
+            class="btn btn-primary"
+            onclick="window.print()">
 
-        body{
+            <i class="fas fa-print"></i>
+            Print
 
-            font-family: Arial, Helvetica, sans-serif;
+        </button>
 
-            font-size:13px;
+        <button
+            type="button"
+            class="btn btn-secondary"
+            onclick="window.close()">
 
-            color:#000;
+            <i class="fas fa-times"></i>
+            Close
 
-            background:#fff;
-
-            padding:20px;
-
-        }
-
-        .invoice{
-
-            width:100%;
-
-            border:2px solid #000;
-
-        }
-
-        table{
-
-            width:100%;
-
-            border-collapse:collapse;
-
-        }
-
-        td,
-        th{
-
-            border:1px solid #000;
-
-            padding:6px;
-
-        }
-
-        .no-border{
-
-            border:none!important;
-
-        }
-
-        .text-center{
-
-            text-align:center;
-
-        }
-
-        .text-right{
-
-            text-align:right;
-
-        }
-
-        .fw-bold{
-
-            font-weight:bold;
-
-        }
-
-        h2{
-
-            margin-bottom:5px;
-
-        }
-
-        .company-header{
-
-            padding:15px;
-
-        }
-
-        .company-header p{
-
-            margin:2px;
-
-        }
-
-        .invoice-title{
-
-            background:#efefef;
-
-            font-size:20px;
-
-            font-weight:bold;
-
-            text-align:center;
-
-            padding:10px;
-
-            border-top:2px solid #000;
-
-            border-bottom:2px solid #000;
-
-        }
-
-        @page{
-
-            size:A4;
-
-            margin:10mm;
-
-        }
-
-        @media print{
-
-            .no-print{
-
-                display:none;
-
-            }
-
-            body{
-
-                padding:0;
-
-            }
-
-        }
-
-    </style>
-
-</head>
-
-<body>
-
-<div class="no-print text-right mb-3">
-
-    <button onclick="window.print()">
-
-        Print Invoice
-
-    </button>
-
-</div>
-
-<div class="invoice">
-
-    <!-- Company -->
-
-    <table>
-
-        <tr>
-
-            <td class="company-header no-border">
-
-                <h2>RR MOTORS</h2>
-
-                <p>Electrical & Machinery Spare Parts</p>
-
-                <p>Thiruthuraipoondi, Tamil Nadu</p>
-
-                <p>GSTIN : XXXXXXXXXXXXXX</p>
-
-                <p>Phone : +91-XXXXXXXXXX</p>
-
-                <p>Email : info@rrmotors.com</p>
-
-            </td>
-
-        </tr>
-
-    </table>
-
-    <div class="invoice-title">
-
-        PURCHASE INVOICE
+        </button>
 
     </div>
 
-    <table>
 
-        <tr>
+    <!-- Purchase Document -->
+    <div class="card">
 
-            <td width="50%">
+        <!-- Header -->
+        <div class="card-header text-center">
 
-                <b>Purchase No :</b>
+            <h3 class="mb-1">
+                PURCHASE
+            </h3>
 
+            <h5 class="mb-0">
                 {{ $purchase->purchase_no }}
+            </h5>
 
-            </td>
+        </div>
 
-            <td>
 
-                <b>Purchase Date :</b>
+        <div class="card-body">
 
-                {{ \Carbon\Carbon::parse($purchase->purchase_date)->format('d-m-Y') }}
+            <!-- Company / Purchase Information -->
+            <div class="row mb-3">
 
-            </td>
+                <!-- Company -->
+                <div class="col-md-4">
 
-        </tr>
+                    <h6 class="fw-bold">
+                        Company
+                    </h6>
 
-        <tr>
+                    <div>
+                        {{ $purchase->company->company_name ?? '-' }}
+                    </div>
 
-            <td>
+                </div>
 
-                <b>Invoice No :</b>
 
-                {{ $purchase->invoice_no }}
+                <!-- Store -->
+                <div class="col-md-4">
 
-            </td>
+                    <h6 class="fw-bold">
+                        Store
+                    </h6>
 
-            <td>
+                    <div>
+                        {{ $purchase->store->store_name ?? '-' }}
+                    </div>
 
-                <b>Invoice Date :</b>
+                </div>
 
-                {{ $purchase->invoice_date }}
 
-            </td>
+                <!-- Purchase Date -->
+                <div class="col-md-4">
 
-        </tr>
+                    <h6 class="fw-bold">
+                        Purchase Date
+                    </h6>
 
-    </table>
+                    <div>
 
-    <table>
+                        {{ $purchase->purchase_date
+                            ? date(
+                                'd-m-Y',
+                                strtotime($purchase->purchase_date)
+                            )
+                            : '-'
+                        }}
 
-        <tr>
+                    </div>
 
-            <th colspan="2"
-                style="background:#f2f2f2;">
+                </div>
 
-                SUPPLIER DETAILS
+            </div>
 
-            </th>
 
-        </tr>
+            <hr>
 
-        <tr>
 
-            <td width="25%">
-                Supplier Name
-            </td>
+            <!-- Supplier / Invoice -->
+            <div class="row mb-4">
 
-            <td>
-                {{ $purchase->supplier->supplier_name }}
-            </td>
+                <!-- Supplier -->
+                <div class="col-md-4">
 
-        </tr>
+                    <h6 class="fw-bold">
+                        Supplier
+                    </h6>
 
-        <tr>
+                    <div>
+                        {{ $purchase->supplier->supplier_name ?? '-' }}
+                    </div>
 
-            <td>
-                Address
-            </td>
+                    @if($purchase->supplier)
 
-            <td>
-                {{ $purchase->supplier->address }}
-            </td>
+                    @if($purchase->supplier->mobile)
 
-        </tr>
+                    <div>
+                        Mobile:
+                        {{ $purchase->supplier->mobile }}
+                    </div>
 
-        <tr>
+                    @endif
 
-            <td>
-                Mobile
-            </td>
+                    @if($purchase->supplier->gst_no)
 
-            <td>
-                {{ $purchase->supplier->mobile }}
-            </td>
+                    <div>
+                        GST No:
+                        {{ $purchase->supplier->gst_no }}
+                    </div>
 
-        </tr>
+                    @endif
 
-        <tr>
+                    @endif
 
-            <td>
-                GST No
-            </td>
+                </div>
 
-            <td>
-                {{ $purchase->supplier->gst_number }}
-            </td>
 
-        </tr>
+                <!-- Invoice No -->
+                <div class="col-md-4">
 
-    </table>
+                    <h6 class="fw-bold">
+                        Invoice No
+                    </h6>
 
-    <br>
+                    <div>
+                        {{ $purchase->invoice_no ?: '-' }}
+                    </div>
 
-    <!-- product details -->
-    <table>
+                </div>
 
-        <thead>
 
-        <tr style="background:#efefef;">
+                <!-- Invoice Date -->
+                <div class="col-md-4">
 
-            <th width="5%">#</th>
+                    <h6 class="fw-bold">
+                        Invoice Date
+                    </h6>
 
-            <th width="12%">Code</th>
+                    <div>
 
-            <th>Product</th>
+                        {{ $purchase->invoice_date
+                            ? date(
+                                'd-m-Y',
+                                strtotime($purchase->invoice_date)
+                            )
+                            : '-'
+                        }}
 
-            <th width="10%">HSN</th>
+                    </div>
 
-            <th width="8%">Qty</th>
+                </div>
 
-            <th width="8%">Unit</th>
+            </div>
 
-            <th width="10%">Price</th>
 
-            <th width="8%">GST%</th>
+            <!-- Purchase Items -->
+            <div class="table-responsive">
 
-            <th width="10%">GST Amt</th>
+                <table class="table table-bordered">
 
-            <th width="12%">Total</th>
+                    <thead>
 
-        </tr>
+                        <tr>
 
-        </thead>
+                            <th width="40">
+                                #
+                            </th>
 
-        <tbody>
+                            <th>
+                                Code
+                            </th>
 
-        @php
+                            <th>
+                                Product
+                            </th>
 
-        $sl = 1;
+                            <th>
+                                Godown
+                            </th>
 
-        $subTotal = 0;
+                            <th class="text-end">
+                                Qty
+                            </th>
 
-        $totalGST = 0;
+                            <th class="text-end">
+                                Rate
+                            </th>
 
-        @endphp
+                            <th class="text-end">
+                                GST %
+                            </th>
 
-        @foreach($purchase->items as $item)
+                            <th class="text-end">
+                                GST Amt
+                            </th>
 
-        @php
+                            <th class="text-end">
+                                Total
+                            </th>
 
-        $subTotal += ($item->quantity * $item->purchase_price);
+                        </tr>
 
-        $totalGST += $item->gst_amount;
+                    </thead>
 
-        @endphp
 
-        <tr>
+                    <tbody>
 
-            <td class="text-center">
-                {{ $sl++ }}
-            </td>
+                        @forelse($purchase->items as $item)
 
-            <td>
-                {{ $item->product->product_code }}
-            </td>
+                        <tr>
 
-            <td>
-                {{ $item->product->product_name }}
-            </td>
+                            <!-- # -->
+                            <td>
+                                {{ $loop->iteration }}
+                            </td>
 
-            <td>
-                {{ $item->product->hsn_code }}
-            </td>
 
-            <td class="text-right">
-                {{ number_format($item->quantity,2) }}
-            </td>
+                            <!-- Code -->
+                            <td>
+                                {{ $item->product->product_code ?? '-' }}
+                            </td>
 
-            <td>
-                {{ $item->product->unit->short_name ?? '' }}
-            </td>
 
-            <td class="text-right">
-                {{ number_format($item->purchase_price,2) }}
-            </td>
+                            <!-- Product -->
+                            <td>
 
-            <td class="text-right">
-                {{ number_format($item->gst_percent,2) }}
-            </td>
+                                {{ $item->product->product_name ?? '-' }}
 
-            <td class="text-right">
-                {{ number_format($item->gst_amount,2) }}
-            </td>
+                            </td>
 
-            <td class="text-right">
-                {{ number_format($item->line_total,2) }}
-            </td>
 
-        </tr>
+                            <!-- Godown -->
+                            <td>
 
-        @endforeach
+                                @if($item->godown)
 
-        </tbody>
+                                {{ $item->godown->godown_name }}
 
-    </table>
+                                @else
 
-    <!-- invoice summery -->
-    @php
+                                Shop / No Godown
 
-    $discount = 0;
+                                @endif
 
-    @endphp
+                            </td>
 
-    <br>
 
-    <table>
+                            <!-- Qty -->
+                            <td class="text-end">
 
-        <tr>
+                                {{ number_format(
+                                        $item->quantity,
+                                        2
+                                    ) }}
 
-            <td width="65%" rowspan="5" style="vertical-align:top;">
+                            </td>
 
-                <b>Remarks</b>
 
-                <br><br>
+                            <!-- Rate -->
+                            <td class="text-end">
 
-                {{ $purchase->remarks }}
+                                {{ number_format(
+                                        $item->purchase_price,
+                                        2
+                                    ) }}
 
-            </td>
+                            </td>
 
-            <td width="20%">
-                Sub Total
-            </td>
 
-            <td class="text-right">
+                            <!-- GST % -->
+                            <td class="text-end">
 
-                ₹ {{ number_format($subTotal,2) }}
+                                {{ number_format(
+                                        $item->gst_percent,
+                                        2
+                                    ) }}
 
-            </td>
+                            </td>
 
-        </tr>
 
-        <tr>
+                            <!-- GST Amount -->
+                            <td class="text-end">
 
-            <td>
-                Discount
-            </td>
+                                {{ number_format(
+                                        $item->gst_amount,
+                                        2
+                                    ) }}
 
-            <td class="text-right">
+                            </td>
 
-                ₹ {{ number_format($discount,2) }}
 
-            </td>
+                            <!-- Total -->
+                            <td class="text-end">
 
-        </tr>
+                                {{ number_format(
+                                        $item->total_amount,
+                                        2
+                                    ) }}
 
-        <tr>
+                            </td>
 
-            <td>
-                GST Total
-            </td>
+                        </tr>
 
-            <td class="text-right">
+                        @empty
 
-                ₹ {{ number_format($totalGST,2) }}
+                        <tr>
 
-            </td>
+                            <td
+                                colspan="9"
+                                class="text-center">
 
-        </tr>
+                                No purchase items found.
 
-        <tr>
+                            </td>
 
-            <td class="fw-bold">
+                        </tr>
 
-                Grand Total
+                        @endforelse
 
-            </td>
+                    </tbody>
 
-            <td class="text-right fw-bold">
+                </table>
 
-                ₹ {{ number_format($purchase->grand_total,2) }}
+            </div>
 
-            </td>
 
-        </tr>
+            <!-- Totals -->
+            <div class="row mt-3">
 
-        <tr>
+                <div class="col-md-7">
 
-            <td colspan="2">
+                    @if($purchase->remarks)
 
-                <b>Amount in Words</b>
+                    <div>
 
-                <br>
+                        <strong>
+                            Remarks:
+                        </strong>
 
-                {{ \NumberFormatter::create('en', \NumberFormatter::SPELLOUT)->format($purchase->grand_total) }}
-                Rupees Only
+                        {{ $purchase->remarks }}
 
-            </td>
+                    </div>
 
-        </tr>
+                    @endif
 
-    </table>
+                </div>
 
-    <!-- signature -->
-    <br><br>
 
-    <table>
+                <div class="col-md-5">
 
-        <tr>
+                    <table class="table table-bordered">
 
-            <td class="text-center">
+                        <tr>
 
-                ______________________
+                            <th>
+                                Sub Total
+                            </th>
 
-                <br>
+                            <td class="text-end">
 
-                Prepared By
+                                {{ number_format(
+                                    $purchase->sub_total ?? 0,
+                                    2
+                                ) }}
 
-            </td>
+                            </td>
 
-            <td class="text-center">
+                        </tr>
 
-                ______________________
 
-                <br>
+                        <tr>
 
-                Checked By
+                            <th>
+                                GST Total
+                            </th>
 
-            </td>
+                            <td class="text-end">
 
-            <td class="text-center">
+                                {{ number_format(
+                                    $purchase->gst_total ?? 0,
+                                    2
+                                ) }}
 
-                ______________________
+                            </td>
 
-                <br>
+                        </tr>
 
-                Authorized Signature
 
-            </td>
+                        <tr>
 
-        </tr>
+                            <th>
+                                Grand Total
+                            </th>
 
-    </table>
+                            <th class="text-end">
+
+                                {{ number_format(
+                                    $purchase->grand_total ?? 0,
+                                    2
+                                ) }}
+
+                            </th>
+
+                        </tr>
+
+                    </table>
+
+                </div>
+
+            </div>
+
+
+            <!-- Signature -->
+            <div class="row mt-5">
+
+                <div class="col-6">
+
+                    <div class="text-center">
+
+                        <br>
+                        <br>
+
+                        __________________________
+
+                        <br>
+
+                        Supplier Signature
+
+                    </div>
+
+                </div>
+
+
+                <div class="col-6">
+
+                    <div class="text-center">
+
+                        <br>
+                        <br>
+
+                        __________________________
+
+                        <br>
+
+                        Authorized Signature
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- Footer -->
+            <div class="text-center mt-4">
+
+                <small class="text-muted">
+
+                    Purchase No:
+                    {{ $purchase->purchase_no }}
+
+                </small>
+
+            </div>
+
+        </div>
+
+    </div>
 
 </div>
 
-<br>
 
-<div class="text-center">
+<style>
+    body {
+        background: #fff !important;
+    }
 
-    <small>
 
-        This is a computer generated Purchase Invoice.
+    @media print {
 
-    </small>
+        @page {
+            size: A4;
+            margin: 10mm;
+        }
 
-</div>
 
-</div>
+        .no-print {
+            display: none !important;
+        }
 
-</body>
 
-</html>
+        .navbar,
+        .sidebar,
+        .main-sidebar,
+        .app-sidebar,
+        footer {
+            display: none !important;
+        }
+
+
+        .container-fluid {
+            width: 100% !important;
+            max-width: 100% !important;
+            margin: 0 !important;
+            padding: 0 !important;
+        }
+
+
+        .card {
+            border: none !important;
+            box-shadow: none !important;
+        }
+
+
+        .card-header {
+            background: transparent !important;
+            color: #000 !important;
+            border-bottom: 2px solid #000 !important;
+        }
+
+
+        .table {
+            width: 100% !important;
+            border-collapse: collapse !important;
+        }
+
+
+        .table th,
+        .table td {
+            border: 1px solid #000 !important;
+            padding: 5px !important;
+        }
+
+
+        .table thead th {
+            background: #eee !important;
+            color: #000 !important;
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+        }
+
+
+        tr {
+            page-break-inside: avoid;
+        }
+
+    }
+</style>
+
+@endsection
