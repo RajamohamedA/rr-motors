@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title','Edit Purchase Return')
+@section('title', 'Edit Purchase Return')
 
 @section('content')
 
@@ -9,12 +9,15 @@
     <form
         action="{{ route('purchase-returns.update', $purchaseReturn->id) }}"
         method="POST"
-        id="purchaseReturnForm">
+        id="purchaseReturnEditForm">
 
         @csrf
         @method('PUT')
 
-        {{-- Hidden Header Values --}}
+        {{-- =========================================================
+             Hidden Header Values
+        ========================================================== --}}
+
         <input
             type="hidden"
             name="purchase_id"
@@ -42,11 +45,8 @@
                 <div class="d-flex justify-content-between align-items-center">
 
                     <h4 class="mb-0">
-
                         <i class="fas fa-edit"></i>
-
                         Edit Purchase Return
-
                     </h4>
 
                     <div>
@@ -58,20 +58,17 @@
                             class="btn btn-primary btn-sm">
 
                             <i class="fas fa-eye"></i>
-
                             View
 
                         </a>
 
                         @endcan
 
-
                         <a
                             href="{{ route('purchase-returns.index') }}"
                             class="btn btn-secondary btn-sm">
 
                             <i class="fas fa-list"></i>
-
                             Back
 
                         </a>
@@ -89,7 +86,7 @@
 
                     {{-- Company --}}
 
-                    <div class="col-md-3">
+                    <div class="col-md-3 mb-3">
 
                         <label class="form-label">
                             Company
@@ -106,7 +103,7 @@
 
                     {{-- Return No --}}
 
-                    <div class="col-md-3">
+                    <div class="col-md-3 mb-3">
 
                         <label class="form-label">
                             Return No
@@ -123,7 +120,7 @@
 
                     {{-- Purchase No --}}
 
-                    <div class="col-md-3">
+                    <div class="col-md-3 mb-3">
 
                         <label class="form-label">
                             Purchase No
@@ -132,7 +129,7 @@
                         <input
                             type="text"
                             class="form-control"
-                            value="{{ $purchaseReturn->purchase->purchase_no }}"
+                            value="{{ $purchaseReturn->purchase->purchase_no ?? '-' }}"
                             readonly>
 
                     </div>
@@ -140,7 +137,7 @@
 
                     {{-- Return Date --}}
 
-                    <div class="col-md-3">
+                    <div class="col-md-3 mb-3">
 
                         <label class="form-label">
                             Return Date
@@ -152,7 +149,9 @@
                             class="form-control"
                             value="{{ old(
                                 'return_date',
-                                \Carbon\Carbon::parse($purchaseReturn->return_date)->format('Y-m-d')
+                                \Carbon\Carbon::parse(
+                                    $purchaseReturn->return_date
+                                )->format('Y-m-d')
                             ) }}"
                             required>
 
@@ -161,11 +160,11 @@
                 </div>
 
 
-                <div class="row mt-3">
+                <div class="row">
 
                     {{-- Store --}}
 
-                    <div class="col-md-3">
+                    <div class="col-md-3 mb-3">
 
                         <label class="form-label">
                             Store
@@ -182,7 +181,7 @@
 
                     {{-- Remarks --}}
 
-                    <div class="col-md-9">
+                    <div class="col-md-9 mb-3">
 
                         <label class="form-label">
                             Remarks
@@ -215,11 +214,8 @@
             <div class="card-header bg-light">
 
                 <strong>
-
                     <i class="fas fa-user"></i>
-
                     Supplier Details
-
                 </strong>
 
             </div>
@@ -229,7 +225,9 @@
 
                 <div class="row">
 
-                    <div class="col-md-4">
+                    {{-- Supplier --}}
+
+                    <div class="col-md-4 mb-3">
 
                         <label class="form-label">
                             Supplier
@@ -244,7 +242,9 @@
                     </div>
 
 
-                    <div class="col-md-3">
+                    {{-- Mobile --}}
+
+                    <div class="col-md-3 mb-3">
 
                         <label class="form-label">
                             Mobile
@@ -259,7 +259,9 @@
                     </div>
 
 
-                    <div class="col-md-5">
+                    {{-- Address --}}
+
+                    <div class="col-md-5 mb-3">
 
                         <label class="form-label">
                             Address
@@ -268,7 +270,9 @@
                         <input
                             type="text"
                             class="form-control"
-                            value="{{ $purchaseReturn->supplier->billing_address ?? $purchaseReturn->supplier->address ?? '-' }}"
+                            value="{{ $purchaseReturn->supplier->billing_address
+                                ?? $purchaseReturn->supplier->address
+                                ?? '-' }}"
                             readonly>
 
                     </div>
@@ -281,7 +285,7 @@
 
 
         {{-- =========================================================
-             Returned Items
+             Return Items
         ========================================================== --}}
 
         <div class="card mt-3 shadow-sm">
@@ -289,11 +293,8 @@
             <div class="card-header bg-secondary text-white">
 
                 <strong>
-
                     <i class="fas fa-box"></i>
-
-                    Returned Items
-
+                    Return Items
                 </strong>
 
             </div>
@@ -305,7 +306,7 @@
 
                     <table
                         class="table table-bordered table-striped table-hover mb-0"
-                        id="returnTable">
+                        id="purchaseReturnEditTable">
 
                         <thead class="table-dark">
 
@@ -327,59 +328,36 @@
                                     Godown
                                 </th>
 
-                                <th width="8%"
-                                    class="text-end">
-
+                                <th width="8%" class="text-end">
                                     Purchased
-
                                 </th>
 
-                                <th width="8%"
-                                    class="text-end">
-
+                                <th width="8%" class="text-end">
                                     Returned
-
                                 </th>
 
-                                <th width="8%"
-                                    class="text-end">
-
+                                <th width="8%" class="text-end">
                                     Balance
-
                                 </th>
 
                                 <th width="110">
-
                                     Return Qty
-
                                 </th>
 
-                                <th width="110"
-                                    class="text-end">
-
+                                <th width="110" class="text-end">
                                     Rate
-
                                 </th>
 
-                                <th width="80"
-                                    class="text-end">
-
+                                <th width="80" class="text-end">
                                     GST %
-
                                 </th>
 
-                                <th width="110"
-                                    class="text-end">
-
+                                <th width="110" class="text-end">
                                     GST Amt
-
                                 </th>
 
-                                <th width="120"
-                                    class="text-end">
-
+                                <th width="120" class="text-end">
                                     Total
-
                                 </th>
 
                             </tr>
@@ -387,73 +365,178 @@
                         </thead>
 
 
-                        <tbody>
+                        <tbody id="purchaseReturnEditItems">
 
-                            @foreach($purchaseReturn->items as $item)
+                            @forelse($purchaseReturn->items as $item)
 
                             @php
 
                             /*
                             |--------------------------------------------------------------------------
-                            | Purchase information
+                            | Purchase Item Information
+                            |--------------------------------------------------------------------------
+                            */
+
+                            $purchaseItem =
+                            $item->purchaseItem;
+
+
+                            /*
+                            |--------------------------------------------------------------------------
+                            | Purchased Quantity
                             |--------------------------------------------------------------------------
                             */
 
                             $purchaseQty =
-                            (float) ($item->purchaseItem->quantity ?? 0);
+                            (float) (
+                            $purchaseItem->quantity ?? 0
+                            );
 
-                            $alreadyReturned =
-                            (float) ($item->purchaseItem->returned_qty ?? 0);
-
-                            $balanceQty =
-                            (float) ($item->purchaseItem->balance_qty ?? 0);
 
                             /*
                             |--------------------------------------------------------------------------
-                            | Current return quantity
+                            | Previous Returned Quantity
+                            |--------------------------------------------------------------------------
+                            |
+                            | This excludes the current Purchase Return.
+                            |
+                            */
+
+                            $previousReturnedQty =
+                            (float) (
+                            $purchaseItem->returned_qty ?? 0
+                            );
+
+
+                            /*
+                            |--------------------------------------------------------------------------
+                            | Balance
+                            |--------------------------------------------------------------------------
+                            */
+
+                            $balanceQty =
+                            (float) (
+                            $purchaseItem->balance_qty ?? 0
+                            );
+
+
+                            /*
+                            |--------------------------------------------------------------------------
+                            | Current Return Quantity
                             |--------------------------------------------------------------------------
                             */
 
                             $currentReturnQty =
                             (float) $item->quantity;
 
+
                             /*
                             |--------------------------------------------------------------------------
-                            | Maximum editable quantity
+                            | Maximum During Edit
                             |--------------------------------------------------------------------------
                             |
-                            | Example:
-                            |
-                            | Purchase = 100
-                            | Other returns = 20
-                            | Current return = 10
-                            |
-                            | Balance excluding current = 80
-                            |
-                            | Maximum while editing = 80 + 10 = 90
+                            | Current return quantity is added back.
                             |
                             */
 
                             $maxReturnQty =
-                            $balanceQty + $currentReturnQty;
+                            $balanceQty +
+                            $currentReturnQty;
+
+
+                            /*
+                            |--------------------------------------------------------------------------
+                            | Godown
+                            |--------------------------------------------------------------------------
+                            */
+
+                            $godownId =
+                            $item->godown_id;
+
+
+                            $godownName =
+                            $item->godown->godown_name
+                            ?? 'Shop / No Godown';
+
+
+                            /*
+                            |--------------------------------------------------------------------------
+                            | Product
+                            |--------------------------------------------------------------------------
+                            */
+
+                            $product =
+                            $item->product;
+
+
+                            /*
+                            |--------------------------------------------------------------------------
+                            | Price
+                            |--------------------------------------------------------------------------
+                            */
+
+                            $price =
+                            (float) (
+                            $item->purchase_price ?? 0
+                            );
+
+
+                            /*
+                            |--------------------------------------------------------------------------
+                            | GST
+                            |--------------------------------------------------------------------------
+                            */
+
+                            $gstPercent =
+                            (float) (
+                            $item->gst_percent ?? 0
+                            );
+
+
+                            /*
+                            |--------------------------------------------------------------------------
+                            | Line Calculation
+                            |--------------------------------------------------------------------------
+                            */
+
+                            $lineSubTotal =
+                            $currentReturnQty *
+                            $price;
+
+
+                            $gstAmount =
+                            $lineSubTotal *
+                            $gstPercent /
+                            100;
+
+
+                            $lineTotal =
+                            $lineSubTotal +
+                            $gstAmount;
 
                             @endphp
 
 
                             <tr>
 
-                                {{-- # --}}
+                                {{-- =====================================================
+                                     #
+                                ====================================================== --}}
 
                                 <td>
+
                                     {{ $loop->iteration }}
+
                                 </td>
 
 
-                                {{-- Product Code --}}
+                                {{-- =====================================================
+                                     Product Code
+                                ====================================================== --}}
 
                                 <td>
 
-                                    {{ $item->product->product_code ?? '-' }}
+                                    {{ $product->product_code ?? '-' }}
 
                                     <input
                                         type="hidden"
@@ -463,21 +546,27 @@
                                 </td>
 
 
-                                {{-- Product --}}
+                                {{-- =====================================================
+                                     Product
+                                ====================================================== --}}
 
                                 <td>
 
                                     <strong>
-                                        {{ $item->product->product_name ?? '-' }}
+                                        {{ $product->product_name ?? '-' }}
                                     </strong>
 
-                                    @if($item->product->unit)
+
+                                    @if(
+                                    isset($product->unit) &&
+                                    $product->unit
+                                    )
 
                                     <br>
 
                                     <small class="text-muted">
 
-                                        {{ $item->product->unit->unit_name }}
+                                        {{ $product->unit->unit_name }}
 
                                     </small>
 
@@ -487,30 +576,28 @@
 
 
                                 {{-- =====================================================
-                                         GODOWN
-                                    ====================================================== --}}
+                                     Godown
+                                ====================================================== --}}
 
                                 <td>
 
                                     <select
                                         name="godown_id[]"
-                                        class="form-select form-select-sm"
+                                        class="form-select form-select-sm purchaseReturnEditGodown"
                                         required>
 
                                         <option value="">
-
                                             Shop / No Godown
-
                                         </option>
 
 
-                                        @if($item->godown)
+                                        @if($godownId)
 
                                         <option
-                                            value="{{ $item->godown_id }}"
+                                            value="{{ $godownId }}"
                                             selected>
 
-                                            {{ $item->godown->godown_name }}
+                                            {{ $godownName }}
 
                                         </option>
 
@@ -519,140 +606,176 @@
                                     </select>
 
 
-                                    {{-- Keep current Godown ID visible for debugging if needed --}}
-
-                                    {{--
-
-                                        <small class="text-muted">
-                                            ID:
-                                            {{ $item->godown_id ?? 'NULL' }}
-                                    </small>
-
-                                    --}}
+                                    <input
+                                        type="hidden"
+                                        class="purchaseReturnEditOriginalGodown"
+                                        value="{{ $godownId }}">
 
                                 </td>
 
 
-                                {{-- Purchased --}}
+                                {{-- =====================================================
+                                     Purchased
+                                ====================================================== --}}
 
                                 <td class="text-end">
 
                                     {{ number_format(
-                                            $purchaseQty,
-                                            2
-                                        ) }}
+                                        $purchaseQty,
+                                        2
+                                    ) }}
 
                                 </td>
 
 
-                                {{-- Already Returned --}}
+                                {{-- =====================================================
+                                     Previous Returned
+                                ====================================================== --}}
 
                                 <td class="text-end">
 
-                                    {{ number_format(
-                                            $alreadyReturned,
-                                            2
-                                        ) }}
-
-                                </td>
-
-
-                                {{-- Balance --}}
-
-                                <td class="text-end">
-
-                                    <strong class="balanceQty">
+                                    <span
+                                        class="purchaseReturnEditReturnedQty">
 
                                         {{ number_format(
-                                                $balanceQty,
-                                                2
-                                            ) }}
+                                            $previousReturnedQty,
+                                            2
+                                        ) }}
+
+                                    </span>
+
+                                </td>
+
+
+                                {{-- =====================================================
+                                     Balance
+                                ====================================================== --}}
+
+                                <td class="text-end">
+
+                                    <strong
+                                        class="purchaseReturnEditBalanceQty">
+
+                                        {{ number_format(
+                                            $balanceQty,
+                                            2
+                                        ) }}
 
                                     </strong>
 
                                 </td>
 
 
-                                {{-- Return Qty --}}
+                                {{-- =====================================================
+                                     Return Quantity
+                                ====================================================== --}}
 
                                 <td>
 
                                     <input
                                         type="number"
                                         name="qty[]"
-                                        class="form-control form-control-sm returnQty text-end"
+                                        class="form-control form-control-sm purchaseReturnEditQty text-end"
                                         value="{{ number_format(
-                                                $currentReturnQty,
-                                                2,
-                                                '.',
-                                                ''
-                                            ) }}"
+                                            $currentReturnQty,
+                                            2,
+                                            '.',
+                                            ''
+                                        ) }}"
                                         min="0"
-                                        max="{{ $maxReturnQty }}"
-                                        step="0.01"
-                                        data-price="{{ $item->purchase_price }}"
-                                        data-gst="{{ $item->gst_percent }}">
+                                        max="{{ number_format(
+                                            $maxReturnQty,
+                                            2,
+                                            '.',
+                                            ''
+                                        ) }}"
+                                        step="0.01">
 
 
                                     <small class="text-muted">
 
                                         Max:
-                                        {{ number_format(
+
+                                        <span
+                                            class="purchaseReturnEditMaxQtyText">
+
+                                            {{ number_format(
                                                 $maxReturnQty,
                                                 2
                                             ) }}
+
+                                        </span>
 
                                     </small>
 
                                 </td>
 
 
-                                {{-- Rate --}}
+                                {{-- =====================================================
+                                     Rate
+                                ====================================================== --}}
 
                                 <td class="text-end">
 
                                     {{ number_format(
-                                            $item->purchase_price,
-                                            2
-                                        ) }}
+                                        $price,
+                                        2
+                                    ) }}
 
 
                                     <input
                                         type="hidden"
                                         name="price[]"
-                                        value="{{ $item->purchase_price }}">
+                                        class="purchaseReturnEditPrice"
+                                        value="{{ number_format(
+                                            $price,
+                                            2,
+                                            '.',
+                                            ''
+                                        ) }}">
 
                                 </td>
 
 
-                                {{-- GST --}}
+                                {{-- =====================================================
+                                     GST %
+                                ====================================================== --}}
 
                                 <td class="text-end">
 
                                     {{ number_format(
-                                            $item->gst_percent,
-                                            2
-                                        ) }}
+                                        $gstPercent,
+                                        2
+                                    ) }}
 
 
                                     <input
                                         type="hidden"
                                         name="gst[]"
-                                        value="{{ $item->gst_percent }}">
+                                        class="purchaseReturnEditGst"
+                                        value="{{ number_format(
+                                            $gstPercent,
+                                            2,
+                                            '.',
+                                            ''
+                                        ) }}">
 
                                 </td>
 
 
-                                {{-- GST Amount --}}
+                                {{-- =====================================================
+                                     GST Amount
+                                ====================================================== --}}
 
                                 <td class="text-end">
 
-                                    <span class="gstAmount">
+                                    <span
+                                        class="purchaseReturnEditGstAmount">
 
                                         {{ number_format(
-                                                $item->gst_amount,
-                                                2
-                                            ) }}
+                                            $gstAmount,
+                                            2
+                                        ) }}
 
                                     </span>
 
@@ -660,27 +783,30 @@
                                     <input
                                         type="hidden"
                                         name="gst_amount[]"
-                                        class="gstAmountInput"
+                                        class="purchaseReturnEditGstAmountInput"
                                         value="{{ number_format(
-                                                $item->gst_amount,
-                                                2,
-                                                '.',
-                                                ''
-                                            ) }}">
+                                            $gstAmount,
+                                            2,
+                                            '.',
+                                            ''
+                                        ) }}">
 
                                 </td>
 
 
-                                {{-- Total --}}
+                                {{-- =====================================================
+                                     Total
+                                ====================================================== --}}
 
                                 <td class="text-end">
 
-                                    <span class="returnAmount">
+                                    <span
+                                        class="purchaseReturnEditAmount">
 
                                         {{ number_format(
-                                                $item->line_total,
-                                                2
-                                            ) }}
+                                            $lineTotal,
+                                            2
+                                        ) }}
 
                                     </span>
 
@@ -688,19 +814,34 @@
                                     <input
                                         type="hidden"
                                         name="amount[]"
-                                        class="amountInput"
+                                        class="purchaseReturnEditAmountInput"
                                         value="{{ number_format(
-                                                $item->line_total,
-                                                2,
-                                                '.',
-                                                ''
-                                            ) }}">
+                                            $lineTotal,
+                                            2,
+                                            '.',
+                                            ''
+                                        ) }}">
 
                                 </td>
 
                             </tr>
 
-                            @endforeach
+
+                            @empty
+
+                            <tr>
+
+                                <td
+                                    colspan="12"
+                                    class="text-center text-muted py-4">
+
+                                    No return items found.
+
+                                </td>
+
+                            </tr>
+
+                            @endforelse
 
                         </tbody>
 
@@ -725,6 +866,8 @@
 
                 <table class="table table-bordered shadow-sm">
 
+                    {{-- Sub Total --}}
+
                     <tr>
 
                         <th width="50%">
@@ -735,10 +878,10 @@
 
                             <input
                                 type="text"
-                                id="purchase_return_sub_total"
+                                id="purchaseReturnEditSubTotal"
                                 class="form-control text-end"
                                 value="{{ number_format(
-                                    $purchaseReturn->sub_total,
+                                    (float) $purchaseReturn->sub_total,
                                     2,
                                     '.',
                                     ''
@@ -749,6 +892,8 @@
 
                     </tr>
 
+
+                    {{-- GST Total --}}
 
                     <tr>
 
@@ -760,10 +905,10 @@
 
                             <input
                                 type="text"
-                                id="purchase_return_gst_total"
+                                id="purchaseReturnEditGstTotal"
                                 class="form-control text-end"
                                 value="{{ number_format(
-                                    $purchaseReturn->gst_total,
+                                    (float) $purchaseReturn->gst_total,
                                     2,
                                     '.',
                                     ''
@@ -774,6 +919,8 @@
 
                     </tr>
 
+
+                    {{-- Grand Total --}}
 
                     <tr class="table-primary">
 
@@ -785,10 +932,10 @@
 
                             <input
                                 type="text"
-                                id="purchase_return_grand_total"
+                                id="purchaseReturnEditGrandTotal"
                                 class="form-control text-end fw-bold"
                                 value="{{ number_format(
-                                    $purchaseReturn->total_amount,
+                                    (float) $purchaseReturn->total_amount,
                                     2,
                                     '.',
                                     ''
@@ -799,28 +946,47 @@
 
                     </tr>
 
-
-                    {{-- Values submitted to controller --}}
-
-                    <input
-                        type="hidden"
-                        name="sub_total"
-                        id="purchase_return_sub_total_hidden"
-                        value="{{ $purchaseReturn->sub_total }}">
-
-                    <input
-                        type="hidden"
-                        name="gst_total"
-                        id="purchase_return_gst_total_hidden"
-                        value="{{ $purchaseReturn->gst_total }}">
-
-                    <input
-                        type="hidden"
-                        name="grand_total"
-                        id="purchase_return_grand_total_hidden"
-                        value="{{ $purchaseReturn->total_amount }}">
-
                 </table>
+
+
+                {{-- =====================================================
+                     Hidden Totals
+                ====================================================== --}}
+
+                <input
+                    type="hidden"
+                    name="sub_total"
+                    id="purchaseReturnEditSubTotalHidden"
+                    value="{{ number_format(
+                        (float) $purchaseReturn->sub_total,
+                        2,
+                        '.',
+                        ''
+                    ) }}">
+
+
+                <input
+                    type="hidden"
+                    name="gst_total"
+                    id="purchaseReturnEditGstTotalHidden"
+                    value="{{ number_format(
+                        (float) $purchaseReturn->gst_total,
+                        2,
+                        '.',
+                        ''
+                    ) }}">
+
+
+                <input
+                    type="hidden"
+                    name="grand_total"
+                    id="purchaseReturnEditGrandTotalHidden"
+                    value="{{ number_format(
+                        (float) $purchaseReturn->total_amount,
+                        2,
+                        '.',
+                        ''
+                    ) }}">
 
             </div>
 
@@ -835,7 +1001,8 @@
 
             <button
                 type="submit"
-                class="btn btn-success">
+                class="btn btn-success"
+                id="purchaseReturnEditUpdateButton">
 
                 <i class="fas fa-save"></i>
 
@@ -848,9 +1015,9 @@
 
             <a
                 href="{{ route(
-                        'purchase-returns.show',
-                        $purchaseReturn->id
-                    ) }}"
+                    'purchase-returns.show',
+                    $purchaseReturn->id
+                ) }}"
                 class="btn btn-info">
 
                 <i class="fas fa-eye"></i>
@@ -881,204 +1048,105 @@
 @endsection
 
 
+{{-- ================================================================
+     EDIT PURCHASE RETURN JAVASCRIPT
+     IMPORTANT:
+     All selectors below are UNIQUE to EDIT PAGE.
+================================================================ --}}
+
 @push('scripts')
 
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
+    document.addEventListener(
+        'DOMContentLoaded',
+        function() {
 
-        /*
-        |--------------------------------------------------------------------------
-        | Elements
-        |--------------------------------------------------------------------------
-        */
+            /*
+            |--------------------------------------------------------------------------
+            | EDIT FORM
+            |--------------------------------------------------------------------------
+            */
 
-        const rows =
-            document.querySelectorAll(
-                '#returnTable tbody tr'
-            );
-
-
-        /*
-        |--------------------------------------------------------------------------
-        | Calculate Row
-        |--------------------------------------------------------------------------
-        */
-
-        function calculateRow(row) {
-
-            const qtyInput =
-                row.querySelector('.returnQty');
-
-            const priceInput =
-                row.querySelector(
-                    'input[name="price[]"]'
+            const editForm =
+                document.getElementById(
+                    'purchaseReturnEditForm'
                 );
 
-            const gstInput =
-                row.querySelector(
-                    'input[name="gst[]"]'
-                );
 
-            const gstAmountDisplay =
-                row.querySelector('.gstAmount');
+            /*
+            |--------------------------------------------------------------------------
+            | Safety Check
+            |--------------------------------------------------------------------------
+            |
+            | If this form does not exist, stop.
+            |
+            */
 
-            const gstAmountInput =
-                row.querySelector('.gstAmountInput');
-
-            const amountDisplay =
-                row.querySelector('.returnAmount');
-
-            const amountInput =
-                row.querySelector('.amountInput');
-
-
-            if (
-                !qtyInput ||
-                !priceInput ||
-                !gstInput
-            ) {
-
+            if (!editForm) {
                 return;
-
             }
 
 
-            let qty =
-                parseFloat(
-                    qtyInput.value
-                ) || 0;
-
-
-            const maxQty =
-                parseFloat(
-                    qtyInput.max
-                ) || 0;
-
-
             /*
             |--------------------------------------------------------------------------
-            | Validate Quantity
+            | Calculate Single Row
             |--------------------------------------------------------------------------
             */
 
-            if (qty < 0) {
+            function calculatePurchaseReturnEditRow(row) {
 
-                qty = 0;
+                if (!row) {
+                    return;
+                }
 
-                qtyInput.value = '0.00';
-
-            }
-
-
-            if (qty > maxQty) {
-
-                qty = maxQty;
-
-                qtyInput.value =
-                    maxQty.toFixed(2);
-
-            }
-
-
-            const price =
-                parseFloat(
-                    priceInput.value
-                ) || 0;
-
-
-            const gst =
-                parseFloat(
-                    gstInput.value
-                ) || 0;
-
-
-            /*
-            |--------------------------------------------------------------------------
-            | Sub Total
-            |--------------------------------------------------------------------------
-            */
-
-            const subTotal =
-                qty * price;
-
-
-            /*
-            |--------------------------------------------------------------------------
-            | GST
-            |--------------------------------------------------------------------------
-            */
-
-            const gstAmount =
-                subTotal *
-                gst /
-                100;
-
-
-            /*
-            |--------------------------------------------------------------------------
-            | Grand Total
-            |--------------------------------------------------------------------------
-            */
-
-            const total =
-                subTotal +
-                gstAmount;
-
-
-            /*
-            |--------------------------------------------------------------------------
-            | Update Display
-            |--------------------------------------------------------------------------
-            */
-
-            gstAmountDisplay.textContent =
-                gstAmount.toFixed(2);
-
-
-            gstAmountInput.value =
-                gstAmount.toFixed(2);
-
-
-            amountDisplay.textContent =
-                total.toFixed(2);
-
-
-            amountInput.value =
-                total.toFixed(2);
-
-        }
-
-
-        /*
-        |--------------------------------------------------------------------------
-        | Calculate All Totals
-        |--------------------------------------------------------------------------
-        */
-
-        function calculateTotals() {
-
-            let subTotal = 0;
-
-            let gstTotal = 0;
-
-            let grandTotal = 0;
-
-
-            rows.forEach(function(row) {
 
                 const qtyInput =
-                    row.querySelector('.returnQty');
+                    row.querySelector(
+                        '.purchaseReturnEditQty'
+                    );
+
 
                 const priceInput =
                     row.querySelector(
-                        'input[name="price[]"]'
+                        '.purchaseReturnEditPrice'
                     );
+
 
                 const gstInput =
                     row.querySelector(
-                        'input[name="gst[]"]'
+                        '.purchaseReturnEditGst'
                     );
 
+
+                const gstDisplay =
+                    row.querySelector(
+                        '.purchaseReturnEditGstAmount'
+                    );
+
+
+                const gstHidden =
+                    row.querySelector(
+                        '.purchaseReturnEditGstAmountInput'
+                    );
+
+
+                const amountDisplay =
+                    row.querySelector(
+                        '.purchaseReturnEditAmount'
+                    );
+
+
+                const amountHidden =
+                    row.querySelector(
+                        '.purchaseReturnEditAmountInput'
+                    );
+
+
+                /*
+                |--------------------------------------------------------------------------
+                | Required Fields
+                |--------------------------------------------------------------------------
+                */
 
                 if (
                     !qtyInput ||
@@ -1091,11 +1159,64 @@
                 }
 
 
-                const qty =
+                /*
+                |--------------------------------------------------------------------------
+                | Quantity
+                |--------------------------------------------------------------------------
+                */
+
+                let qty =
                     parseFloat(
                         qtyInput.value
                     ) || 0;
 
+
+                const maxQty =
+                    parseFloat(
+                        qtyInput.getAttribute('max')
+                    );
+
+
+                /*
+                |--------------------------------------------------------------------------
+                | Negative Quantity
+                |--------------------------------------------------------------------------
+                */
+
+                if (qty < 0) {
+
+                    qty = 0;
+
+                    qtyInput.value =
+                        '0.00';
+
+                }
+
+
+                /*
+                |--------------------------------------------------------------------------
+                | Maximum Quantity
+                |--------------------------------------------------------------------------
+                */
+
+                if (
+                    !isNaN(maxQty) &&
+                    qty > maxQty
+                ) {
+
+                    qty = maxQty;
+
+                    qtyInput.value =
+                        maxQty.toFixed(2);
+
+                }
+
+
+                /*
+                |--------------------------------------------------------------------------
+                | Price
+                |--------------------------------------------------------------------------
+                */
 
                 const price =
                     parseFloat(
@@ -1103,286 +1224,584 @@
                     ) || 0;
 
 
+                /*
+                |--------------------------------------------------------------------------
+                | GST
+                |--------------------------------------------------------------------------
+                */
+
                 const gst =
                     parseFloat(
                         gstInput.value
                     ) || 0;
 
 
-                const lineSubTotal =
+                /*
+                |--------------------------------------------------------------------------
+                | Calculate Sub Total
+                |--------------------------------------------------------------------------
+                */
+
+                const rowSubTotal =
                     qty * price;
 
 
-                const lineGst =
-                    lineSubTotal *
+                /*
+                |--------------------------------------------------------------------------
+                | Calculate GST
+                |--------------------------------------------------------------------------
+                */
+
+                const rowGst =
+                    rowSubTotal *
                     gst /
                     100;
 
 
-                const lineTotal =
-                    lineSubTotal +
-                    lineGst;
+                /*
+                |--------------------------------------------------------------------------
+                | Calculate Total
+                |--------------------------------------------------------------------------
+                */
+
+                const rowGrandTotal =
+                    rowSubTotal +
+                    rowGst;
 
 
-                subTotal +=
-                    lineSubTotal;
+                /*
+                |--------------------------------------------------------------------------
+                | GST Display
+                |--------------------------------------------------------------------------
+                */
+
+                if (gstDisplay) {
+
+                    gstDisplay.textContent =
+                        rowGst.toFixed(2);
+
+                }
 
 
-                gstTotal +=
-                    lineGst;
+                /*
+                |--------------------------------------------------------------------------
+                | GST Hidden
+                |--------------------------------------------------------------------------
+                */
+
+                if (gstHidden) {
+
+                    gstHidden.value =
+                        rowGst.toFixed(2);
+
+                }
 
 
-                grandTotal +=
-                    lineTotal;
+                /*
+                |--------------------------------------------------------------------------
+                | Amount Display
+                |--------------------------------------------------------------------------
+                */
 
-            });
+                if (amountDisplay) {
 
+                    amountDisplay.textContent =
+                        rowGrandTotal.toFixed(2);
 
-            /*
-            |--------------------------------------------------------------------------
-            | Display Totals
-            |--------------------------------------------------------------------------
-            */
-
-            document.getElementById(
-                    'purchase_return_sub_total'
-                ).value =
-                subTotal.toFixed(2);
+                }
 
 
-            document.getElementById(
-                    'purchase_return_gst_total'
-                ).value =
-                gstTotal.toFixed(2);
+                /*
+                |--------------------------------------------------------------------------
+                | Amount Hidden
+                |--------------------------------------------------------------------------
+                */
 
+                if (amountHidden) {
 
-            document.getElementById(
-                    'purchase_return_grand_total'
-                ).value =
-                grandTotal.toFixed(2);
+                    amountHidden.value =
+                        rowGrandTotal.toFixed(2);
 
-
-            /*
-            |--------------------------------------------------------------------------
-            | Hidden Values
-            |--------------------------------------------------------------------------
-            */
-
-            document.getElementById(
-                    'purchase_return_sub_total_hidden'
-                ).value =
-                subTotal.toFixed(2);
-
-
-            document.getElementById(
-                    'purchase_return_gst_total_hidden'
-                ).value =
-                gstTotal.toFixed(2);
-
-
-            document.getElementById(
-                    'purchase_return_grand_total_hidden'
-                ).value =
-                grandTotal.toFixed(2);
-
-        }
-
-
-        /*
-        |--------------------------------------------------------------------------
-        | Quantity Change
-        |--------------------------------------------------------------------------
-        */
-
-        rows.forEach(function(row) {
-
-            const qtyInput =
-                row.querySelector('.returnQty');
-
-
-            if (!qtyInput) {
-
-                return;
+                }
 
             }
 
 
-            qtyInput.addEventListener(
-                'input',
-                function() {
+            /*
+            |--------------------------------------------------------------------------
+            | Calculate Edit Totals
+            |--------------------------------------------------------------------------
+            */
 
-                    calculateRow(row);
+            function calculatePurchaseReturnEditTotals() {
 
-                    calculateTotals();
+                let subTotal = 0;
+
+                let gstTotal = 0;
+
+                let grandTotal = 0;
+
+
+                /*
+                |--------------------------------------------------------------------------
+                | Only Edit Page Rows
+                |--------------------------------------------------------------------------
+                */
+
+                document
+                    .querySelectorAll(
+                        '#purchaseReturnEditItems tr'
+                    )
+                    .forEach(
+                        function(row) {
+
+                            const qtyInput =
+                                row.querySelector(
+                                    '.purchaseReturnEditQty'
+                                );
+
+
+                            const priceInput =
+                                row.querySelector(
+                                    '.purchaseReturnEditPrice'
+                                );
+
+
+                            const gstInput =
+                                row.querySelector(
+                                    '.purchaseReturnEditGst'
+                                );
+
+
+                            if (
+                                !qtyInput ||
+                                !priceInput ||
+                                !gstInput
+                            ) {
+
+                                return;
+
+                            }
+
+
+                            const qty =
+                                parseFloat(
+                                    qtyInput.value
+                                ) || 0;
+
+
+                            const price =
+                                parseFloat(
+                                    priceInput.value
+                                ) || 0;
+
+
+                            const gst =
+                                parseFloat(
+                                    gstInput.value
+                                ) || 0;
+
+
+                            const rowSubTotal =
+                                qty * price;
+
+
+                            const rowGst =
+                                rowSubTotal *
+                                gst /
+                                100;
+
+
+                            const rowGrandTotal =
+                                rowSubTotal +
+                                rowGst;
+
+
+                            subTotal +=
+                                rowSubTotal;
+
+
+                            gstTotal +=
+                                rowGst;
+
+
+                            grandTotal +=
+                                rowGrandTotal;
+
+                        }
+                    );
+
+
+                /*
+                |--------------------------------------------------------------------------
+                | Display Elements
+                |--------------------------------------------------------------------------
+                */
+
+                const subTotalDisplay =
+                    document.getElementById(
+                        'purchaseReturnEditSubTotal'
+                    );
+
+
+                const gstTotalDisplay =
+                    document.getElementById(
+                        'purchaseReturnEditGstTotal'
+                    );
+
+
+                const grandTotalDisplay =
+                    document.getElementById(
+                        'purchaseReturnEditGrandTotal'
+                    );
+
+
+                /*
+                |--------------------------------------------------------------------------
+                | Hidden Elements
+                |--------------------------------------------------------------------------
+                */
+
+                const subTotalHidden =
+                    document.getElementById(
+                        'purchaseReturnEditSubTotalHidden'
+                    );
+
+
+                const gstTotalHidden =
+                    document.getElementById(
+                        'purchaseReturnEditGstTotalHidden'
+                    );
+
+
+                const grandTotalHidden =
+                    document.getElementById(
+                        'purchaseReturnEditGrandTotalHidden'
+                    );
+
+
+                /*
+                |--------------------------------------------------------------------------
+                | Update Display
+                |--------------------------------------------------------------------------
+                */
+
+                if (subTotalDisplay) {
+
+                    subTotalDisplay.value =
+                        subTotal.toFixed(2);
 
                 }
-            );
 
 
-            qtyInput.addEventListener(
-                'change',
-                function() {
+                if (gstTotalDisplay) {
 
-                    calculateRow(row);
-
-                    calculateTotals();
+                    gstTotalDisplay.value =
+                        gstTotal.toFixed(2);
 
                 }
-            );
-
-        });
 
 
-        /*
-        |--------------------------------------------------------------------------
-        | Initial Calculation
-        |--------------------------------------------------------------------------
-        */
+                if (grandTotalDisplay) {
 
-        rows.forEach(function(row) {
+                    grandTotalDisplay.value =
+                        grandTotal.toFixed(2);
 
-            calculateRow(row);
-
-        });
+                }
 
 
-        calculateTotals();
+                /*
+                |--------------------------------------------------------------------------
+                | Update Hidden Values
+                |--------------------------------------------------------------------------
+                */
+
+                if (subTotalHidden) {
+
+                    subTotalHidden.value =
+                        subTotal.toFixed(2);
+
+                }
 
 
-        /*
-        |--------------------------------------------------------------------------
-        | Form Validation
-        |--------------------------------------------------------------------------
-        */
+                if (gstTotalHidden) {
 
-        document.getElementById(
-            'purchaseReturnForm'
-        ).addEventListener(
-            'submit',
-            function(event) {
+                    gstTotalHidden.value =
+                        gstTotal.toFixed(2);
 
-                let hasQuantity = false;
-
-                let invalidQuantity = false;
+                }
 
 
-                rows.forEach(function(row) {
+                if (grandTotalHidden) {
 
-                    const qtyInput =
-                        row.querySelector('.returnQty');
+                    grandTotalHidden.value =
+                        grandTotal.toFixed(2);
 
-                    const godownSelect =
-                        row.querySelector(
-                            'select[name="godown_id[]"]'
+                }
+
+            }
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | Quantity Input Events
+            |--------------------------------------------------------------------------
+            */
+
+            document
+                .querySelectorAll(
+                    '.purchaseReturnEditQty'
+                )
+                .forEach(
+                    function(qtyInput) {
+
+                        qtyInput.addEventListener(
+                            'input',
+                            function() {
+
+                                const row =
+                                    this.closest('tr');
+
+
+                                calculatePurchaseReturnEditRow(
+                                    row
+                                );
+
+
+                                calculatePurchaseReturnEditTotals();
+
+                            }
                         );
 
 
-                    if (!qtyInput) {
+                        qtyInput.addEventListener(
+                            'change',
+                            function() {
+
+                                const row =
+                                    this.closest('tr');
+
+
+                                calculatePurchaseReturnEditRow(
+                                    row
+                                );
+
+
+                                calculatePurchaseReturnEditTotals();
+
+                            }
+                        );
+
+                    }
+                );
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | Initial Row Calculation
+            |--------------------------------------------------------------------------
+            */
+
+            document
+                .querySelectorAll(
+                    '#purchaseReturnEditItems tr'
+                )
+                .forEach(
+                    function(row) {
+
+                        calculatePurchaseReturnEditRow(
+                            row
+                        );
+
+                    }
+                );
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | Initial Total Calculation
+            |--------------------------------------------------------------------------
+            */
+
+            calculatePurchaseReturnEditTotals();
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | Form Submit Validation
+            |--------------------------------------------------------------------------
+            */
+
+            editForm.addEventListener(
+                'submit',
+                function(event) {
+
+                    let hasQuantity =
+                        false;
+
+
+                    let invalid =
+                        false;
+
+
+                    document
+                        .querySelectorAll(
+                            '#purchaseReturnEditItems tr'
+                        )
+                        .forEach(
+                            function(row) {
+
+                                const qtyInput =
+                                    row.querySelector(
+                                        '.purchaseReturnEditQty'
+                                    );
+
+
+                                const godownSelect =
+                                    row.querySelector(
+                                        '.purchaseReturnEditGodown'
+                                    );
+
+
+                                if (!qtyInput) {
+                                    return;
+                                }
+
+
+                                const qty =
+                                    parseFloat(
+                                        qtyInput.value
+                                    ) || 0;
+
+
+                                const maxQty =
+                                    parseFloat(
+                                        qtyInput.getAttribute('max')
+                                    );
+
+
+                                /*
+                                |--------------------------------------------------------------------------
+                                | At Least One Quantity
+                                |--------------------------------------------------------------------------
+                                */
+
+                                if (qty > 0) {
+
+                                    hasQuantity =
+                                        true;
+
+                                }
+
+
+                                /*
+                                |--------------------------------------------------------------------------
+                                | Quantity Validation
+                                |--------------------------------------------------------------------------
+                                */
+
+                                if (
+                                    qty < 0 ||
+                                    (
+                                        !isNaN(maxQty) &&
+                                        qty > maxQty
+                                    )
+                                ) {
+
+                                    invalid =
+                                        true;
+
+
+                                    qtyInput.classList.add(
+                                        'is-invalid'
+                                    );
+
+                                } else {
+
+                                    qtyInput.classList.remove(
+                                        'is-invalid'
+                                    );
+
+                                }
+
+
+                                /*
+                                |--------------------------------------------------------------------------
+                                | Godown Validation
+                                |--------------------------------------------------------------------------
+                                */
+
+                                if (
+                                    qty > 0 &&
+                                    godownSelect &&
+                                    godownSelect.value === ''
+                                ) {
+
+                                    invalid =
+                                        true;
+
+
+                                    godownSelect.classList.add(
+                                        'is-invalid'
+                                    );
+
+                                } else if (godownSelect) {
+
+                                    godownSelect.classList.remove(
+                                        'is-invalid'
+                                    );
+
+                                }
+
+                            }
+                        );
+
+
+                    /*
+                    |--------------------------------------------------------------------------
+                    | No Quantity
+                    |--------------------------------------------------------------------------
+                    */
+
+                    if (!hasQuantity) {
+
+                        event.preventDefault();
+
+
+                        alert(
+                            'Please enter return quantity for at least one product.'
+                        );
+
 
                         return;
 
                     }
 
 
-                    const qty =
-                        parseFloat(
-                            qtyInput.value
-                        ) || 0;
-
-
-                    const maxQty =
-                        parseFloat(
-                            qtyInput.max
-                        ) || 0;
-
-
                     /*
                     |--------------------------------------------------------------------------
-                    | Quantity
+                    | Invalid Data
                     |--------------------------------------------------------------------------
                     */
 
-                    if (qty > 0) {
+                    if (invalid) {
 
-                        hasQuantity = true;
-
-                    }
+                        event.preventDefault();
 
 
-                    if (
-                        qty < 0 ||
-                        qty > maxQty
-                    ) {
-
-                        invalidQuantity = true;
-
-                    }
-
-
-                    /*
-                    |--------------------------------------------------------------------------
-                    | Godown
-                    |--------------------------------------------------------------------------
-                    */
-
-                    if (
-                        qty > 0 &&
-                        godownSelect &&
-                        godownSelect.value === ''
-                    ) {
-
-                        invalidQuantity = true;
-
-                        godownSelect.classList.add(
-                            'is-invalid'
+                        alert(
+                            'Please check return quantity and Godown.'
                         );
 
+
+                        return;
+
                     }
 
-                });
-
-
-                /*
-                |--------------------------------------------------------------------------
-                | No Items
-                |--------------------------------------------------------------------------
-                */
-
-                if (!hasQuantity) {
-
-                    event.preventDefault();
-
-                    alert(
-                        'Please enter return quantity for at least one product.'
-                    );
-
-                    return;
-
                 }
+            );
 
-
-                /*
-                |--------------------------------------------------------------------------
-                | Invalid Quantity / Godown
-                |--------------------------------------------------------------------------
-                */
-
-                if (invalidQuantity) {
-
-                    event.preventDefault();
-
-                    alert(
-                        'Please check return quantity and Godown.'
-                    );
-
-                    return;
-
-                }
-
-            }
-        );
-
-    });
+        });
 </script>
 
 @endpush

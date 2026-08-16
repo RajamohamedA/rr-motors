@@ -2,15 +2,16 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Company;
 use App\Models\Product;
 use App\Models\Purchase;
-use App\Models\PurchaseReturn;
 use App\Models\PurchaseItem;
+use App\Models\PurchaseReturn;
 use App\Models\PurchaseReturnItem;
+use App\Services\StockService;
+use App\Models\Company;
+use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Exception;
 use Illuminate\Routing\Controllers\HasMiddleware;
 use Illuminate\Routing\Controllers\Middleware;
 
@@ -18,13 +19,14 @@ class PurchaseReturnController extends Controller implements HasMiddleware
 {
     /*
     |--------------------------------------------------------------------------
-    | Middleware
+    | MIDDLEWARE
     |--------------------------------------------------------------------------
     */
 
     public static function middleware(): array
     {
         return [
+
             new Middleware(
                 'permission:purchase-return.view',
                 only: ['index', 'show', 'print']
@@ -44,69 +46,26 @@ class PurchaseReturnController extends Controller implements HasMiddleware
                 'permission:purchase-return.delete',
                 only: ['destroy']
             ),
+
         ];
     }
 
 
     /*
     |--------------------------------------------------------------------------
-    | Get Current Company
-    |--------------------------------------------------------------------------
-    |
-    | Super Admin:
-    |     company_id comes from request
-    |
-    | Normal Admin/User:
-    |     company_id comes from logged-in user
-    |
-    */
-
-    private function getCompanyId(Request $request)
-    {
-        if (auth()->user()->is_super_user) {
-
-            return $request->company_id;
-        }
-
-        return auth()->user()->company_id;
-    }
-
-
-    /*
-    |--------------------------------------------------------------------------
-    | Index
+    | INDEX
     |--------------------------------------------------------------------------
     */
 
     public function index(Request $request)
     {
-        $companyId = $this->getCompanyId($request);
-
         $returns = PurchaseReturn::with([
             'purchase',
             'supplier',
         ])
+            ->when($request->filled('search'), function ($query) use ($request) {
 
-            /*
-            |--------------------------------------------------------------------------
-            | Company Filter
-            |--------------------------------------------------------------------------
-            */
-
-            ->when($companyId, function ($query) use ($companyId) {
-
-                $query->where('company_id', $companyId);
-            })
-
-            /*
-            |--------------------------------------------------------------------------
-            | Search
-            |--------------------------------------------------------------------------
-            */
-
-            ->when($request->search, function ($query) use ($request) {
-
-                $search = $request->search;
+                $search = trim($request->search);
 
                 $query->where(function ($q) use ($search) {
 
@@ -116,18 +75,18 @@ class PurchaseReturnController extends Controller implements HasMiddleware
                         "%{$search}%"
                     )
 
-                        ->orWhereHas('supplier', function ($q2) use ($search) {
+                        ->orWhereHas('supplier', function ($q) use ($search) {
 
-                            $q2->where(
+                            $q->where(
                                 'supplier_name',
                                 'like',
                                 "%{$search}%"
                             );
                         })
 
-                        ->orWhereHas('purchase', function ($q3) use ($search) {
+                        ->orWhereHas('purchase', function ($q) use ($search) {
 
-                            $q3->where(
+                            $q->where(
                                 'purchase_no',
                                 'like',
                                 "%{$search}%"
@@ -135,49 +94,57 @@ class PurchaseReturnController extends Controller implements HasMiddleware
                         });
                 });
             })
-
-            ->latest()
+            ->latest('id')
             ->paginate(15)
             ->withQueryString();
 
-
-        /*
-        |--------------------------------------------------------------------------
-        | Companies for Super Admin
-        |--------------------------------------------------------------------------
-        */
-
-        $companies = collect();
-
-        if (auth()->user()->is_super_user) {
-
-            $companies = Company::where('status', 1)
-                ->orderBy('company_name')
-                ->get();
-        }
-
-
         return view(
             'purchase_returns.index',
-            compact(
-                'returns',
-                'companies'
-            )
+            compact('returns')
         );
     }
 
 
     /*
     |--------------------------------------------------------------------------
-    | Create
+    | CREATE
     |--------------------------------------------------------------------------
     */
 
     public function create()
     {
-        $companies = Company::where('status', 1)
-            ->orderBy('company_name')
-            ->get();
+        $user = auth()->user();
+
+        /*
+        |--------------------------------------------------------------------------
+        | Super Admin
+        |--------------------------------------------------------------------------
+        |
+        | Super admin can select any active company.
+        |
+        */
+
+        if ($user->is_super_user) {
+
+            $companies = Company::where('status', 1)
+                ->orderBy('company_name')
+                ->get();
+        } else {
+
+            /*
+            |--------------------------------------------------------------------------
+            | Normal User
+            |--------------------------------------------------------------------------
+            |
+            | Normal user can only work with their assigned company.
+            |
+            */
+
+            $companies = Company::where('id', $user->company_id)
+                ->where('status', 1)
+                ->get();
+        }
+
 
         return view(
             'purchase_returns.create',
@@ -188,49 +155,27 @@ class PurchaseReturnController extends Controller implements HasMiddleware
 
     /*
     |--------------------------------------------------------------------------
-    | Search Purchase Invoice
+    | SEARCH PURCHASE
     |--------------------------------------------------------------------------
     */
 
     public function search(Request $request)
     {
         $request->validate([
-            'search' => 'nullable|string|max:100',
+            'search' => 'required|string|max:100',
+            'company_id' => 'required|integer|exists:companies,id',
         ]);
 
-
-        /*
-        |--------------------------------------------------------------------------
-        | Company
-        |--------------------------------------------------------------------------
-        */
-
-        $companyId = $this->getCompanyId($request);
-
-
-        if (!$companyId) {
-
-            return response()->json([
-                'message' => 'Please select company first.',
-            ], 422);
-        }
-
-
-        /*
-        |--------------------------------------------------------------------------
-        | Search Purchase
-        |--------------------------------------------------------------------------
-        */
+        $search = trim($request->search);
 
         $purchases = Purchase::with([
             'supplier',
         ])
-
-            ->where('company_id', $companyId)
-
-            ->where(function ($query) use ($request) {
-
-                $search = $request->search;
+            ->where(
+                'company_id',
+                $request->company_id
+            )
+            ->where(function ($query) use ($search) {
 
                 $query->where(
                     'purchase_no',
@@ -247,11 +192,9 @@ class PurchaseReturnController extends Controller implements HasMiddleware
                         );
                     });
             })
-
-            ->latest()
+            ->latest('id')
             ->limit(10)
             ->get();
-
 
         return response()->json($purchases);
     }
@@ -259,86 +202,106 @@ class PurchaseReturnController extends Controller implements HasMiddleware
 
     /*
     |--------------------------------------------------------------------------
-    | Get Purchase Invoice
+    | GET PURCHASE INVOICE
     |--------------------------------------------------------------------------
     */
 
-    public function getInvoice($id, Request $request)
+    public function getInvoice(Request $request, $id)
     {
-        /*
-        |--------------------------------------------------------------------------
-        | Company
-        |--------------------------------------------------------------------------
-        */
-
-        $companyId = $this->getCompanyId($request);
-
-
-        if (!$companyId) {
-
-            return response()->json([
-                'message' => 'Company is required.',
-            ], 422);
-        }
-
-
-        /*
-        |--------------------------------------------------------------------------
-        | Load Purchase
-        |--------------------------------------------------------------------------
-        */
+        $request->validate([
+            'company_id' =>
+            'required|integer|exists:companies,id',
+        ]);
 
         $purchase = Purchase::with([
             'supplier',
-            'store',
             'items.product.unit',
             'items.godown',
         ])
-
-            ->where('company_id', $companyId)
-
+            ->where(
+                'company_id',
+                $request->company_id
+            )
             ->findOrFail($id);
 
 
-        /*
-        |--------------------------------------------------------------------------
-        | Calculate Return Balance
-        |--------------------------------------------------------------------------
-        */
-
         foreach ($purchase->items as $item) {
+
+            /*
+            |--------------------------------------------------------------------------
+            | Already Returned
+            |
+            | IMPORTANT:
+            | Return is calculated using:
+            |
+            | purchase
+            | + product
+            | + godown
+            |--------------------------------------------------------------------------
+            */
 
             $returnedQty = PurchaseReturnItem::where(
                 'product_id',
                 $item->product_id
             )
+                ->where(function ($query) use ($item) {
 
-                ->where(
-                    'godown_id',
-                    $item->godown_id
-                )
+                    if ($item->godown_id === null) {
 
-                ->whereHas(
-                    'purchaseReturn',
-                    function ($query) use ($purchase) {
+                        $query->whereNull('godown_id');
+                    } else {
 
                         $query->where(
-                            'purchase_id',
-                            $purchase->id
+                            'godown_id',
+                            $item->godown_id
                         );
                     }
-                )
+                })
+                ->whereHas('purchaseReturn', function ($query) use ($purchase) {
 
+                    $query->where(
+                        'purchase_id',
+                        $purchase->id
+                    );
+                })
                 ->sum('quantity');
 
 
-            $item->returned_qty = $returnedQty;
+            /*
+            |--------------------------------------------------------------------------
+            | Returned Quantity
+            |--------------------------------------------------------------------------
+            */
 
-            $item->balance_qty =
-                max(
-                    0,
-                    $item->quantity - $returnedQty
-                );
+            $item->returned_qty =
+                (float) $returnedQty;
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | Balance Quantity
+            |--------------------------------------------------------------------------
+            */
+
+            $item->balance_qty = max(
+                0,
+                (float) $item->quantity
+                    - (float) $returnedQty
+            );
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | Godown
+            |--------------------------------------------------------------------------
+            */
+
+            $item->godown_id =
+                $item->godown_id;
+
+            $item->godown_name =
+                $item->godown->godown_name
+                ?? 'Shop / No Godown';
         }
 
 
@@ -348,63 +311,58 @@ class PurchaseReturnController extends Controller implements HasMiddleware
 
     /*
     |--------------------------------------------------------------------------
-    | Store
+    | STORE
     |--------------------------------------------------------------------------
     */
 
-    public function store(Request $request)
-    {
+    public function store(
+        Request $request,
+        StockService $stockService
+    ) {
+
         $request->validate([
 
-            'purchase_id' => [
-                'required',
-                'exists:purchases,id',
-            ],
+            'purchase_id' =>
+            'required|integer|exists:purchases,id',
 
-            'supplier_id' => [
-                'required',
-                'exists:suppliers,id',
-            ],
+            'supplier_id' =>
+            'required|integer|exists:suppliers,id',
 
-            'return_date' => [
-                'required',
-                'date',
-            ],
+            'company_id' =>
+            'required|integer|exists:companies,id',
 
-            'product_id' => [
-                'required',
-                'array',
-            ],
+            'return_date' =>
+            'required|date',
 
-            'godown_id' => [
-                'required',
-                'array',
-            ],
+            'product_id' =>
+            'required|array|min:1',
 
-            'qty' => [
-                'required',
-                'array',
-            ],
+            'product_id.*' =>
+            'required|integer|exists:products,id',
 
-            'price' => [
-                'required',
-                'array',
-            ],
+            'godown_id' =>
+            'required|array',
 
-            'gst' => [
-                'required',
-                'array',
-            ],
+            'godown_id.*' =>
+            'nullable|integer|exists:godowns,id',
 
-            'gst_amount' => [
-                'required',
-                'array',
-            ],
+            'qty' =>
+            'required|array',
 
-            'amount' => [
-                'required',
-                'array',
-            ],
+            'qty.*' =>
+            'numeric|min:0',
+
+            'price' =>
+            'required|array',
+
+            'price.*' =>
+            'numeric|min:0',
+
+            'gst' =>
+            'required|array',
+
+            'gst.*' =>
+            'numeric|min:0',
 
         ]);
 
@@ -415,15 +373,13 @@ class PurchaseReturnController extends Controller implements HasMiddleware
 
             /*
             |--------------------------------------------------------------------------
-            | Get Purchase
+            | PURCHASE
             |--------------------------------------------------------------------------
             */
 
             $purchase = Purchase::with([
                 'items.product',
-                'items.godown',
             ])
-
                 ->findOrFail(
                     $request->purchase_id
                 );
@@ -431,20 +387,45 @@ class PurchaseReturnController extends Controller implements HasMiddleware
 
             /*
             |--------------------------------------------------------------------------
-            | Company Security
+            | Security Check
             |--------------------------------------------------------------------------
             */
 
             if (
-                !auth()->user()->is_super_user &&
-                $purchase->company_id != auth()->user()->company_id
+                (int) $purchase->company_id
+                !==
+                (int) $request->company_id
             ) {
 
-                abort(403);
+                throw new Exception(
+                    'Selected purchase does not belong to selected company.'
+                );
             }
 
 
-            $companyId = $purchase->company_id;
+            /*
+            |--------------------------------------------------------------------------
+            | Supplier Check
+            |--------------------------------------------------------------------------
+            */
+
+            if (
+                (int) $purchase->supplier_id
+                !==
+                (int) $request->supplier_id
+            ) {
+
+                throw new Exception(
+                    'Invalid supplier for selected purchase.'
+                );
+            }
+
+
+            $companyId =
+                (int) $purchase->company_id;
+
+            $storeId =
+                (int) $purchase->store_id;
 
 
             /*
@@ -463,30 +444,46 @@ class PurchaseReturnController extends Controller implements HasMiddleware
 
             /*
             |--------------------------------------------------------------------------
-            | Create Return Header
+            | Totals
+            |--------------------------------------------------------------------------
+            */
+
+            $subTotal = 0;
+            $gstTotal = 0;
+            $grandTotal = 0;
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | Create Header
             |--------------------------------------------------------------------------
             */
 
             $return = PurchaseReturn::create([
 
-                'company_id' => $companyId,
+                'company_id' =>
+                $companyId,
 
-                'purchase_id' => $purchase->id,
+                'purchase_id' =>
+                $purchase->id,
 
-                'supplier_id' => $purchase->supplier_id,
+                'supplier_id' =>
+                $purchase->supplier_id,
 
-                'return_no' => $returnNo,
+                'return_no' =>
+                $returnNo,
 
-                'return_date' => $request->return_date,
+                'return_date' =>
+                $request->return_date,
 
                 'sub_total' =>
-                $request->total_sub_total ?? 0,
+                0,
 
                 'gst_total' =>
-                $request->total_gst ?? 0,
+                0,
 
                 'total_amount' =>
-                $request->total_grand_total ?? 0,
+                0,
 
                 'remarks' =>
                 $request->remarks,
@@ -496,7 +493,7 @@ class PurchaseReturnController extends Controller implements HasMiddleware
 
             /*
             |--------------------------------------------------------------------------
-            | Return Items
+            | ITEMS
             |--------------------------------------------------------------------------
             */
 
@@ -507,53 +504,86 @@ class PurchaseReturnController extends Controller implements HasMiddleware
                 );
 
 
+                /*
+                | Ignore zero quantity rows
+                */
+
                 if ($qty <= 0) {
                     continue;
                 }
 
 
-                $godownId = $request->godown_id[$key] ?? null;
+                /*
+                |--------------------------------------------------------------------------
+                | Godown
+                |--------------------------------------------------------------------------
+                */
+
+                $godownId =
+                    $request->godown_id[$key] ?? null;
 
 
                 /*
                 |--------------------------------------------------------------------------
                 | Find Original Purchase Item
+                |
+                | Match PRODUCT + GODOWN
                 |--------------------------------------------------------------------------
                 */
 
                 $purchaseItem = $purchase->items
-                    ->where('product_id', $productId)
-                    ->where(
-                        'godown_id',
+                    ->first(function ($item) use (
+                        $productId,
                         $godownId
-                    )
-                    ->first();
+                    ) {
+
+                        return
+                            (int) $item->product_id
+                            ===
+                            (int) $productId
+
+                            &&
+
+                            (
+                                $item->godown_id == $godownId
+                            );
+                    });
 
 
                 if (!$purchaseItem) {
 
                     throw new Exception(
-                        'Purchase item not found for selected product/godown.'
+                        "Purchase item not found for product ID {$productId}."
                     );
                 }
 
 
                 /*
                 |--------------------------------------------------------------------------
-                | Already Returned Quantity
+                | Already Returned
+                |
+                | PRODUCT + GODOWN + PURCHASE
                 |--------------------------------------------------------------------------
                 */
 
-                $returnedQty = PurchaseReturnItem::where(
-                    'product_id',
-                    $productId
-                )
-
-                    ->where(
-                        'godown_id',
-                        $godownId
+                $returnedQty =
+                    PurchaseReturnItem::where(
+                        'product_id',
+                        $productId
                     )
+                    ->where(function ($query) use ($godownId) {
 
+                        if ($godownId === null) {
+
+                            $query->whereNull('godown_id');
+                        } else {
+
+                            $query->where(
+                                'godown_id',
+                                $godownId
+                            );
+                        }
+                    })
                     ->whereHas(
                         'purchaseReturn',
                         function ($query) use ($purchase) {
@@ -564,31 +594,117 @@ class PurchaseReturnController extends Controller implements HasMiddleware
                             );
                         }
                     )
-
                     ->sum('quantity');
 
 
                 /*
                 |--------------------------------------------------------------------------
-                | Balance
+                | Available Balance
                 |--------------------------------------------------------------------------
                 */
 
                 $balanceQty =
-                    $purchaseItem->quantity -
-                    $returnedQty;
+                    (float) $purchaseItem->quantity
+                    -
+                    (float) $returnedQty;
 
+
+                $balanceQty =
+                    max(0, $balanceQty);
+
+
+                /*
+                |--------------------------------------------------------------------------
+                | Validate Quantity
+                |--------------------------------------------------------------------------
+                */
 
                 if ($qty > $balanceQty) {
 
                     throw new Exception(
-                        'Return quantity exceeds balance for product: '
-                            . (
-                                $purchaseItem->product->product_name
-                                ?? 'Unknown Product'
+
+                        'Return quantity exceeds available balance for product: '
+                            .
+                            $purchaseItem->product->product_name
+                            .
+                            '. Available: '
+                            .
+                            number_format(
+                                $balanceQty,
+                                2
                             )
                     );
                 }
+
+
+                /*
+                |--------------------------------------------------------------------------
+                | Product
+                |--------------------------------------------------------------------------
+                */
+
+                $product =
+                    Product::findOrFail(
+                        $productId
+                    );
+
+
+                /*
+                |--------------------------------------------------------------------------
+                | Price
+                |--------------------------------------------------------------------------
+                */
+
+                $price = (float) (
+                    $request->price[$key] ?? 0
+                );
+
+
+                /*
+                |--------------------------------------------------------------------------
+                | GST
+                |--------------------------------------------------------------------------
+                */
+
+                $gstPercent = (float) (
+                    $request->gst[$key] ?? 0
+                );
+
+
+                /*
+                |--------------------------------------------------------------------------
+                | Calculate Amount Server Side
+                |--------------------------------------------------------------------------
+                */
+
+                $basicAmount =
+                    $qty * $price;
+
+
+                $gstAmount =
+                    $basicAmount
+                    *
+                    $gstPercent
+                    /
+                    100;
+
+
+                $lineTotal =
+                    $basicAmount
+                    +
+                    $gstAmount;
+
+
+                $subTotal +=
+                    $basicAmount;
+
+
+                $gstTotal +=
+                    $gstAmount;
+
+
+                $grandTotal +=
+                    $lineTotal;
 
 
                 /*
@@ -612,55 +728,84 @@ class PurchaseReturnController extends Controller implements HasMiddleware
                     $qty,
 
                     'purchase_price' =>
-                    $request->price[$key] ?? 0,
+                    $price,
 
                     'gst_percent' =>
-                    $request->gst[$key] ?? 0,
+                    $gstPercent,
 
                     'gst_amount' =>
-                    $request->gst_amount[$key] ?? 0,
+                    $gstAmount,
 
                     'line_total' =>
-                    $request->amount[$key] ?? 0,
+                    $lineTotal,
 
                 ]);
 
 
                 /*
                 |--------------------------------------------------------------------------
-                | Stock
+                | Reduce Stock
                 |--------------------------------------------------------------------------
-                |
-                | IMPORTANT:
-                | For now this keeps your existing Product stock logic.
-                | Replace this section with StockService once your
-                | godown stock ledger is fully connected.
-                |
                 */
 
-                $product = Product::find(
-                    $productId
+                $stockService->decreaseStock(
+
+                    $product,
+
+                    $qty,
+
+                    'PURCHASE_RETURN',
+
+                    $companyId,
+
+                    $storeId,
+
+                    $godownId,
+
+                    $return->id,
+
+                    $return->return_no,
+
+                    $price,
+
+                    'Purchase Return'
+
                 );
-
-
-                if ($product) {
-
-                    if (
-                        $product->current_stock < $qty
-                    ) {
-
-                        throw new Exception(
-                            'Insufficient stock for '
-                                . $product->product_name
-                        );
-                    }
-
-
-                    $product->current_stock -= $qty;
-
-                    $product->save();
-                }
             }
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | At Least One Item
+            |--------------------------------------------------------------------------
+            */
+
+            if ($grandTotal <= 0) {
+
+                throw new Exception(
+                    'Please enter return quantity for at least one product.'
+                );
+            }
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | Update Header Totals
+            |--------------------------------------------------------------------------
+            */
+
+            $return->update([
+
+                'sub_total' =>
+                $subTotal,
+
+                'gst_total' =>
+                $gstTotal,
+
+                'total_amount' =>
+                $grandTotal,
+
+            ]);
 
 
             DB::commit();
@@ -676,7 +821,6 @@ class PurchaseReturnController extends Controller implements HasMiddleware
 
             DB::rollBack();
 
-
             return back()
                 ->withInput()
                 ->with(
@@ -689,33 +833,19 @@ class PurchaseReturnController extends Controller implements HasMiddleware
 
     /*
     |--------------------------------------------------------------------------
-    | Show
+    | SHOW
     |--------------------------------------------------------------------------
     */
 
-    public function show($id, Request $request)
+    public function show($id)
     {
-        $companyId = $this->getCompanyId($request);
-
-
-        $query = PurchaseReturn::with([
+        $return = PurchaseReturn::with([
             'purchase',
             'supplier',
             'items.product.unit',
             'items.godown',
-        ]);
-
-
-        if ($companyId) {
-
-            $query->where(
-                'company_id',
-                $companyId
-            );
-        }
-
-
-        $return = $query->findOrFail($id);
+        ])
+            ->findOrFail($id);
 
 
         return view(
@@ -727,115 +857,169 @@ class PurchaseReturnController extends Controller implements HasMiddleware
 
     /*
     |--------------------------------------------------------------------------
-    | Edit
+    | EDIT
     |--------------------------------------------------------------------------
     */
 
-    public function edit($id, Request $request)
+    public function edit($id)
     {
-        $companyId = $this->getCompanyId($request);
-
-
-        $query = PurchaseReturn::with([
+        $purchaseReturn = PurchaseReturn::with([
             'supplier',
-            'purchase',
-            'items.product',
+            'purchase.company',
+            'purchase.store',
+            'items.product.unit',
             'items.godown',
-        ]);
-
-
-        if ($companyId) {
-
-            $query->where(
-                'company_id',
-                $companyId
-            );
-        }
-
-
-        $purchaseReturn = $query->findOrFail($id);
-
-
-        /*
-        |--------------------------------------------------------------------------
-        | Calculate Balance
-        |--------------------------------------------------------------------------
-        */
+        ])->findOrFail($id);
 
         foreach ($purchaseReturn->items as $item) {
 
-            $purchaseItem = PurchaseItem::where(
+            /*
+            |--------------------------------------------------------------------------
+            | Find Original Purchase Item
+            |--------------------------------------------------------------------------
+            */
+
+            $purchaseItemQuery = PurchaseItem::where(
                 'purchase_id',
                 $purchaseReturn->purchase_id
             )
-
                 ->where(
                     'product_id',
                     $item->product_id
-                )
+                );
 
-                ->where(
+            /*
+            |--------------------------------------------------------------------------
+            | Match Godown
+            |--------------------------------------------------------------------------
+            */
+
+            if ($item->godown_id === null) {
+
+                $purchaseItemQuery->whereNull('godown_id');
+            } else {
+
+                $purchaseItemQuery->where(
                     'godown_id',
                     $item->godown_id
-                )
+                );
+            }
 
-                ->first();
+            $purchaseItem = $purchaseItemQuery->first();
 
+
+            /*
+            |--------------------------------------------------------------------------
+            | Purchase Item Found
+            |--------------------------------------------------------------------------
+            */
 
             if ($purchaseItem) {
 
-                $alreadyReturned =
-                    PurchaseReturnItem::where(
-                        'product_id',
-                        $item->product_id
-                    )
+                /*
+                |--------------------------------------------------------------------------
+                | Previous Returns
+                | Excluding Current Return
+                |--------------------------------------------------------------------------
+                */
 
+                $alreadyReturnedQuery = PurchaseReturnItem::where(
+                    'product_id',
+                    $item->product_id
+                )
                     ->where(
-                        'godown_id',
-                        $item->godown_id
+                        'purchase_return_id',
+                        '!=',
+                        $purchaseReturn->id
                     )
-
                     ->whereHas(
                         'purchaseReturn',
-                        function ($query) use (
-                            $purchaseReturn
-                        ) {
+                        function ($q) use ($purchaseReturn) {
 
-                            $query->where(
+                            $q->where(
                                 'purchase_id',
                                 $purchaseReturn->purchase_id
                             );
                         }
-                    )
+                    );
 
-                    ->where(
-                        'id',
-                        '!=',
-                        $item->id
-                    )
 
+                /*
+                |--------------------------------------------------------------------------
+                | Match Godown
+                |--------------------------------------------------------------------------
+                */
+
+                if ($item->godown_id === null) {
+
+                    $alreadyReturnedQuery->whereNull('godown_id');
+                } else {
+
+                    $alreadyReturnedQuery->where(
+                        'godown_id',
+                        $item->godown_id
+                    );
+                }
+
+
+                /*
+                |--------------------------------------------------------------------------
+                | Previous Returned Quantity
+                |--------------------------------------------------------------------------
+                */
+
+                $alreadyReturned = (float) $alreadyReturnedQuery
                     ->sum('quantity');
 
 
+                /*
+                |--------------------------------------------------------------------------
+                | Current Return Quantity
+                |--------------------------------------------------------------------------
+                */
+
+                $currentReturnQty = (float) $item->quantity;
+
+
+                /*
+                |--------------------------------------------------------------------------
+                | Maximum Quantity Available For Current Edit
+                |--------------------------------------------------------------------------
+                |
+                | Current return is excluded above.
+                |
+                */
+
+                $balanceQty = max(
+                    0,
+                    (float) $purchaseItem->quantity
+                        - $alreadyReturned
+                );
+
+
+                /*
+                |--------------------------------------------------------------------------
+                | Attach Purchase Information
+                |--------------------------------------------------------------------------
+                */
+
                 $item->purchaseItem = (object) [
 
-                    'quantity' =>
-                    $purchaseItem->quantity,
+                    // Original purchased quantity
+                    'quantity' => (float) $purchaseItem->quantity,
 
-                    'returned_qty' =>
-                    $alreadyReturned,
+                    // Previous returns excluding current return
+                    'returned_qty' => $alreadyReturned,
 
-                    'balance_qty' =>
-                    max(
-                        0,
-                        $purchaseItem->quantity
-                            - $alreadyReturned
-                    ),
+                    // Current return being edited
+                    'current_return_qty' => $currentReturnQty,
+
+                    // Maximum allowed for current return
+                    'balance_qty' => $balanceQty,
 
                 ];
             }
         }
-
 
         return view(
             'purchase_returns.edit',
@@ -846,14 +1030,53 @@ class PurchaseReturnController extends Controller implements HasMiddleware
 
     /*
     |--------------------------------------------------------------------------
-    | Update
+    | UPDATE
     |--------------------------------------------------------------------------
     */
 
     public function update(
         Request $request,
-        $id
+        $id,
+        StockService $stockService
     ) {
+
+        $request->validate([
+
+            'return_date' =>
+            'required|date',
+
+            'product_id' =>
+            'required|array|min:1',
+
+            'product_id.*' =>
+            'required|integer|exists:products,id',
+
+            'godown_id' =>
+            'required|array',
+
+            'godown_id.*' =>
+            'nullable|integer|exists:godowns,id',
+
+            'qty' =>
+            'required|array',
+
+            'qty.*' =>
+            'numeric|min:0',
+
+            'price' =>
+            'required|array',
+
+            'price.*' =>
+            'numeric|min:0',
+
+            'gst' =>
+            'required|array',
+
+            'gst.*' =>
+            'numeric|min:0',
+
+        ]);
+
 
         DB::beginTransaction();
 
@@ -861,55 +1084,68 @@ class PurchaseReturnController extends Controller implements HasMiddleware
 
             /*
             |--------------------------------------------------------------------------
-            | Load Return
+            | Existing Return
             |--------------------------------------------------------------------------
             */
 
-            $purchaseReturn = PurchaseReturn::with(
-                'items'
-            )->findOrFail($id);
+            $purchaseReturn =
+                PurchaseReturn::with([
+                    'items',
+                    'purchase.items.product',
+                ])
+                ->findOrFail($id);
+
+
+            $purchase =
+                $purchaseReturn->purchase;
+
+
+            $companyId =
+                (int) $purchase->company_id;
+
+
+            $storeId =
+                (int) $purchase->store_id;
 
 
             /*
             |--------------------------------------------------------------------------
-            | Company Security
+            | STEP 1
+            | Restore Old Return Stock
             |--------------------------------------------------------------------------
             */
 
-            if (
-                !auth()->user()->is_super_user &&
-                $purchaseReturn->company_id !=
-                auth()->user()->company_id
-            ) {
+            foreach ($purchaseReturn->items as $oldItem) {
 
-                abort(403);
-            }
+                $product =
+                    Product::findOrFail(
+                        $oldItem->product_id
+                    );
 
 
-            /*
-            |--------------------------------------------------------------------------
-            | Restore Previous Stock
-            |--------------------------------------------------------------------------
-            */
+                $stockService->increaseStock(
 
-            foreach (
-                $purchaseReturn->items
-                as $oldItem
-            ) {
+                    $product,
 
-                $product = Product::find(
-                    $oldItem->product_id
+                    (float) $oldItem->quantity,
+
+                    'PURCHASE_RETURN_EDIT_REVERSE',
+
+                    $companyId,
+
+                    $storeId,
+
+                    $oldItem->godown_id,
+
+                    $purchaseReturn->id,
+
+                    $purchaseReturn->return_no,
+
+                    (float) $oldItem->purchase_price,
+
+                    'Reverse old Purchase Return'
+
                 );
-
-
-                if ($product) {
-
-                    // Reverse old return
-                    $product->current_stock +=
-                        $oldItem->quantity;
-
-                    $product->save();
-                }
             }
 
 
@@ -927,40 +1163,23 @@ class PurchaseReturnController extends Controller implements HasMiddleware
 
             /*
             |--------------------------------------------------------------------------
-            | Update Header
+            | New Totals
             |--------------------------------------------------------------------------
             */
 
-            $purchaseReturn->update([
-
-                'return_date' =>
-                $request->return_date,
-
-                'remarks' =>
-                $request->remarks,
-
-                'sub_total' =>
-                $request->sub_total ?? 0,
-
-                'gst_total' =>
-                $request->gst_total ?? 0,
-
-                'total_amount' =>
-                $request->grand_total ?? 0,
-
-            ]);
+            $subTotal = 0;
+            $gstTotal = 0;
+            $grandTotal = 0;
 
 
             /*
             |--------------------------------------------------------------------------
+            | STEP 2
             | Create New Items
             |--------------------------------------------------------------------------
             */
 
-            foreach (
-                $request->product_id
-                as $key => $productId
-            ) {
+            foreach ($request->product_id as $key => $productId) {
 
                 $qty = (float) (
                     $request->qty[$key] ?? 0
@@ -972,47 +1191,55 @@ class PurchaseReturnController extends Controller implements HasMiddleware
                 }
 
 
+                /*
+                |--------------------------------------------------------------------------
+                | Godown
+                |--------------------------------------------------------------------------
+                */
+
                 $godownId =
-                    $request->godown_id[$key]
-                    ?? null;
+                    $request->godown_id[$key] ?? null;
 
 
                 /*
                 |--------------------------------------------------------------------------
                 | Purchase Item
+                |
+                | PRODUCT + GODOWN
                 |--------------------------------------------------------------------------
                 */
 
                 $purchaseItem =
-                    PurchaseItem::where(
-                        'purchase_id',
-                        $purchaseReturn->purchase_id
-                    )
-
-                    ->where(
-                        'product_id',
-                        $productId
-                    )
-
-                    ->where(
-                        'godown_id',
+                    $purchase->items
+                    ->first(function ($item) use (
+                        $productId,
                         $godownId
-                    )
+                    ) {
 
-                    ->first();
+                        return
+                            (int) $item->product_id
+                            ===
+                            (int) $productId
+
+                            &&
+
+                            $item->godown_id == $godownId;
+                    });
 
 
                 if (!$purchaseItem) {
 
                     throw new Exception(
-                        'Purchase item not found.'
+                        "Purchase item not found for product ID {$productId}."
                     );
                 }
 
 
                 /*
                 |--------------------------------------------------------------------------
-                | Already Returned
+                | Previous Returns
+                |
+                | Current return has already been deleted.
                 |--------------------------------------------------------------------------
                 */
 
@@ -1021,17 +1248,22 @@ class PurchaseReturnController extends Controller implements HasMiddleware
                         'product_id',
                         $productId
                     )
+                    ->where(function ($query) use ($godownId) {
 
-                    ->where(
-                        'godown_id',
-                        $godownId
-                    )
+                        if ($godownId === null) {
 
+                            $query->whereNull('godown_id');
+                        } else {
+
+                            $query->where(
+                                'godown_id',
+                                $godownId
+                            );
+                        }
+                    })
                     ->whereHas(
                         'purchaseReturn',
-                        function ($query) use (
-                            $purchaseReturn
-                        ) {
+                        function ($query) use ($purchaseReturn) {
 
                             $query->where(
                                 'purchase_id',
@@ -1039,27 +1271,110 @@ class PurchaseReturnController extends Controller implements HasMiddleware
                             );
                         }
                     )
-
                     ->sum('quantity');
 
 
-                $balance =
-                    $purchaseItem->quantity
-                    - $alreadyReturned;
+                /*
+                |--------------------------------------------------------------------------
+                | Balance
+                |--------------------------------------------------------------------------
+                */
+
+                $balanceQty = max(
+                    0,
+                    (float) $purchaseItem->quantity
+                        -
+                        (float) $alreadyReturned
+                );
 
 
-                if ($qty > $balance) {
+                /*
+                |--------------------------------------------------------------------------
+                | Validate Quantity
+                |--------------------------------------------------------------------------
+                */
+
+                if ($qty > $balanceQty) {
 
                     throw new Exception(
-                        'Return quantity exceeds balance for product: '
-                            . (
-                                $purchaseItem
-                                ->product
-                                ->product_name
-                                ?? 'Unknown Product'
+
+                        'Return quantity exceeds available balance for product: '
+                            .
+                            $purchaseItem->product->product_name
+                            .
+                            '. Available: '
+                            .
+                            number_format(
+                                $balanceQty,
+                                2
                             )
+
                     );
                 }
+
+
+                /*
+                |--------------------------------------------------------------------------
+                | Product
+                |--------------------------------------------------------------------------
+                */
+
+                $product =
+                    Product::findOrFail(
+                        $productId
+                    );
+
+
+                /*
+                |--------------------------------------------------------------------------
+                | Price / GST
+                |--------------------------------------------------------------------------
+                */
+
+                $price = (float) (
+                    $request->price[$key] ?? 0
+                );
+
+
+                $gstPercent = (float) (
+                    $request->gst[$key] ?? 0
+                );
+
+
+                /*
+                |--------------------------------------------------------------------------
+                | Calculate
+                |--------------------------------------------------------------------------
+                */
+
+                $basicAmount =
+                    $qty * $price;
+
+
+                $gstAmount =
+                    $basicAmount
+                    *
+                    $gstPercent
+                    /
+                    100;
+
+
+                $lineTotal =
+                    $basicAmount
+                    +
+                    $gstAmount;
+
+
+                $subTotal +=
+                    $basicAmount;
+
+
+                $gstTotal +=
+                    $gstAmount;
+
+
+                $grandTotal +=
+                    $lineTotal;
 
 
                 /*
@@ -1083,50 +1398,90 @@ class PurchaseReturnController extends Controller implements HasMiddleware
                     $qty,
 
                     'purchase_price' =>
-                    $request->price[$key] ?? 0,
+                    $price,
 
                     'gst_percent' =>
-                    $request->gst[$key] ?? 0,
+                    $gstPercent,
 
                     'gst_amount' =>
-                    $request->gst_amount[$key] ?? 0,
+                    $gstAmount,
 
                     'line_total' =>
-                    $request->amount[$key] ?? 0,
+                    $lineTotal,
 
                 ]);
 
 
                 /*
                 |--------------------------------------------------------------------------
-                | Reduce Stock
+                | Decrease Stock
                 |--------------------------------------------------------------------------
                 */
 
-                $product = Product::find(
-                    $productId
+                $stockService->decreaseStock(
+
+                    $product,
+
+                    $qty,
+
+                    'PURCHASE_RETURN',
+
+                    $companyId,
+
+                    $storeId,
+
+                    $godownId,
+
+                    $purchaseReturn->id,
+
+                    $purchaseReturn->return_no,
+
+                    $price,
+
+                    'Purchase Return'
+
                 );
-
-
-                if ($product) {
-
-                    if (
-                        $product->current_stock < $qty
-                    ) {
-
-                        throw new Exception(
-                            'Insufficient stock for '
-                                . $product->product_name
-                        );
-                    }
-
-
-                    $product->current_stock -=
-                        $qty;
-
-                    $product->save();
-                }
             }
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | At Least One Item
+            |--------------------------------------------------------------------------
+            */
+
+            if ($grandTotal <= 0) {
+
+                throw new Exception(
+                    'Please enter return quantity for at least one product.'
+                );
+            }
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | Update Header
+            |--------------------------------------------------------------------------
+            */
+
+            $purchaseReturn->update([
+
+                'return_date' =>
+                $request->return_date,
+
+                'sub_total' =>
+                $subTotal,
+
+                'gst_total' =>
+                $gstTotal,
+
+                'total_amount' =>
+                $grandTotal,
+
+                'remarks' =>
+                $request->remarks,
+
+            ]);
 
 
             DB::commit();
@@ -1142,7 +1497,6 @@ class PurchaseReturnController extends Controller implements HasMiddleware
 
             DB::rollBack();
 
-
             return back()
                 ->withInput()
                 ->with(
@@ -1155,75 +1509,76 @@ class PurchaseReturnController extends Controller implements HasMiddleware
 
     /*
     |--------------------------------------------------------------------------
-    | Destroy
+    | DESTROY
     |--------------------------------------------------------------------------
     */
 
     public function destroy(
         $id,
-        Request $request
+        StockService $stockService
     ) {
 
         DB::beginTransaction();
 
         try {
 
-            /*
-            |--------------------------------------------------------------------------
-            | Load Return
-            |--------------------------------------------------------------------------
-            */
+            $purchaseReturn =
+                PurchaseReturn::with([
+                    'items',
+                    'purchase',
+                ])
+                ->findOrFail($id);
+
 
             $companyId =
-                $this->getCompanyId($request);
+                (int) $purchaseReturn
+                    ->purchase
+                    ->company_id;
 
 
-            $query = PurchaseReturn::with(
-                'items'
-            );
-
-
-            if ($companyId) {
-
-                $query->where(
-                    'company_id',
-                    $companyId
-                );
-            }
-
-
-            $purchaseReturn =
-                $query->findOrFail($id);
+            $storeId =
+                (int) $purchaseReturn
+                    ->purchase
+                    ->store_id;
 
 
             /*
             |--------------------------------------------------------------------------
-            | Reverse Stock
+            | Restore Stock
             |--------------------------------------------------------------------------
             */
 
-            foreach (
-                $purchaseReturn->items
-                as $item
-            ) {
+            foreach ($purchaseReturn->items as $item) {
 
-                $product = Product::find(
-                    $item->product_id
+                $product =
+                    Product::findOrFail(
+                        $item->product_id
+                    );
+
+
+                $stockService->increaseStock(
+
+                    $product,
+
+                    (float) $item->quantity,
+
+                    'PURCHASE_RETURN_DELETE',
+
+                    $companyId,
+
+                    $storeId,
+
+                    $item->godown_id,
+
+                    $purchaseReturn->id,
+
+                    $purchaseReturn->return_no,
+
+                    (float) $item->purchase_price,
+
+                    'Reverse deleted Purchase Return'
+
                 );
-
-
-                if ($product) {
-
-                    /*
-                    | Purchase Return reduced stock.
-                    | Deleting the return restores stock.
-                    */
-
-                    $product->current_stock +=
-                        $item->quantity;
-
-                    $product->save();
-                }
             }
 
 
@@ -1261,7 +1616,6 @@ class PurchaseReturnController extends Controller implements HasMiddleware
 
             DB::rollBack();
 
-
             return back()
                 ->with(
                     'error',
@@ -1273,38 +1627,19 @@ class PurchaseReturnController extends Controller implements HasMiddleware
 
     /*
     |--------------------------------------------------------------------------
-    | Print
+    | PRINT
     |--------------------------------------------------------------------------
     */
 
-    public function print(
-        $id,
-        Request $request
-    ) {
-
-        $companyId =
-            $this->getCompanyId($request);
-
-
-        $query = PurchaseReturn::with([
+    public function print($id)
+    {
+        $purchaseReturn = PurchaseReturn::with([
             'purchase',
             'supplier',
-            'items.product',
+            'items.product.unit',
             'items.godown',
-        ]);
-
-
-        if ($companyId) {
-
-            $query->where(
-                'company_id',
-                $companyId
-            );
-        }
-
-
-        $purchaseReturn =
-            $query->findOrFail($id);
+        ])
+            ->findOrFail($id);
 
 
         return view(

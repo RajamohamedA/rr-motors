@@ -24,7 +24,6 @@ import './sales-return';
 
 // add purchase js
 import './purchase-return';
-import './purchase-return-edit';
 import './purchase_report';
 
 

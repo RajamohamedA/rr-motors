@@ -6,43 +6,75 @@ document.addEventListener('DOMContentLoaded', function () {
 
     $('#purchase_search').on('keyup', function () {
 
-        let keyword = $(this).val();
+        let keyword = $(this).val().trim();
 
         if (keyword.length < 2) {
 
-            $('#purchaseResult').hide().html('');
+            $('#purchaseResult')
+                .hide()
+                .html('');
 
             return;
-
         }
 
         $.get($('#searchUrl').val(), {
-
             search: keyword
-
-        }, function (rows) {
+        })
+        .done(function (rows) {
 
             let html = '';
 
-            rows.forEach(function (row) {
+            if (!rows.length) {
 
-                html += `
-                <a href="#"
-                   class="list-group-item list-group-item-action purchaseItem"
-                   data-id="${row.id}">
+                html = `
+                    <div class="list-group-item text-muted">
+                        No purchase found
+                    </div>
+                `;
 
-                    <strong>${row.purchase_no}</strong><br>
+            } else {
 
-                    <small>${row.supplier.supplier_name}</small>
+                rows.forEach(function (row) {
 
-                </a>`;
-            });
+                    html += `
+                        <a href="#"
+                           class="list-group-item list-group-item-action purchaseItem"
+                           data-id="${row.id}">
 
-            $('#purchaseResult').html(html).show();
+                            <strong>
+                                ${row.purchase_no}
+                            </strong>
+
+                            <br>
+
+                            <small>
+                                ${row.supplier?.supplier_name ?? ''}
+                            </small>
+
+                        </a>
+                    `;
+                });
+            }
+
+            $('#purchaseResult')
+                .html(html)
+                .show();
+
+        })
+        .fail(function () {
+
+            $('#purchaseResult')
+                .html(`
+                    <div class="list-group-item text-danger">
+                        Error loading purchase
+                    </div>
+                `)
+                .show();
 
         });
 
     });
+
 
     // =============================================
     // SELECT PURCHASE
@@ -54,17 +86,29 @@ document.addEventListener('DOMContentLoaded', function () {
 
         let id = $(this).data('id');
 
-        $.get($('#purchaseUrl').val() + '/' + id, function (purchase) {
+        $.get(
+            $('#purchaseUrl').val() + '/' + id
+        )
+        .done(function (purchase) {
 
             loadPurchase(purchase);
 
-            $('#purchase_search').val(purchase.purchase_no);
+            $('#purchase_search')
+                .val(purchase.purchase_no);
 
-            $('#purchaseResult').hide();
+            $('#purchaseResult')
+                .hide()
+                .html('');
+
+        })
+        .fail(function () {
+
+            alert('Unable to load purchase.');
 
         });
 
     });
+
 
     // =============================================
     // LOAD PURCHASE
@@ -76,117 +120,202 @@ document.addEventListener('DOMContentLoaded', function () {
 
         $('#supplier_id').val(purchase.supplier_id);
 
-        $('#supplier_name').val(purchase.supplier.supplier_name);
+        $('#supplier_name').val(
+            purchase.supplier?.supplier_name ?? ''
+        );
 
-        $('#supplier_mobile').val(purchase.supplier.mobile ?? '');
+        $('#supplier_mobile').val(
+            purchase.supplier?.mobile ?? ''
+        );
 
         $('#supplier_address').val(
-            purchase.supplier.address ??
-            purchase.supplier.billing_address ??
+            purchase.supplier?.address ??
+            purchase.supplier?.billing_address ??
             ''
         );
 
+
         let html = '';
+
+        if (!purchase.items || purchase.items.length === 0) {
+
+            html = `
+                <tr>
+                    <td colspan="11"
+                        class="text-center text-muted">
+
+                        No items found in this purchase.
+
+                    </td>
+                </tr>
+            `;
+
+            $('#returnItems').html(html);
+
+            calculateTotals();
+
+            return;
+        }
+
 
         purchase.items.forEach(function (item) {
 
+            let purchased = parseFloat(item.quantity) || 0;
+
+            let returned = parseFloat(item.returned_qty) || 0;
+
+            let balance = parseFloat(item.balance_qty) || 0;
+
+            let price = parseFloat(item.purchase_price) || 0;
+
+            let gst = parseFloat(item.gst_percent) || 0;
+
+            let godownId = item.godown_id ?? '';
+
+            let godownName = item.godown?.godown_name ?? 'Shop / No Godown';
+
+
             html += `
-            <tr>
+                <tr>
 
-                <td>
+                    <!-- Product Code -->
+                    <td>
 
-                    ${item.product.product_code}
+                        ${item.product?.product_code ?? ''}
 
-                    <input type="hidden"
-                           name="product_id[]"
-                           value="${item.product_id}">
+                        <input
+                            type="hidden"
+                            name="product_id[]"
+                            value="${item.product_id}">
 
-                </td>
+                    </td>
 
-                <td>
 
-                    ${item.product.product_name}
+                    <!-- Product -->
+                    <td>
 
-                </td>
+                        ${item.product?.product_name ?? ''}
 
-                <td class="text-center">
+                    </td>
 
-                    ${item.quantity}
 
-                </td>
+                    <!-- Godown -->
+                    <td>
 
-                <td class="text-center">
+                        ${godownName}
 
-                    ${item.returned_qty}
+                        <input
+                            type="hidden"
+                            name="godown_id[]"
+                            value="${godownId}">
 
-                </td>
+                    </td>
 
-                <td class="text-center">
 
-                    <strong>${item.balance_qty}</strong>
+                    <!-- Purchased -->
+                    <td class="text-center">
 
-                </td>
+                        ${purchased.toFixed(2)}
 
-                <td>
+                    </td>
 
-                    <input
-                        type="number"
-                        class="form-control returnQty text-end"
-                        name="qty[]"
-                        value="0"
-                        min="0"
-                        max="${item.balance_qty}"
-                        data-price="${item.purchase_price}"
-                        data-gst="${item.gst_percent}">
 
-                </td>
+                    <!-- Returned -->
+                    <td class="text-center">
 
-                <td class="text-end">
+                        ${returned.toFixed(2)}
 
-                    ${parseFloat(item.purchase_price).toFixed(2)}
+                    </td>
 
-                    <input
-                        type="hidden"
-                        name="price[]"
-                        value="${item.purchase_price}">
 
-                </td>
+                    <!-- Balance -->
+                    <td class="text-center">
 
-                <td class="text-end">
+                        <strong>
+                            ${balance.toFixed(2)}
+                        </strong>
 
-                    ${item.gst_percent}
+                    </td>
 
-                    <input
-                        type="hidden"
-                        name="gst[]"
-                        value="${item.gst_percent}">
 
-                </td>
+                    <!-- Return Qty -->
+                    <td>
 
-                <td class="text-end">
+                        <input
+                            type="number"
+                            class="form-control returnQty text-end"
+                            name="qty[]"
+                            value="0"
+                            min="0"
+                            max="${balance}"
+                            step="0.01"
 
-                    <span class="gstAmount">0.00</span>
+                            data-price="${price}"
+                            data-gst="${gst}">
 
-                    <input
-                        type="hidden"
-                        name="gst_amount[]"
-                        value="0">
+                    </td>
 
-                </td>
 
-                <td class="text-end">
+                    <!-- Rate -->
+                    <td class="text-end">
 
-                    <span class="returnAmount">0.00</span>
+                        ${price.toFixed(2)}
 
-                    <input
-                        type="hidden"
-                        name="amount[]"
-                        value="0">
+                        <input
+                            type="hidden"
+                            name="price[]"
+                            value="${price}">
 
-                </td>
+                    </td>
 
-            </tr>`;
+
+                    <!-- GST -->
+                    <td class="text-end">
+
+                        ${gst.toFixed(2)}%
+
+                        <input
+                            type="hidden"
+                            name="gst[]"
+                            value="${gst}">
+
+                    </td>
+
+
+                    <!-- GST Amount -->
+                    <td class="text-end">
+
+                        <span class="gstAmount">
+                            0.00
+                        </span>
+
+                        <input
+                            type="hidden"
+                            name="gst_amount[]"
+                            value="0">
+
+                    </td>
+
+
+                    <!-- Total -->
+                    <td class="text-end">
+
+                        <span class="returnAmount">
+                            0.00
+                        </span>
+
+                        <input
+                            type="hidden"
+                            name="amount[]"
+                            value="0">
+
+                    </td>
+
+                </tr>
+            `;
+
         });
+
 
         $('#returnItems').html(html);
 
@@ -194,52 +323,90 @@ document.addEventListener('DOMContentLoaded', function () {
 
     }
 
+
     // =============================================
-    // RETURN QTY CHANGED
+    // RETURN QTY CHANGE
     // =============================================
 
     $(document).on('input', '.returnQty', function () {
 
-        let row = $(this).closest('tr');
+        let input = $(this);
 
-        let qty = parseFloat($(this).val()) || 0;
+        let row = input.closest('tr');
 
-        let max = parseFloat($(this).attr('max')) || 0;
+        let qty = parseFloat(input.val()) || 0;
 
+        let max = parseFloat(input.attr('max')) || 0;
+
+
+        // Prevent negative quantity
+        if (qty < 0) {
+
+            qty = 0;
+
+            input.val(0);
+
+        }
+
+
+        // Prevent exceeding balance
         if (qty > max) {
 
             qty = max;
 
-            $(this).val(max);
+            input.val(max);
 
-            alert('Return quantity exceeds balance quantity.');
+            alert(
+                'Return quantity exceeds balance quantity.'
+            );
 
         }
 
-        let price = parseFloat($(this).data('price')) || 0;
 
-        let gst = parseFloat($(this).data('gst')) || 0;
+        let price =
+            parseFloat(input.data('price')) || 0;
 
+        let gst =
+            parseFloat(input.data('gst')) || 0;
+
+
+        // Basic amount
         let basic = qty * price;
 
-        let gstAmount = basic * gst / 100;
 
-        let total = basic + gstAmount;
+        // GST amount
+        let gstAmount =
+            basic * gst / 100;
 
-        row.find('.gstAmount').text(gstAmount.toFixed(2));
 
-        row.find('.returnAmount').text(total.toFixed(2));
+        // Grand total
+        let total =
+            basic + gstAmount;
 
-        row.find('input[name="gst_amount[]"]').val(gstAmount.toFixed(2));
 
-        row.find('input[name="amount[]"]').val(total.toFixed(2));
+        row.find('.gstAmount')
+            .text(gstAmount.toFixed(2));
+
+
+        row.find('.returnAmount')
+            .text(total.toFixed(2));
+
+
+        row.find('input[name="gst_amount[]"]')
+            .val(gstAmount.toFixed(2));
+
+
+        row.find('input[name="amount[]"]')
+            .val(total.toFixed(2));
+
 
         calculateTotals();
 
     });
 
+
     // =============================================
-    // TOTALS
+    // CALCULATE TOTALS
     // =============================================
 
     function calculateTotals() {
@@ -250,46 +417,98 @@ document.addEventListener('DOMContentLoaded', function () {
 
         let grandTotal = 0;
 
+
         $('#returnItems tr').each(function () {
 
-            let qty = parseFloat($(this).find('.returnQty').val()) || 0;
+            let input =
+                $(this).find('.returnQty');
 
-            let price = parseFloat($(this).find('.returnQty').data('price')) || 0;
 
-            let gst = parseFloat($(this).find('.returnQty').data('gst')) || 0;
+            if (!input.length) {
+                return;
+            }
 
-            let basic = qty * price;
 
-            let gstAmount = basic * gst / 100;
+            let qty =
+                parseFloat(input.val()) || 0;
+
+
+            let price =
+                parseFloat(input.data('price')) || 0;
+
+
+            let gst =
+                parseFloat(input.data('gst')) || 0;
+
+
+            let basic =
+                qty * price;
+
+
+            let gstAmount =
+                basic * gst / 100;
+
+
+            let total =
+                basic + gstAmount;
+
 
             subTotal += basic;
 
             gstTotal += gstAmount;
 
-            grandTotal += basic + gstAmount;
+            grandTotal += total;
 
         });
 
-        $('#purchase_return_sub_total').val(subTotal.toFixed(2));
 
-        $('#purchase_return_gst_total').val(gstTotal.toFixed(2));
+        $('#purchase_return_sub_total')
+            .val(subTotal.toFixed(2));
 
-        $('#purchase_return_grand_total').val(grandTotal.toFixed(2));
+
+        $('#purchase_return_gst_total')
+            .val(gstTotal.toFixed(2));
+
+
+        $('#purchase_return_grand_total')
+            .val(grandTotal.toFixed(2));
+
+
+        // For edit page hidden fields
+        $('#purchase_return_sub_total_hidden')
+            .val(subTotal.toFixed(2));
+
+
+        $('#purchase_return_gst_total_hidden')
+            .val(gstTotal.toFixed(2));
 
     }
+
 
     // =============================================
     // CLOSE SEARCH RESULT
     // =============================================
 
-    $(document).click(function (e) {
+    $(document).on('click', function (e) {
 
-        if (!$(e.target).closest('#purchase_search,#purchaseResult').length) {
+        if (
+            !$(e.target).closest(
+                '#purchase_search, #purchaseResult'
+            ).length
+        ) {
 
             $('#purchaseResult').hide();
 
         }
 
     });
+
+
+    // =============================================
+    // INITIAL CALCULATION
+    // FOR EDIT PAGE
+    // =============================================
+
+    calculateTotals();
 
 });
