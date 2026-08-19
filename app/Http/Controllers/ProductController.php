@@ -193,12 +193,14 @@ class ProductController extends Controller  implements HasMiddleware
         abort_unless(
             auth()->user()->can('product.view') ||
                 auth()->user()->can('purchase.create') ||
+                auth()->user()->can('purchase.edit') ||
                 auth()->user()->can('sales.create') ||
+                auth()->user()->can('sales.edit') ||
                 auth()->user()->can('quotation.create') ||
+                auth()->user()->can('quotation.edit') ||
                 auth()->user()->can('stock-adjustment.create'),
             403
         );
-
         $search = $request->search;
 
         /*

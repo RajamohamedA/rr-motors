@@ -20,6 +20,9 @@ window.$ = window.jQuery = $;
 import './transaction';
 
 //add sales return js
+import './sales';
+
+//add sales return js
 import './sales-return';
 
 // add purchase js

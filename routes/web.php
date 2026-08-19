@@ -147,3 +147,4 @@ require __DIR__ . '/purchase.php';
 require __DIR__ . '/sales.php';
 require __DIR__ . '/inventory.php';
 require __DIR__ . '/reports.php';
+require __DIR__ . '/stocktransfer.php';

@@ -7,33 +7,29 @@ use Illuminate\Database\Eloquent\Model;
 class Sales extends Model
 {
     protected $fillable = [
-
         'company_id',
-
         'store_id',
-
         'customer_id',
-
         'invoice_no',
-
-        'invoice_date', 
-
+        'invoice_date',
         'sub_total',
-
         'discount',
-
         'gst_total',
-
         'grand_total',
-
         'paid_amount',
-
         'balance_amount',
-
         'remarks',
+        'status',
+    ];
 
-        'status'
-
+    protected $casts = [
+        'invoice_date'   => 'date',
+        'sub_total'      => 'decimal:2',
+        'discount'       => 'decimal:2',
+        'gst_total'      => 'decimal:2',
+        'grand_total'    => 'decimal:2',
+        'paid_amount'    => 'decimal:2',
+        'balance_amount' => 'decimal:2',
     ];
 
     public function customer()
@@ -53,7 +49,7 @@ class Sales extends Model
 
     public function items()
     {
-        return $this->hasMany(SaleItems::class,'sale_id', 'id');
+        return $this->hasMany(SaleItems::class, 'sale_id', 'id');
     }
 
     public function payments()

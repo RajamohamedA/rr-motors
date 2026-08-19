@@ -7,6 +7,9 @@
 
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
     <title>@yield('title','RR Motors ERP')</title>
 
     @vite([
@@ -82,7 +85,7 @@
                     @if(session('info'))
 
                     <div class="alert alert-info alert-dismissible fade show">
-
+                        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
                         <i class="fas fa-info-circle"></i>
 
                         {{ session('info') }}
@@ -94,7 +97,7 @@
                     </div>
 
                     @endif
-                    
+
                     @if ($errors->any())
 
                     <div class="alert alert-danger alert-dismissible fade show">

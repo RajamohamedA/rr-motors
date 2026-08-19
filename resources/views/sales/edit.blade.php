@@ -4,9 +4,7 @@
 
 @section('content')
 
-<form action="{{ route('sales.update',$sale->id) }}" method="POST">
-
-    @csrf
+<form action="{{ route('sales.update', $sale->id) }}" method="POST">
 
     @method('PUT')
 
@@ -14,4 +12,4 @@
 
 </form>
 
-@endsection     
+@endsection

@@ -2,10 +2,11 @@
 
 use Illuminate\Support\Facades\Route;
 
-
 use App\Http\Controllers\SalesController;
 use App\Http\Controllers\SalesReturnController;
 use App\Http\Controllers\QuotationController;
+
+
 
 Route::middleware(['auth'])->group(function () {
 
@@ -15,20 +16,41 @@ Route::middleware(['auth'])->group(function () {
     |--------------------------------------------------------------------------
     */
 
-    Route::resource('sales', SalesController::class);
-
     Route::get(
         '/sales/{sale}/print',
         [SalesController::class, 'print']
     )->name('sales.print');
+
+    Route::post(
+        'sales/check-stock',
+        [SalesController::class, 'checkStock']
+    )->name('sales.check-stock');
+
+    // Route::post(
+    //     '/stock-transfers/quick-transfer',
+    //     [SalesController::class, 'quickTransfer']
+    // )->name('stock-transfers.quick-transfer');
+
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | get customer and store details for particular company
+    |--------------------------------------------------------------------------
+    */
+    Route::get(
+        '/sales/company/{company}/data',
+        [SalesController::class, 'companyData']
+    )->name('sales.company.data');
+
+    Route::resource('sales', SalesController::class);
+
 
     /*
     |--------------------------------------------------------------------------
     | Sales Return
     |--------------------------------------------------------------------------
     */
-
-    Route::resource('sales-returns', SalesReturnController::class);
 
     Route::get(
         '/sales-return/search-invoice',
@@ -45,13 +67,17 @@ Route::middleware(['auth'])->group(function () {
         [SalesReturnController::class, 'print']
     )->name('sales-returns.print');
 
+    Route::resource(
+        'sales-returns',
+        SalesReturnController::class
+    );
+
 
     /*
     |--------------------------------------------------------------------------
     | Quotations
     |--------------------------------------------------------------------------
     */
-    Route::resource('quotations', QuotationController::class);
 
     Route::get(
         'quotations/{quotation}/print',
@@ -63,5 +89,8 @@ Route::middleware(['auth'])->group(function () {
         [QuotationController::class, 'convertToSales']
     )->name('quotations.convert');
 
-
+    Route::resource(
+        'quotations',
+        QuotationController::class
+    );
 });
