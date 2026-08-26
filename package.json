@@ -7,6 +7,7 @@
         "dev": "vite"
     },
     "devDependencies": {
+        "@vitejs/plugin-react": "^6.0.5",
         "alpinejs": "^3.4.2",
         "autoprefixer": "^10.4.2",
         "concurrently": "^9.0.1",
@@ -16,6 +17,7 @@
     },
     "dependencies": {
         "@fortawesome/fontawesome-free": "^7.3.0",
+        "@inertiajs/react": "^3.7.0",
         "@popperjs/core": "^2.11.8",
         "admin-lte": "^4.1.0",
         "apexcharts": "^5.16.0",
@@ -26,6 +28,8 @@
         "datatables.net-buttons-bs5": "^4.0.0",
         "jquery": "^4.0.0",
         "jszip": "^3.10.1",
-        "pdfmake": "^0.3.11"
+        "pdfmake": "^0.3.11",
+        "react": "^19.2.8",
+        "react-dom": "^19.2.8"
     }
 }

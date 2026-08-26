@@ -2,7 +2,6 @@
 
 namespace App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
@@ -10,31 +9,36 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Spatie\Permission\Traits\HasRoles;
-use App\Models\Store;
 
-#[Fillable(['name', 'email', 'password'])]
-#[Hidden(['password', 'remember_token'])]
 class User extends Authenticatable
 {
     /** @use HasFactory<UserFactory> */
     use HasFactory, Notifiable, HasRoles;
 
-    protected $fillable = [
-
+    #[Fillable([
         'company_id',
-
+        'store_id',
         'name',
-
         'email',
-
         'mobile',
-
         'password',
-
         'status',
-
         'is_super_user',
+    ])]
+    #[Hidden([
+        'password',
+        'remember_token',
+    ])]
 
+    protected $fillable = [
+        'company_id',
+        'store_id',
+        'name',
+        'email',
+        'mobile',
+        'password',
+        'status',
+        'is_super_user',
     ];
 
     protected $hidden = [
@@ -42,23 +46,43 @@ class User extends Authenticatable
         'remember_token',
     ];
 
-    /**
-     * Get the attributes that should be cast.
-     *
-     * @return array<string, string>
-     */
     protected function casts(): array
     {
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'status' => 'boolean',
+            'is_super_user' => 'boolean',
         ];
     }
+
+    /*
+    |--------------------------------------------------------------------------
+    | Company
+    |--------------------------------------------------------------------------
+    */
 
     public function company()
     {
         return $this->belongsTo(Company::class);
     }
+
+    /*
+    |--------------------------------------------------------------------------
+    | Default / Primary Store
+    |--------------------------------------------------------------------------
+    */
+
+    public function store()
+    {
+        return $this->belongsTo(Store::class);
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | All Assigned Stores
+    |--------------------------------------------------------------------------
+    */
 
     public function stores()
     {

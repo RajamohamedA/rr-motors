@@ -2,12 +2,79 @@
 @import 'bootstrap-icons/font/bootstrap-icons.css';
 @import '@fortawesome/fontawesome-free/css/all.min.css';
 
+
 /* Custom CSS files */
 @import './layout.css';
 @import './sidebar.css';
 @import './navbar.css';
 @import './dashboard.css';
 @import './responsive.css';
+
+/* react */
+@import './business-layout.css';
+@import './business-sidebar.css';
+@import './business-topbar.css';
+@import './business-branch-switcher.css';
+@import './business-user-menu.css';
+
+/* Super admin css */
+@import './super-admin-sidebar.css';
+@import './super-admin-topbar.css';
+@import './super-admin-layout.css';
+@import './super-admin-dashboard.css';
+@import './super-admin-companies.css';
+@import './super-admin-company-show.css';
+@import './super-admin-branches.css';
+@import './super-admin-users.css';
+@import './super-admin-roles.css';
+@import './super-admin-permissions.css';
+@import './super-admin-activity.css';
+@import './super-admin-settings.css';
+@import './profile.css';
+
+
+/* customer colors */
+
+:root {
+    --rr-primary: #2563eb;
+    --rr-primary-hover: #1d4ed8;
+    --rr-primary-soft: #eff6ff;
+
+    --rr-sidebar: #172033;
+    --rr-sidebar-hover: #202c42;
+    --rr-sidebar-active: #263754;
+
+    --rr-app-bg: #f3f5f8;
+
+    --rr-surface: #ffffff;
+    --rr-surface-secondary: #f8fafc;
+
+    --rr-text: #1e293b;
+    --rr-text-secondary: #475569;
+    --rr-text-muted: #64748b;
+
+    --rr-border: #cbd5e1;
+    --rr-border-light: #e2e8f0;
+
+    --rr-success: #15803d;
+    --rr-warning: #b45309;
+    --rr-danger: #c62828;
+    --rr-info: #0369a1;
+}
+
+body {
+    font-family:
+        "Segoe UI",
+        Inter,
+        Roboto,
+        Helvetica,
+        Arial,
+        sans-serif;
+
+    background: var(--rr-app-bg);
+
+    color: var(--rr-text);
+}
 
 body {
     background: #f4f6f9;

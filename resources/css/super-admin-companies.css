@@ -1,0 +1,316 @@
+.rr-company-toolbar {
+    min-height: 58px;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    gap: 20px;
+
+    padding: 10px 14px;
+
+    border-bottom:
+        1px solid var(--rr-border-light);
+}
+
+.rr-company-search {
+    width: min(430px, 100%);
+
+    height: 38px;
+
+    display: flex;
+    align-items: center;
+
+    gap: 8px;
+
+    padding: 0 11px;
+
+    border:
+        1px solid var(--rr-border);
+
+    border-radius: 7px;
+
+    background: #ffffff;
+}
+
+.rr-company-search:focus-within {
+    border-color: #93b4ef;
+
+    box-shadow:
+        0 0 0 3px rgba(37, 99, 235, 0.07);
+}
+
+.rr-company-search i {
+    color: var(--rr-text);
+
+    font-size: 13px;
+}
+
+.rr-company-search input {
+    flex: 1;
+
+    min-width: 0;
+
+    border: 0;
+
+    outline: 0;
+
+    background: transparent;
+
+    color: var(--rr-text);
+
+    font-family: inherit;
+
+    font-size: 12px;
+}
+
+.rr-company-search input::placeholder {
+    color: var(--rr-text-muted);
+}
+
+.rr-company-result-count {
+    color: var(--rr-text-muted);
+
+    font-size: 11px;
+
+    white-space: nowrap;
+}
+
+
+/* Company */
+
+.rr-company-list-cell {
+    display: flex;
+    align-items: center;
+
+    gap: 10px;
+
+    min-width: 210px;
+}
+
+.rr-company-list-logo {
+    width: 38px;
+    height: 38px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    flex-shrink: 0;
+
+    overflow: hidden;
+
+    border:
+        1px solid #dbe5f1;
+
+    border-radius: 8px;
+
+    background: var(--rr-primary-soft);
+
+    color: var(--rr-primary);
+
+    font-size: 15px;
+}
+
+.rr-company-list-logo img {
+    width: 100%;
+    height: 100%;
+
+    object-fit: cover;
+}
+
+.rr-company-list-content {
+    min-width: 0;
+}
+
+.rr-company-list-name {
+    color: var(--rr-text);
+
+    font-size: 13px;
+
+    font-weight: 650;
+
+    white-space: nowrap;
+}
+
+.rr-company-list-meta,
+.rr-table-secondary {
+    margin-top: 2px;
+
+    color: var(--rr-text-secondary);
+
+    font-size: 10.5px;
+}
+
+
+/* Count */
+
+.rr-count-badge {
+    min-width: 28px;
+    height: 27px;
+
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    padding: 0 7px;
+
+    border-radius: 6px;
+
+    background: #f1f5f9;
+
+    color: #475569;
+
+    font-size: 11px;
+
+    font-weight: 650;
+}
+
+
+/* Actions */
+
+.rr-table-actions {
+    display: inline-flex;
+    align-items: center;
+
+    gap: 4px;
+}
+
+.rr-icon-action {
+    width: 31px;
+    height: 31px;
+
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    border:
+        1px solid transparent;
+
+    border-radius: 6px;
+
+    background: transparent;
+
+    color: #64748b;
+
+    text-decoration: none;
+
+    font-size: 12px;
+}
+
+.rr-icon-action:hover {
+    border-color: var(--rr-border);
+
+    background: #f8fafc;
+
+    color: #334155;
+}
+
+.rr-icon-action-primary {
+    color: var(--rr-primary);
+}
+
+.rr-icon-action-primary:hover {
+    border-color: #dbeafe;
+
+    background: var(--rr-primary-soft);
+
+    color: var(--rr-primary-hover);
+}
+
+
+@media (max-width: 767.98px) {
+
+    .rr-company-toolbar {
+        align-items: stretch;
+
+        flex-direction: column;
+
+        gap: 8px;
+    }
+
+    .rr-company-search {
+        width: 100%;
+    }
+
+}
+
+.rr-company-form-footer {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+
+    gap: 8px;
+
+    padding: 16px 18px;
+
+    border-top: 1px solid var(--rr-border-light);
+
+    background: #fafbfc;
+
+    border-radius: 0 0 9px 9px;
+}
+
+.rr-form-help {
+    margin-top: 5px;
+
+    color: var(--rr-text-muted);
+
+    font-size: 11px;
+}
+
+.rr-form-error {
+    margin-top: 5px;
+
+    color: var(--rr-danger);
+
+    font-size: 11px;
+}
+
+.rr-company-filter {
+    height: 38px;
+
+    min-width: 170px;
+
+    padding: 0 10px;
+
+    border: 1px solid var(--rr-border);
+
+    border-radius: 7px;
+
+    background: #ffffff;
+
+    color: var(--rr-text-secondary);
+
+    font-family: inherit;
+
+    font-size: 12px;
+
+    outline: none;
+}
+
+.rr-company-filter:focus {
+    border-color: #93b4ef;
+
+    box-shadow:
+        0 0 0 3px rgba(37, 99, 235, 0.07);
+}
+
+.rr-company-code {
+    display: inline-flex;
+    align-items: center;
+
+    padding: 4px 8px;
+
+    border: 1px solid #cbd5e1;
+    border-radius: 5px;
+
+    background: #f8fafc;
+
+    color: #1e293b;
+
+    font-size: 11.5px;
+    font-weight: 700;
+
+    letter-spacing: 0.4px;
+}

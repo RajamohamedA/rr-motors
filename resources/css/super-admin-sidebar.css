@@ -1,0 +1,833 @@
+/* =========================================================
+   RR ERP SUPER ADMIN SIDEBAR
+   ========================================================= */
+
+:root {
+    --rr-sidebar-expanded: 280px;
+    --rr-sidebar-collapsed: 76px;
+}
+
+
+/* =========================================================
+   SIDEBAR
+   ========================================================= */
+
+.rr-admin-sidebar {
+    position: fixed;
+
+    top: 0;
+    left: 0;
+    bottom: 0;
+
+    width: var(--rr-sidebar-expanded);
+
+    display: flex;
+    flex-direction: column;
+
+    background:
+        linear-gradient(180deg,
+            #172033 0%,
+            #111827 60%,
+            #0f172a 100%);
+
+    color: #ffffff;
+
+    z-index: 1200;
+
+    overflow: visible;
+
+    box-shadow:
+        4px 0 18px rgba(15, 23, 42, 0.08);
+
+    transition:
+        width 0.22s ease,
+        box-shadow 0.22s ease,
+        transform 0.22s ease;
+}
+
+
+/* =========================================================
+   MANUAL COLLAPSE
+   ========================================================= */
+
+.rr-admin-sidebar.rr-admin-sidebar-collapsed {
+    width: var(--rr-sidebar-collapsed);
+}
+
+
+/* =========================================================
+   TEMPORARY HOVER EXPANSION
+   ========================================================= */
+
+.rr-admin-sidebar.rr-admin-sidebar-collapsed.rr-admin-sidebar-hovered {
+    width: var(--rr-sidebar-expanded);
+
+    box-shadow:
+        12px 0 32px rgba(15, 23, 42, 0.2);
+}
+
+
+/* =========================================================
+   BRAND
+   ========================================================= */
+
+.rr-admin-brand {
+    position: relative;
+
+    height: 76px;
+
+    display: flex;
+    align-items: center;
+
+    padding: 0 16px;
+
+    border-bottom:
+        1px solid rgba(255, 255, 255, 0.07);
+
+    flex-shrink: 0;
+}
+
+
+.rr-admin-brand-link {
+    flex: 1;
+
+    min-width: 0;
+
+    display: flex;
+    align-items: center;
+
+    gap: 12px;
+
+    color: #ffffff;
+
+    text-decoration: none;
+
+    overflow: hidden;
+}
+
+
+.rr-admin-brand-link:hover {
+    color: #ffffff;
+
+    text-decoration: none;
+}
+
+
+/* =========================================================
+   BRAND MARK
+   ========================================================= */
+
+.rr-admin-brand-mark {
+    position: relative;
+
+    width: 42px;
+    height: 42px;
+
+    min-width: 42px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 11px;
+
+    background:
+        linear-gradient(145deg,
+            #2563eb,
+            #1d4ed8);
+
+    color: #ffffff;
+
+    font-size: 12px;
+    font-weight: 800;
+
+    letter-spacing: 0.4px;
+
+    box-shadow:
+        0 6px 14px rgba(37, 99, 235, 0.28);
+}
+
+
+.rr-admin-brand-mark::after {
+    content: "";
+
+    position: absolute;
+
+    inset: 5px;
+
+    border-radius: 7px;
+
+    border:
+        1px solid rgba(255, 255, 255, 0.16);
+}
+
+
+/* =========================================================
+   BRAND TEXT
+   ========================================================= */
+
+.rr-admin-brand-text {
+    min-width: 170px;
+
+    opacity: 1;
+
+    transform: translateX(0);
+
+    transition:
+        opacity 0.16s ease,
+        transform 0.18s ease;
+}
+
+
+.rr-admin-brand-name {
+    color: #ffffff;
+
+    font-size: 14px;
+    font-weight: 750;
+
+    line-height: 1.2;
+
+    white-space: nowrap;
+}
+
+
+.rr-admin-brand-caption {
+    margin-top: 3px;
+
+    color: rgba(226, 232, 240, 0.58);
+
+    font-size: 8.5px;
+
+    white-space: nowrap;
+}
+
+
+/* Hide brand text when collapsed */
+
+.rr-admin-sidebar.rr-admin-sidebar-collapsed:not(.rr-admin-sidebar-hovered) .rr-admin-brand-text {
+    opacity: 0;
+
+    transform: translateX(-8px);
+
+    pointer-events: none;
+}
+
+
+/* =========================================================
+   DESKTOP TOGGLE BUTTON
+   ========================================================= */
+
+   .rr-admin-sidebar-toggle {
+       position: absolute;
+       top: 50%;
+       right: -14px;
+       transform: translateY(-50%);
+
+       z-index: 20;
+
+       width: 29px;
+       height: 29px;
+
+       display: flex;
+       align-items: center;
+       justify-content: center;
+
+       padding: 0;
+
+       border: 3px solid #f8fafc;
+       border-radius: 50%;
+
+       background:
+           linear-gradient(145deg,
+               #2563eb,
+               #1d4ed8);
+
+       color: #ffffff;
+
+       font-size: 9px;
+
+       cursor: pointer;
+
+       box-shadow:
+           0 6px 16px rgba(15, 23, 42, 0.22);
+
+       transition:
+           transform 0.18s ease,
+           background 0.18s ease,
+           box-shadow 0.18s ease;
+   }
+
+   .rr-admin-sidebar-toggle:hover {
+       transform:
+           translateY(-50%) scale(1.08);
+
+       background:
+           linear-gradient(145deg,
+               #3b82f6,
+               #2563eb);
+
+       box-shadow:
+           0 8px 18px rgba(37, 99, 235, 0.3);
+   }
+
+   @media (max-width: 991.98px) {
+
+       .rr-admin-sidebar-toggle {
+           display: none;
+       }
+
+   }
+
+
+/* =========================================================
+   MOBILE CLOSE
+   ========================================================= */
+
+.rr-admin-sidebar-close {
+    display: none;
+
+    margin-left: auto;
+
+    border: 0;
+
+    background: transparent;
+
+    color: rgba(255, 255, 255, 0.65);
+
+    font-size: 16px;
+}
+
+
+/* =========================================================
+   NAVIGATION
+   ========================================================= */
+
+.rr-admin-navigation {
+    flex: 1;
+
+    overflow-y: auto;
+    overflow-x: hidden;
+
+    padding: 16px 11px;
+}
+
+
+.rr-admin-navigation::-webkit-scrollbar {
+    width: 5px;
+}
+
+
+.rr-admin-navigation::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+
+.rr-admin-navigation::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.1);
+
+    border-radius: 8px;
+}
+
+
+/* =========================================================
+   SECTION
+   ========================================================= */
+
+.rr-admin-menu-section {
+    margin-bottom: 18px;
+}
+
+
+.rr-admin-section-title {
+    min-height: 22px;
+
+    display: flex;
+    align-items: center;
+
+    padding: 0 10px 6px;
+
+    color: rgba(255, 255, 255, 0.35);
+
+    font-size: 9px;
+    font-weight: 700;
+
+    letter-spacing: 1px;
+
+    white-space: nowrap;
+
+    opacity: 1;
+
+    transition:
+        opacity 0.15s ease,
+        transform 0.15s ease;
+}
+
+
+/* Hide title collapsed */
+
+.rr-admin-sidebar.rr-admin-sidebar-collapsed:not(.rr-admin-sidebar-hovered) .rr-admin-section-title {
+    opacity: 0;
+
+    transform: translateX(-8px);
+}
+
+
+/* =========================================================
+   MENU
+   ========================================================= */
+
+.rr-admin-menu {
+    display: flex;
+    flex-direction: column;
+
+    gap: 3px;
+}
+
+
+.rr-admin-menu-item {
+    position: relative;
+
+    min-height: 44px;
+
+    display: flex;
+    align-items: center;
+
+    gap: 9px;
+
+    padding: 6px 10px;
+
+    border-radius: 9px;
+
+    color: rgba(255, 255, 255, 0.65);
+
+    text-decoration: none;
+
+    overflow: hidden;
+
+    transition:
+        background-color 0.15s ease,
+        color 0.15s ease,
+        border-color 0.15s ease;
+}
+
+
+.rr-admin-menu-item:hover {
+    background:
+        rgba(255, 255, 255, 0.06);
+
+    color: #ffffff;
+
+    text-decoration: none;
+}
+
+
+/* =========================================================
+   MENU ICON
+   ========================================================= */
+
+.rr-admin-menu-icon {
+    width: 34px;
+    height: 34px;
+
+    min-width: 34px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 9px;
+
+    color: rgba(255, 255, 255, 0.6);
+
+    font-size: 15px;
+
+    transition:
+        color 0.15s ease,
+        background 0.15s ease;
+}
+
+
+.rr-admin-menu-item:hover .rr-admin-menu-icon {
+    color: #ffffff;
+
+    background:
+        rgba(255, 255, 255, 0.06);
+}
+
+
+/* =========================================================
+   LABEL
+   ========================================================= */
+
+.rr-admin-menu-label {
+    min-width: 150px;
+
+    flex: 1;
+
+    font-size: 12px;
+    font-weight: 500;
+
+    white-space: nowrap;
+
+    opacity: 1;
+
+    transform: translateX(0);
+
+    transition:
+        opacity 0.15s ease,
+        transform 0.18s ease;
+}
+
+
+/* Hide labels collapsed */
+
+.rr-admin-sidebar.rr-admin-sidebar-collapsed:not(.rr-admin-sidebar-hovered) .rr-admin-menu-label {
+    opacity: 0;
+
+    transform: translateX(-8px);
+
+    pointer-events: none;
+}
+
+
+/* =========================================================
+   ACTIVE
+   ========================================================= */
+
+.rr-admin-menu-item-active {
+    background:
+        linear-gradient(90deg,
+            rgba(37, 99, 235, 0.28),
+            rgba(37, 99, 235, 0.09));
+
+    color: #ffffff;
+}
+
+
+.rr-admin-menu-item-active:hover {
+    background:
+        linear-gradient(90deg,
+            rgba(37, 99, 235, 0.3),
+            rgba(37, 99, 235, 0.1));
+}
+
+
+.rr-admin-menu-item-active .rr-admin-menu-icon {
+    color: #ffffff;
+
+    background:
+        linear-gradient(145deg,
+            #3b82f6,
+            #2563eb);
+
+    box-shadow:
+        0 5px 12px rgba(37, 99, 235, 0.24);
+}
+
+
+.rr-admin-menu-item-active .rr-admin-menu-label {
+    font-weight: 600;
+}
+
+
+.rr-admin-active-marker {
+    position: absolute;
+
+    top: 9px;
+    right: 0;
+
+    width: 3px;
+    height: 25px;
+
+    border-radius: 3px 0 0 3px;
+
+    background: #60a5fa;
+}
+
+
+/* =========================================================
+   FOOTER
+   ========================================================= */
+
+.rr-admin-sidebar-footer {
+    flex-shrink: 0;
+
+    padding: 11px;
+
+    border-top:
+        1px solid rgba(255, 255, 255, 0.07);
+
+    overflow: hidden;
+}
+
+
+.rr-admin-user-summary {
+    display: flex;
+    align-items: center;
+
+    gap: 10px;
+
+    padding: 7px;
+
+    border-radius: 9px;
+}
+
+
+.rr-admin-user-avatar {
+    width: 36px;
+    height: 36px;
+
+    min-width: 36px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 10px;
+
+    background:
+        linear-gradient(145deg,
+            rgba(59, 130, 246, 0.28),
+            rgba(37, 99, 235, 0.14));
+
+    color: #ffffff;
+
+    font-size: 12px;
+    font-weight: 700;
+}
+
+
+.rr-admin-user-details {
+    min-width: 155px;
+
+    opacity: 1;
+
+    transform: translateX(0);
+
+    transition:
+        opacity 0.15s ease,
+        transform 0.18s ease;
+}
+
+
+.rr-admin-user-name {
+    max-width: 165px;
+
+    overflow: hidden;
+
+    color: rgba(255, 255, 255, 0.9);
+
+    font-size: 11px;
+    font-weight: 600;
+
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+
+.rr-admin-user-role {
+    margin-top: 2px;
+
+    color: rgba(255, 255, 255, 0.38);
+
+    font-size: 9px;
+}
+
+
+/* Hide user info collapsed */
+
+.rr-admin-sidebar.rr-admin-sidebar-collapsed:not(.rr-admin-sidebar-hovered) .rr-admin-user-details {
+    opacity: 0;
+
+    transform: translateX(-8px);
+
+    pointer-events: none;
+}
+
+
+/* =========================================================
+   MAIN CONTENT POSITION
+   ========================================================= */
+
+.rr-admin-main {
+    min-height: 100vh;
+
+    margin-left:
+        var(--rr-sidebar-expanded);
+
+    transition:
+        margin-left 0.22s ease;
+}
+
+
+.sidebar-collapsed .rr-admin-main {
+    margin-left:
+        var(--rr-sidebar-collapsed);
+}
+
+
+/*
+   When collapsed sidebar expands by hover,
+   main content stays at 76px.
+
+   The sidebar floats above the content.
+*/
+
+
+/* =========================================================
+   MOBILE OVERLAY
+   ========================================================= */
+
+.rr-admin-sidebar-overlay {
+    display: none;
+
+    position: fixed;
+
+    inset: 0;
+
+    background:
+        rgba(15, 23, 42, 0.5);
+
+    backdrop-filter: blur(2px);
+
+    z-index: 1040;
+}
+
+
+/* =========================================================
+   RESPONSIVE
+   ========================================================= */
+
+@media (max-width: 991.98px) {
+
+    .rr-admin-sidebar,
+    .rr-admin-sidebar.rr-admin-sidebar-collapsed {
+        width: min(286px, 88vw);
+
+        transform:
+            translateX(-100%);
+    }
+
+
+    .rr-admin-sidebar.rr-admin-sidebar-open {
+        transform:
+            translateX(0);
+    }
+
+
+    .rr-admin-sidebar-overlay {
+        display: block;
+    }
+
+
+    .rr-admin-sidebar-close {
+        display: block;
+    }
+
+
+    .rr-admin-sidebar-toggle {
+        display: none;
+    }
+
+
+    /*
+       Always show text on mobile
+    */
+
+    .rr-admin-brand-text,
+    .rr-admin-section-title,
+    .rr-admin-menu-label,
+    .rr-admin-user-details {
+        opacity: 1 !important;
+
+        transform: none !important;
+
+        pointer-events: auto !important;
+    }
+
+
+    .rr-admin-main,
+    .sidebar-collapsed .rr-admin-main {
+        margin-left: 0;
+    }
+}
+
+
+/* =========================================================
+   DESKTOP SIDEBAR TOGGLE IN TOPBAR
+   ========================================================= */
+
+.rr-admin-topbar-sidebar-toggle {
+    width: 40px;
+    height: 40px;
+
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    flex: 0 0 40px;
+
+    padding: 0;
+
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+
+    background:
+        linear-gradient(180deg,
+            #ffffff,
+            #f8fafc);
+
+    color: #475569;
+
+    font-size: 17px;
+
+    cursor: pointer;
+
+    box-shadow:
+        0 1px 2px rgba(15, 23, 42, 0.04);
+
+    transition:
+        color 0.16s ease,
+        background 0.16s ease,
+        border-color 0.16s ease,
+        box-shadow 0.16s ease,
+        transform 0.16s ease;
+}
+
+
+.rr-admin-topbar-sidebar-toggle:hover {
+    color: #2563eb;
+
+    background: #eff6ff;
+
+    border-color: #bfdbfe;
+
+    box-shadow:
+        0 5px 14px rgba(37, 99, 235, 0.1);
+
+    transform:
+        translateY(-1px);
+}
+
+
+/* Desktop */
+
+.rr-admin-mobile-menu {
+    display: none;
+}
+
+
+/* Mobile */
+
+@media (max-width: 991.98px) {
+
+    .rr-admin-topbar-sidebar-toggle {
+        display: none;
+    }
+
+
+    .rr-admin-mobile-menu {
+        display: inline-flex;
+    }
+
+}

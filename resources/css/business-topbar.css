@@ -1,0 +1,413 @@
+/* =========================================================
+   RR MOTORS TOPBAR
+   ========================================================= */
+
+.rr-topbar {
+    height: 72px;
+
+    position: sticky;
+    top: 0;
+
+    z-index: 1000;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    padding: 0 24px;
+
+    background: #ffffff;
+
+    border-bottom: 1px solid #e5e7eb;
+
+    box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04);
+}
+
+
+/* =========================================================
+   LEFT
+   ========================================================= */
+
+.rr-topbar-left {
+    display: flex;
+    align-items: center;
+
+    min-width: 0;
+
+    gap: 16px;
+}
+
+
+/* Mobile menu */
+
+.rr-topbar-menu-button {
+    display: none;
+
+    width: 40px;
+    height: 40px;
+
+    border: 0;
+
+    border-radius: 8px;
+
+    background: #f3f4f6;
+
+    color: #374151;
+
+    font-size: 20px;
+
+    align-items: center;
+    justify-content: center;
+}
+
+.rr-topbar-menu-button:hover {
+    background: #e5e7eb;
+}
+
+
+/* =========================================================
+   COMPANY / BRANCH
+   ========================================================= */
+
+.rr-topbar-location {
+    display: flex;
+    flex-direction: column;
+
+    min-width: 0;
+}
+
+.rr-topbar-company {
+    display: flex;
+    align-items: center;
+
+    gap: 7px;
+
+    color: #111827;
+
+    font-size: 14px;
+
+    font-weight: 700;
+
+    white-space: nowrap;
+
+    overflow: hidden;
+
+    text-overflow: ellipsis;
+}
+
+.rr-topbar-company-icon {
+    display: flex;
+
+    align-items: center;
+    justify-content: center;
+
+    width: 22px;
+    height: 22px;
+
+    border-radius: 6px;
+
+    background: #eff6ff;
+
+    color: #2563eb;
+
+    font-size: 12px;
+
+    flex-shrink: 0;
+}
+
+.rr-topbar-branch {
+    display: flex;
+    align-items: center;
+
+    gap: 5px;
+
+    margin-top: 3px;
+
+    padding-left: 29px;
+
+    color: #6b7280;
+
+    font-size: 11px;
+
+    white-space: nowrap;
+
+    overflow: hidden;
+
+    text-overflow: ellipsis;
+}
+
+.rr-topbar-branch i {
+    font-size: 10px;
+}
+
+
+/* =========================================================
+   RIGHT
+   ========================================================= */
+
+.rr-topbar-right {
+    display: flex;
+    align-items: center;
+
+    gap: 8px;
+}
+
+
+/* Icon button */
+
+.rr-topbar-icon-button {
+    position: relative;
+
+    width: 38px;
+    height: 38px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border: 0;
+
+    border-radius: 8px;
+
+    background: transparent;
+
+    color: #64748b;
+
+    font-size: 17px;
+
+    transition:
+        background-color 0.15s ease,
+        color 0.15s ease;
+}
+
+.rr-topbar-icon-button:hover {
+    background: #f1f5f9;
+
+    color: #1e293b;
+}
+
+
+/* Notification */
+
+.rr-notification-badge {
+    position: absolute;
+
+    top: 4px;
+    right: 3px;
+
+    min-width: 15px;
+    height: 15px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    padding: 0 3px;
+
+    border-radius: 10px;
+
+    background: #ef4444;
+
+    color: #ffffff;
+
+    font-size: 8px;
+
+    font-weight: 700;
+
+    border: 2px solid #ffffff;
+}
+
+
+/* =========================================================
+   DIVIDER
+   ========================================================= */
+
+.rr-topbar-divider {
+    width: 1px;
+    height: 30px;
+
+    margin: 0 8px;
+
+    background: #e5e7eb;
+}
+
+
+/* =========================================================
+   USER
+   ========================================================= */
+
+.rr-topbar-user {
+    display: flex;
+    align-items: center;
+
+    gap: 9px;
+
+    padding: 4px 7px;
+
+    border-radius: 10px;
+
+    cursor: pointer;
+
+    transition: background-color 0.15s ease;
+}
+
+.rr-topbar-user:hover {
+    background: #f8fafc;
+}
+
+
+/* Avatar */
+
+.rr-topbar-avatar {
+    width: 38px;
+    height: 38px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    flex-shrink: 0;
+
+    border-radius: 50%;
+
+    background: #2563eb;
+
+    color: #ffffff;
+
+    font-size: 13px;
+
+    font-weight: 700;
+}
+
+
+/* User information */
+
+.rr-topbar-user-info {
+    min-width: 80px;
+}
+
+.rr-topbar-user-name {
+    color: #111827;
+
+    font-size: 12px;
+
+    font-weight: 600;
+
+    white-space: nowrap;
+}
+
+.rr-topbar-user-role {
+    margin-top: 2px;
+
+    color: var(--rr-text);
+
+    font-size: 10px;
+
+    white-space: nowrap;
+}
+
+.rr-topbar-user-arrow {
+    margin-left: 3px;
+
+    color: var(--rr-text);
+
+    font-size: 10px;
+}
+
+
+/* Logout */
+
+.rr-topbar-logout {
+    width: 38px;
+    height: 38px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border: 0;
+
+    border-radius: 8px;
+
+    background: transparent;
+
+    color: #64748b;
+
+    font-size: 17px;
+
+    text-decoration: none;
+}
+
+.rr-topbar-logout:hover {
+    background: #fef2f2;
+
+    color: #dc2626;
+}
+
+
+/* =========================================================
+   RESPONSIVE
+   ========================================================= */
+
+@media (max-width: 991.98px) {
+
+    .rr-topbar {
+        padding: 0 16px;
+    }
+
+    .rr-topbar-menu-button {
+        display: flex;
+    }
+
+    .rr-topbar-user-info,
+    .rr-topbar-user-arrow {
+        display: none;
+    }
+
+    .rr-topbar-user {
+        padding: 0;
+    }
+
+    .rr-topbar-divider {
+        margin: 0 4px;
+    }
+}
+
+
+@media (max-width: 575.98px) {
+
+    .rr-topbar {
+        height: 64px;
+
+        padding: 0 12px;
+    }
+
+    .rr-topbar-left {
+        gap: 10px;
+    }
+
+    .rr-topbar-company {
+        max-width: 170px;
+    }
+
+    .rr-topbar-branch {
+        max-width: 170px;
+
+        padding-left: 29px;
+    }
+
+    .rr-topbar-icon-button {
+        width: 34px;
+        height: 34px;
+    }
+
+    .rr-topbar-avatar {
+        width: 34px;
+        height: 34px;
+    }
+
+    .rr-topbar-logout {
+        width: 34px;
+        height: 34px;
+    }
+}

@@ -1,0 +1,563 @@
+/* =========================================================
+   PERMISSION DIRECTORY
+   ========================================================= */
+
+.rr-permission-toolbar {
+    min-height: 60px;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    gap: 16px;
+
+    padding: 10px 14px;
+
+    border-bottom: 1px solid #e2e8f0;
+}
+
+
+.rr-permission-search {
+    position: relative;
+
+    width: min(430px, 100%);
+    height: 38px;
+
+    display: flex;
+    align-items: center;
+
+    gap: 8px;
+
+    padding: 0 38px 0 12px;
+
+    border: 1px solid #cbd5e1;
+    border-radius: 7px;
+
+    background: #ffffff;
+}
+
+
+.rr-permission-search:focus-within {
+    border-color: #3b82f6;
+
+    box-shadow:
+        0 0 0 3px rgba(59, 130, 246, 0.08);
+}
+
+
+.rr-permission-search>i {
+    color: #475569;
+
+    font-size: 13px;
+}
+
+
+.rr-permission-search input {
+    width: 100%;
+
+    min-width: 0;
+
+    border: 0;
+    outline: 0;
+
+    background: transparent;
+
+    color: #1e293b;
+
+    font-size: 12px;
+}
+
+
+.rr-permission-search-clear {
+    position: absolute;
+
+    top: 50%;
+    right: 7px;
+
+    width: 26px;
+    height: 26px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    transform: translateY(-50%);
+
+    padding: 0;
+
+    border: 0;
+    border-radius: 5px;
+
+    background: transparent;
+
+    color: #64748b;
+}
+
+
+.rr-permission-search-clear:hover {
+    background: #f1f5f9;
+
+    color: #1e293b;
+}
+
+
+.rr-permission-toolbar-filters {
+    display: flex;
+    align-items: center;
+
+    gap: 8px;
+}
+
+
+.rr-permission-filter {
+    height: 38px;
+
+    min-width: 145px;
+
+    padding: 0 10px;
+
+    border: 1px solid #cbd5e1;
+    border-radius: 7px;
+
+    background: #ffffff;
+
+    color: #334155;
+
+    font-size: 12px;
+}
+
+
+.rr-permission-result-count {
+    color: #475569;
+
+    font-size: 11.5px;
+    font-weight: 600;
+
+    white-space: nowrap;
+}
+
+
+/* Modules */
+
+.rr-permission-directory-modules {
+    display: flex;
+    flex-direction: column;
+
+    gap: 14px;
+}
+
+
+.rr-permission-directory-module {
+    overflow: hidden;
+
+    border: 1px solid #cbd5e1;
+    border-radius: 9px;
+
+    background: #ffffff;
+}
+
+
+.rr-permission-directory-module-header {
+    min-height: 54px;
+
+    display: flex;
+    align-items: center;
+
+    padding: 10px 14px;
+
+    border-bottom: 1px solid #e2e8f0;
+
+    background: #f8fafc;
+}
+
+
+.rr-permission-directory-module-left {
+    display: flex;
+    align-items: center;
+
+    gap: 10px;
+}
+
+
+.rr-permission-directory-module-icon {
+    width: 34px;
+    height: 34px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 7px;
+
+    background: #e2e8f0;
+
+    color: #334155;
+
+    font-size: 13px;
+}
+
+
+.rr-permission-directory-module-name {
+    color: #1e293b;
+
+    font-size: 13px;
+    font-weight: 700;
+}
+
+
+.rr-permission-directory-module-count {
+    margin-top: 2px;
+
+    color: #64748b;
+
+    font-size: 10.5px;
+}
+
+
+/* Table */
+
+.rr-permission-directory-table-wrapper {
+    overflow-x: auto;
+}
+
+
+.rr-permission-directory-table {
+    width: 100%;
+
+    border-collapse: collapse;
+}
+
+
+.rr-permission-directory-table th {
+    padding: 9px 12px;
+
+    border-bottom: 1px solid #e2e8f0;
+
+    background: #ffffff;
+
+    color: #64748b;
+
+    font-size: 10.5px;
+    font-weight: 700;
+
+    text-transform: uppercase;
+}
+
+
+.rr-permission-directory-table td {
+    padding: 10px 12px;
+
+    border-bottom: 1px solid #eef2f7;
+
+    color: #334155;
+
+    font-size: 12px;
+}
+
+
+.rr-permission-directory-table tbody tr:last-child td {
+    border-bottom: 0;
+}
+
+
+.rr-permission-directory-table tbody tr:hover {
+    background: #f8fafc;
+}
+
+
+.rr-permission-action-name {
+    color: #1e293b;
+
+    font-weight: 650;
+}
+
+
+.rr-permission-code {
+    display: inline-flex;
+
+    padding: 3px 7px;
+
+    border: 1px solid #cbd5e1;
+    border-radius: 5px;
+
+    background: #f8fafc;
+
+    color: #334155;
+
+    font-size: 10.5px;
+    font-weight: 600;
+}
+
+
+.rr-permission-usage {
+    display: inline-flex;
+
+    padding: 3px 7px;
+
+    border-radius: 5px;
+
+    font-size: 10.5px;
+    font-weight: 600;
+}
+
+
+.rr-permission-usage-used {
+    background: #f0fdf4;
+
+    color: #15803d;
+}
+
+
+.rr-permission-usage-unused {
+    background: #f8fafc;
+
+    color: #64748b;
+}
+
+
+/* Responsive */
+
+@media (max-width: 991.98px) {
+
+    .rr-permission-toolbar {
+        align-items: stretch;
+
+        flex-direction: column;
+    }
+
+    .rr-permission-search {
+        width: 100%;
+    }
+
+    .rr-permission-toolbar-filters {
+        flex-wrap: wrap;
+    }
+
+}
+
+
+@media (max-width: 575.98px) {
+
+    .rr-permission-toolbar-filters {
+        align-items: stretch;
+
+        flex-direction: column;
+    }
+
+    .rr-permission-filter {
+        width: 100%;
+    }
+
+}
+
+/* =========================================================
+   PERMISSION CREATE / EDIT
+   ========================================================= */
+
+.rr-permission-preview {
+    display: flex;
+    align-items: flex-start;
+
+    gap: 12px;
+
+    padding: 14px;
+
+    border: 1px solid #bfdbfe;
+    border-radius: 8px;
+
+    background: #eff6ff;
+}
+
+
+.rr-permission-preview-icon {
+    width: 36px;
+    height: 36px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    flex-shrink: 0;
+
+    border-radius: 7px;
+
+    background: #dbeafe;
+
+    color: #2563eb;
+
+    font-size: 15px;
+}
+
+
+.rr-permission-preview-content {
+    min-width: 0;
+}
+
+
+.rr-permission-preview-label {
+    color: #475569;
+
+    font-size: 10.5px;
+    font-weight: 700;
+
+    text-transform: uppercase;
+}
+
+
+.rr-permission-preview-value {
+    margin-top: 4px;
+
+    color: #1e3a8a;
+
+    font-size: 15px;
+    font-weight: 700;
+
+    letter-spacing: 0.2px;
+
+    overflow-wrap: anywhere;
+}
+
+
+.rr-permission-preview-help {
+    margin-top: 3px;
+
+    color: #475569;
+
+    font-size: 11px;
+    font-weight: 500;
+}
+
+
+/* =========================================================
+   PERMISSION EDIT
+   ========================================================= */
+
+.rr-permission-edit-status {
+    display: inline-flex;
+    align-items: center;
+
+    gap: 6px;
+
+    padding: 5px 9px;
+
+    border-radius: 6px;
+
+    font-size: 10.5px;
+    font-weight: 700;
+}
+
+.rr-permission-edit-status-editable {
+    background: #eff6ff;
+    color: #1d4ed8;
+}
+
+.rr-permission-edit-status-locked {
+    background: #fef2f2;
+    color: #b91c1c;
+}
+
+
+/* Protection warning */
+
+.rr-permission-protected-warning {
+    display: flex;
+    align-items: flex-start;
+
+    gap: 12px;
+
+    margin-bottom: 20px;
+    padding: 14px;
+
+    border: 1px solid #fecaca;
+    border-radius: 8px;
+
+    background: #fef2f2;
+}
+
+.rr-permission-protected-icon {
+    width: 36px;
+    height: 36px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    flex-shrink: 0;
+
+    border-radius: 7px;
+
+    background: #fee2e2;
+    color: #b91c1c;
+
+    font-size: 14px;
+}
+
+.rr-permission-protected-title {
+    color: #991b1b;
+
+    font-size: 12.5px;
+    font-weight: 700;
+}
+
+.rr-permission-protected-text {
+    margin-top: 3px;
+
+    color: #7f1d1d;
+
+    font-size: 11.5px;
+    line-height: 1.55;
+}
+
+.rr-permission-protected-help {
+    margin-top: 5px;
+
+    color: #64748b;
+
+    font-size: 10.5px;
+    line-height: 1.5;
+}
+
+
+/* Metadata */
+
+.rr-permission-meta-card {
+    height: 100%;
+
+    padding: 12px 14px;
+
+    border: 1px solid #e2e8f0;
+    border-radius: 7px;
+
+    background: #f8fafc;
+}
+
+.rr-permission-meta-label {
+    color: #64748b;
+
+    font-size: 10px;
+    font-weight: 700;
+
+    text-transform: uppercase;
+}
+
+.rr-permission-meta-value {
+    margin-top: 4px;
+
+    color: #1e293b;
+
+    font-size: 13px;
+    font-weight: 700;
+
+    overflow-wrap: anywhere;
+}
+
+
+/* Disabled protected inputs */
+
+.rr-form-control:disabled {
+    background: #f1f5f9;
+
+    color: #64748b;
+
+    cursor: not-allowed;
+}

@@ -1,0 +1,686 @@
+/* =========================================================
+   ACTIVITY LOGS
+   ========================================================= */
+
+.rr-activity-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    gap: 12px;
+
+    padding: 12px 14px;
+
+    border-bottom: 1px solid #e2e8f0;
+}
+
+
+/* Search */
+
+.rr-activity-search {
+    position: relative;
+
+    width: min(480px, 100%);
+    height: 38px;
+
+    display: flex;
+    align-items: center;
+
+    gap: 8px;
+
+    padding: 0 38px 0 12px;
+
+    border: 1px solid #cbd5e1;
+    border-radius: 7px;
+
+    background: #ffffff;
+}
+
+.rr-activity-search:focus-within {
+    border-color: #3b82f6;
+
+    box-shadow:
+        0 0 0 3px rgba(59, 130, 246, 0.08);
+}
+
+.rr-activity-search>i {
+    color: #64748b;
+
+    font-size: 13px;
+}
+
+.rr-activity-search input {
+    width: 100%;
+
+    border: 0;
+    outline: 0;
+
+    background: transparent;
+
+    color: #1e293b;
+
+    font-size: 12px;
+}
+
+.rr-activity-search-clear {
+    position: absolute;
+
+    top: 50%;
+    right: 7px;
+
+    width: 26px;
+    height: 26px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    transform: translateY(-50%);
+
+    padding: 0;
+
+    border: 0;
+    border-radius: 5px;
+
+    background: transparent;
+
+    color: #64748b;
+}
+
+.rr-activity-search-clear:hover {
+    background: #f1f5f9;
+
+    color: #1e293b;
+}
+
+
+/* =========================================================
+   FILTERS
+   ========================================================= */
+
+.rr-activity-filters {
+    display: grid;
+
+    grid-template-columns:
+        repeat(5, minmax(0, 1fr));
+
+    gap: 10px;
+
+    padding: 12px 14px;
+
+    border-bottom: 1px solid #e2e8f0;
+
+    background: #f8fafc;
+}
+
+.rr-activity-filter {
+    min-width: 0;
+}
+
+.rr-activity-filter label {
+    display: block;
+
+    margin-bottom: 5px;
+
+    color: #475569;
+
+    font-size: 10px;
+    font-weight: 700;
+
+    text-transform: uppercase;
+}
+
+.rr-activity-filter select,
+.rr-activity-filter input {
+    width: 100%;
+    height: 36px;
+
+    padding: 0 9px;
+
+    border: 1px solid #cbd5e1;
+    border-radius: 6px;
+
+    outline: 0;
+
+    background: #ffffff;
+
+    color: #334155;
+
+    font-size: 11.5px;
+}
+
+.rr-activity-filter select:focus,
+.rr-activity-filter input:focus {
+    border-color: #3b82f6;
+
+    box-shadow:
+        0 0 0 3px rgba(59, 130, 246, 0.07);
+}
+
+
+/* =========================================================
+   TABLE
+   ========================================================= */
+
+.rr-activity-table {
+    min-width: 1050px;
+}
+
+.rr-activity-date {
+    color: #1e293b;
+
+    font-size: 11.5px;
+    font-weight: 650;
+
+    white-space: nowrap;
+}
+
+.rr-activity-time {
+    margin-top: 2px;
+
+    color: #64748b;
+
+    font-size: 10px;
+
+    white-space: nowrap;
+}
+
+
+/* User */
+
+.rr-activity-user {
+    display: flex;
+    align-items: center;
+
+    gap: 8px;
+}
+
+.rr-activity-avatar {
+    width: 31px;
+    height: 31px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    flex-shrink: 0;
+
+    border-radius: 7px;
+
+    background: #eff6ff;
+
+    color: #2563eb;
+
+    font-size: 9.5px;
+    font-weight: 700;
+}
+
+.rr-activity-user-name {
+    color: #1e293b;
+
+    font-size: 11.5px;
+    font-weight: 650;
+
+    white-space: nowrap;
+}
+
+.rr-activity-user-email {
+    margin-top: 1px;
+
+    color: #64748b;
+
+    font-size: 9.5px;
+
+    white-space: nowrap;
+}
+
+
+/* Module */
+
+.rr-activity-module {
+    display: inline-flex;
+
+    padding: 4px 7px;
+
+    border: 1px solid #cbd5e1;
+    border-radius: 5px;
+
+    background: #f8fafc;
+
+    color: #334155;
+
+    font-size: 10.5px;
+    font-weight: 650;
+}
+
+
+/* Action */
+
+.rr-activity-action {
+    display: inline-flex;
+    align-items: center;
+
+    padding: 4px 7px;
+
+    border-radius: 5px;
+
+    font-size: 10.5px;
+    font-weight: 650;
+}
+
+.rr-activity-action-default {
+    background: #f1f5f9;
+
+    color: #475569;
+}
+
+.rr-activity-action-success {
+    background: #f0fdf4;
+
+    color: #15803d;
+}
+
+.rr-activity-action-primary {
+    background: #eff6ff;
+
+    color: #1d4ed8;
+}
+
+.rr-activity-action-danger {
+    background: #fef2f2;
+
+    color: #b91c1c;
+}
+
+
+/* Description */
+
+.rr-activity-description {
+    max-width: 350px;
+
+    color: #334155;
+
+    font-size: 11.5px;
+
+    line-height: 1.45;
+}
+
+.rr-activity-ip {
+    color: #64748b;
+
+    font-family: monospace;
+
+    font-size: 10.5px;
+
+    white-space: nowrap;
+}
+
+
+/* =========================================================
+   PAGINATION
+   ========================================================= */
+
+.rr-activity-pagination {
+    min-height: 58px;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    gap: 12px;
+
+    padding: 10px 14px;
+
+    border-top: 1px solid #e2e8f0;
+}
+
+.rr-activity-pagination-info {
+    color: #64748b;
+
+    font-size: 11px;
+}
+
+.rr-activity-pagination-links {
+    display: flex;
+    align-items: center;
+
+    gap: 4px;
+}
+
+.rr-activity-page-button {
+    min-width: 31px;
+    height: 31px;
+
+    padding: 0 8px;
+
+    border: 1px solid #cbd5e1;
+    border-radius: 5px;
+
+    background: #ffffff;
+
+    color: #475569;
+
+    font-size: 11px;
+    font-weight: 600;
+}
+
+.rr-activity-page-button:hover:not(:disabled) {
+    background: #f8fafc;
+
+    border-color: #94a3b8;
+}
+
+.rr-activity-page-button.active {
+    border-color: #2563eb;
+
+    background: #2563eb;
+
+    color: #ffffff;
+}
+
+.rr-activity-page-button:disabled {
+    opacity: 0.45;
+
+    cursor: not-allowed;
+}
+
+
+/* =========================================================
+   ACTIVITY DETAILS MODAL
+   ========================================================= */
+
+.rr-activity-modal {
+    width: min(760px, calc(100vw - 30px));
+
+    max-height: calc(100vh - 50px);
+
+    display: flex;
+    flex-direction: column;
+
+    overflow: hidden;
+
+    border-radius: 10px;
+
+    background: #ffffff;
+
+    box-shadow:
+        0 20px 50px rgba(15, 23, 42, 0.18);
+}
+
+.rr-activity-modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    gap: 14px;
+
+    padding: 14px 16px;
+
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.rr-activity-modal-heading {
+    display: flex;
+    align-items: center;
+
+    gap: 10px;
+}
+
+.rr-activity-modal-icon {
+    width: 36px;
+    height: 36px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 7px;
+
+    background: #eff6ff;
+
+    color: #2563eb;
+
+    font-size: 14px;
+}
+
+.rr-activity-modal-title {
+    color: #1e293b;
+
+    font-size: 14px;
+    font-weight: 700;
+}
+
+.rr-activity-modal-subtitle {
+    margin-top: 2px;
+
+    color: #64748b;
+
+    font-size: 10.5px;
+}
+
+.rr-activity-modal-body {
+    overflow-y: auto;
+
+    padding: 16px;
+}
+
+.rr-activity-modal-footer {
+    display: flex;
+    justify-content: flex-end;
+
+    padding: 11px 16px;
+
+    border-top: 1px solid #e2e8f0;
+
+    background: #f8fafc;
+}
+
+
+/* Details */
+
+.rr-activity-detail-grid {
+    display: grid;
+
+    grid-template-columns:
+        repeat(3, minmax(0, 1fr));
+
+    gap: 10px;
+}
+
+.rr-activity-detail-item {
+    padding: 10px;
+
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+
+    background: #f8fafc;
+}
+
+.rr-activity-detail-label {
+    color: #64748b;
+
+    font-size: 9.5px;
+    font-weight: 700;
+
+    text-transform: uppercase;
+}
+
+.rr-activity-detail-value {
+    margin-top: 4px;
+
+    color: #1e293b;
+
+    font-size: 11.5px;
+    font-weight: 650;
+
+    overflow-wrap: anywhere;
+}
+
+
+/* Sections */
+
+.rr-activity-detail-section {
+    margin-top: 15px;
+}
+
+.rr-activity-detail-section-title {
+    margin-bottom: 7px;
+
+    color: #334155;
+
+    font-size: 10.5px;
+    font-weight: 700;
+
+    text-transform: uppercase;
+}
+
+.rr-activity-detail-description {
+    padding: 10px 12px;
+
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+
+    background: #ffffff;
+
+    color: #334155;
+
+    font-size: 11.5px;
+
+    line-height: 1.5;
+}
+
+
+/* Values */
+
+.rr-activity-values {
+    overflow: hidden;
+
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+}
+
+.rr-activity-value-row {
+    display: grid;
+
+    grid-template-columns:
+        minmax(130px, 0.35fr) minmax(0, 1fr);
+
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.rr-activity-value-row:last-child {
+    border-bottom: 0;
+}
+
+.rr-activity-value-key {
+    padding: 8px 10px;
+
+    background: #f8fafc;
+
+    color: #475569;
+
+    font-size: 10.5px;
+    font-weight: 650;
+}
+
+.rr-activity-value-data {
+    padding: 8px 10px;
+
+    color: #334155;
+
+    font-size: 10.5px;
+
+    overflow-wrap: anywhere;
+}
+
+.rr-activity-value-old {
+    background: #fffafa;
+}
+
+.rr-activity-value-new {
+    background: #fbfffc;
+}
+
+
+/* User agent */
+
+.rr-activity-user-agent {
+    padding: 10px;
+
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+
+    background: #f8fafc;
+
+    color: #64748b;
+
+    font-family: monospace;
+
+    font-size: 9.5px;
+
+    line-height: 1.5;
+
+    overflow-wrap: anywhere;
+}
+
+
+/* =========================================================
+   RESPONSIVE
+   ========================================================= */
+
+@media (max-width: 1199.98px) {
+
+    .rr-activity-filters {
+        grid-template-columns:
+            repeat(3, minmax(0, 1fr));
+    }
+
+}
+
+
+@media (max-width: 767.98px) {
+
+    .rr-activity-toolbar {
+        align-items: stretch;
+
+        flex-direction: column;
+    }
+
+    .rr-activity-search {
+        width: 100%;
+    }
+
+    .rr-activity-filters {
+        grid-template-columns:
+            repeat(2, minmax(0, 1fr));
+    }
+
+    .rr-activity-pagination {
+        align-items: flex-start;
+
+        flex-direction: column;
+    }
+
+    .rr-activity-detail-grid {
+        grid-template-columns:
+            repeat(2, minmax(0, 1fr));
+    }
+
+}
+
+
+@media (max-width: 575.98px) {
+
+    .rr-activity-filters {
+        grid-template-columns: 1fr;
+    }
+
+    .rr-activity-detail-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .rr-activity-value-row {
+        grid-template-columns: 1fr;
+    }
+
+}

@@ -1,0 +1,1085 @@
+/* =========================================================
+   USERS - SUMMARY
+   ========================================================= */
+
+.rr-user-stat-card {
+    height: 100%;
+
+    padding: 18px 19px;
+
+    border: 1px solid #cbd5e1;
+    border-radius: 9px;
+
+    background: #ffffff;
+
+    box-shadow:
+        0 1px 3px rgba(15, 23, 42, 0.05);
+}
+
+.rr-user-stat-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    gap: 12px;
+}
+
+.rr-user-stat-title {
+    color: #475569;
+
+    font-size: 11px;
+    font-weight: 700;
+
+    letter-spacing: 0.3px;
+
+    text-transform: uppercase;
+}
+
+.rr-user-stat-icon {
+    width: 36px;
+    height: 36px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 8px;
+
+    font-size: 15px;
+}
+
+.rr-user-stat-icon-primary {
+    background: #eff6ff;
+    color: #2563eb;
+}
+
+.rr-user-stat-icon-success {
+    background: #f0fdf4;
+    color: #15803d;
+}
+
+.rr-user-stat-icon-warning {
+    background: #fffbeb;
+    color: #b45309;
+}
+
+.rr-user-stat-icon-info {
+    background: #f0f9ff;
+    color: #0369a1;
+}
+
+.rr-user-stat-value {
+    margin-top: 13px;
+
+    color: #1e293b;
+
+    font-size: 28px;
+    font-weight: 700;
+
+    line-height: 1;
+}
+
+.rr-user-stat-description {
+    margin-top: 7px;
+
+    color: #64748b;
+
+    font-size: 11.5px;
+    font-weight: 500;
+}
+
+
+/* =========================================================
+   TOOLBAR
+   ========================================================= */
+
+.rr-user-toolbar {
+    min-height: 60px;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    gap: 16px;
+
+    padding: 10px 14px;
+
+    border-bottom: 1px solid var(--rr-border-light);
+}
+
+.rr-user-search {
+    width: min(390px, 100%);
+
+    height: 38px;
+
+    display: flex;
+    align-items: center;
+
+    gap: 8px;
+
+    padding: 0 11px;
+
+    border: 1px solid #cbd5e1;
+    border-radius: 7px;
+
+    background: #ffffff;
+}
+
+.rr-user-search:focus-within {
+    border-color: #3b82f6;
+
+    box-shadow:
+        0 0 0 3px rgba(59, 130, 246, 0.07);
+}
+
+.rr-user-search i {
+    color: #64748b;
+
+    font-size: 13px;
+}
+
+.rr-user-search input {
+    flex: 1;
+
+    min-width: 0;
+
+    border: 0;
+    outline: 0;
+
+    background: transparent;
+
+    color: #1e293b;
+
+    font-size: 12px;
+}
+
+.rr-user-toolbar-filters {
+    display: flex;
+    align-items: center;
+
+    gap: 8px;
+}
+
+.rr-user-filter {
+    height: 38px;
+
+    min-width: 135px;
+
+    padding: 0 10px;
+
+    border: 1px solid #cbd5e1;
+    border-radius: 7px;
+
+    background: #ffffff;
+
+    color: #334155;
+
+    font-size: 12px;
+}
+
+.rr-user-result-count {
+    color: #64748b;
+
+    font-size: 11.5px;
+
+    white-space: nowrap;
+}
+
+
+/* =========================================================
+   USER CELL
+   ========================================================= */
+
+.rr-user-cell {
+    display: flex;
+    align-items: center;
+
+    gap: 10px;
+
+    min-width: 190px;
+}
+
+.rr-user-avatar {
+    width: 36px;
+    height: 36px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    flex-shrink: 0;
+
+    border-radius: 8px;
+
+    background: #eff6ff;
+
+    color: #2563eb;
+
+    font-size: 11px;
+    font-weight: 700;
+}
+
+.rr-user-cell-info {
+    min-width: 0;
+}
+
+.rr-user-cell-name {
+    color: #1e293b;
+
+    font-size: 12.5px;
+    font-weight: 650;
+}
+
+
+/* Company */
+
+.rr-user-company-name {
+    color: #1e293b;
+
+    font-size: 12px;
+    font-weight: 600;
+}
+
+
+/* =========================================================
+   BRANCHES
+   ========================================================= */
+
+.rr-user-branch-list {
+    display: flex;
+    align-items: center;
+
+    flex-wrap: wrap;
+
+    gap: 4px;
+
+    min-width: 120px;
+}
+
+.rr-user-branch-badge {
+    display: inline-flex;
+    align-items: center;
+
+    min-height: 25px;
+
+    padding: 3px 7px;
+
+    border: 1px solid #cbd5e1;
+    border-radius: 5px;
+
+    background: #f8fafc;
+
+    color: #334155;
+
+    font-size: 10.5px;
+    font-weight: 650;
+}
+
+.rr-user-branch-more {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    min-width: 27px;
+    height: 25px;
+
+    padding: 0 6px;
+
+    border-radius: 5px;
+
+    background: #e2e8f0;
+
+    color: #475569;
+
+    font-size: 10px;
+    font-weight: 700;
+}
+
+
+/* =========================================================
+   ROLE
+   ========================================================= */
+
+.rr-user-role-list {
+    display: flex;
+    flex-wrap: wrap;
+
+    gap: 4px;
+}
+
+.rr-user-role-badge {
+    display: inline-flex;
+    align-items: center;
+
+    padding: 3px 7px;
+
+    border: 1px solid #dbeafe;
+    border-radius: 5px;
+
+    background: #eff6ff;
+
+    color: #1d4ed8;
+
+    font-size: 10.5px;
+
+    font-weight: 600;
+}
+
+
+/* =========================================================
+   LOGIN
+   ========================================================= */
+
+.rr-user-last-login {
+    color: #475569;
+
+    font-size: 11px;
+
+    white-space: nowrap;
+}
+
+
+/* =========================================================
+   RESPONSIVE
+   ========================================================= */
+
+@media (max-width: 1199.98px) {
+
+    .rr-user-toolbar {
+        align-items: stretch;
+
+        flex-direction: column;
+    }
+
+    .rr-user-toolbar-filters {
+        flex-wrap: wrap;
+    }
+
+}
+
+
+@media (max-width: 575.98px) {
+
+    .rr-user-toolbar-filters {
+        align-items: stretch;
+
+        flex-direction: column;
+    }
+
+    .rr-user-search {
+        width: 100%;
+    }
+
+    .rr-user-filter,
+    .rr-search-select {
+        width: 100%;
+    }
+
+}
+
+/* =========================================================
+   USER ACCESS FORM
+   ========================================================= */
+
+.rr-user-access-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    gap: 16px;
+
+    margin-bottom: 10px;
+}
+
+.rr-user-access-help {
+    color: #64748b;
+
+    font-size: 11.5px;
+    font-weight: 500;
+}
+
+
+/* Empty/loading */
+
+.rr-user-branch-empty {
+    min-height: 90px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    gap: 8px;
+
+    padding: 20px;
+
+    border: 1px dashed #cbd5e1;
+    border-radius: 8px;
+
+    background: #f8fafc;
+
+    color: #475569;
+
+    font-size: 12px;
+    font-weight: 500;
+}
+
+
+/* Branch grid */
+
+.rr-user-branch-selector {
+    display: grid;
+
+    grid-template-columns:
+        repeat(3, minmax(0, 1fr));
+
+    gap: 8px;
+}
+
+.rr-user-branch-option {
+    position: relative;
+
+    min-height: 64px;
+
+    display: flex;
+    align-items: center;
+
+    gap: 10px;
+
+    padding: 10px 12px;
+
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+
+    background: #ffffff;
+
+    cursor: pointer;
+
+    transition:
+        border-color 0.14s ease,
+        background-color 0.14s ease,
+        box-shadow 0.14s ease;
+}
+
+.rr-user-branch-option:hover {
+    border-color: #93b4ef;
+
+    background: #f8fbff;
+}
+
+.rr-user-branch-option.selected {
+    border-color: #60a5fa;
+
+    background: #eff6ff;
+
+    box-shadow:
+        0 0 0 2px rgba(37, 99, 235, 0.05);
+}
+
+.rr-user-branch-option input {
+    position: absolute;
+
+    opacity: 0;
+
+    pointer-events: none;
+}
+
+.rr-user-branch-option-icon {
+    width: 34px;
+    height: 34px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    flex-shrink: 0;
+
+    border-radius: 7px;
+
+    background: #f1f5f9;
+
+    color: #475569;
+
+    font-size: 14px;
+}
+
+.rr-user-branch-option.selected .rr-user-branch-option-icon {
+    background: #dbeafe;
+
+    color: #2563eb;
+}
+
+.rr-user-branch-option-info {
+    flex: 1;
+
+    min-width: 0;
+}
+
+.rr-user-branch-option-name {
+    color: #1e293b;
+
+    font-size: 12px;
+    font-weight: 650;
+
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.rr-user-branch-option-code {
+    margin-top: 2px;
+
+    color: #64748b;
+
+    font-size: 10.5px;
+    font-weight: 600;
+}
+
+.rr-user-branch-selected-icon {
+    color: #2563eb;
+
+    flex-shrink: 0;
+}
+
+
+/* Responsive */
+
+@media (max-width: 1199.98px) {
+
+    .rr-user-branch-selector {
+        grid-template-columns:
+            repeat(2, minmax(0, 1fr));
+    }
+
+}
+
+@media (max-width: 767.98px) {
+
+    .rr-user-access-header {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .rr-user-branch-selector {
+        grid-template-columns: 1fr;
+    }
+
+}
+
+
+/* User details */
+
+.rr-user-details-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    gap: 20px;
+
+    padding: 20px;
+}
+
+.rr-user-details-identity {
+    display: flex;
+    align-items: center;
+
+    gap: 13px;
+}
+
+.rr-user-details-avatar {
+    width: 52px;
+    height: 52px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 10px;
+
+    background: #eff6ff;
+    color: #2563eb;
+
+    font-size: 15px;
+    font-weight: 700;
+}
+
+.rr-user-details-name {
+    color: #1e293b;
+
+    font-size: 19px;
+    font-weight: 700;
+}
+
+.rr-user-details-email {
+    margin-top: 3px;
+
+    color: #64748b;
+
+    font-size: 12px;
+}
+
+.rr-user-details-actions {
+    display: flex;
+    align-items: center;
+
+    gap: 8px;
+}
+
+
+/* Information */
+
+.rr-user-info-grid {
+    display: grid;
+
+    grid-template-columns:
+        repeat(2, minmax(0, 1fr));
+}
+
+.rr-user-info-item {
+    min-height: 74px;
+
+    padding: 15px 17px;
+
+    border-right:
+        1px solid var(--rr-border-light);
+
+    border-bottom:
+        1px solid var(--rr-border-light);
+}
+
+.rr-user-info-item:nth-child(2n) {
+    border-right: 0;
+}
+
+.rr-user-info-item:nth-last-child(-n + 2) {
+    border-bottom: 0;
+}
+
+.rr-user-info-label {
+    color: #64748b;
+
+    font-size: 10.5px;
+    font-weight: 700;
+
+    text-transform: uppercase;
+}
+
+.rr-user-info-value {
+    margin-top: 6px;
+
+    color: #1e293b;
+
+    font-size: 12.5px;
+    font-weight: 600;
+
+    overflow-wrap: anywhere;
+}
+
+
+/* Permissions */
+
+.rr-user-permission-list {
+    display: flex;
+    flex-wrap: wrap;
+
+    gap: 7px;
+}
+
+.rr-user-permission-badge {
+    display: inline-flex;
+    align-items: center;
+
+    gap: 5px;
+
+    padding: 5px 8px;
+
+    border: 1px solid #cbd5e1;
+    border-radius: 6px;
+
+    background: #f8fafc;
+
+    color: #334155;
+
+    font-size: 11px;
+    font-weight: 600;
+}
+
+.rr-user-permission-badge i {
+    color: #15803d;
+}
+
+.rr-user-no-permissions {
+    display: flex;
+    align-items: center;
+
+    gap: 8px;
+
+    color: #64748b;
+
+    font-size: 12px;
+}
+
+
+@media (max-width: 767.98px) {
+
+    .rr-user-details-header {
+        align-items: flex-start;
+
+        flex-direction: column;
+    }
+
+    .rr-user-details-actions {
+        flex-wrap: wrap;
+
+        width: 100%;
+    }
+
+}
+
+
+@media (max-width: 575.98px) {
+
+    .rr-user-info-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .rr-user-info-item {
+        border-right: 0;
+
+        border-bottom:
+            1px solid var(--rr-border-light);
+    }
+
+    .rr-user-info-item:nth-last-child(-n + 2) {
+        border-bottom:
+            1px solid var(--rr-border-light);
+    }
+
+    .rr-user-info-item:last-child {
+        border-bottom: 0;
+    }
+
+}
+
+
+/* =========================================================
+   USER EFFECTIVE PERMISSIONS
+   ========================================================= */
+
+.rr-user-permission-toolbar {
+    min-height: 58px;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    gap: 16px;
+
+    padding: 10px 14px;
+
+    border-bottom:
+        1px solid var(--rr-border-light);
+
+    background: #ffffff;
+}
+
+
+.rr-user-permission-search {
+    position: relative;
+
+    width: min(420px, 100%);
+
+    height: 38px;
+
+    display: flex;
+    align-items: center;
+
+    gap: 8px;
+
+    padding: 0 36px 0 11px;
+
+    border: 1px solid #cbd5e1;
+    border-radius: 7px;
+
+    background: #ffffff;
+}
+
+
+.rr-user-permission-search:focus-within {
+    border-color: #3b82f6;
+
+    box-shadow:
+        0 0 0 3px rgba(59, 130, 246, 0.07);
+}
+
+
+.rr-user-permission-search>i {
+    color: #475569;
+
+    font-size: 13px;
+}
+
+
+.rr-user-permission-search input {
+    flex: 1;
+
+    min-width: 0;
+
+    border: 0;
+    outline: 0;
+
+    background: transparent;
+
+    color: #1e293b;
+
+    font-size: 12px;
+    font-weight: 500;
+}
+
+
+.rr-user-permission-search input::placeholder {
+    color: #64748b;
+}
+
+
+.rr-user-permission-clear {
+    position: absolute;
+
+    top: 50%;
+    right: 7px;
+
+    width: 26px;
+    height: 26px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    transform:
+        translateY(-50%);
+
+    border: 0;
+    border-radius: 5px;
+
+    background: transparent;
+
+    color: #64748b;
+
+    font-size: 10px;
+}
+
+
+.rr-user-permission-clear:hover {
+    background: #f1f5f9;
+
+    color: #1e293b;
+}
+
+
+.rr-user-permission-result-count {
+    color: #475569;
+
+    font-size: 11.5px;
+    font-weight: 600;
+
+    white-space: nowrap;
+}
+
+
+/* Module groups */
+
+.rr-user-permission-modules {
+    display: flex;
+    flex-direction: column;
+
+    gap: 14px;
+}
+
+
+.rr-user-permission-module {
+    overflow: hidden;
+
+    border: 1px solid #cbd5e1;
+    border-radius: 9px;
+
+    background: #ffffff;
+}
+
+
+.rr-user-permission-module-header {
+    min-height: 54px;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    padding: 10px 14px;
+
+    border-bottom:
+        1px solid #e2e8f0;
+
+    background: #f8fafc;
+}
+
+
+.rr-user-permission-module-left {
+    display: flex;
+    align-items: center;
+
+    gap: 10px;
+}
+
+
+.rr-user-permission-module-icon {
+    width: 34px;
+    height: 34px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    flex-shrink: 0;
+
+    border-radius: 7px;
+
+    background: #e2e8f0;
+
+    color: #334155;
+
+    font-size: 13px;
+}
+
+
+.rr-user-permission-module-name {
+    color: #1e293b;
+
+    font-size: 13px;
+    font-weight: 700;
+}
+
+
+.rr-user-permission-module-count {
+    margin-top: 2px;
+
+    color: #64748b;
+
+    font-size: 10.5px;
+    font-weight: 500;
+}
+
+
+/* Permission grid */
+
+.rr-user-permission-grid {
+    display: grid;
+
+    grid-template-columns:
+        repeat(4, minmax(0, 1fr));
+}
+
+
+.rr-user-permission-item {
+    min-height: 60px;
+
+    display: flex;
+    align-items: center;
+
+    gap: 9px;
+
+    padding: 10px 12px;
+
+    border-right:
+        1px solid #e2e8f0;
+
+    border-bottom:
+        1px solid #e2e8f0;
+
+    background: #ffffff;
+}
+
+
+.rr-user-permission-item:nth-child(4n) {
+    border-right: 0;
+}
+
+
+.rr-user-permission-check {
+    width: 25px;
+    height: 25px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    flex-shrink: 0;
+
+    border-radius: 6px;
+
+    background: #f0fdf4;
+
+    color: #15803d;
+
+    font-size: 11px;
+}
+
+
+.rr-user-permission-info {
+    min-width: 0;
+}
+
+
+.rr-user-permission-action {
+    color: #1e293b;
+
+    font-size: 11.5px;
+    font-weight: 650;
+}
+
+
+.rr-user-permission-code {
+    margin-top: 2px;
+
+    color: #64748b;
+
+    font-size: 9.5px;
+
+    overflow-wrap: anywhere;
+}
+
+
+@media (max-width: 1199.98px) {
+
+    .rr-user-permission-grid {
+        grid-template-columns:
+            repeat(3, minmax(0, 1fr));
+    }
+
+}
+
+
+@media (max-width: 767.98px) {
+
+    .rr-user-permission-toolbar {
+        align-items: stretch;
+
+        flex-direction: column;
+    }
+
+    .rr-user-permission-search {
+        width: 100%;
+    }
+
+    .rr-user-permission-grid {
+        grid-template-columns:
+            repeat(2, minmax(0, 1fr));
+    }
+
+}
+
+
+@media (max-width: 575.98px) {
+
+    .rr-user-permission-grid {
+        grid-template-columns: 1fr;
+    }
+
+}

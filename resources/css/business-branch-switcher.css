@@ -1,0 +1,232 @@
+.rr-branch-switcher {
+    min-width: 0;
+}
+
+.rr-branch-switcher-button {
+    display: flex;
+    align-items: center;
+
+    gap: 10px;
+
+    padding: 6px 10px;
+
+    border: 1px solid transparent;
+
+    border-radius: 10px;
+
+    background: transparent;
+
+    color: inherit;
+
+    min-width: 0;
+
+    transition:
+        background-color 0.15s ease,
+        border-color 0.15s ease;
+}
+
+.rr-branch-switcher-button:hover {
+    background: #f8fafc;
+
+    border-color: #e5e7eb;
+}
+
+.rr-branch-company-icon {
+    width: 36px;
+    height: 36px;
+
+    flex-shrink: 0;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 9px;
+
+    background: #eff6ff;
+
+    color: #2563eb;
+
+    font-size: 15px;
+}
+
+.rr-branch-info {
+    min-width: 0;
+
+    text-align: left;
+}
+
+.rr-branch-company-name {
+    max-width: 220px;
+
+    color: #111827;
+
+    font-size: 13px;
+
+    font-weight: 700;
+
+    overflow: hidden;
+
+    text-overflow: ellipsis;
+
+    white-space: nowrap;
+}
+
+.rr-branch-current {
+    max-width: 220px;
+
+    margin-top: 2px;
+
+    color: #64748b;
+
+    font-size: 11px;
+
+    overflow: hidden;
+
+    text-overflow: ellipsis;
+
+    white-space: nowrap;
+}
+
+.rr-branch-arrow {
+    margin-left: 4px;
+
+    color: var(--rr-text);
+
+    font-size: 10px;
+}
+
+.rr-branch-menu {
+    min-width: 290px;
+
+    padding: 8px;
+
+    border: 1px solid #e5e7eb;
+
+    border-radius: 12px;
+
+    box-shadow:
+        0 15px 40px rgba(15, 23, 42, 0.12);
+
+    overflow: hidden;
+}
+
+.rr-branch-menu-header {
+    padding: 7px 10px 8px;
+}
+
+.rr-branch-menu-title {
+    color: #111827;
+
+    font-size: 12px;
+
+    font-weight: 700;
+}
+
+.rr-branch-menu-company {
+    margin-top: 2px;
+
+    color: var(--rr-text);
+
+    font-size: 10px;
+}
+
+.rr-branch-menu-item {
+    display: flex;
+
+    align-items: center;
+
+    gap: 10px;
+
+    min-height: 52px;
+
+    padding: 8px 10px;
+
+    border-radius: 8px;
+
+    color: #334155;
+}
+
+.rr-branch-menu-item:hover {
+    background: #f8fafc;
+}
+
+.rr-branch-menu-item-active {
+    background: #eff6ff;
+
+    color: #1d4ed8;
+}
+
+.rr-branch-menu-icon {
+    width: 32px;
+    height: 32px;
+
+    flex-shrink: 0;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 8px;
+
+    background: #f1f5f9;
+
+    color: #475569;
+}
+
+.rr-branch-menu-item-active .rr-branch-menu-icon {
+    background: #dbeafe;
+
+    color: #2563eb;
+}
+
+.rr-branch-menu-content {
+    display: flex;
+
+    flex: 1;
+
+    min-width: 0;
+
+    flex-direction: column;
+}
+
+.rr-branch-menu-name {
+    font-size: 12px;
+
+    font-weight: 600;
+
+    overflow: hidden;
+
+    text-overflow: ellipsis;
+
+    white-space: nowrap;
+}
+
+.rr-branch-menu-code {
+    margin-top: 2px;
+
+    color: var(--rr-text);
+
+    font-size: 10px;
+}
+
+.rr-branch-check {
+    margin-left: auto;
+
+    color: #2563eb;
+
+    font-size: 16px;
+}
+
+@media (max-width: 575.98px) {
+
+    .rr-branch-company-name,
+    .rr-branch-current {
+        max-width: 145px;
+    }
+
+    .rr-branch-menu {
+        min-width: 260px;
+    }
+
+}

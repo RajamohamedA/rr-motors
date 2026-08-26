@@ -8,6 +8,7 @@ class Store extends Model
 {
     protected $fillable = [
         'company_id',
+        'branch_number',
         'store_code',
         'store_name',
         'contact_person',

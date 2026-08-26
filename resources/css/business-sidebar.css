@@ -1,0 +1,375 @@
+/* =========================================================
+   RR MOTORS SIDEBAR
+   ========================================================= */
+
+.rr-sidebar {
+    position: fixed;
+
+    top: 0;
+    left: 0;
+    bottom: 0;
+
+    width: 264px;
+
+    display: flex;
+    flex-direction: column;
+
+    background: #111827;
+
+    color: #ffffff;
+
+    z-index: 1040;
+
+    overflow: hidden;
+
+    box-shadow: 4px 0 18px rgba(15, 23, 42, 0.08);
+
+    transition:
+        transform 0.25s ease,
+        width 0.25s ease;
+}
+
+
+/* =========================================================
+   BRAND
+   ========================================================= */
+
+.rr-sidebar-brand {
+    height: 76px;
+
+    display: flex;
+    align-items: center;
+
+    padding: 0 18px;
+
+    border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+
+    flex-shrink: 0;
+}
+
+.rr-brand-link {
+    display: flex;
+    align-items: center;
+
+    gap: 12px;
+
+    min-width: 0;
+
+    color: #ffffff;
+
+    text-decoration: none;
+}
+
+.rr-brand-link:hover {
+    color: #ffffff;
+}
+
+.rr-brand-logo {
+    width: 42px;
+    height: 42px;
+
+    flex-shrink: 0;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 11px;
+
+    background: #2563eb;
+
+    color: #ffffff;
+
+    font-size: 15px;
+    font-weight: 800;
+
+    letter-spacing: -0.5px;
+
+    box-shadow: 0 5px 14px rgba(37, 99, 235, 0.3);
+}
+
+.rr-brand-content {
+    min-width: 0;
+}
+
+.rr-brand-name {
+    font-size: 15px;
+
+    font-weight: 800;
+
+    letter-spacing: 0.4px;
+
+    white-space: nowrap;
+}
+
+.rr-brand-subtitle {
+    margin-top: 2px;
+
+    font-size: 10px;
+
+    color: rgba(255, 255, 255, 0.45);
+
+    white-space: nowrap;
+}
+
+
+/* Mobile close */
+
+.rr-sidebar-close {
+    display: none;
+
+    margin-left: auto;
+
+    border: 0;
+
+    background: transparent;
+
+    color: rgba(255, 255, 255, 0.7);
+
+    font-size: 17px;
+}
+
+
+/* =========================================================
+   NAVIGATION
+   ========================================================= */
+
+.rr-sidebar-navigation {
+    flex: 1;
+
+    overflow-y: auto;
+
+    overflow-x: hidden;
+
+    padding: 18px 12px 12px;
+}
+
+
+/* Scrollbar */
+
+.rr-sidebar-navigation::-webkit-scrollbar {
+    width: 5px;
+}
+
+.rr-sidebar-navigation::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.rr-sidebar-navigation::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.12);
+
+    border-radius: 10px;
+}
+
+
+/* Section */
+
+.rr-sidebar-section {
+    margin-bottom: 22px;
+}
+
+.rr-sidebar-section-title {
+    padding: 0 11px;
+
+    margin-bottom: 7px;
+
+    color: rgba(255, 255, 255, 0.35);
+
+    font-size: 10px;
+
+    font-weight: 700;
+
+    letter-spacing: 1px;
+}
+
+
+/* Menu */
+
+.rr-sidebar-menu {
+    display: flex;
+
+    flex-direction: column;
+
+    gap: 2px;
+}
+
+
+/* Item */
+
+.rr-sidebar-item {
+    position: relative;
+
+    display: flex;
+    align-items: center;
+
+    min-height: 42px;
+
+    padding: 8px 11px;
+
+    border-radius: 8px;
+
+    color: rgba(255, 255, 255, 0.64);
+
+    text-decoration: none;
+
+    transition:
+        background-color 0.15s ease,
+        color 0.15s ease,
+        transform 0.15s ease;
+}
+
+.rr-sidebar-item:hover {
+    color: #ffffff;
+
+    background: rgba(255, 255, 255, 0.07);
+}
+
+.rr-sidebar-item:active {
+    transform: scale(0.985);
+}
+
+
+/* Icon */
+
+.rr-sidebar-item-icon {
+    width: 28px;
+
+    flex-shrink: 0;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    font-size: 15px;
+}
+
+.rr-sidebar-item-label {
+    margin-left: 5px;
+
+    font-size: 13px;
+
+    font-weight: 500;
+
+    white-space: nowrap;
+}
+
+
+/* Active */
+
+.rr-sidebar-item-active {
+    color: #ffffff;
+
+    background: rgba(37, 99, 235, 0.20);
+}
+
+.rr-sidebar-item-active:hover {
+    background: rgba(37, 99, 235, 0.24);
+}
+
+.rr-sidebar-item-active .rr-sidebar-item-icon {
+    color: #60a5fa;
+}
+
+.rr-sidebar-item-active .rr-sidebar-item-label {
+    font-weight: 600;
+}
+
+
+/* Active indicator */
+
+.rr-sidebar-active-indicator {
+    position: absolute;
+
+    top: 7px;
+    right: 0;
+
+    width: 3px;
+    height: 28px;
+
+    border-radius: 3px 0 0 3px;
+
+    background: #60a5fa;
+}
+
+
+/* =========================================================
+   BOTTOM
+   ========================================================= */
+
+.rr-sidebar-bottom {
+    flex-shrink: 0;
+
+    padding: 12px 18px;
+
+    border-top: 1px solid rgba(255, 255, 255, 0.07);
+}
+
+.rr-sidebar-version {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    color: rgba(255, 255, 255, 0.35);
+
+    font-size: 10px;
+}
+
+.rr-sidebar-version span {
+    opacity: 0.7;
+}
+
+
+/* =========================================================
+   MOBILE OVERLAY
+   ========================================================= */
+
+.rr-sidebar-overlay {
+    display: none;
+
+    position: fixed;
+
+    inset: 0;
+
+    background: rgba(15, 23, 42, 0.45);
+
+    backdrop-filter: blur(2px);
+
+    z-index: 1035;
+}
+
+
+/* =========================================================
+   TABLET / MOBILE
+   ========================================================= */
+
+@media (max-width: 991.98px) {
+
+    .rr-sidebar {
+        transform: translateX(-100%);
+    }
+
+    .rr-sidebar.rr-sidebar-open {
+        transform: translateX(0);
+    }
+
+    .rr-sidebar-close {
+        display: block;
+    }
+
+    .rr-sidebar-overlay {
+        display: block;
+    }
+}
+
+
+/* =========================================================
+   SMALL MOBILE
+   ========================================================= */
+
+@media (max-width: 575.98px) {
+
+    .rr-sidebar {
+        width: min(290px, 86vw);
+    }
+
+}
