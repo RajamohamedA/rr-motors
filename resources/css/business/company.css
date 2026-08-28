@@ -1,0 +1,1051 @@
+/* =========================================================
+   RR ERP - BUSINESS COMPANY PROFILE
+   ========================================================= */
+
+.rr-company-profile-page {
+    width: 100%;
+
+    display: grid;
+
+    gap: 24px;
+
+    padding-bottom: 40px;
+
+    color: #172033;
+}
+
+
+/* =========================================================
+   HERO
+   ========================================================= */
+
+.rr-company-profile-hero {
+    position: relative;
+
+    overflow: hidden;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: space-between;
+
+    gap: 24px;
+
+    padding: 28px;
+
+    border:
+        1px solid rgba(191, 219, 254, 0.75);
+
+    border-radius: 20px;
+
+    background:
+        linear-gradient(135deg,
+            #f8fbff 0%,
+            #ffffff 65%);
+
+    box-shadow:
+        0 18px 40px rgba(15, 23, 42, 0.07);
+
+    animation:
+        rrCompanyProfileFadeUp 0.42s ease both;
+}
+
+
+.rr-company-profile-hero::before {
+    content: "";
+
+    position: absolute;
+
+    width: 250px;
+
+    height: 250px;
+
+    top: -120px;
+
+    right: -90px;
+
+    border-radius: 50%;
+
+    background:
+        rgba(37, 99, 235, 0.08);
+
+    pointer-events: none;
+}
+
+
+.rr-company-profile-hero-main {
+    position: relative;
+
+    z-index: 2;
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 18px;
+
+    min-width: 0;
+}
+
+
+.rr-company-profile-logo {
+    width: 72px;
+
+    height: 72px;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    flex: 0 0 72px;
+
+    overflow: hidden;
+
+    border-radius: 18px;
+
+    background:
+        linear-gradient(145deg,
+            #2563eb,
+            #1d4ed8);
+
+    color: #ffffff;
+
+    font-size: 24px;
+
+    font-weight: 850;
+
+    box-shadow:
+        0 12px 28px rgba(37, 99, 235, 0.22);
+}
+
+
+.rr-company-profile-logo img {
+    width: 100%;
+
+    height: 100%;
+
+    object-fit: cover;
+}
+
+
+.rr-company-profile-hero-content {
+    min-width: 0;
+}
+
+
+.rr-company-profile-eyebrow {
+    margin-bottom: 5px;
+
+    color: #2563eb;
+
+    font-size: 12px;
+
+    font-weight: 850;
+
+    letter-spacing: 1px;
+}
+
+
+.rr-company-profile-hero h1 {
+    margin: 0;
+
+    color: #0f172a;
+
+    font-size:
+        clamp(28px,
+            3vw,
+            38px);
+
+    font-weight: 850;
+
+    line-height: 1.1;
+
+    letter-spacing: -0.8px;
+}
+
+
+.rr-company-profile-hero-content>p {
+    max-width: 570px;
+
+    margin:
+        9px 0 0;
+
+    color: #64748b;
+
+    font-size: 14px;
+
+    line-height: 1.65;
+}
+
+
+/* =========================================================
+   META
+   ========================================================= */
+
+.rr-company-profile-meta {
+    display: flex;
+
+    flex-wrap: wrap;
+
+    gap: 9px;
+
+    margin-top: 15px;
+}
+
+
+.rr-company-profile-meta-badge {
+    display: inline-flex;
+
+    align-items: center;
+
+    gap: 8px;
+
+    padding:
+        8px 10px;
+
+    border:
+        1px solid #e2e8f0;
+
+    border-radius: 9px;
+
+    background: #ffffff;
+}
+
+
+.rr-company-profile-meta-badge>i {
+    color: #2563eb;
+
+    font-size: 14px;
+}
+
+
+.rr-company-profile-meta-badge span {
+    display: block;
+
+    color: #94a3b8;
+
+    font-size: 12px;
+}
+
+
+.rr-company-profile-meta-badge strong {
+    display: block;
+
+    margin-top: 1px;
+
+    color: #334155;
+
+    font-size: 13px;
+
+    font-weight: 750;
+}
+
+
+.rr-company-profile-meta-badge.active {
+    border-color: #bbf7d0;
+
+    background: #f0fdf4;
+}
+
+
+.rr-company-profile-meta-badge.active>i,
+.rr-company-profile-meta-badge.active strong {
+    color: #15803d;
+}
+
+
+.rr-company-profile-meta-badge.inactive {
+    border-color: #fecaca;
+
+    background: #fff1f2;
+}
+
+
+.rr-company-profile-meta-badge.inactive>i,
+.rr-company-profile-meta-badge.inactive strong {
+    color: #b91c1c;
+}
+
+
+/* =========================================================
+   SECURITY
+   ========================================================= */
+
+.rr-company-profile-security {
+    position: relative;
+
+    z-index: 2;
+
+    max-width: 390px;
+
+    display: flex;
+
+    align-items: flex-start;
+
+    gap: 11px;
+
+    padding: 14px;
+
+    border:
+        1px solid #dbeafe;
+
+    border-radius: 12px;
+
+    background:
+        rgba(255, 255, 255, 0.88);
+}
+
+
+.rr-company-profile-security-icon {
+    width: 38px;
+
+    height: 38px;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    flex: 0 0 38px;
+
+    border-radius: 10px;
+
+    background: #eff6ff;
+
+    color: #2563eb;
+
+    font-size: 16px;
+}
+
+
+.rr-company-profile-security strong {
+    display: block;
+
+    color: #334155;
+
+    font-size: 14px;
+
+    font-weight: 750;
+}
+
+
+.rr-company-profile-security span {
+    display: block;
+
+    margin-top: 4px;
+
+    color: #64748b;
+
+    font-size: 12px;
+
+    line-height: 1.55;
+}
+
+
+/* =========================================================
+   SUMMARY
+   ========================================================= */
+
+.rr-company-profile-summary {
+    display: grid;
+
+    grid-template-columns:
+        repeat(4,
+            minmax(0, 1fr));
+
+    gap: 14px;
+}
+
+
+.rr-company-profile-summary-card {
+    display: flex;
+
+    align-items: center;
+
+    gap: 11px;
+
+    min-width: 0;
+
+    padding: 16px;
+
+    border:
+        1px solid #e2e8f0;
+
+    border-radius: 14px;
+
+    background: #ffffff;
+
+    box-shadow:
+        0 9px 24px rgba(15, 23, 42, 0.05);
+
+    animation:
+        rrCompanyProfileFadeUp 0.42s ease both;
+}
+
+
+.rr-company-profile-summary-icon {
+    width: 42px;
+
+    height: 42px;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    flex: 0 0 42px;
+
+    border-radius: 11px;
+
+    background: #eff6ff;
+
+    color: #2563eb;
+
+    font-size: 16px;
+}
+
+
+.rr-company-profile-summary-card>div:last-child {
+    min-width: 0;
+}
+
+
+.rr-company-profile-summary-card span {
+    display: block;
+
+    color: #94a3b8;
+
+    font-size: 12px;
+}
+
+
+.rr-company-profile-summary-card strong {
+    display: block;
+
+    overflow: hidden;
+
+    margin-top: 3px;
+
+    color: #334155;
+
+    font-size: 14px;
+
+    font-weight: 750;
+
+    white-space: nowrap;
+
+    text-overflow: ellipsis;
+}
+
+
+/* =========================================================
+   FORM
+   ========================================================= */
+
+.rr-company-profile-form {
+    display: grid;
+
+    gap: 18px;
+}
+
+
+/* =========================================================
+   SECTION
+   ========================================================= */
+
+.rr-company-profile-section {
+    overflow: hidden;
+
+    border:
+        1px solid #e2e8f0;
+
+    border-radius: 16px;
+
+    background: #ffffff;
+
+    box-shadow:
+        0 10px 30px rgba(15, 23, 42, 0.055);
+
+    animation:
+        rrCompanyProfileFadeUp 0.42s ease both;
+}
+
+
+.rr-company-profile-section-header {
+    display: flex;
+
+    align-items: center;
+
+    gap: 12px;
+
+    padding:
+        18px 20px;
+
+    border-bottom:
+        1px solid #edf2f7;
+}
+
+
+.rr-company-profile-section-icon {
+    width: 43px;
+
+    height: 43px;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    flex: 0 0 43px;
+
+    border-radius: 11px;
+
+    background: #eff6ff;
+
+    color: #2563eb;
+
+    font-size: 17px;
+}
+
+
+.rr-company-profile-section-header h2 {
+    margin: 0;
+
+    color: #172033;
+
+    font-size: 18px;
+
+    font-weight: 800;
+}
+
+
+.rr-company-profile-section-header p {
+    margin:
+        4px 0 0;
+
+    color: #94a3b8;
+
+    font-size: 12px;
+
+    line-height: 1.5;
+}
+
+
+.rr-company-profile-section-body {
+    padding: 20px;
+}
+
+
+/* =========================================================
+   GRID
+   ========================================================= */
+
+.rr-company-profile-grid {
+    display: grid;
+
+    grid-template-columns:
+        repeat(2,
+            minmax(0, 1fr));
+
+    gap: 17px;
+}
+
+
+.rr-company-profile-field.full {
+    grid-column:
+        1 / -1;
+}
+
+
+/* =========================================================
+   LABEL
+   ========================================================= */
+
+.rr-company-profile-label-row {
+    display: flex;
+
+    align-items: center;
+
+    justify-content: space-between;
+
+    gap: 10px;
+
+    margin-bottom: 7px;
+}
+
+
+.rr-company-profile-label-row label {
+    color: #475569;
+
+    font-size: 13px;
+
+    font-weight: 750;
+}
+
+
+.rr-company-profile-label-row label span {
+    margin-left: 3px;
+
+    color: #dc2626;
+}
+
+
+.rr-company-profile-label-row small {
+    color: #94a3b8;
+
+    font-size: 12px;
+}
+
+
+/* =========================================================
+   INPUT
+   ========================================================= */
+
+.rr-company-profile-input-wrapper {
+    min-height: 46px;
+
+    display: flex;
+
+    align-items: center;
+
+    border:
+        1px solid #dce3eb;
+
+    border-radius: 10px;
+
+    background: #ffffff;
+
+    transition:
+        border-color 0.18s ease,
+        box-shadow 0.18s ease,
+        background 0.18s ease;
+}
+
+
+.rr-company-profile-input-wrapper:focus-within {
+    border-color: #60a5fa;
+
+    box-shadow:
+        0 0 0 3px rgba(37, 99, 235, 0.08);
+}
+
+
+.rr-company-profile-input-wrapper>i {
+    width: 42px;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    flex: 0 0 42px;
+
+    color: #94a3b8;
+
+    font-size: 14px;
+}
+
+
+.rr-company-profile-input-wrapper:focus-within>i {
+    color: #2563eb;
+}
+
+
+.rr-company-profile-input-wrapper input,
+.rr-company-profile-input-wrapper textarea {
+    width: 100%;
+
+    min-width: 0;
+
+    border: 0;
+
+    outline: 0;
+
+    background: transparent;
+
+    color: #172033;
+
+    font-size: 14px;
+
+    font-family: inherit;
+}
+
+
+.rr-company-profile-input-wrapper input {
+    min-height: 44px;
+
+    padding:
+        0 12px 0 0;
+}
+
+
+.rr-company-profile-input-wrapper textarea {
+    resize: vertical;
+
+    min-height: 100px;
+
+    padding:
+        12px 12px 12px 0;
+}
+
+
+.rr-company-profile-input-wrapper.textarea {
+    align-items: flex-start;
+}
+
+
+.rr-company-profile-input-wrapper.textarea>i {
+    padding-top: 14px;
+}
+
+
+.rr-company-profile-input-wrapper.readonly {
+    background: #f8fafc;
+
+    border-color: #e2e8f0;
+}
+
+
+.rr-company-profile-input-wrapper.readonly input {
+    color: #64748b;
+
+    cursor: not-allowed;
+}
+
+
+/* =========================================================
+   ERROR
+   ========================================================= */
+
+.rr-company-profile-error {
+    display: flex;
+
+    align-items: center;
+
+    gap: 5px;
+
+    margin-top: 6px;
+
+    color: #dc2626;
+
+    font-size: 12px;
+}
+
+
+/* =========================================================
+   ACTIONS
+   ========================================================= */
+
+.rr-company-profile-actions {
+    position: sticky;
+
+    bottom: 12px;
+
+    z-index: 20;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: space-between;
+
+    gap: 14px;
+
+    padding:
+        14px 16px;
+
+    border:
+        1px solid #e2e8f0;
+
+    border-radius: 14px;
+
+    background:
+        rgba(255, 255, 255, 0.94);
+
+    backdrop-filter: blur(14px);
+
+    -webkit-backdrop-filter: blur(14px);
+
+    box-shadow:
+        0 12px 30px rgba(15, 23, 42, 0.09);
+}
+
+
+.rr-company-profile-unsaved {
+    display: inline-flex;
+
+    align-items: center;
+
+    gap: 7px;
+
+    color: #b45309;
+
+    font-size: 13px;
+
+    font-weight: 700;
+}
+
+
+.rr-company-profile-unsaved i {
+    font-size: 8px;
+}
+
+
+.rr-company-profile-action-buttons {
+    display: flex;
+
+    align-items: center;
+
+    gap: 10px;
+}
+
+
+.rr-company-profile-reset-btn,
+.rr-company-profile-save-btn {
+    min-height: 44px;
+
+    display: inline-flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    gap: 8px;
+
+    padding:
+        0 15px;
+
+    border-radius: 9px;
+
+    font-size: 14px;
+
+    font-weight: 750;
+
+    cursor: pointer;
+
+    transition:
+        transform 0.18s ease,
+        box-shadow 0.18s ease,
+        opacity 0.18s ease;
+}
+
+
+.rr-company-profile-reset-btn {
+    border:
+        1px solid #dbe2ea;
+
+    background: #ffffff;
+
+    color: #475569;
+}
+
+
+.rr-company-profile-save-btn {
+    border: 0;
+
+    background:
+        linear-gradient(135deg,
+            #2563eb,
+            #1d4ed8);
+
+    color: #ffffff;
+
+    box-shadow:
+        0 9px 22px rgba(37, 99, 235, 0.20);
+}
+
+
+.rr-company-profile-reset-btn:hover:not(:disabled),
+.rr-company-profile-save-btn:hover:not(:disabled) {
+    transform: translateY(-1px);
+}
+
+
+.rr-company-profile-save-btn:hover:not(:disabled) {
+    box-shadow:
+        0 13px 28px rgba(37, 99, 235, 0.27);
+}
+
+
+.rr-company-profile-reset-btn:disabled,
+.rr-company-profile-save-btn:disabled {
+    cursor: not-allowed;
+
+    opacity: 0.55;
+
+    transform: none;
+
+    box-shadow: none;
+}
+
+
+/* =========================================================
+   ANIMATION
+   ========================================================= */
+
+@keyframes rrCompanyProfileFadeUp {
+
+    from {
+        opacity: 0;
+
+        transform:
+            translateY(12px);
+    }
+
+    to {
+        opacity: 1;
+
+        transform:
+            translateY(0);
+    }
+}
+
+
+/* =========================================================
+   TABLET
+   ========================================================= */
+
+@media (max-width: 1000px) {
+
+    .rr-company-profile-hero {
+        align-items: flex-start;
+
+        flex-direction: column;
+    }
+
+
+    .rr-company-profile-security {
+        max-width: none;
+
+        width: 100%;
+    }
+
+
+    .rr-company-profile-summary {
+        grid-template-columns:
+            repeat(2,
+                minmax(0, 1fr));
+    }
+}
+
+
+/* =========================================================
+   MOBILE
+   ========================================================= */
+
+@media (max-width: 650px) {
+
+    .rr-company-profile-page {
+        gap: 18px;
+    }
+
+
+    .rr-company-profile-hero {
+        padding: 20px;
+
+        border-radius: 15px;
+    }
+
+
+    .rr-company-profile-hero-main {
+        align-items: flex-start;
+
+        flex-direction: column;
+    }
+
+
+    .rr-company-profile-logo {
+        width: 60px;
+
+        height: 60px;
+
+        flex-basis: 60px;
+
+        font-size: 20px;
+    }
+
+
+    .rr-company-profile-hero h1 {
+        font-size: 28px;
+    }
+
+
+    .rr-company-profile-meta {
+        align-items: stretch;
+
+        flex-direction: column;
+    }
+
+
+    .rr-company-profile-meta-badge {
+        width: 100%;
+    }
+
+
+    .rr-company-profile-summary {
+        grid-template-columns:
+            1fr;
+    }
+
+
+    .rr-company-profile-grid {
+        grid-template-columns:
+            1fr;
+    }
+
+
+    .rr-company-profile-field.full {
+        grid-column: auto;
+    }
+
+
+    .rr-company-profile-actions {
+        position: static;
+
+        align-items: stretch;
+
+        flex-direction: column;
+    }
+
+
+    .rr-company-profile-action-buttons {
+        display: grid;
+
+        grid-template-columns:
+            1fr;
+    }
+
+
+    .rr-company-profile-reset-btn,
+    .rr-company-profile-save-btn {
+        width: 100%;
+    }
+}
+
+
+/* =========================================================
+   REDUCED MOTION
+   ========================================================= */
+
+@media (prefers-reduced-motion: reduce) {
+
+    .rr-company-profile-page *,
+    .rr-company-profile-page *::before,
+    .rr-company-profile-page *::after {
+        animation-duration:
+            0.01ms !important;
+
+        animation-iteration-count:
+            1 !important;
+
+        transition-duration:
+            0.01ms !important;
+    }
+}

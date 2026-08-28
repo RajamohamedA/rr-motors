@@ -1,0 +1,927 @@
+.rr-company-dashboard {
+    width: 100%;
+    padding: 24px;
+}
+
+
+/* ==========================================================================
+   HERO
+   ========================================================================== */
+
+.rr-company-dashboard-hero {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 24px;
+
+    margin-bottom: 24px;
+    padding: 26px;
+
+    border: 1px solid #e2e8f0;
+    border-radius: 18px;
+
+    background:
+        linear-gradient(135deg,
+            #ffffff 0%,
+            #f8fafc 100%);
+
+    box-shadow:
+        0 10px 30px rgba(15, 23, 42, 0.06);
+}
+
+
+.rr-company-dashboard-hero-content {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+
+    min-width: 0;
+}
+
+
+.rr-company-dashboard-company-icon {
+    width: 64px;
+    height: 64px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    flex: 0 0 64px;
+
+    border-radius: 16px;
+
+    background: #0f172a;
+
+    color: #ffffff;
+
+    font-size: 21px;
+    font-weight: 800;
+    letter-spacing: 0.5px;
+}
+
+
+.rr-company-dashboard-company-info {
+    min-width: 0;
+}
+
+
+.rr-company-dashboard-eyebrow,
+.rr-company-dashboard-section-label {
+    display: block;
+
+    margin-bottom: 5px;
+
+    color: #64748b;
+
+    font-size: 12px;
+    font-weight: 800;
+
+    letter-spacing: 0.08em;
+
+    text-transform: uppercase;
+}
+
+
+.rr-company-dashboard-company-info h1 {
+    margin: 0;
+
+    color: #0f172a;
+
+    font-size: 30px;
+    font-weight: 800;
+
+    line-height: 1.15;
+}
+
+
+.rr-company-dashboard-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 18px;
+
+    margin-top: 10px;
+}
+
+
+.rr-company-dashboard-meta span {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+
+    color: #64748b;
+
+    font-size: 13px;
+    font-weight: 600;
+}
+
+
+.rr-company-dashboard-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+
+    flex-shrink: 0;
+}
+
+
+/* ==========================================================================
+   BUTTON
+   ========================================================================== */
+
+.rr-company-btn {
+    min-height: 42px;
+
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+
+    padding: 9px 16px;
+
+    border: 1px solid transparent;
+    border-radius: 10px;
+
+    font-size: 14px;
+    font-weight: 700;
+
+    text-decoration: none;
+
+    cursor: pointer;
+
+    transition:
+        transform 0.18s ease,
+        background 0.18s ease,
+        border-color 0.18s ease,
+        box-shadow 0.18s ease;
+}
+
+
+.rr-company-btn:hover {
+    transform: translateY(-1px);
+}
+
+
+.rr-company-btn-primary {
+    border-color: #2563eb;
+
+    background: #2563eb;
+
+    color: #ffffff;
+}
+
+
+.rr-company-btn-primary:hover {
+    background: #1d4ed8;
+
+    color: #ffffff;
+
+    box-shadow:
+        0 8px 18px rgba(37, 99, 235, 0.18);
+}
+
+
+.rr-company-btn-secondary {
+    border-color: #cbd5e1;
+
+    background: #ffffff;
+
+    color: #334155;
+}
+
+
+.rr-company-btn-secondary:hover {
+    border-color: #94a3b8;
+
+    background: #f8fafc;
+
+    color: #0f172a;
+}
+
+
+.rr-company-btn-enter {
+    border-color: #dbeafe;
+
+    background: #eff6ff;
+
+    color: #1d4ed8;
+}
+
+
+.rr-company-btn-enter:hover {
+    border-color: #2563eb;
+
+    background: #2563eb;
+
+    color: #ffffff;
+}
+
+
+/* ==========================================================================
+   SUMMARY
+   ========================================================================== */
+
+.rr-company-dashboard-summary-grid {
+    display: grid;
+
+    grid-template-columns:
+        repeat(5,
+            minmax(0, 1fr));
+
+    gap: 14px;
+
+    margin-bottom: 24px;
+}
+
+
+.rr-company-summary-card {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+
+    min-height: 94px;
+
+    padding: 18px;
+
+    border: 1px solid #e2e8f0;
+    border-radius: 14px;
+
+    background: #ffffff;
+
+    box-shadow:
+        0 4px 16px rgba(15, 23, 42, 0.04);
+}
+
+
+.rr-company-summary-icon {
+    width: 45px;
+    height: 45px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    flex: 0 0 45px;
+
+    border-radius: 12px;
+
+    background: #f1f5f9;
+
+    color: #475569;
+
+    font-size: 18px;
+}
+
+
+.rr-company-summary-card span {
+    display: block;
+
+    color: #64748b;
+
+    font-size: 12px;
+    font-weight: 700;
+}
+
+
+.rr-company-summary-card strong {
+    display: block;
+
+    margin-top: 3px;
+
+    color: #0f172a;
+
+    font-size: 24px;
+    font-weight: 800;
+}
+
+
+.rr-company-summary-card-success .rr-company-summary-icon {
+    background: #ecfdf5;
+
+    color: #059669;
+}
+
+
+.rr-company-summary-card-warning .rr-company-summary-icon {
+    background: #fffbeb;
+
+    color: #d97706;
+}
+
+
+/* ==========================================================================
+   EMPTY BRANCH ALERT
+   ========================================================================== */
+
+.rr-company-empty-alert {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+
+    margin-bottom: 24px;
+    padding: 20px;
+
+    border: 1px solid #fde68a;
+    border-radius: 14px;
+
+    background: #fffbeb;
+}
+
+
+.rr-company-empty-alert-icon {
+    width: 50px;
+    height: 50px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    flex: 0 0 50px;
+
+    border-radius: 13px;
+
+    background: #fef3c7;
+
+    color: #b45309;
+
+    font-size: 21px;
+}
+
+
+.rr-company-empty-alert>div:nth-child(2) {
+    flex: 1;
+}
+
+
+.rr-company-empty-alert h2 {
+    margin: 0 0 4px;
+
+    color: #92400e;
+
+    font-size: 18px;
+    font-weight: 800;
+}
+
+
+.rr-company-empty-alert p {
+    margin: 0;
+
+    color: #a16207;
+
+    font-size: 14px;
+    line-height: 1.55;
+}
+
+
+/* ==========================================================================
+   MAIN GRID
+   ========================================================================== */
+
+.rr-company-dashboard-main-grid {
+    display: grid;
+
+    grid-template-columns:
+        minmax(0, 1.65fr) minmax(300px, 0.65fr);
+
+    gap: 20px;
+
+    align-items: start;
+}
+
+
+.rr-company-dashboard-side-column {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+
+.rr-company-dashboard-panel {
+    overflow: hidden;
+
+    border: 1px solid #e2e8f0;
+    border-radius: 16px;
+
+    background: #ffffff;
+
+    box-shadow:
+        0 5px 20px rgba(15, 23, 42, 0.04);
+}
+
+
+.rr-company-dashboard-panel-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 18px;
+
+    padding: 20px 22px;
+
+    border-bottom: 1px solid #eef2f7;
+}
+
+
+.rr-company-dashboard-panel-header h2 {
+    margin: 0;
+
+    color: #0f172a;
+
+    font-size: 19px;
+    font-weight: 800;
+}
+
+
+.rr-company-dashboard-panel-header p {
+    max-width: 620px;
+
+    margin: 6px 0 0;
+
+    color: #64748b;
+
+    font-size: 13px;
+    line-height: 1.55;
+}
+
+
+.rr-company-text-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+
+    flex-shrink: 0;
+
+    margin-top: 4px;
+
+    color: #2563eb;
+
+    font-size: 13px;
+    font-weight: 700;
+
+    text-decoration: none;
+}
+
+
+/* ==========================================================================
+   BRANCH
+   ========================================================================== */
+
+.rr-company-branch-list {
+    padding: 8px 22px 16px;
+}
+
+
+.rr-company-branch-card {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+
+    padding: 16px 0;
+
+    border-bottom: 1px solid #eef2f7;
+}
+
+
+.rr-company-branch-card:last-child {
+    border-bottom: 0;
+}
+
+
+.rr-company-branch-card-main {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+
+    min-width: 0;
+}
+
+
+.rr-company-branch-icon {
+    width: 46px;
+    height: 46px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    flex: 0 0 46px;
+
+    border-radius: 12px;
+
+    background: #f1f5f9;
+
+    color: #334155;
+
+    font-size: 18px;
+}
+
+
+.rr-company-branch-info {
+    min-width: 0;
+}
+
+
+.rr-company-branch-title-row {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px 12px;
+}
+
+
+.rr-company-branch-title-row h3 {
+    margin: 0;
+
+    color: #0f172a;
+
+    font-size: 15px;
+    font-weight: 800;
+}
+
+
+.rr-company-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+
+    padding: 4px 8px;
+
+    border-radius: 999px;
+
+    font-size: 12px;
+    font-weight: 750;
+}
+
+
+.rr-company-status-active {
+    background: #ecfdf5;
+
+    color: #047857;
+}
+
+
+.rr-company-status-pending {
+    background: #fffbeb;
+
+    color: #b45309;
+}
+
+
+.rr-company-branch-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 7px 14px;
+
+    margin-top: 7px;
+}
+
+
+.rr-company-branch-meta span {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+
+    color: #64748b;
+
+    font-size: 12px;
+    font-weight: 600;
+}
+
+
+.rr-company-branch-actions {
+    flex-shrink: 0;
+}
+
+
+.rr-company-pending-message {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+
+    color: #b45309;
+
+    font-size: 12px;
+    font-weight: 700;
+}
+
+
+/* ==========================================================================
+   QUICK LINKS
+   ========================================================================== */
+
+.rr-company-quick-links {
+    padding: 8px 14px 14px;
+}
+
+
+.rr-company-quick-link {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+
+    min-height: 63px;
+
+    padding: 10px;
+
+    border-radius: 11px;
+
+    color: inherit;
+
+    text-decoration: none;
+
+    transition:
+        background 0.18s ease,
+        transform 0.18s ease;
+}
+
+
+.rr-company-quick-link:hover {
+    background: #f8fafc;
+
+    transform: translateX(2px);
+}
+
+
+.rr-company-quick-link-icon {
+    width: 39px;
+    height: 39px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    flex: 0 0 39px;
+
+    border-radius: 10px;
+
+    background: #eff6ff;
+
+    color: #2563eb;
+
+    font-size: 16px;
+}
+
+
+.rr-company-quick-link>div:nth-child(2) {
+    flex: 1;
+    min-width: 0;
+}
+
+
+.rr-company-quick-link strong {
+    display: block;
+
+    color: #1e293b;
+
+    font-size: 13px;
+    font-weight: 750;
+}
+
+
+.rr-company-quick-link span {
+    display: block;
+
+    margin-top: 2px;
+
+    color: #64748b;
+
+    font-size: 12px;
+}
+
+
+.rr-company-quick-arrow {
+    color: #94a3b8;
+
+    font-size: 12px;
+}
+
+
+/* ==========================================================================
+   ACCOUNT
+   ========================================================================== */
+
+.rr-company-account-card {
+    display: flex;
+    align-items: center;
+    gap: 13px;
+
+    padding: 18px;
+}
+
+
+.rr-company-account-avatar {
+    width: 46px;
+    height: 46px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    flex: 0 0 46px;
+
+    border-radius: 50%;
+
+    background: #0f172a;
+
+    color: #ffffff;
+
+    font-size: 14px;
+    font-weight: 800;
+}
+
+
+.rr-company-account-card span,
+.rr-company-account-card small {
+    display: block;
+
+    color: #64748b;
+
+    font-size: 12px;
+}
+
+
+.rr-company-account-card strong {
+    display: block;
+
+    margin: 2px 0;
+
+    color: #0f172a;
+
+    font-size: 14px;
+    font-weight: 750;
+}
+
+
+/* ==========================================================================
+   NO DATA
+   ========================================================================== */
+
+.rr-company-no-data {
+    padding: 52px 24px;
+
+    text-align: center;
+}
+
+
+.rr-company-no-data-icon {
+    width: 58px;
+    height: 58px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    margin: 0 auto 14px;
+
+    border-radius: 15px;
+
+    background: #f1f5f9;
+
+    color: #475569;
+
+    font-size: 23px;
+}
+
+
+.rr-company-no-data h3 {
+    margin: 0;
+
+    color: #0f172a;
+
+    font-size: 17px;
+    font-weight: 800;
+}
+
+
+.rr-company-no-data p {
+    max-width: 420px;
+
+    margin: 7px auto 16px;
+
+    color: #64748b;
+
+    font-size: 13px;
+    line-height: 1.55;
+}
+
+
+/* ==========================================================================
+   RESPONSIVE
+   ========================================================================== */
+
+@media (max-width: 1200px) {
+
+    .rr-company-dashboard-summary-grid {
+        grid-template-columns:
+            repeat(3,
+                minmax(0, 1fr));
+    }
+
+
+    .rr-company-dashboard-main-grid {
+        grid-template-columns:
+            minmax(0, 1fr);
+    }
+
+
+    .rr-company-dashboard-side-column {
+        display: grid;
+
+        grid-template-columns:
+            repeat(2,
+                minmax(0, 1fr));
+    }
+}
+
+
+@media (max-width: 768px) {
+
+    .rr-company-dashboard {
+        padding: 16px;
+    }
+
+
+    .rr-company-dashboard-hero {
+        flex-direction: column;
+        align-items: stretch;
+
+        padding: 20px;
+    }
+
+
+    .rr-company-dashboard-actions {
+        width: 100%;
+    }
+
+
+    .rr-company-dashboard-actions .rr-company-btn {
+        flex: 1;
+    }
+
+
+    .rr-company-dashboard-summary-grid {
+        grid-template-columns:
+            repeat(2,
+                minmax(0, 1fr));
+    }
+
+
+    .rr-company-dashboard-side-column {
+        grid-template-columns:
+            minmax(0, 1fr);
+    }
+
+
+    .rr-company-branch-card {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+
+    .rr-company-branch-actions {
+        width: 100%;
+    }
+
+
+    .rr-company-branch-actions .rr-company-btn {
+        width: 100%;
+    }
+
+
+    .rr-company-empty-alert {
+        align-items: flex-start;
+        flex-wrap: wrap;
+    }
+}
+
+
+@media (max-width: 520px) {
+
+    .rr-company-dashboard-company-icon {
+        width: 54px;
+        height: 54px;
+
+        flex-basis: 54px;
+    }
+
+
+    .rr-company-dashboard-company-info h1 {
+        font-size: 24px;
+    }
+
+
+    .rr-company-dashboard-summary-grid {
+        grid-template-columns:
+            minmax(0, 1fr);
+    }
+
+
+    .rr-company-dashboard-actions {
+        flex-direction: column;
+    }
+
+
+    .rr-company-dashboard-actions .rr-company-btn {
+        width: 100%;
+    }
+}

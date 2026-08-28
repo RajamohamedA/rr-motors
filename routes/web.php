@@ -1,17 +1,57 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use Inertia\Inertia;
 
 
-
+/*
+|--------------------------------------------------------------------------
+| Main Controllers
+|--------------------------------------------------------------------------
+*/
 
 use App\Http\Controllers\CustomerPaymentController;
-
+use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\BranchContextController;
+use App\Http\Controllers\BranchSelectionController;
 
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\UserController;
 
-use Inertia\Inertia;
+
+/*
+|--------------------------------------------------------------------------
+| Authentication Controllers
+|--------------------------------------------------------------------------
+*/
+
+use App\Http\Controllers\Auth\BusinessRegistrationController;
+use App\Http\Controllers\Auth\PasswordResetLinkController;
+use App\Http\Controllers\Auth\LoginRedirectController;
+
+
+/*
+|--------------------------------------------------------------------------
+| Business Controllers
+|--------------------------------------------------------------------------
+*/
+
+use App\Http\Controllers\Business\DashboardController as BusinessDashboardController;
+use App\Http\Controllers\Business\CompanyController as BusinessCompanyController;
+
+/*
+|--------------------------------------------------------------------------
+| company Controllers
+|--------------------------------------------------------------------------
+*/
+use App\Http\Controllers\Business\CompanyDashboardController;
+
+
+/*
+|--------------------------------------------------------------------------
+| Super Admin Controllers
+|--------------------------------------------------------------------------
+*/
 
 use App\Http\Controllers\SuperAdmin\DashboardController as SuperAdminDashboardController;
 
@@ -29,33 +69,14 @@ use App\Http\Controllers\SuperAdmin\ActivityLogController;
 
 use App\Http\Controllers\SuperAdmin\SettingController as SuperAdminSettingController;
 
-use App\Http\Controllers\ProfileController;
-
 use App\Http\Controllers\SuperAdmin\NotificationController;
 
 
-use App\Http\Controllers\Auth\BusinessRegistrationController;
-use App\Http\Controllers\Auth\PasswordResetLinkController;
-
-
-
-use App\Http\Controllers\BranchContextController;
-
-use App\Http\Controllers\Business\DashboardController as BusinessDashboardController;
-
-use App\Http\Controllers\Auth\LoginRedirectController;
-
-use App\Http\Controllers\BranchSelectionController;
 /*
 |--------------------------------------------------------------------------
-| Welcome
+| Public Home
 |--------------------------------------------------------------------------
 */
-
-Route::get('/react-test', function () {
-    return Inertia::render('Test');
-})->middleware('auth');
-
 
 Route::get(
     '/',
@@ -68,56 +89,106 @@ Route::get(
 );
 
 
-Route::middleware('guest')
-    ->group(function () {
+/*
+|--------------------------------------------------------------------------
+| React Test
+|--------------------------------------------------------------------------
+|
+| Development helper.
+| Remove in production if no longer required.
+|
+*/
 
-        Route::get(
-            '/register-business',
-            [
-                BusinessRegistrationController::class,
-                'create',
-            ]
-        )->name(
-            'business.register'
+Route::get(
+    '/react-test',
+    function () {
+
+        return Inertia::render(
+            'Test'
         );
-
-        Route::post(
-            '/register-business',
-            [
-                BusinessRegistrationController::class,
-                'store',
-            ]
-        )->name(
-            'business.register.store'
-        );
-
-        Route::get(
-            'forgot-password',
-            [
-                PasswordResetLinkController::class,
-                'create',
-            ]
-        )->name(
-            'password.request'
-        );
+    }
+)->middleware(
+    'auth'
+);
 
 
-        Route::post(
-            'forgot-password',
-            [
-                PasswordResetLinkController::class,
-                'store',
-            ]
-        )->name(
-            'password.email'
-        );
-    });
 
+Route::get(
+    '/company/dashboard',
+    [CompanyDashboardController::class, 'index']
+)->name('business.company.dashboard');
 
 
 /*
 |--------------------------------------------------------------------------
-| company
+| Guest Routes
+|--------------------------------------------------------------------------
+*/
+
+Route::middleware([
+    'guest',
+])->group(function () {
+
+    /*
+    |--------------------------------------------------------------------------
+    | Business Registration
+    |--------------------------------------------------------------------------
+    */
+
+    Route::get(
+        '/register-business',
+        [
+            BusinessRegistrationController::class,
+            'create',
+        ]
+    )->name(
+        'business.register'
+    );
+
+
+    Route::post(
+        '/register-business',
+        [
+            BusinessRegistrationController::class,
+            'store',
+        ]
+    )->name(
+        'business.register.store'
+    );
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Forgot Password
+    |--------------------------------------------------------------------------
+    */
+
+    Route::get(
+        '/forgot-password',
+        [
+            PasswordResetLinkController::class,
+            'create',
+        ]
+    )->name(
+        'password.request'
+    );
+
+
+    Route::post(
+        '/forgot-password',
+        [
+            PasswordResetLinkController::class,
+            'store',
+        ]
+    )->name(
+        'password.email'
+    );
+});
+
+
+/*
+|--------------------------------------------------------------------------
+| Super Admin
 |--------------------------------------------------------------------------
 */
 
@@ -125,122 +196,263 @@ Route::middleware([
     'auth',
     'verified',
     'super.admin',
-])->prefix('super-admin')
-    ->name('super-admin.')
+])
+    ->prefix(
+        'super-admin'
+    )
+    ->name(
+        'super-admin.'
+    )
     ->group(function () {
 
-
-    /*
-    |--------------------------------------------------------------------------
-    | Dashboard
-    |--------------------------------------------------------------------------
-    */
-    Route::get('/dashboard', [SuperAdminDashboardController::class, 'index'])
-        ->name('dashboard');
-
-    /*
-    |--------------------------------------------------------------------------
-    | Companies
-    |--------------------------------------------------------------------------
-    */
-
-    Route::get(
-            '/companies',
-            [SuperAdminCompanyController::class, 'index']
-        )->name('companies.index');
+        /*
+        |--------------------------------------------------------------------------
+        | Dashboard
+        |--------------------------------------------------------------------------
+        */
 
         Route::get(
-            '/companies/create',
-            [SuperAdminCompanyController::class, 'create']
-        )->name('companies.create');
-
-        Route::post(
-            '/companies',
-            [SuperAdminCompanyController::class, 'store']
-        )->name('companies.store');
-
-        Route::get(
-            '/companies/{company}',
-            [SuperAdminCompanyController::class, 'show']
-        )->name('companies.show');
-
-        Route::get(
-            '/companies/{company}/edit',
-            [SuperAdminCompanyController::class, 'edit']
-        )->name('companies.edit');
-
-        Route::put(
-            '/companies/{company}',
-            [SuperAdminCompanyController::class, 'update']
-        )->name('companies.update');
-
-        Route::post(
-            '/companies/{company}/activate',
-            [SuperAdminCompanyController::class, 'activate']
-        )->name('companies.activate');
-
-        Route::post(
-            '/companies/{company}/deactivate',
-            [SuperAdminCompanyController::class, 'deactivate']
-        )->name('companies.deactivate');
-
-        Route::delete(
-            '/companies/{company}',
-            [SuperAdminCompanyController::class, 'destroy']
-        )->name('companies.destroy');
-
-        Route::post(
-            '/companies/{id}/restore',
-            [SuperAdminCompanyController::class, 'restore']
-        )->name('companies.restore');
+            '/dashboard',
+            [
+                SuperAdminDashboardController::class,
+                'index',
+            ]
+        )->name(
+            'dashboard'
+        );
 
 
         /*
         |--------------------------------------------------------------------------
-        | branches route under companies
+        | Companies
+        |--------------------------------------------------------------------------
+        */
+
+        Route::get(
+            '/companies',
+            [
+                SuperAdminCompanyController::class,
+                'index',
+            ]
+        )->name(
+            'companies.index'
+        );
+
+
+        Route::get(
+            '/companies/create',
+            [
+                SuperAdminCompanyController::class,
+                'create',
+            ]
+        )->name(
+            'companies.create'
+        );
+
+
+        Route::post(
+            '/companies',
+            [
+                SuperAdminCompanyController::class,
+                'store',
+            ]
+        )->name(
+            'companies.store'
+        );
+
+
+        Route::get(
+            '/companies/{company}',
+            [
+                SuperAdminCompanyController::class,
+                'show',
+            ]
+        )->name(
+            'companies.show'
+        );
+
+
+        Route::get(
+            '/companies/{company}/edit',
+            [
+                SuperAdminCompanyController::class,
+                'edit',
+            ]
+        )->name(
+            'companies.edit'
+        );
+
+
+        Route::put(
+            '/companies/{company}',
+            [
+                SuperAdminCompanyController::class,
+                'update',
+            ]
+        )->name(
+            'companies.update'
+        );
+
+
+        Route::post(
+            '/companies/{company}/activate',
+            [
+                SuperAdminCompanyController::class,
+                'activate',
+            ]
+        )->name(
+            'companies.activate'
+        );
+
+
+        Route::post(
+            '/companies/{company}/deactivate',
+            [
+                SuperAdminCompanyController::class,
+                'deactivate',
+            ]
+        )->name(
+            'companies.deactivate'
+        );
+
+
+        Route::delete(
+            '/companies/{company}',
+            [
+                SuperAdminCompanyController::class,
+                'destroy',
+            ]
+        )->name(
+            'companies.destroy'
+        );
+
+
+        Route::post(
+            '/companies/{id}/restore',
+            [
+                SuperAdminCompanyController::class,
+                'restore',
+            ]
+        )->name(
+            'companies.restore'
+        );
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Company Branches
         |--------------------------------------------------------------------------
         */
 
         Route::get(
             '/companies/{company}/branches/create',
-            [SuperAdminBranchController::class, 'create']
-        )->name('companies.branches.create');
+            [
+                SuperAdminBranchController::class,
+                'create',
+            ]
+        )->name(
+            'companies.branches.create'
+        );
+
 
         Route::post(
             '/companies/{company}/branches',
-            [SuperAdminBranchController::class, 'store']
-        )->name('companies.branches.store');
+            [
+                SuperAdminBranchController::class,
+                'store',
+            ]
+        )->name(
+            'companies.branches.store'
+        );
+
 
         Route::get(
             '/companies/{company}/branches/{store}/edit',
-            [SuperAdminBranchController::class, 'edit']
-        )->name('companies.branches.edit');
+            [
+                SuperAdminBranchController::class,
+                'edit',
+            ]
+        )->name(
+            'companies.branches.edit'
+        );
+
 
         Route::put(
             '/companies/{company}/branches/{store}',
-            [SuperAdminBranchController::class, 'update']
-        )->name('companies.branches.update');
+            [
+                SuperAdminBranchController::class,
+                'update',
+            ]
+        )->name(
+            'companies.branches.update'
+        );
+
 
         Route::post(
             '/companies/{company}/branches/{store}/activate',
-            [SuperAdminBranchController::class, 'activate']
-        )->name('companies.branches.activate');
+            [
+                SuperAdminBranchController::class,
+                'activate',
+            ]
+        )->name(
+            'companies.branches.activate'
+        );
+
 
         Route::post(
             '/companies/{company}/branches/{store}/deactivate',
-            [SuperAdminBranchController::class, 'deactivate']
-        )->name('companies.branches.deactivate');
+            [
+                SuperAdminBranchController::class,
+                'deactivate',
+            ]
+        )->name(
+            'companies.branches.deactivate'
+        );
 
 
         /*
         |--------------------------------------------------------------------------
-        | branches for all company
+        | All Branches
         |--------------------------------------------------------------------------
         */
+
         Route::get(
             '/branches',
-            [SuperAdminBranchController::class, 'index']
-        )->name('branches.index');
+            [
+                SuperAdminBranchController::class,
+                'index',
+            ]
+        )->name(
+            'branches.index'
+        );
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Enter Company / Branch Context
+        |--------------------------------------------------------------------------
+        |
+        | IMPORTANT:
+        |
+        | This does NOT logout Super Admin.
+        |
+        | It only enters:
+        |
+        | active_company_id
+        | active_store_id
+        | super_admin_business_context
+        |
+        */
+
+        Route::get(
+            '/companies/{company}/branches/{store}/enter',
+            [
+                BranchContextController::class,
+                'enter',
+            ]
+        )->name(
+            'branch.enter'
+        );
 
 
         /*
@@ -251,53 +463,119 @@ Route::middleware([
 
         Route::get(
             '/users',
-            [SuperAdminUserController::class, 'index']
-        )->name('users.index');
+            [
+                SuperAdminUserController::class,
+                'index',
+            ]
+        )->name(
+            'users.index'
+        );
+
 
         Route::get(
             '/users/create',
-            [SuperAdminUserController::class, 'create']
-        )->name('users.create');
+            [
+                SuperAdminUserController::class,
+                'create',
+            ]
+        )->name(
+            'users.create'
+        );
+
 
         Route::post(
             '/users',
-            [SuperAdminUserController::class, 'store']
-        )->name('users.store');
+            [
+                SuperAdminUserController::class,
+                'store',
+            ]
+        )->name(
+            'users.store'
+        );
+
+
+        Route::get(
+            '/users/{user}',
+            [
+                SuperAdminUserController::class,
+                'show',
+            ]
+        )->name(
+            'users.show'
+        );
+
 
         Route::get(
             '/users/{user}/edit',
-            [SuperAdminUserController::class, 'edit']
-        )->name('users.edit');
+            [
+                SuperAdminUserController::class,
+                'edit',
+            ]
+        )->name(
+            'users.edit'
+        );
+
 
         Route::put(
             '/users/{user}',
-            [SuperAdminUserController::class, 'update']
-        )->name('users.update');
+            [
+                SuperAdminUserController::class,
+                'update',
+            ]
+        )->name(
+            'users.update'
+        );
+
 
         Route::post(
             '/users/{user}/activate',
-            [SuperAdminUserController::class, 'activate']
-        )->name('users.activate');
+            [
+                SuperAdminUserController::class,
+                'activate',
+            ]
+        )->name(
+            'users.activate'
+        );
+
 
         Route::post(
             '/users/{user}/deactivate',
-            [SuperAdminUserController::class, 'deactivate']
-        )->name('users.deactivate');
+            [
+                SuperAdminUserController::class,
+                'deactivate',
+            ]
+        )->name(
+            'users.deactivate'
+        );
 
-        Route::get(
+
+        Route::delete(
             '/users/{user}',
-            [SuperAdminUserController::class, 'show']
-        )->name('users.show');
+            [
+                SuperAdminUserController::class,
+                'destroy',
+            ]
+        )->name(
+            'users.destroy'
+        );
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Branch Options For User
+        |--------------------------------------------------------------------------
+        */
 
         Route::get(
             '/companies/{company}/branches/options',
-            [SuperAdminUserController::class, 'branchOptions']
-        )->name('users.branch-options');
+            [
+                SuperAdminUserController::class,
+                'branchOptions',
+            ]
+        )->name(
+            'users.branch-options'
+        );
 
-        Route::delete(
-            '/users/{user}',
-            [SuperAdminUserController::class, 'destroy']
-        )->name('users.destroy');
 
         /*
         |--------------------------------------------------------------------------
@@ -307,147 +585,305 @@ Route::middleware([
 
         Route::get(
             '/roles',
-            [SuperAdminRoleController::class, 'index']
-        )->name('roles.index');
+            [
+                SuperAdminRoleController::class,
+                'index',
+            ]
+        )->name(
+            'roles.index'
+        );
+
 
         Route::get(
             '/roles/create',
-            [SuperAdminRoleController::class, 'create']
-        )->name('roles.create');
+            [
+                SuperAdminRoleController::class,
+                'create',
+            ]
+        )->name(
+            'roles.create'
+        );
+
 
         Route::post(
             '/roles',
-            [SuperAdminRoleController::class, 'store']
-        )->name('roles.store');
+            [
+                SuperAdminRoleController::class,
+                'store',
+            ]
+        )->name(
+            'roles.store'
+        );
+
 
         Route::get(
             '/roles/{role}',
-            [SuperAdminRoleController::class, 'show']
-        )->name('roles.show');
+            [
+                SuperAdminRoleController::class,
+                'show',
+            ]
+        )->name(
+            'roles.show'
+        );
+
 
         Route::get(
             '/roles/{role}/edit',
-            [SuperAdminRoleController::class, 'edit']
-        )->name('roles.edit');
+            [
+                SuperAdminRoleController::class,
+                'edit',
+            ]
+        )->name(
+            'roles.edit'
+        );
+
 
         Route::put(
             '/roles/{role}',
-            [SuperAdminRoleController::class, 'update']
-        )->name('roles.update');
+            [
+                SuperAdminRoleController::class,
+                'update',
+            ]
+        )->name(
+            'roles.update'
+        );
+
 
         Route::delete(
             '/roles/{role}',
-            [SuperAdminRoleController::class, 'destroy']
-        )->name('roles.destroy');
+            [
+                SuperAdminRoleController::class,
+                'destroy',
+            ]
+        )->name(
+            'roles.destroy'
+        );
 
 
         /*
         |--------------------------------------------------------------------------
-        | Roles
+        | Permissions
         |--------------------------------------------------------------------------
         */
 
         Route::get(
             '/permissions',
-            [SuperAdminPermissionController::class, 'index']
-        )->name('permissions.index');
+            [
+                SuperAdminPermissionController::class,
+                'index',
+            ]
+        )->name(
+            'permissions.index'
+        );
+
 
         Route::get(
             '/permissions/create',
-            [SuperAdminPermissionController::class, 'create']
-        )->name('permissions.create');
+            [
+                SuperAdminPermissionController::class,
+                'create',
+            ]
+        )->name(
+            'permissions.create'
+        );
+
 
         Route::post(
             '/permissions',
-            [SuperAdminPermissionController::class, 'store']
-        )->name('permissions.store');
+            [
+                SuperAdminPermissionController::class,
+                'store',
+            ]
+        )->name(
+            'permissions.store'
+        );
+
 
         Route::get(
             '/permissions/{permission}/edit',
-            [SuperAdminPermissionController::class, 'edit']
-        )->name('permissions.edit');
+            [
+                SuperAdminPermissionController::class,
+                'edit',
+            ]
+        )->name(
+            'permissions.edit'
+        );
+
 
         Route::put(
             '/permissions/{permission}',
-            [SuperAdminPermissionController::class, 'update']
-        )->name('permissions.update');
+            [
+                SuperAdminPermissionController::class,
+                'update',
+            ]
+        )->name(
+            'permissions.update'
+        );
+
 
         Route::delete(
             '/permissions/{permission}',
-            [SuperAdminPermissionController::class, 'destroy']
-        )->name('permissions.destroy');
+            [
+                SuperAdminPermissionController::class,
+                'destroy',
+            ]
+        )->name(
+            'permissions.destroy'
+        );
 
+
+        /*
+        |--------------------------------------------------------------------------
+        | Activity Logs
+        |--------------------------------------------------------------------------
+        */
 
         Route::get(
             '/activity-logs',
-            [ActivityLogController::class, 'index']
-        )->name('activity-logs.index');
+            [
+                ActivityLogController::class,
+                'index',
+            ]
+        )->name(
+            'activity-logs.index'
+        );
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Settings
+        |--------------------------------------------------------------------------
+        */
 
         Route::get(
             '/settings',
-            [SuperAdminSettingController::class, 'index']
-        )->name('settings.index');
-
-    Route::post(
-        '/notifications/{id}/read',
-        [
-            NotificationController::class,
-            'read',
-        ]
-    )->name(
-        'notifications.read'
-    );
+            [
+                SuperAdminSettingController::class,
+                'index',
+            ]
+        )->name(
+            'settings.index'
+        );
 
 
-    Route::patch(
-        '/notifications/{id}/read',
-        [
-            NotificationController::class,
-            'markRead',
-        ]
-    )->name(
-        'notifications.mark-read'
-    );
+        /*
+        |--------------------------------------------------------------------------
+        | Notifications
+        |--------------------------------------------------------------------------
+        */
+
+        Route::post(
+            '/notifications/{id}/read',
+            [
+                NotificationController::class,
+                'read',
+            ]
+        )->name(
+            'notifications.read'
+        );
 
 
-    Route::patch(
-        '/notifications/read-all',
-        [
-            NotificationController::class,
-            'markAllRead',
-        ]
-    )->name(
-        'notifications.read-all'
-    );
-});
+        Route::patch(
+            '/notifications/{id}/read',
+            [
+                NotificationController::class,
+                'markRead',
+            ]
+        )->name(
+            'notifications.mark-read'
+        );
 
-Route::middleware(['auth', 'verified'])->group(function () {
 
-    Route::get(
-        '/super-admin/companies/{company}/branches/{store}/enter',
-        [BranchContextController::class, 'enter']
-    )->name('super-admin.branch.enter');
+        Route::patch(
+            '/notifications/read-all',
+            [
+                NotificationController::class,
+                'markAllRead',
+            ]
+        )->name(
+            'notifications.read-all'
+        );
+    });
+
+
+/*
+|--------------------------------------------------------------------------
+| Branch / Business Context
+|--------------------------------------------------------------------------
+*/
+
+Route::middleware([
+    'auth',
+    'verified',
+])->group(function () {
+
+    /*
+    |--------------------------------------------------------------------------
+    | Select Branch
+    |--------------------------------------------------------------------------
+    |
+    | Used by Company Admin / Store Users.
+    |
+    */
 
     Route::post(
         '/select-branch/{store}',
-        [BranchContextController::class, 'select']
-    )->name('branch.select.store');
+        [
+            BranchContextController::class,
+            'select',
+        ]
+    )->name(
+        'branch.select.store'
+    );
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Exit Branch / Company Context
+    |--------------------------------------------------------------------------
+    |
+    | Super Admin:
+    |
+    | - stays logged in
+    | - clears active company/store
+    | - returns to Super Admin dashboard
+    |
+    | Company user:
+    |
+    | - clears active store context
+    | - controller decides whether to return to branch selection
+    |
+    */
 
     Route::post(
         '/branch/exit',
-        [BranchContextController::class, 'exit']
-    )->name('branch.exit');
-
+        [
+            BranchContextController::class,
+            'exit',
+        ]
+    )->name(
+        'branch.exit'
+    );
 });
 
 
 /*
 |--------------------------------------------------------------------------
-| profile controller
+| Profile
 |--------------------------------------------------------------------------
+|
+| ONE profile route group only.
+|
+| Profile Show.jsx automatically chooses:
+|
+| SuperAdminLayout
+| BusinessLayout
+|
 */
 
-Route::middleware('auth')->group(function () {
+Route::middleware([
+    'auth',
+])->group(function () {
 
     Route::get(
         '/profile',
@@ -455,7 +891,9 @@ Route::middleware('auth')->group(function () {
             ProfileController::class,
             'edit',
         ]
-    )->name('profile.edit');
+    )->name(
+        'profile.edit'
+    );
 
 
     Route::put(
@@ -464,7 +902,9 @@ Route::middleware('auth')->group(function () {
             ProfileController::class,
             'update',
         ]
-    )->name('profile.update');
+    )->name(
+        'profile.update'
+    );
 
 
     Route::patch(
@@ -475,14 +915,29 @@ Route::middleware('auth')->group(function () {
         ]
     );
 
+
+    /*
+    |--------------------------------------------------------------------------
+    | Password Update
+    |--------------------------------------------------------------------------
+    */
+
     Route::put(
         '/profile/password',
         [
             ProfileController::class,
             'updatePassword',
         ]
-    )->name('profile.password.update');
+    )->name(
+        'profile.password.update'
+    );
 
+
+    /*
+    |--------------------------------------------------------------------------
+    | Delete Profile
+    |--------------------------------------------------------------------------
+    */
 
     Route::delete(
         '/profile',
@@ -490,69 +945,214 @@ Route::middleware('auth')->group(function () {
             ProfileController::class,
             'destroy',
         ]
-    )->name('profile.destroy');
-
-});
-
-
-Route::middleware(['auth', 'verified'])->group(function () {
-
-    Route::get(
-        '/business/dashboard',
-        [BusinessDashboardController::class, 'index']
-    )->name('business.dashboard');
-});
-
-Route::middleware(['auth', 'verified'])->group(function () {
-
-    Route::get(
-        '/login/redirect',
-        [LoginRedirectController::class, 'handle']
-    )->name('login.redirect');
-});
-
-Route::middleware(['auth', 'verified'])->group(function () {
-
-    Route::get(
-        '/select-branch',
-        [BranchSelectionController::class, 'index']
-    )->name('branch.select');
+    )->name(
+        'profile.destroy'
+    );
 });
 
 
 /*
 |--------------------------------------------------------------------------
-| customer-payments
+| Login Redirect
+|--------------------------------------------------------------------------
+|
+| Determines:
+|
+| Super Admin       → Super Admin dashboard
+| Company Admin     → Business / branch flow
+| Branch User       → Business / branch flow
+|
+*/
+
+Route::middleware([
+    'auth',
+    'verified',
+])->group(function () {
+
+    Route::get(
+        '/login/redirect',
+        [
+            LoginRedirectController::class,
+            'handle',
+        ]
+    )->name(
+        'login.redirect'
+    );
+});
+
+
+/*
+|--------------------------------------------------------------------------
+| Branch Selection
 |--------------------------------------------------------------------------
 */
 
-Route::middleware('auth')->group(function () {
+Route::middleware([
+    'auth',
+    'verified',
+])->group(function () {
 
-    Route::resource('customer-payments', CustomerPaymentController::class);
+    Route::get(
+        '/select-branch',
+        [
+            BranchSelectionController::class,
+            'index',
+        ]
+    )->name(
+        'branch.select'
+    );
+});
 
-    // Search Sales Invoice
+
+/*
+|--------------------------------------------------------------------------
+| Business Dashboard
+|--------------------------------------------------------------------------
+|
+| Later we will add EnsureBusinessContextActive middleware here.
+|
+*/
+
+Route::middleware([
+    'auth',
+    'verified',
+])->group(function () {
+
+    Route::get(
+        '/business/dashboard',
+        [
+            BusinessDashboardController::class,
+            'index',
+        ]
+    )->name(
+        'business.dashboard'
+    );
+
+    /*
+    |--------------------------------------------------------------------------
+    | Company Admin - Company Profile
+    |--------------------------------------------------------------------------
+    */
+
+    Route::middleware([
+        'auth',
+        'verified',
+    ])->group(function () {
+
+        Route::get(
+            '/company/profile',
+            [
+                BusinessCompanyController::class,
+                'show',
+            ]
+        )->name(
+            'business.company.show'
+        );
+
+
+        Route::put(
+            '/company/profile',
+            [
+                BusinessCompanyController::class,
+                'update',
+            ]
+        )->name(
+            'business.company.update'
+        );
+    });
+});
+
+
+/*
+|--------------------------------------------------------------------------
+| Customer Payments
+|--------------------------------------------------------------------------
+*/
+
+Route::middleware([
+    'auth',
+])->group(function () {
+
+    /*
+    |--------------------------------------------------------------------------
+    | Customer Payments Resource
+    |--------------------------------------------------------------------------
+    */
+
+    Route::resource(
+        'customer-payments',
+        CustomerPaymentController::class
+    );
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Search Sales Invoice
+    |--------------------------------------------------------------------------
+    */
+
     Route::get(
         'customer-payments/search/invoice',
-        [CustomerPaymentController::class, 'searchInvoice']
-    )->name('customer-payments.search');
+        [
+            CustomerPaymentController::class,
+            'searchInvoice',
+        ]
+    )->name(
+        'customer-payments.search'
+    );
 
-    // Get Invoice Details
+
+    /*
+    |--------------------------------------------------------------------------
+    | Invoice Details
+    |--------------------------------------------------------------------------
+    */
+
     Route::get(
         'customer-payments/invoice/{id}',
-        [CustomerPaymentController::class, 'invoiceDetails']
-    )->name('customer-payments.invoice');
+        [
+            CustomerPaymentController::class,
+            'invoiceDetails',
+        ]
+    )->name(
+        'customer-payments.invoice'
+    );
 
-    // Print Receipt
+
+    /*
+    |--------------------------------------------------------------------------
+    | Print Receipt
+    |--------------------------------------------------------------------------
+    */
+
     Route::get(
         'customer-payments/{customer_payment}/print',
-        [CustomerPaymentController::class, 'print']
-    )->name('customer-payments.print');
+        [
+            CustomerPaymentController::class,
+            'print',
+        ]
+    )->name(
+        'customer-payments.print'
+    );
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Customer Ledger
+    |--------------------------------------------------------------------------
+    */
 
     Route::get(
         'customer-ledger',
-        [CustomerPaymentController::class, 'customerLedger']
-    )->name('customer-ledger');
+        [
+            CustomerPaymentController::class,
+            'customerLedger',
+        ]
+    )->name(
+        'customer-ledger'
+    );
 });
+
 
 /*
 |--------------------------------------------------------------------------
@@ -560,75 +1160,205 @@ Route::middleware('auth')->group(function () {
 |--------------------------------------------------------------------------
 */
 
-Route::middleware('auth')->group(function () {
+Route::middleware([
+    'auth',
+])->group(function () {
 
-    // Sales Report
-    // Route::resource('sales-reports', SalesReportController::class);
+    /*
+    |--------------------------------------------------------------------------
+    | Sales Report
+    |--------------------------------------------------------------------------
+    */
 
-    // Purchase Return Report
-    // Route::resource('purchase-return-reports', PurchaseReturnReportController::class);
+    // Route::resource(
+    //     'sales-reports',
+    //     SalesReportController::class
+    // );
 
-    // Sales Return Report
-    // Route::resource('sales-return-reports', SalesReturnReportController::class);
 
-    // Stock Report
-    // Route::resource('stock-reports', StockReportController::class);
+    /*
+    |--------------------------------------------------------------------------
+    | Purchase Return Report
+    |--------------------------------------------------------------------------
+    */
 
-    // Supplier Ledger
-    // Route::resource('supplier-ledgers', SupplierLedgerController::class);
+    // Route::resource(
+    //     'purchase-return-reports',
+    //     PurchaseReturnReportController::class
+    // );
 
-    // Customer Ledger
-    // Route::resource('customer-ledgers', CustomerLedgerController::class);
 
-    // GST Report
-    // Route::resource('gst-reports', GstReportController::class);
+    /*
+    |--------------------------------------------------------------------------
+    | Sales Return Report
+    |--------------------------------------------------------------------------
+    */
 
+    // Route::resource(
+    //     'sales-return-reports',
+    //     SalesReturnReportController::class
+    // );
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Stock Report
+    |--------------------------------------------------------------------------
+    */
+
+    // Route::resource(
+    //     'stock-reports',
+    //     StockReportController::class
+    // );
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Supplier Ledger
+    |--------------------------------------------------------------------------
+    */
+
+    // Route::resource(
+    //     'supplier-ledgers',
+    //     SupplierLedgerController::class
+    // );
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Customer Ledger
+    |--------------------------------------------------------------------------
+    */
+
+    // Route::resource(
+    //     'customer-ledgers',
+    //     CustomerLedgerController::class
+    // );
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | GST Report
+    |--------------------------------------------------------------------------
+    */
+
+    // Route::resource(
+    //     'gst-reports',
+    //     GSTReportController::class
+    // );
 });
 
-Route::resource('roles', RoleController::class);
-
-Route::resource('users', UserController::class);
-
-Route::post('/users/{user}/deactivate', [UserController::class, 'deactivate'])
-    ->name('users.deactivate');
-
-Route::post('/users/{user}/activate', [UserController::class, 'activate'])
-    ->name('users.activate');
 
 /*
 |--------------------------------------------------------------------------
-| Profile
+| Legacy / Business Roles
+|--------------------------------------------------------------------------
+|
+| These are your existing non-Super-Admin role routes.
+|
+| Later we should decide whether these belong inside a Business prefix /
+| permission middleware.
+|
+*/
+
+Route::resource(
+    'roles',
+    RoleController::class
+);
+
+
+/*
+|--------------------------------------------------------------------------
+| Legacy / Business Users
 |--------------------------------------------------------------------------
 */
 
-Route::middleware('auth')->group(function () {
+Route::resource(
+    'users',
+    UserController::class
+);
 
-    Route::get(
-        '/profile',
-        [ProfileController::class, 'edit']
-    )->name('profile.edit');
 
-    Route::patch(
-        '/profile',
-        [ProfileController::class, 'update']
-    )->name('profile.update');
+Route::post(
+    '/users/{user}/deactivate',
+    [
+        UserController::class,
+        'deactivate',
+    ]
+)->name(
+    'users.deactivate'
+);
 
-    Route::delete(
-        '/profile',
-        [ProfileController::class, 'destroy']
-    )->name('profile.destroy');
-});
+
+Route::post(
+    '/users/{user}/activate',
+    [
+        UserController::class,
+        'activate',
+    ]
+)->name(
+    'users.activate'
+);
+
 
 /*
 |--------------------------------------------------------------------------
-| Authentication
+| Authentication Routes
 |--------------------------------------------------------------------------
 */
 
 require __DIR__ . '/auth.php';
+
+
+/*
+|--------------------------------------------------------------------------
+| Master Routes
+|--------------------------------------------------------------------------
+*/
+
 require __DIR__ . '/masters.php';
+
+
+/*
+|--------------------------------------------------------------------------
+| Purchase Routes
+|--------------------------------------------------------------------------
+*/
+
 require __DIR__ . '/purchase.php';
+
+
+/*
+|--------------------------------------------------------------------------
+| Sales Routes
+|--------------------------------------------------------------------------
+*/
+
 require __DIR__ . '/sales.php';
+
+
+/*
+|--------------------------------------------------------------------------
+| Inventory Routes
+|--------------------------------------------------------------------------
+*/
+
 require __DIR__ . '/inventory.php';
+
+
+/*
+|--------------------------------------------------------------------------
+| Report Routes
+|--------------------------------------------------------------------------
+*/
+
 require __DIR__ . '/reports.php';
+
+
+/*
+|--------------------------------------------------------------------------
+| Stock Transfer Routes
+|--------------------------------------------------------------------------
+*/
+
 require __DIR__ . '/stocktransfer.php';

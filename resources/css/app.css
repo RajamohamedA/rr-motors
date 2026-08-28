@@ -38,6 +38,12 @@
 @import './super-admin-settings.css';
 @import './profile.css';
 
+/* business */
+
+@import './business/dashboard.css';
+@import './business/sidebar.css';
+@import './business/topbar.css';
+
 
 /* customer colors */
 

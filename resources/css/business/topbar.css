@@ -1,0 +1,1214 @@
+/* ==========================================================================
+   RR MOTORS - BUSINESS TOPBAR
+   ========================================================================== */
+
+
+/* ==========================================================================
+   TOPBAR
+   ========================================================================== */
+
+.rr-business-topbar {
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+
+    min-height: 72px;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+
+    padding: 0 24px;
+
+    border-bottom: 1px solid #e2e8f0;
+
+    background: rgba(255, 255, 255, 0.96);
+
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+
+    box-shadow:
+        0 1px 3px rgba(15, 23, 42, 0.03);
+}
+
+
+/* ==========================================================================
+   LEFT / RIGHT
+   ========================================================================== */
+
+.rr-business-topbar-left,
+.rr-business-topbar-right {
+    display: flex;
+    align-items: center;
+
+    min-width: 0;
+}
+
+
+.rr-business-topbar-left {
+    gap: 14px;
+
+    flex: 1;
+}
+
+
+.rr-business-topbar-right {
+    gap: 12px;
+
+    flex-shrink: 0;
+}
+
+
+/* ==========================================================================
+   MOBILE MENU
+   ========================================================================== */
+
+.rr-business-topbar-mobile-menu {
+    width: 42px;
+    height: 42px;
+
+    display: none;
+    align-items: center;
+    justify-content: center;
+
+    flex: 0 0 42px;
+
+    padding: 0;
+
+    border: 1px solid #e2e8f0;
+    border-radius: 11px;
+
+    background: #ffffff;
+
+    color: #334155;
+
+    font-size: 23px;
+
+    cursor: pointer;
+
+    transition:
+        background 0.18s ease,
+        border-color 0.18s ease,
+        color 0.18s ease;
+}
+
+
+.rr-business-topbar-mobile-menu:hover {
+    border-color: #bfdbfe;
+
+    background: #eff6ff;
+
+    color: #2563eb;
+}
+
+
+/* ==========================================================================
+   COMPANY
+   ========================================================================== */
+
+.rr-business-topbar-company {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+
+    min-width: 0;
+}
+
+
+.rr-business-topbar-company-icon {
+    width: 39px;
+    height: 39px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    flex: 0 0 39px;
+
+    border-radius: 11px;
+
+    background:
+        linear-gradient(135deg,
+            #0f172a,
+            #334155);
+
+    color: #ffffff;
+
+    font-size: 13px;
+    font-weight: 800;
+
+    letter-spacing: 0.04em;
+
+    box-shadow:
+        0 5px 12px rgba(15, 23, 42, 0.14);
+}
+
+
+.rr-business-topbar-company-info {
+    min-width: 0;
+}
+
+
+.rr-business-topbar-company-info strong {
+    display: block;
+
+    max-width: 190px;
+
+    overflow: hidden;
+
+    color: #0f172a;
+
+    font-size: 14px;
+    font-weight: 800;
+
+    line-height: 1.25;
+
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+
+.rr-business-topbar-company-info span {
+    display: block;
+
+    margin-top: 2px;
+
+    color: #64748b;
+
+    font-size: 12px;
+    font-weight: 650;
+
+    line-height: 1.2;
+}
+
+
+/* ==========================================================================
+   DIVIDER
+   ========================================================================== */
+
+.rr-business-topbar-divider {
+    width: 1px;
+    height: 34px;
+
+    flex: 0 0 1px;
+
+    margin: 0 2px;
+
+    background: #e2e8f0;
+}
+
+
+/* ==========================================================================
+   BRANCH SWITCHER
+   ========================================================================== */
+
+.rr-business-branch-switcher {
+    position: relative;
+
+    min-width: 0;
+}
+
+
+.rr-business-branch-switcher-button {
+    min-width: 205px;
+    max-width: 285px;
+    min-height: 48px;
+
+    display: flex;
+    align-items: center;
+    gap: 10px;
+
+    padding: 6px 10px;
+
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+
+    background: #ffffff;
+
+    color: #0f172a;
+
+    text-align: left;
+
+    cursor: pointer;
+
+    transition:
+        background 0.18s ease,
+        border-color 0.18s ease,
+        box-shadow 0.18s ease;
+}
+
+
+.rr-business-branch-switcher-button:hover,
+.rr-business-branch-switcher-button.open {
+    border-color: #bfdbfe;
+
+    background: #f8fbff;
+
+    box-shadow:
+        0 5px 14px rgba(37, 99, 235, 0.08);
+}
+
+
+.rr-business-branch-switcher-icon {
+    width: 35px;
+    height: 35px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    flex: 0 0 35px;
+
+    border-radius: 9px;
+
+    background: #eff6ff;
+
+    color: #2563eb;
+
+    font-size: 15px;
+}
+
+
+.rr-business-branch-switcher-info {
+    min-width: 0;
+
+    flex: 1;
+}
+
+
+.rr-business-branch-switcher-info>span {
+    display: block;
+
+    margin-bottom: 1px;
+
+    color: #94a3b8;
+
+    font-size: 11px;
+    font-weight: 700;
+
+    line-height: 1.1;
+
+    text-transform: uppercase;
+
+    letter-spacing: 0.04em;
+}
+
+
+.rr-business-branch-switcher-info strong {
+    display: block;
+
+    overflow: hidden;
+
+    color: #1e293b;
+
+    font-size: 13px;
+    font-weight: 800;
+
+    line-height: 1.25;
+
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+
+.rr-business-branch-switcher-info small {
+    display: block;
+
+    margin-top: 1px;
+
+    overflow: hidden;
+
+    color: #64748b;
+
+    font-size: 11px;
+    font-weight: 600;
+
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+
+.rr-business-branch-switcher-chevron {
+    flex-shrink: 0;
+
+    color: #94a3b8;
+
+    font-size: 11px;
+
+    transition:
+        transform 0.2s ease;
+}
+
+
+.rr-business-branch-switcher-chevron.open {
+    transform: rotate(180deg);
+}
+
+
+/* ==========================================================================
+   BRANCH DROPDOWN
+   ========================================================================== */
+
+.rr-business-branch-dropdown {
+    position: absolute;
+
+    top: calc(100% + 10px);
+    left: 0;
+
+    z-index: 1100;
+
+    width: 350px;
+    max-height: calc(100vh - 110px);
+
+    overflow: hidden;
+
+    border: 1px solid #e2e8f0;
+    border-radius: 14px;
+
+    background: #ffffff;
+
+    box-shadow:
+        0 18px 45px rgba(15, 23, 42, 0.16);
+
+    animation:
+        rrBusinessDropdownIn 0.16s ease-out;
+}
+
+
+@keyframes rrBusinessDropdownIn {
+
+    from {
+        opacity: 0;
+
+        transform:
+            translateY(-5px);
+    }
+
+    to {
+        opacity: 1;
+
+        transform:
+            translateY(0);
+    }
+}
+
+
+/* ==========================================================================
+   BRANCH DROPDOWN HEADER
+   ========================================================================== */
+
+.rr-business-branch-dropdown-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+
+    padding: 15px 16px;
+
+    border-bottom: 1px solid #eef2f7;
+
+    background: #f8fafc;
+}
+
+
+.rr-business-branch-dropdown-header>div {
+    min-width: 0;
+}
+
+
+.rr-business-branch-dropdown-header span {
+    display: block;
+
+    color: #64748b;
+
+    font-size: 12px;
+    font-weight: 700;
+}
+
+
+.rr-business-branch-dropdown-header strong {
+    display: block;
+
+    margin-top: 2px;
+
+    overflow: hidden;
+
+    color: #0f172a;
+
+    font-size: 14px;
+    font-weight: 800;
+
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+
+.rr-business-branch-count {
+    min-width: 28px;
+    height: 28px;
+
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+
+    padding: 0 8px;
+
+    border-radius: 999px;
+
+    background: #e2e8f0;
+
+    color: #334155 !important;
+
+    font-size: 12px !important;
+    font-weight: 800 !important;
+}
+
+
+/* ==========================================================================
+   COMPANY WORKSPACE
+   ========================================================================== */
+
+.rr-business-branch-dropdown-company,
+.rr-business-branch-dropdown-item {
+    width: 100%;
+
+    display: flex;
+    align-items: center;
+    gap: 11px;
+
+    padding: 11px 14px;
+
+    border: 0;
+
+    background: transparent;
+
+    color: inherit;
+
+    text-align: left;
+
+    cursor: pointer;
+
+    transition:
+        background 0.16s ease;
+}
+
+
+.rr-business-branch-dropdown-company:hover,
+.rr-business-branch-dropdown-item:hover {
+    background: #f8fafc;
+}
+
+
+.rr-business-branch-dropdown-company.active,
+.rr-business-branch-dropdown-item.active {
+    background: #eff6ff;
+}
+
+
+.rr-business-branch-dropdown-company {
+    margin: 6px 0;
+}
+
+
+/* ==========================================================================
+   BRANCH ITEM
+   ========================================================================== */
+
+.rr-business-branch-item-icon {
+    width: 38px;
+    height: 38px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    flex: 0 0 38px;
+
+    border-radius: 10px;
+
+    background: #f1f5f9;
+
+    color: #475569;
+
+    font-size: 15px;
+}
+
+
+.rr-business-branch-dropdown-item.active .rr-business-branch-item-icon,
+
+.rr-business-branch-dropdown-company.active .rr-business-branch-item-icon {
+    background: #dbeafe;
+
+    color: #2563eb;
+}
+
+
+.rr-business-branch-item-info {
+    min-width: 0;
+
+    flex: 1;
+}
+
+
+.rr-business-branch-item-info strong {
+    display: block;
+
+    overflow: hidden;
+
+    color: #1e293b;
+
+    font-size: 13px;
+    font-weight: 750;
+
+    line-height: 1.3;
+
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+
+.rr-business-branch-item-info span {
+    display: block;
+
+    margin-top: 2px;
+
+    overflow: hidden;
+
+    color: #64748b;
+
+    font-size: 12px;
+    font-weight: 550;
+
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+
+.rr-business-branch-current-icon {
+    flex-shrink: 0;
+
+    color: #2563eb;
+
+    font-size: 16px;
+}
+
+
+.rr-business-branch-arrow {
+    flex-shrink: 0;
+
+    color: #94a3b8;
+
+    font-size: 11px;
+}
+
+
+/* ==========================================================================
+   DROPDOWN SEPARATOR
+   ========================================================================== */
+
+.rr-business-branch-dropdown-separator {
+    height: 1px;
+
+    margin: 0 14px;
+
+    background: #eef2f7;
+}
+
+
+/* ==========================================================================
+   BRANCH LIST
+   ========================================================================== */
+
+.rr-business-branch-dropdown-list {
+    max-height: 310px;
+
+    overflow-y: auto;
+    overflow-x: hidden;
+
+    padding: 6px 0;
+}
+
+
+.rr-business-branch-dropdown-list::-webkit-scrollbar {
+    width: 5px;
+}
+
+
+.rr-business-branch-dropdown-list::-webkit-scrollbar-thumb {
+    border-radius: 10px;
+
+    background: #cbd5e1;
+}
+
+
+/* ==========================================================================
+   EMPTY BRANCH
+   ========================================================================== */
+
+.rr-business-branch-dropdown-empty {
+    padding: 30px 20px;
+
+    color: #64748b;
+
+    text-align: center;
+}
+
+
+.rr-business-branch-dropdown-empty>i {
+    display: block;
+
+    margin-bottom: 9px;
+
+    color: #94a3b8;
+
+    font-size: 26px;
+}
+
+
+.rr-business-branch-dropdown-empty strong {
+    display: block;
+
+    color: #334155;
+
+    font-size: 13px;
+    font-weight: 750;
+}
+
+
+.rr-business-branch-dropdown-empty span {
+    display: block;
+
+    margin-top: 4px;
+
+    font-size: 12px;
+    line-height: 1.45;
+}
+
+
+/* ==========================================================================
+   BRANCH DROPDOWN FOOTER
+   ========================================================================== */
+
+.rr-business-branch-dropdown-footer {
+    padding: 8px;
+
+    border-top: 1px solid #eef2f7;
+
+    background: #f8fafc;
+}
+
+
+.rr-business-branch-dropdown-footer a {
+    min-height: 38px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+
+    padding: 8px 12px;
+
+    border-radius: 9px;
+
+    color: #475569;
+
+    font-size: 12px;
+    font-weight: 700;
+
+    text-decoration: none;
+
+    transition:
+        background 0.16s ease,
+        color 0.16s ease;
+}
+
+
+.rr-business-branch-dropdown-footer a:hover {
+    background: #ffffff;
+
+    color: #2563eb;
+}
+
+
+/* ==========================================================================
+   EXIT COMPANY
+   ========================================================================== */
+
+.rr-business-topbar-exit-context {
+    min-height: 40px;
+
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+
+    padding: 8px 13px;
+
+    border: 1px solid #fecaca;
+    border-radius: 10px;
+
+    background: #fff7f7;
+
+    color: #dc2626;
+
+    font-size: 12px;
+    font-weight: 750;
+
+    cursor: pointer;
+
+    transition:
+        background 0.18s ease,
+        border-color 0.18s ease;
+}
+
+
+.rr-business-topbar-exit-context:hover {
+    border-color: #fca5a5;
+
+    background: #fef2f2;
+}
+
+
+/* ==========================================================================
+   PROFILE
+   ========================================================================== */
+
+.rr-business-profile-dropdown-wrapper {
+    position: relative;
+}
+
+
+.rr-business-topbar-profile {
+    min-height: 46px;
+
+    display: flex;
+    align-items: center;
+    gap: 9px;
+
+    padding: 5px 8px;
+
+    border: 1px solid transparent;
+    border-radius: 11px;
+
+    background: transparent;
+
+    color: inherit;
+
+    cursor: pointer;
+
+    transition:
+        background 0.18s ease,
+        border-color 0.18s ease;
+}
+
+
+.rr-business-topbar-profile:hover {
+    border-color: #e2e8f0;
+
+    background: #f8fafc;
+}
+
+
+.rr-business-topbar-avatar {
+    width: 37px;
+    height: 37px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    flex: 0 0 37px;
+
+    border-radius: 50%;
+
+    background: #0f172a;
+
+    color: #ffffff;
+
+    font-size: 12px;
+    font-weight: 800;
+}
+
+
+.rr-business-topbar-user-info {
+    min-width: 0;
+
+    text-align: left;
+}
+
+
+.rr-business-topbar-user-info strong {
+    display: block;
+
+    max-width: 150px;
+
+    overflow: hidden;
+
+    color: #1e293b;
+
+    font-size: 13px;
+    font-weight: 750;
+
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+
+.rr-business-topbar-user-info span {
+    display: block;
+
+    margin-top: 1px;
+
+    max-width: 150px;
+
+    overflow: hidden;
+
+    color: #64748b;
+
+    font-size: 11px;
+    font-weight: 600;
+
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+
+.rr-business-topbar-profile>.bi-chevron-down {
+    margin-left: 2px;
+
+    color: #94a3b8;
+
+    font-size: 10px;
+
+    transition:
+        transform 0.2s ease;
+}
+
+
+.rr-business-topbar-profile>.bi-chevron-down.open {
+    transform: rotate(180deg);
+}
+
+
+/* ==========================================================================
+   PROFILE DROPDOWN
+   ========================================================================== */
+
+.rr-business-profile-dropdown {
+    position: absolute;
+
+    top: calc(100% + 9px);
+    right: 0;
+
+    z-index: 1100;
+
+    width: 280px;
+
+    overflow: hidden;
+
+    border: 1px solid #e2e8f0;
+    border-radius: 14px;
+
+    background: #ffffff;
+
+    box-shadow:
+        0 18px 45px rgba(15, 23, 42, 0.16);
+
+    animation:
+        rrBusinessDropdownIn 0.16s ease-out;
+}
+
+
+.rr-business-profile-dropdown-header {
+    display: flex;
+    align-items: center;
+    gap: 11px;
+
+    padding: 16px;
+
+    border-bottom: 1px solid #eef2f7;
+
+    background: #f8fafc;
+}
+
+
+.rr-business-profile-dropdown-avatar {
+    width: 42px;
+    height: 42px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    flex: 0 0 42px;
+
+    border-radius: 50%;
+
+    background: #0f172a;
+
+    color: #ffffff;
+
+    font-size: 13px;
+    font-weight: 800;
+}
+
+
+.rr-business-profile-dropdown-header>div:last-child {
+    min-width: 0;
+}
+
+
+.rr-business-profile-dropdown-header strong {
+    display: block;
+
+    overflow: hidden;
+
+    color: #0f172a;
+
+    font-size: 13px;
+    font-weight: 800;
+
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+
+.rr-business-profile-dropdown-header span {
+    display: block;
+
+    margin-top: 2px;
+
+    overflow: hidden;
+
+    color: #64748b;
+
+    font-size: 12px;
+
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+
+.rr-business-profile-dropdown-menu {
+    padding: 7px;
+}
+
+
+.rr-business-profile-dropdown-menu a,
+.rr-business-profile-dropdown-menu button {
+    width: 100%;
+    min-height: 40px;
+
+    display: flex;
+    align-items: center;
+    gap: 10px;
+
+    padding: 8px 10px;
+
+    border: 0;
+    border-radius: 9px;
+
+    background: transparent;
+
+    color: #334155;
+
+    font-size: 13px;
+    font-weight: 650;
+
+    text-align: left;
+    text-decoration: none;
+
+    cursor: pointer;
+
+    transition:
+        background 0.16s ease,
+        color 0.16s ease;
+}
+
+
+.rr-business-profile-dropdown-menu a:hover,
+.rr-business-profile-dropdown-menu button:hover {
+    background: #f8fafc;
+
+    color: #2563eb;
+}
+
+
+.rr-business-profile-dropdown-menu i {
+    width: 18px;
+
+    text-align: center;
+}
+
+
+.rr-business-profile-dropdown-menu .rr-business-profile-logout {
+    margin-top: 5px;
+
+    border-top: 1px solid #eef2f7;
+    border-radius: 0 0 9px 9px;
+
+    color: #dc2626;
+}
+
+
+.rr-business-profile-dropdown-menu .rr-business-profile-logout:hover {
+    background: #fef2f2;
+
+    color: #dc2626;
+}
+
+
+/* ==========================================================================
+   RESPONSIVE - TABLET
+   ========================================================================== */
+
+@media (max-width: 1100px) {
+
+    .rr-business-topbar-company-info {
+        display: none;
+    }
+
+
+    .rr-business-topbar-divider {
+        display: none;
+    }
+
+
+    .rr-business-branch-switcher-button {
+        min-width: 190px;
+    }
+
+
+    .rr-business-topbar-user-info {
+        display: none;
+    }
+}
+
+
+/* ==========================================================================
+   RESPONSIVE - MOBILE
+   ========================================================================== */
+
+@media (max-width: 991px) {
+
+    .rr-business-topbar {
+        min-height: 64px;
+
+        padding:
+            0 14px;
+
+        gap: 10px;
+    }
+
+
+    .rr-business-topbar-mobile-menu {
+        display: flex;
+    }
+
+
+    .rr-business-topbar-company {
+        display: none;
+    }
+
+
+    .rr-business-branch-switcher-button {
+        min-width: 0;
+        max-width: 220px;
+    }
+
+
+    .rr-business-topbar-exit-context span {
+        display: none;
+    }
+
+
+    .rr-business-topbar-exit-context {
+        width: 40px;
+        height: 40px;
+
+        padding: 0;
+    }
+}
+
+
+/* ==========================================================================
+   SMALL MOBILE
+   ========================================================================== */
+
+@media (max-width: 600px) {
+
+    .rr-business-topbar {
+        padding:
+            0 10px;
+    }
+
+
+    .rr-business-topbar-left {
+        gap: 8px;
+    }
+
+
+    .rr-business-topbar-right {
+        gap: 5px;
+    }
+
+
+    .rr-business-branch-switcher-button {
+        width: auto;
+        max-width: 170px;
+
+        padding:
+            5px 8px;
+    }
+
+
+    .rr-business-branch-switcher-icon {
+        display: none;
+    }
+
+
+    .rr-business-branch-switcher-info>span,
+    .rr-business-branch-switcher-info small {
+        display: none;
+    }
+
+
+    .rr-business-branch-switcher-info strong {
+        max-width: 120px;
+    }
+
+
+    .rr-business-branch-dropdown {
+        position: fixed;
+
+        top: 70px;
+        right: 10px;
+        left: 10px;
+
+        width: auto;
+        max-height: calc(100vh - 85px);
+    }
+
+
+    .rr-business-topbar-profile {
+        padding:
+            4px 2px;
+    }
+
+
+    .rr-business-topbar-profile>.bi-chevron-down {
+        display: none;
+    }
+
+
+    .rr-business-profile-dropdown {
+        position: fixed;
+
+        top: 70px;
+        right: 10px;
+
+        width: min(280px,
+                calc(100vw - 20px));
+    }
+}

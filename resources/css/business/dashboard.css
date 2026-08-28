@@ -1,0 +1,1310 @@
+/* =========================================================
+   RR ERP - BUSINESS DASHBOARD
+   ========================================================= */
+
+:root {
+    --rr-business-text: #172033;
+    --rr-business-muted: #64748b;
+    --rr-business-soft: #94a3b8;
+    --rr-business-border: #e2e8f0;
+
+    --rr-business-blue: #2563eb;
+    --rr-business-blue-dark: #1d4ed8;
+
+    --rr-business-green: #15803d;
+    --rr-business-amber: #b45309;
+    --rr-business-red: #dc2626;
+
+    --rr-business-bg: #f8fafc;
+}
+
+
+/* =========================================================
+   PAGE
+   ========================================================= */
+
+.rr-business-dashboard {
+    width: 100%;
+
+    display: grid;
+
+    gap: 28px;
+
+    padding-bottom: 40px;
+
+    color: var(--rr-business-text);
+}
+
+
+/* =========================================================
+   BUSINESS HERO
+   ========================================================= */
+
+.rr-business-hero {
+    position: relative;
+
+    overflow: hidden;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: space-between;
+
+    gap: 28px;
+
+    padding: 30px;
+
+    border:
+        1px solid rgba(191, 219, 254, 0.7);
+
+    border-radius: 20px;
+
+    background:
+        linear-gradient(135deg,
+            rgba(239, 246, 255, 0.98),
+            rgba(255, 255, 255, 0.98));
+
+    box-shadow:
+        0 18px 40px rgba(15, 23, 42, 0.07);
+
+    animation:
+        rrBusinessFadeUp 0.45s ease both;
+}
+
+
+.rr-business-hero::before {
+    content: "";
+
+    position: absolute;
+
+    width: 260px;
+
+    height: 260px;
+
+    right: -90px;
+
+    top: -110px;
+
+    border-radius: 50%;
+
+    background:
+        rgba(37, 99, 235, 0.08);
+
+    pointer-events: none;
+}
+
+
+.rr-business-hero-main {
+    position: relative;
+
+    z-index: 2;
+
+    display: flex;
+
+    align-items: flex-start;
+
+    gap: 18px;
+
+    min-width: 0;
+}
+
+
+.rr-business-company-icon {
+    width: 62px;
+
+    height: 62px;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    flex: 0 0 62px;
+
+    border-radius: 16px;
+
+    background:
+        linear-gradient(145deg,
+            #2563eb,
+            #1d4ed8);
+
+    color: #ffffff;
+
+    font-size: 24px;
+
+    box-shadow:
+        0 12px 28px rgba(37, 99, 235, 0.22);
+}
+
+
+.rr-business-eyebrow {
+    margin-bottom: 6px;
+
+    color: #2563eb;
+
+    font-size: 12px;
+
+    font-weight: 850;
+
+    letter-spacing: 1px;
+}
+
+
+.rr-business-hero h1 {
+    margin: 0;
+
+    color: #0f172a;
+
+    font-size:
+        clamp(28px,
+            3vw,
+            38px);
+
+    font-weight: 850;
+
+    line-height: 1.1;
+
+    letter-spacing: -1px;
+}
+
+
+.rr-business-branch-name {
+    display: flex;
+
+    align-items: center;
+
+    gap: 8px;
+
+    margin-top: 10px;
+
+    color: #334155;
+
+    font-size: 16px;
+
+    font-weight: 700;
+}
+
+
+.rr-business-branch-name i {
+    color: #2563eb;
+}
+
+
+.rr-business-context-meta {
+    display: flex;
+
+    flex-wrap: wrap;
+
+    gap: 10px;
+
+    margin-top: 16px;
+}
+
+
+.rr-business-context-meta span {
+    display: inline-flex;
+
+    align-items: center;
+
+    gap: 7px;
+
+    padding:
+        7px 10px;
+
+    border:
+        1px solid #dbeafe;
+
+    border-radius: 8px;
+
+    background:
+        rgba(255, 255, 255, 0.78);
+
+    color: #64748b;
+
+    font-size: 13px;
+}
+
+
+.rr-business-context-meta strong {
+    color: #334155;
+
+    font-size: 13px;
+
+    font-weight: 750;
+}
+
+
+/* =========================================================
+   HERO ACTIONS
+   ========================================================= */
+
+.rr-business-hero-actions {
+    position: relative;
+
+    z-index: 2;
+
+    display: flex;
+
+    flex-wrap: wrap;
+
+    justify-content: flex-end;
+
+    gap: 10px;
+}
+
+
+.rr-business-primary-btn,
+.rr-business-secondary-btn,
+.rr-business-exit-btn,
+.rr-business-link-btn {
+    min-height: 43px;
+
+    display: inline-flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    gap: 8px;
+
+    padding:
+        0 15px;
+
+    border-radius: 9px;
+
+    font-size: 14px;
+
+    font-weight: 750;
+
+    text-decoration: none;
+
+    cursor: pointer;
+
+    transition:
+        transform 0.18s ease,
+        box-shadow 0.18s ease,
+        border-color 0.18s ease;
+}
+
+
+.rr-business-primary-btn {
+    border: 0;
+
+    background:
+        linear-gradient(135deg,
+            #2563eb,
+            #1d4ed8);
+
+    color: #ffffff;
+
+    box-shadow:
+        0 9px 20px rgba(37, 99, 235, 0.20);
+}
+
+
+.rr-business-primary-btn:hover {
+    color: #ffffff;
+
+    transform: translateY(-2px);
+
+    box-shadow:
+        0 13px 28px rgba(37, 99, 235, 0.28);
+}
+
+
+.rr-business-secondary-btn {
+    border:
+        1px solid #dbe2ea;
+
+    background: #ffffff;
+
+    color: #334155;
+}
+
+
+.rr-business-secondary-btn:hover {
+    color: #2563eb;
+
+    border-color: #bfdbfe;
+
+    transform: translateY(-1px);
+}
+
+
+.rr-business-exit-btn {
+    border:
+        1px solid #fecaca;
+
+    background: #fff7f7;
+
+    color: #b91c1c;
+}
+
+
+.rr-business-exit-btn:hover {
+    border-color: #fca5a5;
+
+    transform: translateY(-1px);
+}
+
+
+/* =========================================================
+   SECTION
+   ========================================================= */
+
+.rr-business-section {
+    display: grid;
+
+    gap: 18px;
+}
+
+
+.rr-business-section-header {
+    display: flex;
+
+    align-items: center;
+
+    justify-content: space-between;
+
+    gap: 16px;
+}
+
+
+.rr-business-section-header span {
+    display: block;
+
+    margin-bottom: 4px;
+
+    color: #2563eb;
+
+    font-size: 12px;
+
+    font-weight: 850;
+
+    letter-spacing: 0.9px;
+}
+
+
+.rr-business-section-header h2 {
+    margin: 0;
+
+    color: #172033;
+
+    font-size: 22px;
+
+    font-weight: 820;
+}
+
+
+.rr-business-section-header p {
+    margin: 5px 0 0;
+
+    color: #64748b;
+
+    font-size: 14px;
+
+    line-height: 1.55;
+}
+
+
+/* =========================================================
+   KPI GRID
+   ========================================================= */
+
+.rr-business-kpi-grid {
+    display: grid;
+
+    grid-template-columns:
+        repeat(4,
+            minmax(0, 1fr));
+
+    gap: 16px;
+}
+
+
+.rr-business-kpi-card {
+    position: relative;
+
+    overflow: hidden;
+
+    min-height: 150px;
+
+    padding: 18px;
+
+    border:
+        1px solid #e2e8f0;
+
+    border-radius: 15px;
+
+    background: #ffffff;
+
+    box-shadow:
+        0 10px 28px rgba(15, 23, 42, 0.055);
+
+    transition:
+        transform 0.2s ease,
+        box-shadow 0.2s ease,
+        border-color 0.2s ease;
+
+    animation:
+        rrBusinessFadeUp 0.45s ease both;
+}
+
+
+.rr-business-kpi-card:nth-child(2) {
+    animation-delay: 0.04s;
+}
+
+
+.rr-business-kpi-card:nth-child(3) {
+    animation-delay: 0.08s;
+}
+
+
+.rr-business-kpi-card:nth-child(4) {
+    animation-delay: 0.12s;
+}
+
+
+.rr-business-kpi-card:nth-child(5) {
+    animation-delay: 0.16s;
+}
+
+
+.rr-business-kpi-card:nth-child(6) {
+    animation-delay: 0.20s;
+}
+
+
+.rr-business-kpi-card:nth-child(7) {
+    animation-delay: 0.24s;
+}
+
+
+.rr-business-kpi-card:nth-child(8) {
+    animation-delay: 0.28s;
+}
+
+
+.rr-business-kpi-card:hover {
+    transform:
+        translateY(-4px);
+
+    border-color: #cbd5e1;
+
+    box-shadow:
+        0 16px 34px rgba(15, 23, 42, 0.09);
+}
+
+
+.rr-business-kpi-card.warning {
+    border-color: #fde68a;
+
+    background:
+        linear-gradient(145deg,
+            #fffdf5,
+            #ffffff);
+}
+
+
+.rr-business-kpi-icon {
+    width: 42px;
+
+    height: 42px;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    margin-bottom: 14px;
+
+    border-radius: 11px;
+
+    background: #eff6ff;
+
+    color: #2563eb;
+
+    font-size: 17px;
+}
+
+
+.rr-business-kpi-card.warning .rr-business-kpi-icon {
+    background: #fffbeb;
+
+    color: #b45309;
+}
+
+
+.rr-business-kpi-label {
+    color: #64748b;
+
+    font-size: 13px;
+
+    font-weight: 700;
+}
+
+
+.rr-business-kpi-value {
+    margin-top: 5px;
+
+    color: #172033;
+
+    font-size:
+        clamp(23px,
+            2.3vw,
+            30px);
+
+    font-weight: 850;
+
+    line-height: 1.1;
+
+    letter-spacing: -0.5px;
+}
+
+
+.rr-business-kpi-hint {
+    margin-top: 8px;
+
+    color: #94a3b8;
+
+    font-size: 12px;
+
+    line-height: 1.5;
+}
+
+
+/* =========================================================
+   ADMIN GRID
+   ========================================================= */
+
+.rr-business-admin-grid,
+.rr-business-transaction-grid {
+    display: grid;
+
+    grid-template-columns:
+        repeat(2,
+            minmax(0, 1fr));
+
+    gap: 18px;
+}
+
+
+/* =========================================================
+   PANEL
+   ========================================================= */
+
+.rr-business-panel {
+    overflow: hidden;
+
+    border:
+        1px solid #e2e8f0;
+
+    border-radius: 16px;
+
+    background: #ffffff;
+
+    box-shadow:
+        0 10px 30px rgba(15, 23, 42, 0.055);
+
+    animation:
+        rrBusinessFadeUp 0.45s ease both;
+}
+
+
+.rr-business-panel-header {
+    display: flex;
+
+    align-items: center;
+
+    gap: 12px;
+
+    padding: 18px;
+
+    border-bottom:
+        1px solid #edf2f7;
+}
+
+
+.rr-business-panel-icon {
+    width: 42px;
+
+    height: 42px;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    flex: 0 0 42px;
+
+    border-radius: 11px;
+
+    background: #eff6ff;
+
+    color: #2563eb;
+
+    font-size: 17px;
+}
+
+
+.rr-business-panel-header h3 {
+    margin: 0;
+
+    color: #172033;
+
+    font-size: 17px;
+
+    font-weight: 800;
+}
+
+
+.rr-business-panel-header p {
+    margin: 4px 0 0;
+
+    color: #94a3b8;
+
+    font-size: 12px;
+
+    line-height: 1.5;
+}
+
+
+/* =========================================================
+   SUMMARY ROW
+   ========================================================= */
+
+.rr-business-summary-row {
+    display: grid;
+
+    grid-template-columns:
+        repeat(3,
+            minmax(0, 1fr));
+
+    gap: 10px;
+
+    padding:
+        16px 18px;
+}
+
+
+.rr-business-summary-metric {
+    padding: 13px;
+
+    border:
+        1px solid #edf2f7;
+
+    border-radius: 10px;
+
+    background: #f8fafc;
+
+    text-align: center;
+}
+
+
+.rr-business-summary-metric.warning {
+    border-color: #fde68a;
+
+    background: #fffbeb;
+}
+
+
+.rr-business-summary-metric strong {
+    display: block;
+
+    color: #172033;
+
+    font-size: 22px;
+
+    font-weight: 850;
+}
+
+
+.rr-business-summary-metric span {
+    display: block;
+
+    margin-top: 4px;
+
+    color: #64748b;
+
+    font-size: 12px;
+
+    font-weight: 650;
+}
+
+
+/* =========================================================
+   BRANCH LIST
+   ========================================================= */
+
+.rr-business-branch-list {
+    display: grid;
+
+    gap: 10px;
+
+    padding:
+        4px 18px 18px;
+}
+
+
+.rr-business-branch-item {
+    display: flex;
+
+    align-items: center;
+
+    gap: 11px;
+
+    padding: 12px;
+
+    border:
+        1px solid #edf2f7;
+
+    border-radius: 10px;
+
+    background: #ffffff;
+
+    transition:
+        background 0.18s ease,
+        border-color 0.18s ease,
+        transform 0.18s ease;
+}
+
+
+.rr-business-branch-item:hover {
+    transform:
+        translateX(3px);
+
+    border-color: #dbeafe;
+
+    background: #fbfdff;
+}
+
+
+.rr-business-branch-item.current {
+    border-color: #bfdbfe;
+
+    background: #f8fbff;
+}
+
+
+.rr-business-branch-item-icon {
+    width: 38px;
+
+    height: 38px;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    flex: 0 0 38px;
+
+    border-radius: 9px;
+
+    background: #eff6ff;
+
+    color: #2563eb;
+
+    font-size: 15px;
+}
+
+
+.rr-business-branch-item-data {
+    min-width: 0;
+
+    flex: 1;
+}
+
+
+.rr-business-branch-item-data strong {
+    display: block;
+
+    overflow: hidden;
+
+    color: #334155;
+
+    font-size: 14px;
+
+    font-weight: 750;
+
+    white-space: nowrap;
+
+    text-overflow: ellipsis;
+}
+
+
+.rr-business-branch-item-data span {
+    display: block;
+
+    overflow: hidden;
+
+    margin-top: 3px;
+
+    color: #94a3b8;
+
+    font-size: 12px;
+
+    white-space: nowrap;
+
+    text-overflow: ellipsis;
+}
+
+
+/* =========================================================
+   STATUS
+   ========================================================= */
+
+.rr-business-status {
+    display: inline-flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    min-height: 28px;
+
+    padding:
+        0 9px;
+
+    border-radius: 100px;
+
+    font-size: 12px;
+
+    font-weight: 750;
+
+    white-space: nowrap;
+}
+
+
+.rr-business-status.active {
+    background: #ecfdf3;
+
+    color: #15803d;
+}
+
+
+.rr-business-status.pending {
+    background: #fffbeb;
+
+    color: #b45309;
+}
+
+
+/* =========================================================
+   PANEL FOOTER
+   ========================================================= */
+
+.rr-business-panel-footer {
+    display: flex;
+
+    justify-content: flex-end;
+
+    padding:
+        13px 18px;
+
+    border-top:
+        1px solid #edf2f7;
+}
+
+
+.rr-business-link-btn {
+    min-height: 38px;
+
+    border:
+        1px solid #dbe2ea;
+
+    background: #ffffff;
+
+    color: #2563eb;
+}
+
+
+/* =========================================================
+   ADMIN ACTIONS
+   ========================================================= */
+
+.rr-business-admin-actions {
+    display: grid;
+
+    gap: 10px;
+
+    padding:
+        6px 18px 18px;
+}
+
+
+.rr-business-admin-action {
+    display: flex;
+
+    align-items: center;
+
+    gap: 12px;
+
+    padding: 13px;
+
+    border:
+        1px solid #edf2f7;
+
+    border-radius: 10px;
+
+    color: inherit;
+
+    text-decoration: none;
+
+    transition:
+        transform 0.18s ease,
+        border-color 0.18s ease,
+        background 0.18s ease;
+}
+
+
+.rr-business-admin-action:hover {
+    color: inherit;
+
+    transform:
+        translateX(3px);
+
+    border-color: #bfdbfe;
+
+    background: #f8fbff;
+}
+
+
+.rr-business-admin-action>i {
+    width: 38px;
+
+    height: 38px;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    flex: 0 0 38px;
+
+    border-radius: 9px;
+
+    background: #eff6ff;
+
+    color: #2563eb;
+
+    font-size: 15px;
+}
+
+
+.rr-business-admin-action strong {
+    display: block;
+
+    color: #334155;
+
+    font-size: 14px;
+
+    font-weight: 750;
+}
+
+
+.rr-business-admin-action span {
+    display: block;
+
+    margin-top: 3px;
+
+    color: #94a3b8;
+
+    font-size: 12px;
+}
+
+
+/* =========================================================
+   TRANSACTIONS
+   ========================================================= */
+
+.rr-business-transaction-list {
+    display: grid;
+
+    padding:
+        4px 18px 18px;
+}
+
+
+.rr-business-transaction-row {
+    display: flex;
+
+    align-items: center;
+
+    justify-content: space-between;
+
+    gap: 14px;
+
+    padding:
+        13px 2px;
+
+    border-bottom:
+        1px solid #edf2f7;
+}
+
+
+.rr-business-transaction-row:last-child {
+    border-bottom: 0;
+}
+
+
+.rr-business-transaction-row>div {
+    min-width: 0;
+}
+
+
+.rr-business-transaction-row strong {
+    display: block;
+
+    color: #334155;
+
+    font-size: 14px;
+
+    font-weight: 750;
+}
+
+
+.rr-business-transaction-row span {
+    display: block;
+
+    overflow: hidden;
+
+    margin-top: 3px;
+
+    color: #94a3b8;
+
+    font-size: 12px;
+
+    white-space: nowrap;
+
+    text-overflow: ellipsis;
+}
+
+
+.rr-business-transaction-amount {
+    color: #172033 !important;
+
+    font-size: 14px !important;
+
+    white-space: nowrap;
+}
+
+
+/* =========================================================
+   EMPTY STATE
+   ========================================================= */
+
+.rr-business-empty {
+    padding:
+        28px 12px;
+
+    color: #94a3b8;
+
+    font-size: 13px;
+
+    text-align: center;
+}
+
+
+/* =========================================================
+   ANIMATION
+   ========================================================= */
+
+@keyframes rrBusinessFadeUp {
+
+    from {
+        opacity: 0;
+
+        transform:
+            translateY(14px);
+    }
+
+    to {
+        opacity: 1;
+
+        transform:
+            translateY(0);
+    }
+}
+
+
+/* =========================================================
+   RESPONSIVE - LARGE TABLET
+   ========================================================= */
+
+@media (max-width: 1180px) {
+
+    .rr-business-kpi-grid {
+        grid-template-columns:
+            repeat(2,
+                minmax(0, 1fr));
+    }
+}
+
+
+/* =========================================================
+   RESPONSIVE - TABLET
+   ========================================================= */
+
+@media (max-width: 900px) {
+
+    .rr-business-hero {
+        align-items: flex-start;
+
+        flex-direction: column;
+    }
+
+
+    .rr-business-hero-actions {
+        width: 100%;
+
+        justify-content: flex-start;
+    }
+
+
+    .rr-business-admin-grid,
+    .rr-business-transaction-grid {
+        grid-template-columns:
+            1fr;
+    }
+}
+
+
+/* =========================================================
+   RESPONSIVE - MOBILE
+   ========================================================= */
+
+@media (max-width: 650px) {
+
+    .rr-business-dashboard {
+        gap: 20px;
+    }
+
+
+    .rr-business-hero {
+        padding: 20px;
+
+        border-radius: 15px;
+    }
+
+
+    .rr-business-hero-main {
+        flex-direction: column;
+    }
+
+
+    .rr-business-company-icon {
+        width: 54px;
+
+        height: 54px;
+
+        flex-basis: 54px;
+
+        font-size: 20px;
+    }
+
+
+    .rr-business-hero h1 {
+        font-size: 28px;
+    }
+
+
+    .rr-business-branch-name {
+        font-size: 15px;
+    }
+
+
+    .rr-business-context-meta {
+        align-items: stretch;
+
+        flex-direction: column;
+    }
+
+
+    .rr-business-context-meta span {
+        width: 100%;
+
+        justify-content: space-between;
+    }
+
+
+    .rr-business-hero-actions {
+        display: grid;
+
+        grid-template-columns:
+            1fr;
+
+        width: 100%;
+    }
+
+
+    .rr-business-primary-btn,
+    .rr-business-secondary-btn,
+    .rr-business-exit-btn {
+        width: 100%;
+    }
+
+
+    .rr-business-kpi-grid {
+        grid-template-columns:
+            1fr;
+    }
+
+
+    .rr-business-section-header h2 {
+        font-size: 20px;
+    }
+
+
+    .rr-business-summary-row {
+        grid-template-columns:
+            1fr;
+    }
+
+
+    .rr-business-branch-item {
+        align-items: flex-start;
+
+        flex-wrap: wrap;
+    }
+
+
+    .rr-business-status {
+        margin-left:
+            49px;
+    }
+
+
+    .rr-business-transaction-row {
+        align-items: flex-start;
+
+        flex-direction: column;
+    }
+}
+
+
+/* =========================================================
+   REDUCED MOTION
+   ========================================================= */
+
+@media (prefers-reduced-motion: reduce) {
+
+    .rr-business-dashboard *,
+    .rr-business-dashboard *::before,
+    .rr-business-dashboard *::after {
+        animation-duration:
+            0.01ms !important;
+
+        animation-iteration-count:
+            1 !important;
+
+        transition-duration:
+            0.01ms !important;
+    }
+}

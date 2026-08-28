@@ -2,6 +2,7 @@
 
 namespace App\Http\Middleware;
 
+use App\Models\Store;
 use Illuminate\Http\Request;
 use Inertia\Middleware;
 
@@ -100,10 +101,10 @@ class HandleInertiaRequests extends Middleware
 
 
                         /*
-                        |--------------------------------------------------------------------------
-                        | Roles
-                        |--------------------------------------------------------------------------
-                        */
+                            |--------------------------------------------------------------------------
+                            | Roles
+                            |--------------------------------------------------------------------------
+                            */
 
                         'roles' =>
                         fn() =>
@@ -114,10 +115,10 @@ class HandleInertiaRequests extends Middleware
 
 
                         /*
-                        |--------------------------------------------------------------------------
-                        | Permissions
-                        |--------------------------------------------------------------------------
-                        */
+                            |--------------------------------------------------------------------------
+                            | Permissions
+                            |--------------------------------------------------------------------------
+                            */
 
                         'permissions' =>
                         fn() =>
@@ -141,6 +142,12 @@ class HandleInertiaRequests extends Middleware
 
             'business' => [
 
+                /*
+                |--------------------------------------------------------------------------
+                | Company
+                |--------------------------------------------------------------------------
+                */
+
                 'company_id' =>
                 fn() =>
                 $request
@@ -149,12 +156,92 @@ class HandleInertiaRequests extends Middleware
                         'active_company_id'
                     ),
 
+                'company_name' =>
+                fn() =>
+                $request
+                    ->session()
+                    ->get(
+                        'active_company_name'
+                    ),
+
+                'company_code' =>
+                fn() =>
+                $request
+                    ->session()
+                    ->get(
+                        'active_company_code'
+                    ),
+
+
+                /*
+                |--------------------------------------------------------------------------
+                | Branch
+                |--------------------------------------------------------------------------
+                */
+
                 'store_id' =>
                 fn() =>
                 $request
                     ->session()
                     ->get(
                         'active_store_id'
+                    ),
+
+                'store_name' =>
+                fn() =>
+                $request
+                    ->session()
+                    ->get(
+                        'active_store_name'
+                    ),
+
+                'store_code' =>
+                fn() =>
+                $request
+                    ->session()
+                    ->get(
+                        'active_store_code'
+                    ),
+
+
+                /*
+                |--------------------------------------------------------------------------
+                | Available Branches
+                |--------------------------------------------------------------------------
+                |
+                | Used by Business Topbar branch switcher.
+                |
+                | Super Admin:
+                | - all active branches in current company context
+                |
+                | Company Admin:
+                | - all active branches in own company
+                |
+                | Branch Admin / Normal User:
+                | - only explicitly assigned active branches
+                |
+                */
+
+                'available_branches' =>
+                fn() =>
+                $this->getAvailableBranches(
+                    $request
+                ),
+
+
+                /*
+                |--------------------------------------------------------------------------
+                | Super Admin Business Context
+                |--------------------------------------------------------------------------
+                */
+
+                'is_super_admin_context' =>
+                fn() =>
+                (bool) $request
+                    ->session()
+                    ->get(
+                        'super_admin_business_context',
+                        false
                     ),
             ],
 
@@ -163,24 +250,6 @@ class HandleInertiaRequests extends Middleware
             |--------------------------------------------------------------------------
             | Global Application Message
             |--------------------------------------------------------------------------
-            |
-            | IMPORTANT:
-            |
-            | All controllers should use:
-            |
-            | return back()->with(
-            |     'app_message',
-            |     [
-            |         'id' => (string) Str::uuid(),
-            |         'type' => 'success',
-            |         'message' => 'Operation completed successfully.',
-            |     ]
-            | );
-            |
-            | Available in React:
-            |
-            | const { app_message } = usePage().props;
-            |
             */
 
             'app_message' =>
@@ -196,10 +265,6 @@ class HandleInertiaRequests extends Middleware
             |--------------------------------------------------------------------------
             | Legacy Generic Message
             |--------------------------------------------------------------------------
-            |
-            | Keep this temporarily while older controllers are converted
-            | to app_message.
-            |
             */
 
             'message' =>
@@ -213,14 +278,19 @@ class HandleInertiaRequests extends Middleware
 
             /*
             |--------------------------------------------------------------------------
-            | Super Admin Notifications
+            | Notifications
             |--------------------------------------------------------------------------
+            |
+            | Every authenticated user receives their own Laravel database
+            | notifications.
+            |
             */
 
             'notifications' =>
             fn() =>
             $this->getNotifications(
-                $user
+                $user,
+                $request
             ),
         ];
     }
@@ -228,26 +298,316 @@ class HandleInertiaRequests extends Middleware
 
     /*
     |--------------------------------------------------------------------------
-    | Super Admin Notifications
+    | Available Branches
     |--------------------------------------------------------------------------
     */
 
-    private function getNotifications(
-        $user
+    private function getAvailableBranches(
+        Request $request
     ): array {
 
         /*
         |--------------------------------------------------------------------------
-        | Guest / Business User
+        | Current User
         |--------------------------------------------------------------------------
-        |
-        | The notification dropdown currently belongs only to Super Admin.
-        |
+        */
+
+        $user =
+            $request->user();
+
+
+        if (
+            !$user
+        ) {
+
+            return [];
+        }
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Active Company Context
+        |--------------------------------------------------------------------------
+        */
+
+        $activeCompanyId =
+            $request
+            ->session()
+            ->get(
+                'active_company_id'
+            );
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | No Company Context
+        |--------------------------------------------------------------------------
         */
 
         if (
-            !$user ||
-            !(bool) $user->is_super_user
+            !$activeCompanyId
+        ) {
+
+            return [];
+        }
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Current Branch
+        |--------------------------------------------------------------------------
+        */
+
+        $activeStoreId =
+            $request
+            ->session()
+            ->get(
+                'active_store_id'
+            );
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Super Admin
+        |--------------------------------------------------------------------------
+        */
+
+        if (
+            (bool) $user->is_super_user
+        ) {
+
+            return Store::query()
+                ->where(
+                    'company_id',
+                    $activeCompanyId
+                )
+                ->where(
+                    'status',
+                    1
+                )
+                ->orderBy(
+                    'store_name'
+                )
+                ->get([
+                    'id',
+                    'store_code',
+                    'store_name',
+                    'city',
+                    'state',
+                ])
+                ->map(
+                    function (
+                        Store $store
+                    ) use (
+                        $activeStoreId
+                    ) {
+
+                        return [
+
+                            'id' =>
+                            $store->id,
+
+                            'store_code' =>
+                            $store->store_code,
+
+                            'store_name' =>
+                            $store->store_name,
+
+                            'city' =>
+                            $store->city,
+
+                            'state' =>
+                            $store->state,
+
+                            'is_current' =>
+                            (int) $activeStoreId ===
+                                (int) $store->id,
+                        ];
+                    }
+                )
+                ->values()
+                ->all();
+        }
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Company Admin
+        |--------------------------------------------------------------------------
+        */
+
+        if (
+            $user->hasRole(
+                'Company Admin'
+            )
+        ) {
+
+            /*
+            |--------------------------------------------------------------------------
+            | Security Check
+            |--------------------------------------------------------------------------
+            */
+
+            if (
+                (int) $activeCompanyId !==
+                (int) $user->company_id
+            ) {
+
+                return [];
+            }
+
+
+            return Store::query()
+                ->where(
+                    'company_id',
+                    $user->company_id
+                )
+                ->where(
+                    'status',
+                    1
+                )
+                ->orderBy(
+                    'store_name'
+                )
+                ->get([
+                    'id',
+                    'store_code',
+                    'store_name',
+                    'city',
+                    'state',
+                ])
+                ->map(
+                    function (
+                        Store $store
+                    ) use (
+                        $activeStoreId
+                    ) {
+
+                        return [
+
+                            'id' =>
+                            $store->id,
+
+                            'store_code' =>
+                            $store->store_code,
+
+                            'store_name' =>
+                            $store->store_name,
+
+                            'city' =>
+                            $store->city,
+
+                            'state' =>
+                            $store->state,
+
+                            'is_current' =>
+                            (int) $activeStoreId ===
+                                (int) $store->id,
+                        ];
+                    }
+                )
+                ->values()
+                ->all();
+        }
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Branch Admin / Normal Business User
+        |--------------------------------------------------------------------------
+        */
+
+        return $user
+            ->stores()
+            ->where(
+                'stores.company_id',
+                $user->company_id
+            )
+            ->where(
+                'stores.status',
+                1
+            )
+            ->orderBy(
+                'stores.store_name'
+            )
+            ->get([
+                'stores.id',
+                'stores.store_code',
+                'stores.store_name',
+                'stores.city',
+                'stores.state',
+            ])
+            ->map(
+                function (
+                    $store
+                ) use (
+                    $activeStoreId
+                ) {
+
+                    return [
+
+                        'id' =>
+                        $store->id,
+
+                        'store_code' =>
+                        $store->store_code,
+
+                        'store_name' =>
+                        $store->store_name,
+
+                        'city' =>
+                        $store->city,
+
+                        'state' =>
+                        $store->state,
+
+                        'is_current' =>
+                        (int) $activeStoreId ===
+                            (int) $store->id,
+                    ];
+                }
+            )
+            ->values()
+            ->all();
+    }
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Notifications
+    |--------------------------------------------------------------------------
+    |
+    | Laravel notifications are already attached to the recipient user.
+    |
+    | Therefore:
+    |
+    | Super Admin
+    |     -> sees notifications sent to Super Admin
+    |
+    | Company Admin
+    |     -> sees notifications sent to that Company Admin
+    |
+    | Branch Admin
+    |     -> sees notifications sent to that Branch Admin
+    |
+    | Normal User
+    |     -> sees notifications sent to that user
+    |
+    */
+
+    private function getNotifications(
+        $user,
+        Request $request
+    ): array {
+
+        /*
+        |--------------------------------------------------------------------------
+        | Guest
+        |--------------------------------------------------------------------------
+        */
+
+        if (
+            !$user
         ) {
 
             return [
@@ -263,6 +623,28 @@ class HandleInertiaRequests extends Middleware
 
         /*
         |--------------------------------------------------------------------------
+        | Business Context
+        |--------------------------------------------------------------------------
+        */
+
+        $activeCompanyId =
+            $request
+            ->session()
+            ->get(
+                'active_company_id'
+            );
+
+
+        $activeStoreId =
+            $request
+            ->session()
+            ->get(
+                'active_store_id'
+            );
+
+
+        /*
+        |--------------------------------------------------------------------------
         | Latest Notifications
         |--------------------------------------------------------------------------
         */
@@ -272,18 +654,67 @@ class HandleInertiaRequests extends Middleware
             ->notifications()
             ->latest()
             ->limit(
-                8
+                10
             )
             ->get()
             ->map(
                 function (
                     $notification
+                ) use (
+                    $activeCompanyId,
+                    $activeStoreId
                 ) {
+
+                    /*
+                        |--------------------------------------------------------------------------
+                        | Notification Data
+                        |--------------------------------------------------------------------------
+                        */
 
                     $data =
                         $notification->data
                         ?? [];
 
+
+                    /*
+                        |--------------------------------------------------------------------------
+                        | Notification Company / Branch
+                        |--------------------------------------------------------------------------
+                        |
+                        | Optional values.
+                        |
+                        | Notifications that don't contain these values continue
+                        | to work normally.
+                        |
+                        */
+
+                    $notificationCompanyId =
+                        $data['company_id']
+                        ?? null;
+
+
+                    $notificationStoreId =
+                        $data['store_id']
+                        ?? null;
+
+
+                    /*
+                        |--------------------------------------------------------------------------
+                        | Navigation URL
+                        |--------------------------------------------------------------------------
+                        */
+
+                    $fallbackUrl =
+                        $data['fallback_url']
+                        ?? $data['url']
+                        ?? null;
+
+
+                    /*
+                        |--------------------------------------------------------------------------
+                        | Return
+                        |--------------------------------------------------------------------------
+                        */
 
                     return [
 
@@ -333,6 +764,35 @@ class HandleInertiaRequests extends Middleware
 
                         /*
                             |--------------------------------------------------------------------------
+                            | Company / Branch Context
+                            |--------------------------------------------------------------------------
+                            */
+
+                        'company_id' =>
+                        $notificationCompanyId,
+
+                        'store_id' =>
+                        $notificationStoreId,
+
+                        'belongs_to_active_company' =>
+                        $notificationCompanyId === null
+                            ||
+                            (
+                                (int) $notificationCompanyId ===
+                                (int) $activeCompanyId
+                            ),
+
+                        'belongs_to_active_branch' =>
+                        $notificationStoreId === null
+                            ||
+                            (
+                                (int) $notificationStoreId ===
+                                (int) $activeStoreId
+                            ),
+
+
+                        /*
+                            |--------------------------------------------------------------------------
                             | Navigation
                             |--------------------------------------------------------------------------
                             */
@@ -346,8 +806,7 @@ class HandleInertiaRequests extends Middleware
                             ?? null,
 
                         'fallback_url' =>
-                        $data['fallback_url']
-                            ?? null,
+                        $fallbackUrl,
 
 
                         /*
@@ -388,6 +847,9 @@ class HandleInertiaRequests extends Middleware
         |--------------------------------------------------------------------------
         | Unread Count
         |--------------------------------------------------------------------------
+        |
+        | Count unread notifications belonging to the logged-in user.
+        |
         */
 
         $unreadCount =

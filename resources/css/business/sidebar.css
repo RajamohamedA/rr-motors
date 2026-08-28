@@ -1,0 +1,1271 @@
+/* =========================================================
+   RR ERP - BUSINESS SIDEBAR
+   ========================================================= */
+
+:root {
+    --rr-bs-width: 268px;
+    --rr-bs-collapsed-width: 78px;
+
+    --rr-bs-bg: #0f172a;
+    --rr-bs-bg-soft: #172033;
+    --rr-bs-border: rgba(148, 163, 184, 0.13);
+
+    --rr-bs-text: #cbd5e1;
+    --rr-bs-muted: #94a3b8;
+    --rr-bs-heading: #ffffff;
+
+    --rr-bs-primary: #3b82f6;
+    --rr-bs-primary-soft: rgba(59, 130, 246, 0.14);
+
+    --rr-bs-hover: rgba(255, 255, 255, 0.055);
+
+    --rr-bs-radius: 10px;
+}
+
+
+/* =========================================================
+   SIDEBAR
+   ========================================================= */
+
+.rr-business-sidebar {
+    width: var(--rr-bs-width);
+    height: 100vh;
+
+    position: fixed;
+
+    top: 0;
+    left: 0;
+    bottom: 0;
+
+    z-index: 1040;
+
+    display: flex;
+    flex-direction: column;
+
+    overflow: hidden;
+
+    border-right:
+        1px solid var(--rr-bs-border);
+
+    background:
+        linear-gradient(180deg,
+            #0f172a 0%,
+            #111827 100%);
+
+    box-shadow:
+        8px 0 30px rgba(15, 23, 42, 0.08);
+
+    transition:
+        width 0.24s ease,
+        transform 0.24s ease,
+        box-shadow 0.24s ease;
+}
+
+
+/* =========================================================
+   COLLAPSED
+   ========================================================= */
+
+.rr-business-sidebar.collapsed {
+    width: var(--rr-bs-collapsed-width);
+}
+
+
+/* =========================================================
+   BUSINESS MAIN
+   ========================================================= */
+
+.rr-business-main {
+    min-width: 0;
+
+    margin-left:
+        var(--rr-bs-width);
+
+    transition:
+        margin-left 0.24s ease;
+}
+
+
+.rr-business-layout.sidebar-collapsed .rr-business-main {
+    margin-left:
+        var(--rr-bs-collapsed-width);
+}
+
+
+/* =========================================================
+   HOVER EXPANSION
+   ========================================================= */
+
+.rr-business-layout.sidebar-collapsed .rr-business-sidebar:not(.collapsed) {
+    width: var(--rr-bs-width);
+
+    box-shadow:
+        14px 0 38px rgba(15, 23, 42, 0.22);
+}
+
+
+/* =========================================================
+   COMPANY IDENTITY
+   ========================================================= */
+
+.rr-business-sidebar-company {
+    position: relative;
+
+    min-height: 82px;
+
+    display: flex;
+    align-items: center;
+
+    gap: 12px;
+
+    padding:
+        14px 54px 14px 16px;
+
+    flex-shrink: 0;
+
+    border-bottom:
+        1px solid var(--rr-bs-border);
+
+    background:
+        rgba(255, 255, 255, 0.018);
+}
+
+
+.rr-business-sidebar-company-icon {
+    width: 44px;
+    height: 44px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    flex: 0 0 44px;
+
+    border-radius: 12px;
+
+    background:
+        linear-gradient(145deg,
+            #3b82f6,
+            #2563eb);
+
+    color: #ffffff;
+
+    font-size: 18px;
+    font-weight: 800;
+
+    box-shadow:
+        0 8px 22px rgba(37, 99, 235, 0.26);
+}
+
+
+.rr-business-sidebar-company-info {
+    min-width: 0;
+
+    flex: 1;
+}
+
+
+.rr-business-sidebar-company-info strong {
+    display: block;
+
+    overflow: hidden;
+
+    color: #ffffff;
+
+    font-size: 15px;
+    font-weight: 800;
+
+    line-height: 1.25;
+
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+
+.rr-business-sidebar-company-info span {
+    display: flex;
+    align-items: center;
+
+    gap: 6px;
+
+    overflow: hidden;
+
+    margin-top: 5px;
+
+    color: #94a3b8;
+
+    font-size: 12px;
+    font-weight: 600;
+
+    line-height: 1.3;
+
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+
+.rr-business-sidebar-company-info span i {
+    flex-shrink: 0;
+
+    color: #60a5fa;
+
+    font-size: 12px;
+}
+
+
+.rr-business-sidebar-company-info small {
+    display: block;
+
+    overflow: hidden;
+
+    margin-top: 4px;
+
+    color: #64748b;
+
+    font-size: 12px;
+    font-weight: 650;
+
+    line-height: 1.3;
+
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+
+/* =========================================================
+   SIDEBAR COLLAPSE / EXPAND BUTTON
+   ========================================================= */
+
+.rr-business-sidebar-collapse-btn {
+    position: absolute;
+
+    top: 24px;
+    right: 12px;
+
+    z-index: 20;
+
+    width: 32px;
+    height: 32px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    padding: 0;
+
+    border:
+        1px solid rgba(148, 163, 184, 0.18);
+
+    border-radius: 9px;
+
+    background:
+        rgba(255, 255, 255, 0.055);
+
+    color: #94a3b8;
+
+    font-size: 13px;
+
+    cursor: pointer;
+
+    transition:
+        background 0.18s ease,
+        border-color 0.18s ease,
+        color 0.18s ease,
+        transform 0.18s ease;
+}
+
+
+.rr-business-sidebar-collapse-btn:hover {
+    border-color:
+        rgba(96, 165, 250, 0.35);
+
+    background:
+        rgba(59, 130, 246, 0.14);
+
+    color: #ffffff;
+}
+
+
+.rr-business-sidebar-collapse-btn:focus-visible {
+    outline:
+        2px solid #60a5fa;
+
+    outline-offset: 2px;
+}
+
+
+/* =========================================================
+   NAVIGATION
+   ========================================================= */
+
+.rr-business-sidebar-nav {
+    flex: 1;
+
+    min-height: 0;
+
+    overflow-x: hidden;
+    overflow-y: auto;
+
+    padding:
+        14px 10px 20px;
+
+    scrollbar-width: thin;
+
+    scrollbar-color:
+        rgba(148, 163, 184, 0.25) transparent;
+}
+
+
+.rr-business-sidebar-nav::-webkit-scrollbar {
+    width: 5px;
+}
+
+
+.rr-business-sidebar-nav::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+
+.rr-business-sidebar-nav::-webkit-scrollbar-thumb {
+    border-radius: 20px;
+
+    background:
+        rgba(148, 163, 184, 0.22);
+}
+
+
+.rr-business-sidebar-nav::-webkit-scrollbar-thumb:hover {
+    background:
+        rgba(148, 163, 184, 0.35);
+}
+
+
+/* =========================================================
+   MAIN LINK
+   ========================================================= */
+
+.rr-business-sidebar-link {
+    position: relative;
+
+    min-height: 44px;
+
+    display: flex;
+    align-items: center;
+
+    gap: 11px;
+
+    margin-bottom: 4px;
+
+    padding:
+        0 12px;
+
+    border-radius:
+        var(--rr-bs-radius);
+
+    color:
+        var(--rr-bs-text);
+
+    font-size: 14px;
+    font-weight: 650;
+
+    line-height: 1;
+
+    text-decoration: none;
+
+    transition:
+        background 0.18s ease,
+        color 0.18s ease,
+        transform 0.18s ease;
+}
+
+
+.rr-business-sidebar-link>i {
+    width: 22px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    flex: 0 0 22px;
+
+    color: #94a3b8;
+
+    font-size: 16px;
+
+    transition:
+        color 0.18s ease,
+        transform 0.18s ease;
+}
+
+
+.rr-business-sidebar-link>span {
+    overflow: hidden;
+
+    white-space: nowrap;
+
+    text-overflow: ellipsis;
+}
+
+
+/* =========================================================
+   LINK HOVER
+   ========================================================= */
+
+.rr-business-sidebar-link:hover {
+    color: #ffffff;
+
+    background:
+        var(--rr-bs-hover);
+
+    transform:
+        translateX(2px);
+}
+
+
+.rr-business-sidebar-link:hover>i {
+    color: #60a5fa;
+
+    transform:
+        scale(1.05);
+}
+
+
+/* =========================================================
+   ACTIVE LINK
+   ========================================================= */
+
+.rr-business-sidebar-link.active {
+    color: #ffffff;
+
+    background:
+        linear-gradient(90deg,
+            rgba(37, 99, 235, 0.25),
+            rgba(37, 99, 235, 0.10));
+
+    box-shadow:
+        inset 0 0 0 1px rgba(96, 165, 250, 0.10);
+}
+
+
+.rr-business-sidebar-link.active::before {
+    content: "";
+
+    position: absolute;
+
+    left: 0;
+    top: 9px;
+    bottom: 9px;
+
+    width: 3px;
+
+    border-radius:
+        0 4px 4px 0;
+
+    background: #60a5fa;
+}
+
+
+.rr-business-sidebar-link.active>i {
+    color: #60a5fa;
+}
+
+
+/* =========================================================
+   GROUP
+   ========================================================= */
+
+.rr-business-sidebar-group {
+    margin-bottom: 4px;
+}
+
+
+/* =========================================================
+   GROUP BUTTON
+   ========================================================= */
+
+.rr-business-sidebar-group-button {
+    position: relative;
+
+    width: 100%;
+    min-height: 44px;
+
+    display: flex;
+    align-items: center;
+
+    gap: 11px;
+
+    padding:
+        0 12px;
+
+    border: 0;
+
+    border-radius:
+        var(--rr-bs-radius);
+
+    outline: none;
+
+    background: transparent;
+
+    color:
+        var(--rr-bs-text);
+
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 650;
+
+    text-align: left;
+
+    cursor: pointer;
+
+    transition:
+        background 0.18s ease,
+        color 0.18s ease;
+}
+
+
+.rr-business-sidebar-group-button>i:first-child {
+    width: 22px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    flex: 0 0 22px;
+
+    color: #94a3b8;
+
+    font-size: 16px;
+
+    transition:
+        color 0.18s ease;
+}
+
+
+.rr-business-sidebar-group-button>span {
+    min-width: 0;
+
+    flex: 1;
+
+    overflow: hidden;
+
+    white-space: nowrap;
+
+    text-overflow: ellipsis;
+}
+
+
+.rr-business-sidebar-group-button:hover {
+    color: #ffffff;
+
+    background:
+        var(--rr-bs-hover);
+}
+
+
+.rr-business-sidebar-group-button:hover>i:first-child {
+    color: #60a5fa;
+}
+
+
+/* =========================================================
+   GROUP ACTIVE
+   ========================================================= */
+
+.rr-business-sidebar-group-button.active {
+    color: #ffffff;
+
+    background:
+        rgba(59, 130, 246, 0.08);
+}
+
+
+.rr-business-sidebar-group-button.active>i:first-child {
+    color: #60a5fa;
+}
+
+
+/* =========================================================
+   CHEVRON
+   ========================================================= */
+
+.rr-business-sidebar-chevron {
+    margin-left: auto;
+
+    color: #64748b;
+
+    font-size: 12px;
+
+    transition:
+        transform 0.2s ease,
+        color 0.2s ease;
+}
+
+
+.rr-business-sidebar-chevron.open {
+    transform:
+        rotate(180deg);
+
+    color: #94a3b8;
+}
+
+
+/* =========================================================
+   SUBMENU
+   ========================================================= */
+
+.rr-business-sidebar-submenu {
+    position: relative;
+
+    display: grid;
+
+    gap: 2px;
+
+    margin:
+        3px 0 7px 22px;
+
+    padding-left: 13px;
+
+    border-left:
+        1px solid rgba(148, 163, 184, 0.15);
+
+    animation:
+        rrBusinessSidebarSubmenu 0.2s ease both;
+}
+
+
+.rr-business-sidebar-submenu .rr-business-sidebar-link {
+    min-height: 39px;
+
+    margin: 0;
+
+    padding:
+        0 10px;
+
+    font-size: 13px;
+
+    border-radius: 8px;
+}
+
+
+.rr-business-sidebar-submenu .rr-business-sidebar-link>i {
+    width: 19px;
+
+    flex-basis: 19px;
+
+    font-size: 14px;
+}
+
+
+.rr-business-sidebar-submenu .rr-business-sidebar-link.active::before {
+    top: 8px;
+    bottom: 8px;
+}
+
+
+/* =========================================================
+   COLLAPSED COMPANY
+   ========================================================= */
+
+.rr-business-sidebar.collapsed .rr-business-sidebar-company {
+    min-height: 118px;
+
+    flex-direction: column;
+
+    justify-content: flex-start;
+
+    gap: 12px;
+
+    padding:
+        14px 10px;
+}
+
+
+.rr-business-sidebar.collapsed .rr-business-sidebar-company-icon {
+    order: 1;
+
+    width: 44px;
+    height: 44px;
+
+    flex:
+        0 0 44px;
+}
+
+
+.rr-business-sidebar.collapsed .rr-business-sidebar-collapse-btn {
+    position: static;
+
+    order: 2;
+
+    width: 34px;
+    height: 30px;
+
+    flex:
+        0 0 30px;
+}
+
+
+.rr-business-sidebar.collapsed .rr-business-sidebar-company-info {
+    display: none;
+}
+
+
+/* =========================================================
+   COLLAPSED LINKS
+   ========================================================= */
+
+.rr-business-sidebar.collapsed .rr-business-sidebar-link,
+
+.rr-business-sidebar.collapsed .rr-business-sidebar-group-button {
+    justify-content: center;
+
+    gap: 0;
+
+    padding:
+        0 10px;
+}
+
+
+.rr-business-sidebar.collapsed .rr-business-sidebar-link>i,
+
+.rr-business-sidebar.collapsed .rr-business-sidebar-group-button>i:first-child {
+    width: 24px;
+
+    flex-basis: 24px;
+
+    font-size: 18px;
+}
+
+
+.rr-business-sidebar.collapsed .rr-business-sidebar-link>span,
+
+.rr-business-sidebar.collapsed .rr-business-sidebar-group-button>span,
+
+.rr-business-sidebar.collapsed .rr-business-sidebar-chevron,
+
+.rr-business-sidebar.collapsed .rr-business-sidebar-profile-info {
+    display: none;
+}
+
+
+.rr-business-sidebar.collapsed .rr-business-sidebar-submenu {
+    display: none;
+}
+
+
+.rr-business-sidebar.collapsed .rr-business-sidebar-link:hover {
+    transform: none;
+}
+
+
+/* =========================================================
+   FOOTER
+   ========================================================= */
+
+.rr-business-sidebar-footer {
+    flex-shrink: 0;
+
+    padding: 10px;
+
+    border-top:
+        1px solid var(--rr-bs-border);
+
+    background:
+        rgba(0, 0, 0, 0.08);
+}
+
+
+/* =========================================================
+   USER PROFILE
+   ========================================================= */
+
+.rr-business-sidebar-profile {
+    min-height: 58px;
+
+    display: flex;
+    align-items: center;
+
+    gap: 11px;
+
+    padding: 8px;
+
+    border-radius: 11px;
+
+    color: inherit;
+
+    text-decoration: none;
+
+    transition:
+        background 0.18s ease;
+}
+
+
+.rr-business-sidebar-profile:hover {
+    background:
+        rgba(255, 255, 255, 0.055);
+}
+
+
+/* =========================================================
+   AVATAR
+   ========================================================= */
+
+.rr-business-sidebar-avatar {
+    width: 40px;
+    height: 40px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    flex:
+        0 0 40px;
+
+    border:
+        1px solid rgba(96, 165, 250, 0.24);
+
+    border-radius: 11px;
+
+    background:
+        rgba(59, 130, 246, 0.14);
+
+    color: #bfdbfe;
+
+    font-size: 13px;
+    font-weight: 800;
+
+    letter-spacing: 0.3px;
+}
+
+
+.rr-business-sidebar-profile-info {
+    min-width: 0;
+
+    flex: 1;
+}
+
+
+.rr-business-sidebar-profile-info strong {
+    display: block;
+
+    overflow: hidden;
+
+    color: #f8fafc;
+
+    font-size: 13px;
+    font-weight: 750;
+
+    white-space: nowrap;
+
+    text-overflow: ellipsis;
+}
+
+
+.rr-business-sidebar-profile-info span {
+    display: block;
+
+    overflow: hidden;
+
+    margin-top: 3px;
+
+    color: #94a3b8;
+
+    font-size: 12px;
+    font-weight: 600;
+
+    white-space: nowrap;
+
+    text-overflow: ellipsis;
+}
+
+
+/* =========================================================
+   COLLAPSED PROFILE
+   ========================================================= */
+
+.rr-business-sidebar.collapsed .rr-business-sidebar-profile {
+    justify-content: center;
+
+    gap: 0;
+
+    padding:
+        8px 4px;
+}
+
+
+/* =========================================================
+   FOCUS
+   ========================================================= */
+
+.rr-business-sidebar-link:focus-visible,
+.rr-business-sidebar-group-button:focus-visible,
+.rr-business-sidebar-profile:focus-visible {
+    outline:
+        2px solid #60a5fa;
+
+    outline-offset: -2px;
+}
+
+
+/* =========================================================
+   SUBMENU ANIMATION
+   ========================================================= */
+
+@keyframes rrBusinessSidebarSubmenu {
+
+    from {
+        opacity: 0;
+
+        transform:
+            translateY(-5px);
+    }
+
+    to {
+        opacity: 1;
+
+        transform:
+            translateY(0);
+    }
+}
+
+
+/* =========================================================
+   MOBILE
+   ========================================================= */
+
+@media (max-width: 991px) {
+
+    .rr-business-main,
+    .rr-business-layout.sidebar-collapsed .rr-business-main {
+        margin-left: 0;
+    }
+
+
+    .rr-business-sidebar {
+        width: 280px;
+
+        transform:
+            translateX(-100%);
+
+        box-shadow:
+            18px 0 45px rgba(15, 23, 42, 0.22);
+    }
+
+
+    .rr-business-sidebar.mobile-open {
+        transform:
+            translateX(0);
+    }
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Ignore Desktop Collapse On Mobile
+    |--------------------------------------------------------------------------
+    */
+
+    .rr-business-sidebar.collapsed {
+        width: 280px;
+    }
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Hide Desktop Collapse Button
+    |--------------------------------------------------------------------------
+    */
+
+    .rr-business-sidebar-collapse-btn {
+        display: none;
+    }
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Restore Company Identity
+    |--------------------------------------------------------------------------
+    */
+
+    .rr-business-sidebar-company,
+    .rr-business-sidebar.collapsed .rr-business-sidebar-company {
+        min-height: 82px;
+
+        flex-direction: row;
+
+        justify-content: flex-start;
+
+        gap: 12px;
+
+        padding:
+            14px 16px;
+    }
+
+
+    .rr-business-sidebar.collapsed .rr-business-sidebar-company-icon {
+        order: initial;
+    }
+
+
+    .rr-business-sidebar.collapsed .rr-business-sidebar-company-info {
+        display: block;
+    }
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Restore Menu Text
+    |--------------------------------------------------------------------------
+    */
+
+    .rr-business-sidebar.collapsed .rr-business-sidebar-link,
+
+    .rr-business-sidebar.collapsed .rr-business-sidebar-group-button {
+        justify-content: flex-start;
+
+        gap: 11px;
+
+        padding:
+            0 12px;
+    }
+
+
+    .rr-business-sidebar.collapsed .rr-business-sidebar-link>span,
+
+    .rr-business-sidebar.collapsed .rr-business-sidebar-group-button>span,
+
+    .rr-business-sidebar.collapsed .rr-business-sidebar-profile-info {
+        display: block;
+    }
+
+
+    .rr-business-sidebar.collapsed .rr-business-sidebar-chevron {
+        display: inline-block;
+    }
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Restore Submenu
+    |--------------------------------------------------------------------------
+    */
+
+    .rr-business-sidebar.collapsed .rr-business-sidebar-submenu {
+        display: grid;
+    }
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Restore Profile
+    |--------------------------------------------------------------------------
+    */
+
+    .rr-business-sidebar.collapsed .rr-business-sidebar-profile {
+        justify-content: flex-start;
+
+        gap: 11px;
+
+        padding: 8px;
+    }
+}
+
+
+/* =========================================================
+   SMALL MOBILE
+   ========================================================= */
+
+@media (max-width: 420px) {
+
+    .rr-business-sidebar,
+    .rr-business-sidebar.collapsed {
+        width:
+            min(86vw,
+                290px);
+    }
+}
+
+
+/* =========================================================
+   REDUCED MOTION
+   ========================================================= */
+
+@media (prefers-reduced-motion: reduce) {
+
+    .rr-business-sidebar,
+    .rr-business-main,
+    .rr-business-sidebar *,
+    .rr-business-sidebar *::before,
+    .rr-business-sidebar *::after {
+        animation-duration:
+            0.01ms !important;
+
+        animation-iteration-count:
+            1 !important;
+
+        transition-duration:
+            0.01ms !important;
+    }
+}
+
+/* =========================================================
+   SIDEBAR UTILITIES
+   ========================================================= */
+
+.rr-business-sidebar-utility {
+    flex-shrink: 0;
+
+    padding:
+        8px 10px;
+
+    border-top:
+        1px solid var(--rr-bs-border);
+
+    background:
+        rgba(0, 0, 0, 0.035);
+}
+
+
+/* =========================================================
+   UTILITY LINKS
+   ========================================================= */
+
+.rr-business-sidebar-utility .rr-business-sidebar-link {
+    margin-bottom: 3px;
+}
+
+
+.rr-business-sidebar-utility .rr-business-sidebar-link:last-child {
+    margin-bottom: 0;
+}
+
+
+/* =========================================================
+   NOTIFICATION BADGE
+   ========================================================= */
+
+.rr-business-sidebar-badge {
+    min-width: 22px;
+    height: 22px;
+
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    flex-shrink: 0;
+
+    margin-left: auto;
+
+    padding:
+        0 6px;
+
+    border-radius: 999px;
+
+    background: #ef4444;
+
+    color: #ffffff;
+
+    font-size: 12px;
+    font-weight: 800;
+
+    line-height: 1;
+
+    box-shadow:
+        0 3px 8px rgba(239, 68, 68, 0.24);
+}
+
+
+/* =========================================================
+   NOTIFICATION ICON
+   ========================================================= */
+
+.rr-business-sidebar-utility .rr-business-sidebar-link:first-child>i {
+    position: relative;
+}
+
+
+/* =========================================================
+   COLLAPSED UTILITIES
+   ========================================================= */
+
+.rr-business-sidebar.collapsed .rr-business-sidebar-utility {
+    padding:
+        8px 10px;
+}
+
+
+.rr-business-sidebar.collapsed .rr-business-sidebar-utility .rr-business-sidebar-link {
+    justify-content: center;
+
+    gap: 0;
+
+    padding:
+        0 10px;
+}
+
+
+/* =========================================================
+   COLLAPSED NOTIFICATION DOT
+   ========================================================= */
+
+.rr-business-sidebar.collapsed .rr-business-sidebar-utility .rr-business-sidebar-link:first-child {
+    position: relative;
+}
+
+
+.rr-business-sidebar.collapsed .rr-business-sidebar-utility .rr-business-sidebar-link:first-child .rr-business-sidebar-badge {
+    position: absolute;
+
+    top: 3px;
+    right: 5px;
+
+    min-width: 8px;
+    width: 8px;
+    height: 8px;
+
+    padding: 0;
+
+    border:
+        2px solid var(--rr-bs-bg);
+
+    font-size: 0;
+}
+
+
+/* =========================================================
+   MOBILE UTILITIES
+   ========================================================= */
+
+@media (max-width: 991px) {
+
+    .rr-business-sidebar-utility {
+        padding:
+            8px 10px;
+    }
+
+
+    .rr-business-sidebar.collapsed .rr-business-sidebar-utility .rr-business-sidebar-link {
+        justify-content: flex-start;
+
+        gap: 11px;
+
+        padding:
+            0 12px;
+    }
+
+
+    .rr-business-sidebar.collapsed .rr-business-sidebar-badge {
+        position: static;
+
+        min-width: 22px;
+        width: auto;
+        height: 22px;
+
+        margin-left: auto;
+
+        padding:
+            0 6px;
+
+        border: 0;
+
+        font-size: 12px;
+    }
+}

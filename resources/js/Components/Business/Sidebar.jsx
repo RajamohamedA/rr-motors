@@ -1,421 +1,1581 @@
-import { Link, usePage } from '@inertiajs/react';
-import { useMemo } from 'react';
+import {
+    Link,
+    usePage,
+} from '@inertiajs/react';
 
-export default function Sidebar({ open = false, onClose = () => { } }) {
+import {
+    useMemo,
+    useState,
+} from 'react';
 
-    const { auth } = usePage().props;
 
-    const permissions = auth?.permissions ?? [];
-    const user = auth?.user;
-    const roles = auth?.roles ?? [];
-
-    /*
-    |--------------------------------------------------------------------------
-    | Permission helper
-    |--------------------------------------------------------------------------
-    */
-
-    const can = (permission) => {
-
-        // Super admin can access everything
-        if (user?.is_super_user) {
-            return true;
-        }
-
-        // No permission requirement
-        if (!permission) {
-            return true;
-        }
-
-        return permissions.includes(permission);
-    };
-
+export default function BusinessSidebar({
+    open = false,
+    collapsed = false,
+    permanentlyCollapsed = false,
+    onToggleCollapse = null,
+    onClose = null,
+    onMouseEnter = null,
+    onMouseLeave = null,
+}) {
 
     /*
     |--------------------------------------------------------------------------
-    | Role helper
+    | Shared Props
     |--------------------------------------------------------------------------
     */
 
-    const hasRole = (role) => {
-        return roles.includes(role);
-    };
+    const {
+        auth,
+        business,
+        notifications,
+    } = usePage().props;
 
 
-    /*
-    |--------------------------------------------------------------------------
-    | Current URL
-    |--------------------------------------------------------------------------
-    */
+    const user =
+        auth?.user;
 
-    const currentUrl = usePage().url;
+
+    const permissions =
+        user?.permissions
+        ?? [];
+
+
+    const roles =
+        user?.roles
+        ?? [];
 
 
     /*
     |--------------------------------------------------------------------------
-    | Menu definition
-    |--------------------------------------------------------------------------
-    |
-    | Keep menu definitions here.
-    | Actual authorization is still handled by Laravel middleware.
-    |
-    */
-
-    const sections = useMemo(() => [
-
-        {
-            title: 'MAIN',
-
-            items: [
-                {
-                    label: 'Dashboard',
-                    icon: 'bi-grid-1x2-fill',
-                    href: '/business/dashboard',
-                },
-            ],
-        },
-
-
-        {
-            title: 'TRANSACTIONS',
-
-            items: [
-                {
-                    label: 'Sales',
-                    icon: 'bi-cart-check-fill',
-                    href: '/sales',
-                    permission: 'sales.view',
-                },
-
-                {
-                    label: 'Purchases',
-                    icon: 'bi-bag-check-fill',
-                    href: '/purchases',
-                    permission: 'purchases.view',
-                },
-
-                {
-                    label: 'Customer Payments',
-                    icon: 'bi-cash-stack',
-                    href: '/customer-payments',
-                    permission: 'customer-payments.view',
-                },
-            ],
-        },
-
-
-        {
-            title: 'INVENTORY',
-
-            items: [
-                {
-                    label: 'Stock',
-                    icon: 'bi-box-seam-fill',
-                    href: '/inventory',
-                    permission: 'stock.view',
-                },
-
-                {
-                    label: 'Stock Transfer',
-                    icon: 'bi-arrow-left-right',
-                    href: '/stock-transfers',
-                    permission: 'stock-transfers.view',
-                },
-
-                {
-                    label: 'Stock Adjustment',
-                    icon: 'bi-sliders',
-                    href: '/stock-adjustments',
-                    permission: 'stock-adjustments.view',
-                },
-            ],
-        },
-
-
-        {
-            title: 'MASTERS',
-
-            items: [
-                {
-                    label: 'Products',
-                    icon: 'bi-box-fill',
-                    href: '/products',
-                    permission: 'products.view',
-                },
-
-                {
-                    label: 'Customers',
-                    icon: 'bi-people-fill',
-                    href: '/customers',
-                    permission: 'customers.view',
-                },
-
-                {
-                    label: 'Suppliers',
-                    icon: 'bi-truck',
-                    href: '/suppliers',
-                    permission: 'suppliers.view',
-                },
-
-                {
-                    label: 'Categories',
-                    icon: 'bi-tags-fill',
-                    href: '/categories',
-                    permission: 'categories.view',
-                },
-
-                {
-                    label: 'Brands',
-                    icon: 'bi-bookmark-star-fill',
-                    href: '/brands',
-                    permission: 'brands.view',
-                },
-
-                {
-                    label: 'Units',
-                    icon: 'bi-rulers',
-                    href: '/units',
-                    permission: 'units.view',
-                },
-            ],
-        },
-
-
-        {
-            title: 'REPORTS',
-
-            items: [
-                {
-                    label: 'Reports',
-                    icon: 'bi-bar-chart-fill',
-                    href: '/reports',
-                    permission: 'reports.view',
-                },
-            ],
-        },
-
-
-        {
-            title: 'SETTINGS',
-
-            items: [
-                {
-                    label: 'My Profile',
-                    icon: 'bi-person-circle',
-                    href: '/profile',
-                },
-            ],
-        },
-
-    ], [permissions, user, roles]);
-
-
-    /*
-    |--------------------------------------------------------------------------
-    | Filter menu according to permissions
+    | Access Helpers
     |--------------------------------------------------------------------------
     */
 
-    const visibleSections = sections
-        .map((section) => {
-
-            const visibleItems = section.items.filter((item) => {
-
-                return can(item.permission);
-
-            });
-
-            return {
-                ...section,
-                items: visibleItems,
-            };
-
-        })
-        .filter((section) => section.items.length > 0);
-
-
-    /*
-    |--------------------------------------------------------------------------
-    | Active URL
-    |--------------------------------------------------------------------------
-    */
-
-    const isActive = (href) => {
-
-        if (href === '/business/dashboard') {
-            return currentUrl === href;
-        }
-
-        return (
-            currentUrl === href ||
-            currentUrl.startsWith(`${href}/`)
+    const isSuperAdmin =
+        Boolean(
+            user?.is_super_user
         );
-    };
+
+
+    const isCompanyAdmin =
+        roles.includes(
+            'Company Admin'
+        );
 
 
     /*
     |--------------------------------------------------------------------------
-    | Close sidebar on mobile
+    | Active Branch Context
+    |--------------------------------------------------------------------------
+    |
+    | Company Admin can work at company level without selecting a branch.
+    | Operational ERP menus are shown only when a branch is active.
+    |
+    */
+
+    const hasActiveBranch =
+        Boolean(
+            business?.store_id
+        );
+
+
+    const can =
+        (
+            permission
+        ) => {
+
+            if (
+                isSuperAdmin ||
+                isCompanyAdmin
+            ) {
+
+                return true;
+            }
+
+
+            return permissions.includes(
+                permission
+            );
+        };
+
+
+    const canAny =
+        (
+            permissionList
+        ) => {
+
+            if (
+                isSuperAdmin ||
+                isCompanyAdmin
+            ) {
+
+                return true;
+            }
+
+
+            return permissionList.some(
+                (
+                    permission
+                ) =>
+                    permissions.includes(
+                        permission
+                    )
+            );
+        };
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Menu State
     |--------------------------------------------------------------------------
     */
 
-    const handleNavigation = () => {
+    const [
+        openGroups,
+        setOpenGroups,
+    ] = useState({
+        masters:
+            false,
 
-        if (window.innerWidth < 992) {
-            onClose();
-        }
+        purchase:
+            false,
 
-    };
+        sales:
+            false,
 
+        inventory:
+            false,
+
+        accounts:
+            false,
+
+        reports:
+            false,
+
+        administration:
+            true,
+    });
+
+
+    const toggleGroup =
+        (
+            group
+        ) => {
+
+            setOpenGroups(
+                (
+                    current
+                ) => ({
+
+                    ...current,
+
+                    [group]:
+                        !current[group],
+
+                })
+            );
+        };
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Menu Definition
+    |--------------------------------------------------------------------------
+    */
+
+    const menu =
+        useMemo(
+            () => [
+
+                /*
+                |--------------------------------------------------------------------------
+                | Dashboard
+                |--------------------------------------------------------------------------
+                */
+
+                {
+                    type:
+                        'link',
+
+                    label:
+                        'Dashboard',
+
+                    icon:
+                        'bi-grid-1x2',
+
+                    href:
+                        isCompanyAdmin &&
+                            !hasActiveBranch
+                            ? '/company/dashboard'
+                            : '/business/dashboard',
+
+                    visible:
+                        isCompanyAdmin ||
+                        (
+                            hasActiveBranch &&
+                            can(
+                                'dashboard.view'
+                            )
+                        ),
+                },
+
+
+                /*
+                |--------------------------------------------------------------------------
+                | Company Administration
+                |--------------------------------------------------------------------------
+                */
+
+                {
+                    type:
+                        'group',
+
+                    key:
+                        'administration',
+
+                    label:
+                        'Company',
+
+                    icon:
+                        'bi-buildings',
+
+                    visible:
+                        isCompanyAdmin,
+
+                    children: [
+
+                        {
+                            label:
+                                'Company Profile',
+
+                            icon:
+                                'bi-building-gear',
+
+                            href:
+                                '/company/profile',
+
+                            visible:
+                                true,
+                        },
+
+                        {
+                            label:
+                                'Branches',
+
+                            icon:
+                                'bi-shop-window',
+
+                            href:
+                                '/company/branches',
+
+                            visible:
+                                true,
+                        },
+
+                        {
+                            label:
+                                'Add Branch',
+
+                            icon:
+                                'bi-plus-circle',
+
+                            href:
+                                '/company/branches/create',
+
+                            visible:
+                                true,
+                        },
+
+                        {
+                            label:
+                                'Users & Access',
+
+                            icon:
+                                'bi-people',
+
+                            href:
+                                '/company/users',
+
+                            visible:
+                                true,
+                        },
+
+                        {
+                            label:
+                                'Add User',
+
+                            icon:
+                                'bi-person-plus',
+
+                            href:
+                                '/company/users/create',
+
+                            visible:
+                                true,
+                        },
+
+                    ],
+                },
+
+
+                /*
+                |--------------------------------------------------------------------------
+                | Masters
+                |--------------------------------------------------------------------------
+                */
+
+                {
+                    type:
+                        'group',
+
+                    key:
+                        'masters',
+
+                    label:
+                        'Masters',
+
+                    icon:
+                        'bi-database',
+
+                    visible:
+                        hasActiveBranch &&
+                        canAny([
+                            'customer.view',
+                            'supplier.view',
+                            'product.view',
+                            'category.view',
+                            'brand.view',
+                            'unit.view',
+                        ]),
+
+                    children: [
+
+                        {
+                            label:
+                                'Customers',
+
+                            icon:
+                                'bi-person-vcard',
+
+                            href:
+                                '/customers',
+
+                            visible:
+                                can(
+                                    'customer.view'
+                                ),
+                        },
+
+                        {
+                            label:
+                                'Suppliers',
+
+                            icon:
+                                'bi-truck',
+
+                            href:
+                                '/suppliers',
+
+                            visible:
+                                can(
+                                    'supplier.view'
+                                ),
+                        },
+
+                        {
+                            label:
+                                'Products',
+
+                            icon:
+                                'bi-box-seam',
+
+                            href:
+                                '/products',
+
+                            visible:
+                                can(
+                                    'product.view'
+                                ),
+                        },
+
+                        {
+                            label:
+                                'Categories',
+
+                            icon:
+                                'bi-tags',
+
+                            href:
+                                '/categories',
+
+                            visible:
+                                can(
+                                    'category.view'
+                                ),
+                        },
+
+                        {
+                            label:
+                                'Brands',
+
+                            icon:
+                                'bi-award',
+
+                            href:
+                                '/brands',
+
+                            visible:
+                                can(
+                                    'brand.view'
+                                ),
+                        },
+
+                        {
+                            label:
+                                'Units',
+
+                            icon:
+                                'bi-rulers',
+
+                            href:
+                                '/units',
+
+                            visible:
+                                can(
+                                    'unit.view'
+                                ),
+                        },
+
+                    ],
+                },
+
+
+                /*
+                |--------------------------------------------------------------------------
+                | Purchase
+                |--------------------------------------------------------------------------
+                */
+
+                {
+                    type:
+                        'group',
+
+                    key:
+                        'purchase',
+
+                    label:
+                        'Purchase',
+
+                    icon:
+                        'bi-bag-check',
+
+                    visible:
+                        hasActiveBranch &&
+                        canAny([
+                            'purchase.view',
+                            'purchase.create',
+                        ]),
+
+                    children: [
+
+                        {
+                            label:
+                                'Purchases',
+
+                            icon:
+                                'bi-receipt',
+
+                            href:
+                                '/purchases',
+
+                            visible:
+                                can(
+                                    'purchase.view'
+                                ),
+                        },
+
+                        {
+                            label:
+                                'New Purchase',
+
+                            icon:
+                                'bi-plus-square',
+
+                            href:
+                                '/purchases/create',
+
+                            visible:
+                                can(
+                                    'purchase.create'
+                                ),
+                        },
+
+                        {
+                            label:
+                                'Purchase Returns',
+
+                            icon:
+                                'bi-arrow-return-left',
+
+                            href:
+                                '/purchase-returns',
+
+                            visible:
+                                can(
+                                    'purchase.view'
+                                ),
+                        },
+
+                    ],
+                },
+
+
+                /*
+                |--------------------------------------------------------------------------
+                | Sales
+                |--------------------------------------------------------------------------
+                */
+
+                {
+                    type:
+                        'group',
+
+                    key:
+                        'sales',
+
+                    label:
+                        'Sales',
+
+                    icon:
+                        'bi-cart-check',
+
+                    visible:
+                        hasActiveBranch &&
+                        canAny([
+                            'sales.view',
+                            'sales.create',
+                            'quotation.view',
+                        ]),
+
+                    children: [
+
+                        {
+                            label:
+                                'Sales',
+
+                            icon:
+                                'bi-receipt-cutoff',
+
+                            href:
+                                '/sales',
+
+                            visible:
+                                can(
+                                    'sales.view'
+                                ),
+                        },
+
+                        {
+                            label:
+                                'New Sale',
+
+                            icon:
+                                'bi-plus-square',
+
+                            href:
+                                '/sales/create',
+
+                            visible:
+                                can(
+                                    'sales.create'
+                                ),
+                        },
+
+                        {
+                            label:
+                                'Sales Returns',
+
+                            icon:
+                                'bi-arrow-return-right',
+
+                            href:
+                                '/sales-returns',
+
+                            visible:
+                                can(
+                                    'sales.view'
+                                ),
+                        },
+
+                        {
+                            label:
+                                'Quotations',
+
+                            icon:
+                                'bi-file-earmark-text',
+
+                            href:
+                                '/quotations',
+
+                            visible:
+                                can(
+                                    'quotation.view'
+                                ),
+                        },
+
+                    ],
+                },
+
+
+                /*
+                |--------------------------------------------------------------------------
+                | Inventory
+                |--------------------------------------------------------------------------
+                */
+
+                {
+                    type:
+                        'group',
+
+                    key:
+                        'inventory',
+
+                    label:
+                        'Inventory',
+
+                    icon:
+                        'bi-boxes',
+
+                    visible:
+                        hasActiveBranch &&
+                        canAny([
+                            'stock.view',
+                            'stock.adjust',
+                        ]),
+
+                    children: [
+
+                        {
+                            label:
+                                'Current Stock',
+
+                            icon:
+                                'bi-box-seam',
+
+                            href:
+                                '/current-stock',
+
+                            visible:
+                                can(
+                                    'stock.view'
+                                ),
+                        },
+
+                        {
+                            label:
+                                'Stock Ledger',
+
+                            icon:
+                                'bi-journal-text',
+
+                            href:
+                                '/stock-ledger',
+
+                            visible:
+                                can(
+                                    'stock.view'
+                                ),
+                        },
+
+                        {
+                            label:
+                                'Stock Adjustment',
+
+                            icon:
+                                'bi-sliders',
+
+                            href:
+                                '/stock-adjustments',
+
+                            visible:
+                                can(
+                                    'stock.adjust'
+                                ),
+                        },
+
+                        {
+                            label:
+                                'Stock Transfer',
+
+                            icon:
+                                'bi-arrow-left-right',
+
+                            href:
+                                '/stock-transfers',
+
+                            visible:
+                                can(
+                                    'stock.view'
+                                ),
+                        },
+
+                    ],
+                },
+
+
+                /*
+                |--------------------------------------------------------------------------
+                | Accounts
+                |--------------------------------------------------------------------------
+                */
+
+                {
+                    type:
+                        'group',
+
+                    key:
+                        'accounts',
+
+                    label:
+                        'Accounts',
+
+                    icon:
+                        'bi-wallet2',
+
+                    visible:
+                        hasActiveBranch &&
+                        canAny([
+                            'customer.view',
+                            'sales.view',
+                        ]),
+
+                    children: [
+
+                        {
+                            label:
+                                'Customer Payments',
+
+                            icon:
+                                'bi-cash-coin',
+
+                            href:
+                                '/customer-payments',
+
+                            visible:
+                                true,
+                        },
+
+                        {
+                            label:
+                                'Customer Ledger',
+
+                            icon:
+                                'bi-journal',
+
+                            href:
+                                '/customer-ledger',
+
+                            visible:
+                                true,
+                        },
+
+                    ],
+                },
+
+
+                /*
+                |--------------------------------------------------------------------------
+                | Reports
+                |--------------------------------------------------------------------------
+                */
+
+                {
+                    type:
+                        'group',
+
+                    key:
+                        'reports',
+
+                    label:
+                        'Reports',
+
+                    icon:
+                        'bi-bar-chart-line',
+
+                    visible:
+                        hasActiveBranch &&
+                        canAny([
+                            'purchase.view',
+                            'sales.view',
+                            'stock.view',
+                        ]),
+
+                    children: [
+
+                        {
+                            label:
+                                'Purchase Report',
+
+                            icon:
+                                'bi-graph-down-arrow',
+
+                            href:
+                                '/purchase-reports',
+
+                            visible:
+                                can(
+                                    'purchase.view'
+                                ),
+                        },
+
+                        {
+                            label:
+                                'Sales Report',
+
+                            icon:
+                                'bi-graph-up-arrow',
+
+                            href:
+                                '/sales-reports',
+
+                            visible:
+                                can(
+                                    'sales.view'
+                                ),
+                        },
+
+                        {
+                            label:
+                                'Stock Report',
+
+                            icon:
+                                'bi-bar-chart',
+
+                            href:
+                                '/stock-reports',
+
+                            visible:
+                                can(
+                                    'stock.view'
+                                ),
+                        },
+
+                    ],
+                },
+
+            ],
+            [
+                permissions,
+                roles,
+                isSuperAdmin,
+                isCompanyAdmin,
+                hasActiveBranch,
+            ]
+        );
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Render
+    |--------------------------------------------------------------------------
+    */
 
     return (
-        <>
-            {/* Mobile overlay */}
 
-            {open && (
-                <div
-                    className="rr-sidebar-overlay"
-                    onClick={onClose}
-                    aria-hidden="true"
-                />
-            )}
+        <aside
+            className={
+                `rr-business-sidebar ` +
+                `${open ? 'mobile-open' : ''} ` +
+                `${collapsed ? 'collapsed' : ''}`
+            }
+            onMouseEnter={
+                onMouseEnter
+            }
+            onMouseLeave={
+                onMouseLeave
+            }
+        >
 
+            {/* =========================================================
+                BUSINESS IDENTITY
+               ========================================================= */}
 
-            {/* Sidebar */}
+            <div className="rr-business-sidebar-company">
 
-            <aside
-                className={`rr-sidebar ${open ? 'rr-sidebar-open' : ''
-                    }`}
-            >
+                <button
+                    type="button"
+                    className="rr-business-sidebar-collapse-btn"
+                    onClick={onToggleCollapse}
+                    title={
+                        permanentlyCollapsed
+                            ? 'Expand sidebar'
+                            : 'Collapse sidebar'
+                    }
+                    aria-label={
+                        permanentlyCollapsed
+                            ? 'Expand sidebar'
+                            : 'Collapse sidebar'
+                    }
+                >
+                    <i
+                        className={
+                            permanentlyCollapsed
+                                ? 'bi bi-chevron-double-right'
+                                : 'bi bi-chevron-double-left'
+                        }
+                    ></i>
+                </button>
 
-                {/* =====================================================
-                    BRAND
-                   ===================================================== */}
+                <div className="rr-business-sidebar-company-icon">
 
-                <div className="rr-sidebar-brand">
-
-                    <Link
-                        href="/business/dashboard"
-                        className="rr-brand-link"
-                        onClick={handleNavigation}
-                    >
-
-                        <div className="rr-brand-logo">
-                            RR
-                        </div>
-
-                        <div className="rr-brand-content">
-
-                            <div className="rr-brand-name">
-                                RR MOTORS
-                            </div>
-
-                            <div className="rr-brand-subtitle">
-                                Business Management
-                            </div>
-
-                        </div>
-
-                    </Link>
-
-
-                    {/* Mobile close */}
-
-                    <button
-                        type="button"
-                        className="rr-sidebar-close"
-                        onClick={onClose}
-                        aria-label="Close sidebar"
-                    >
-
-                        <i className="bi bi-x-lg"></i>
-
-                    </button>
+                    {
+                        getInitials(
+                            business?.company_name
+                            ?? 'Company'
+                        )
+                    }
 
                 </div>
 
 
-                {/* =====================================================
-                    NAVIGATION
-                   ===================================================== */}
+                {
+                    !collapsed && (
 
-                <nav className="rr-sidebar-navigation">
+                        <div className="rr-business-sidebar-company-info">
 
-                    {visibleSections.map((section) => (
-
-                        <div
-                            className="rr-sidebar-section"
-                            key={section.title}
-                        >
-
-                            <div className="rr-sidebar-section-title">
-                                {section.title}
-                            </div>
+                            <strong>
+                                {
+                                    business?.company_name
+                                    ?? 'Company'
+                                }
+                            </strong>
 
 
-                            <div className="rr-sidebar-menu">
+                            <span>
 
-                                {section.items.map((item) => {
+                                <i
+                                    className={
+                                        hasActiveBranch
+                                            ? 'bi bi-shop'
+                                            : 'bi bi-building'
+                                    }
+                                ></i>
 
-                                    const active = isActive(item.href);
+                                {
+                                    hasActiveBranch
+                                        ? (
+                                            business?.store_name
+                                            ?? 'Branch'
+                                        )
+                                        : 'Company Workspace'
+                                }
+
+                            </span>
+
+
+                            {
+                                (
+                                    business?.company_code ||
+                                    business?.store_code
+                                ) && (
+
+                                    <small>
+
+                                        {
+                                            business?.company_code
+                                            ?? ''
+                                        }
+
+                                        {
+                                            business?.company_code &&
+                                                business?.store_code
+                                                ? ' • '
+                                                : ''
+                                        }
+
+                                        {
+                                            business?.store_code
+                                            ?? ''
+                                        }
+
+                                    </small>
+
+                                )
+                            }
+
+                        </div>
+
+                    )
+                }
+
+            </div>
+
+
+            {/* =========================================================
+                NAVIGATION
+               ========================================================= */}
+
+            <nav className="rr-business-sidebar-nav">
+
+                {
+                    menu
+                        .filter(
+                            (
+                                item
+                            ) =>
+                                item.visible
+                        )
+                        .map(
+                            (
+                                item
+                            ) => {
+
+                                if (
+                                    item.type ===
+                                    'link'
+                                ) {
 
                                     return (
 
-                                        <Link
-                                            key={item.label}
-                                            href={item.href}
-                                            onClick={handleNavigation}
-                                            className={`rr-sidebar-item ${active
-                                                    ? 'rr-sidebar-item-active'
-                                                    : ''
-                                                }`}
-                                        >
-
-                                            <span className="rr-sidebar-item-icon">
-
-                                                <i
-                                                    className={`bi ${item.icon}`}
-                                                />
-
-                                            </span>
-
-                                            <span className="rr-sidebar-item-label">
-                                                {item.label}
-                                            </span>
-
-                                            {active && (
-                                                <span className="rr-sidebar-active-indicator" />
-                                            )}
-
-                                        </Link>
+                                        <SidebarLink
+                                            key={
+                                                item.label
+                                            }
+                                            item={
+                                                item
+                                            }
+                                            collapsed={
+                                                collapsed
+                                            }
+                                            onClose={
+                                                onClose
+                                            }
+                                        />
 
                                     );
+                                }
 
-                                })}
+
+                                const children =
+                                    item.children
+                                        ?.filter(
+                                            (
+                                                child
+                                            ) =>
+                                                child.visible
+                                        )
+                                    ?? [];
+
+
+                                if (
+                                    !children.length
+                                ) {
+
+                                    return null;
+                                }
+
+
+                                return (
+
+                                    <SidebarGroup
+                                        key={
+                                            item.key
+                                        }
+                                        item={
+                                            item
+                                        }
+                                        children={
+                                            children
+                                        }
+                                        open={
+                                            openGroups[
+                                            item.key
+                                            ]
+                                        }
+                                        collapsed={
+                                            collapsed
+                                        }
+                                        onToggle={
+                                            () =>
+                                                toggleGroup(
+                                                    item.key
+                                                )
+                                        }
+                                        onClose={
+                                            onClose
+                                        }
+                                    />
+
+                                );
+                            }
+                        )
+                }
+
+            </nav>
+
+
+            {/* =========================================================
+                UTILITIES
+               ========================================================= */}
+
+            <div className="rr-business-sidebar-utility">
+
+                <Link
+                    href="/notifications"
+                    className={
+                        `rr-business-sidebar-link ${isCurrentPath('/notifications')
+                            ? 'active'
+                            : ''
+                        }`
+                    }
+                    onClick={
+                        onClose
+                    }
+                    title={
+                        collapsed
+                            ? 'Notifications'
+                            : undefined
+                    }
+                >
+
+                    <i className="bi bi-bell"></i>
+
+                    {
+                        !collapsed && (
+
+                            <>
+                                <span>
+                                    Notifications
+                                </span>
+
+                                {
+                                    (
+                                        notifications?.unread_count
+                                        ?? 0
+                                    ) > 0 && (
+
+                                        <small className="rr-business-sidebar-badge">
+
+                                            {
+                                                notifications?.unread_count
+                                            }
+
+                                        </small>
+
+                                    )
+                                }
+                            </>
+
+                        )
+                    }
+
+                </Link>
+
+
+                <Link
+                    href="/help"
+                    className={
+                        `rr-business-sidebar-link ${isCurrentPath('/help')
+                            ? 'active'
+                            : ''
+                        }`
+                    }
+                    onClick={
+                        onClose
+                    }
+                    title={
+                        collapsed
+                            ? 'Help & Support'
+                            : undefined
+                    }
+                >
+
+                    <i className="bi bi-question-circle"></i>
+
+                    {
+                        !collapsed && (
+
+                            <span>
+                                Help & Support
+                            </span>
+
+                        )
+                    }
+
+                </Link>
+
+
+                <Link
+                    href="/settings"
+                    className={
+                        `rr-business-sidebar-link ${isCurrentPath('/settings')
+                            ? 'active'
+                            : ''
+                        }`
+                    }
+                    onClick={
+                        onClose
+                    }
+                    title={
+                        collapsed
+                            ? 'Settings'
+                            : undefined
+                    }
+                >
+
+                    <i className="bi bi-gear"></i>
+
+                    {
+                        !collapsed && (
+
+                            <span>
+                                Settings
+                            </span>
+
+                        )
+                    }
+
+                </Link>
+
+            </div>
+
+
+            {/* =========================================================
+                PROFILE
+               ========================================================= */}
+
+            <div className="rr-business-sidebar-footer">
+
+                <Link
+                    href="/profile"
+                    className="rr-business-sidebar-profile"
+                    onClick={
+                        onClose
+                    }
+                >
+
+                    <div className="rr-business-sidebar-avatar">
+
+                        {
+                            getInitials(
+                                user?.name
+                            )
+                        }
+
+                    </div>
+
+
+                    {
+                        !collapsed && (
+
+                            <div className="rr-business-sidebar-profile-info">
+
+                                <strong>
+                                    {
+                                        user?.name
+                                        ?? 'User'
+                                    }
+                                </strong>
+
+
+                                <span>
+                                    {
+                                        isSuperAdmin
+                                            ? 'Super Administrator'
+                                            : roles[0]
+                                            ?? 'Business User'
+                                    }
+                                </span>
 
                             </div>
 
-                        </div>
+                        )
+                    }
 
-                    ))}
+                </Link>
 
-                </nav>
+            </div>
+
+        </aside>
+    );
+}
 
 
-                {/* =====================================================
-                    BOTTOM
-                   ===================================================== */}
+/*
+|--------------------------------------------------------------------------
+| Sidebar Link
+|--------------------------------------------------------------------------
+*/
 
-                <div className="rr-sidebar-bottom">
+function SidebarLink({
+    item,
+    collapsed,
+    onClose,
+}) {
 
-                    <div className="rr-sidebar-version">
-                        RR Motors
-                        <span>v1.0</span>
+    const active =
+        isCurrentPath(
+            item.href
+        );
+
+
+    return (
+
+        <Link
+            href={
+                item.href
+            }
+            className={
+                `rr-business-sidebar-link ${active
+                    ? 'active'
+                    : ''
+                }`
+            }
+            title={
+                collapsed
+                    ? item.label
+                    : undefined
+            }
+            onClick={
+                onClose
+            }
+        >
+
+            <i className={`bi ${item.icon}`}></i>
+
+
+            {
+                !collapsed && (
+
+                    <span>
+                        {item.label}
+                    </span>
+
+                )
+            }
+
+        </Link>
+    );
+}
+
+
+/*
+|--------------------------------------------------------------------------
+| Sidebar Group
+|--------------------------------------------------------------------------
+*/
+
+function SidebarGroup({
+    item,
+    children,
+    open,
+    collapsed,
+    onToggle,
+    onClose,
+}) {
+
+    const childActive =
+        children.some(
+            (
+                child
+            ) =>
+                isCurrentPath(
+                    child.href
+                )
+        );
+
+
+    return (
+
+        <div
+            className={
+                `rr-business-sidebar-group ${childActive
+                    ? 'has-active'
+                    : ''
+                }`
+            }
+        >
+
+            <button
+                type="button"
+                className={
+                    `rr-business-sidebar-group-button ${childActive
+                        ? 'active'
+                        : ''
+                    }`
+                }
+                onClick={
+                    onToggle
+                }
+                title={
+                    collapsed
+                        ? item.label
+                        : undefined
+                }
+            >
+
+                <i className={`bi ${item.icon}`}></i>
+
+
+                {
+                    !collapsed && (
+
+                        <>
+
+                            <span>
+                                {item.label}
+                            </span>
+
+
+                            <i
+                                className={
+                                    `bi bi-chevron-down rr-business-sidebar-chevron ${open
+                                        ? 'open'
+                                        : ''
+                                    }`
+                                }
+                            ></i>
+
+                        </>
+
+                    )
+                }
+
+            </button>
+
+
+            {
+                !collapsed &&
+                open && (
+
+                    <div className="rr-business-sidebar-submenu">
+
+                        {
+                            children.map(
+                                (
+                                    child
+                                ) => (
+
+                                    <SidebarLink
+                                        key={
+                                            child.label
+                                        }
+                                        item={
+                                            child
+                                        }
+                                        collapsed={
+                                            false
+                                        }
+                                        onClose={
+                                            onClose
+                                        }
+                                    />
+
+                                )
+                            )
+                        }
+
                     </div>
 
-                </div>
+                )
+            }
 
-            </aside>
-        </>
+        </div>
     );
+}
+
+
+/*
+|--------------------------------------------------------------------------
+| Current Path
+|--------------------------------------------------------------------------
+*/
+
+function isCurrentPath(
+    href
+) {
+
+    if (
+        typeof window ===
+        'undefined'
+    ) {
+
+        return false;
+    }
+
+
+    const pathname =
+        window.location.pathname;
+
+
+    if (
+        href ===
+        '/business/dashboard'
+    ) {
+
+        return pathname ===
+            href;
+    }
+
+
+    return pathname ===
+        href ||
+        pathname.startsWith(
+            `${href}/`
+        );
+}
+
+
+/*
+|--------------------------------------------------------------------------
+| User Initials
+|--------------------------------------------------------------------------
+*/
+
+function getInitials(
+    name
+) {
+
+    if (
+        !name
+    ) {
+
+        return 'U';
+    }
+
+
+    const parts =
+        String(
+            name
+        )
+            .trim()
+            .split(
+                /\s+/
+            )
+            .filter(
+                Boolean
+            );
+
+
+    if (
+        parts.length === 1
+    ) {
+
+        return parts[0]
+            .substring(
+                0,
+                2
+            )
+            .toUpperCase();
+    }
+
+
+    return (
+        parts[0][0]
+        +
+        parts[
+        parts.length - 1
+        ][0]
+    ).toUpperCase();
 }
