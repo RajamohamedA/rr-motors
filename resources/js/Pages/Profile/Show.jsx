@@ -5,15 +5,48 @@ import {
 import {
     Head,
     useForm,
+    usePage,
 } from '@inertiajs/react';
 
 import SuperAdminLayout
     from '../../Layouts/SuperAdminLayout';
 
+import BusinessLayout
+    from '../../Layouts/BusinessLayout';
+
 
 export default function Show({
     userData,
 }) {
+
+    /*
+    |--------------------------------------------------------------------------
+    | Shared Auth
+    |--------------------------------------------------------------------------
+    */
+
+    const {
+        auth,
+    } = usePage().props;
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Resolve Layout
+    |--------------------------------------------------------------------------
+    */
+
+    const isSuperAdmin =
+        Boolean(
+            auth?.user?.is_super_user
+        );
+
+
+    const Layout =
+        isSuperAdmin
+            ? SuperAdminLayout
+            : BusinessLayout;
+
 
     /*
     |--------------------------------------------------------------------------
@@ -91,7 +124,7 @@ export default function Show({
 
     return (
 
-        <SuperAdminLayout
+        <Layout
             title="My Profile"
             subtitle="Account information, access and security"
             breadcrumbs={[
@@ -881,7 +914,7 @@ export default function Show({
 
             </section>
 
-        </SuperAdminLayout>
+        </Layout>
 
     );
 }

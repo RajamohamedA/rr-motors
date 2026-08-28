@@ -7,15 +7,21 @@ use Inertia\Middleware;
 
 class HandleInertiaRequests extends Middleware
 {
-    /**
-     * The root template that's loaded on the first page visit.
-     */
+    /*
+    |--------------------------------------------------------------------------
+    | Root View
+    |--------------------------------------------------------------------------
+    */
+
     protected $rootView = 'app';
 
 
-    /**
-     * Determine the current asset version.
-     */
+    /*
+    |--------------------------------------------------------------------------
+    | Asset Version
+    |--------------------------------------------------------------------------
+    */
+
     public function version(
         Request $request
     ): ?string {
@@ -26,9 +32,12 @@ class HandleInertiaRequests extends Middleware
     }
 
 
-    /**
-     * Define the props that are shared by default.
-     */
+    /*
+    |--------------------------------------------------------------------------
+    | Shared Props
+    |--------------------------------------------------------------------------
+    */
+
     public function share(
         Request $request
     ): array {
@@ -42,12 +51,6 @@ class HandleInertiaRequests extends Middleware
         $user =
             $request->user();
 
-
-        /*
-        |--------------------------------------------------------------------------
-        | Shared Inertia Props
-        |--------------------------------------------------------------------------
-        */
 
         return [
 
@@ -95,6 +98,36 @@ class HandleInertiaRequests extends Middleware
                         'last_login_at' =>
                         $user->last_login_at,
 
+
+                        /*
+                        |--------------------------------------------------------------------------
+                        | Roles
+                        |--------------------------------------------------------------------------
+                        */
+
+                        'roles' =>
+                        fn() =>
+                        $user
+                            ->getRoleNames()
+                            ->values()
+                            ->all(),
+
+
+                        /*
+                        |--------------------------------------------------------------------------
+                        | Permissions
+                        |--------------------------------------------------------------------------
+                        */
+
+                        'permissions' =>
+                        fn() =>
+                        $user
+                            ->getAllPermissions()
+                            ->pluck(
+                                'name'
+                            )
+                            ->values()
+                            ->all(),
                     ]
                     : null,
             ],
@@ -131,18 +164,26 @@ class HandleInertiaRequests extends Middleware
             | Global Application Message
             |--------------------------------------------------------------------------
             |
-            | All controllers should use App\Support\AppResponse.
+            | IMPORTANT:
             |
-            | Example:
+            | All controllers should use:
             |
-            | AppResponse::success(...)
-            | AppResponse::error(...)
-            | AppResponse::warning(...)
-            | AppResponse::info(...)
+            | return back()->with(
+            |     'app_message',
+            |     [
+            |         'id' => (string) Str::uuid(),
+            |         'type' => 'success',
+            |         'message' => 'Operation completed successfully.',
+            |     ]
+            | );
+            |
+            | Available in React:
+            |
+            | const { app_message } = usePage().props;
             |
             */
 
-            'appMessage' =>
+            'app_message' =>
             fn() =>
             $request
                 ->session()
@@ -153,14 +194,11 @@ class HandleInertiaRequests extends Middleware
 
             /*
             |--------------------------------------------------------------------------
-            | Generic Message
+            | Legacy Generic Message
             |--------------------------------------------------------------------------
             |
-            | Keep this temporarily if any older module still uses:
-            |
-            | ->with('message', '...')
-            |
-            | You can remove it later after all modules use AppResponse.
+            | Keep this temporarily while older controllers are converted
+            | to app_message.
             |
             */
 
@@ -190,7 +228,7 @@ class HandleInertiaRequests extends Middleware
 
     /*
     |--------------------------------------------------------------------------
-    | Get Super Admin Notifications
+    | Super Admin Notifications
     |--------------------------------------------------------------------------
     */
 
@@ -202,6 +240,9 @@ class HandleInertiaRequests extends Middleware
         |--------------------------------------------------------------------------
         | Guest / Business User
         |--------------------------------------------------------------------------
+        |
+        | The notification dropdown currently belongs only to Super Admin.
+        |
         */
 
         if (
@@ -248,7 +289,7 @@ class HandleInertiaRequests extends Middleware
 
                         /*
                             |--------------------------------------------------------------------------
-                            | Notification ID
+                            | ID
                             |--------------------------------------------------------------------------
                             */
 
@@ -311,12 +352,13 @@ class HandleInertiaRequests extends Middleware
 
                         /*
                             |--------------------------------------------------------------------------
-                            | Read Status
+                            | Read State
                             |--------------------------------------------------------------------------
                             */
 
                         'read' =>
-                        $notification->read_at
+                        $notification
+                            ->read_at
                             !== null,
 
                         'read_at' =>
@@ -327,7 +369,7 @@ class HandleInertiaRequests extends Middleware
 
                         /*
                             |--------------------------------------------------------------------------
-                            | Time
+                            | Created Time
                             |--------------------------------------------------------------------------
                             */
 
@@ -356,7 +398,7 @@ class HandleInertiaRequests extends Middleware
 
         /*
         |--------------------------------------------------------------------------
-        | Response
+        | Return Notification Data
         |--------------------------------------------------------------------------
         */
 

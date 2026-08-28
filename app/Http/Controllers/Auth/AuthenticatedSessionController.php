@@ -4,35 +4,50 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\LoginRequest;
+use App\Models\Company;
 use App\Services\ActivityLogger;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\View\View;
 use Inertia\Inertia;
+use Inertia\Response as InertiaResponse;
 use Symfony\Component\HttpFoundation\Response;
-
+use Illuminate\Support\Facades\Route;
 class AuthenticatedSessionController extends Controller
 {
-    /**
-     * Display the login view.
-     */
-    public function create(): View
+    /*
+    |--------------------------------------------------------------------------
+    | Login Page
+    |--------------------------------------------------------------------------
+    */
+
+    public function create(): InertiaResponse
     {
-        return view('auth.login');
+        return Inertia::render(
+            'Auth/Login',
+            [
+                'canResetPassword' =>
+                Route::has(
+                    'password.request'
+                ),
+            ]
+        );
     }
 
 
-    /**
-     * Handle an incoming authentication request.
-     */
+    /*
+    |--------------------------------------------------------------------------
+    | Login
+    |--------------------------------------------------------------------------
+    */
+
     public function store(
         LoginRequest $request
     ): RedirectResponse {
 
         /*
         |--------------------------------------------------------------------------
-        | Authenticate
+        | Authenticate Credentials
         |--------------------------------------------------------------------------
         */
 
@@ -41,11 +56,179 @@ class AuthenticatedSessionController extends Controller
 
         /*
         |--------------------------------------------------------------------------
+        | Current User
+        |--------------------------------------------------------------------------
+        */
+
+        $user =
+            $request->user();
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Safety
+        |--------------------------------------------------------------------------
+        */
+
+        if (
+            !$user
+        ) {
+
+            return $this->rejectLogin(
+                $request,
+                'Unable to sign in. Please try again.'
+            );
+        }
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Super Admin
+        |--------------------------------------------------------------------------
+        |
+        | Super Admin is platform-level and does not require a company.
+        |
+        | But the Super Admin account itself must still be active.
+        |
+        */
+
+        if (
+            (bool) $user->is_super_user
+        ) {
+
+            if (
+                !(bool) $user->status
+            ) {
+
+                return $this->rejectLogin(
+                    $request,
+                    'Your Super Admin account is inactive. Please contact the system administrator.'
+                );
+            }
+
+
+            return $this->completeLogin(
+                $request
+            );
+        }
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | User Account Status
+        |--------------------------------------------------------------------------
+        |
+        | New business registrations are created with status = false.
+        |
+        | Super Admin activates the account after subscription/payment.
+        |
+        */
+
+        if (
+            !(bool) $user->status
+        ) {
+
+            return $this->rejectLogin(
+                $request,
+                'Your RR ERP account is pending activation. Please complete your subscription/payment and wait for Super Admin approval.'
+            );
+        }
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Company Assignment Required
+        |--------------------------------------------------------------------------
+        */
+
+        if (
+            !$user->company_id
+        ) {
+
+            return $this->rejectLogin(
+                $request,
+                'No company is assigned to your account. Please contact the administrator.'
+            );
+        }
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Load Company
+        |--------------------------------------------------------------------------
+        */
+
+        $company =
+            Company::query()
+            ->find(
+                $user->company_id
+            );
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Company Missing
+        |--------------------------------------------------------------------------
+        */
+
+        if (
+            !$company
+        ) {
+
+            return $this->rejectLogin(
+                $request,
+                'Your assigned company could not be found. Please contact the administrator.'
+            );
+        }
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Company Activation / Subscription
+        |--------------------------------------------------------------------------
+        */
+
+        if (
+            !(bool) $company->status
+        ) {
+
+            return $this->rejectLogin(
+                $request,
+                'Your company subscription is pending activation. Please complete the subscription/payment and wait for Super Admin approval.'
+            );
+        }
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Successful Company Login
+        |--------------------------------------------------------------------------
+        */
+
+        return $this->completeLogin(
+            $request
+        );
+    }
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Complete Successful Login
+    |--------------------------------------------------------------------------
+    */
+
+    private function completeLogin(
+        LoginRequest $request
+    ): RedirectResponse {
+
+        /*
+        |--------------------------------------------------------------------------
         | Regenerate Session
         |--------------------------------------------------------------------------
         */
 
-        $request->session()
+        $request
+            ->session()
             ->regenerate();
 
 
@@ -55,7 +238,18 @@ class AuthenticatedSessionController extends Controller
         |--------------------------------------------------------------------------
         */
 
-        $user = $request->user();
+        $user =
+            $request->user();
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Login Time
+        |--------------------------------------------------------------------------
+        */
+
+        $loginTime =
+            now();
 
 
         /*
@@ -64,11 +258,9 @@ class AuthenticatedSessionController extends Controller
         |--------------------------------------------------------------------------
         */
 
-        $loginTime = now();
-
-
         $user->update([
-            'last_login_at' => $loginTime,
+            'last_login_at' =>
+            $loginTime,
         ]);
 
 
@@ -88,6 +280,7 @@ class AuthenticatedSessionController extends Controller
             subject: $user,
 
             newValues: [
+
                 'email' =>
                 $user->email,
 
@@ -100,8 +293,17 @@ class AuthenticatedSessionController extends Controller
 
         /*
         |--------------------------------------------------------------------------
-        | Redirect After Login
+        | Redirect Through Login Redirect Controller
         |--------------------------------------------------------------------------
+        |
+        | LoginRedirectController decides:
+        |
+        | - Super Admin
+        | - Company Admin
+        | - Store Manager
+        | - Sales/Purchase User
+        | - Branch selection
+        |
         */
 
         return redirect()
@@ -111,9 +313,124 @@ class AuthenticatedSessionController extends Controller
     }
 
 
-    /**
-     * Destroy an authenticated session.
-     */
+    /*
+    |--------------------------------------------------------------------------
+    | Reject Login
+    |--------------------------------------------------------------------------
+    |
+    | Credentials are correct, but the account is not currently allowed
+    | to enter RR ERP.
+    |
+    */
+
+    private function rejectLogin(
+        LoginRequest $request,
+        string $message
+    ): RedirectResponse {
+
+        /*
+        |--------------------------------------------------------------------------
+        | Logout
+        |--------------------------------------------------------------------------
+        */
+
+        Auth::guard(
+            'web'
+        )->logout();
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Invalidate Existing Session
+        |--------------------------------------------------------------------------
+        |
+        | Clears:
+        |
+        | active_company_id
+        | active_store_id
+        | and any other session context.
+        |
+        */
+
+        $request
+            ->session()
+            ->invalidate();
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Regenerate CSRF Token
+        |--------------------------------------------------------------------------
+        */
+
+        $request
+            ->session()
+            ->regenerateToken();
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Return To React Login Page
+        |--------------------------------------------------------------------------
+        */
+
+        return redirect()
+            ->route(
+                'login'
+            )
+            ->withInput([
+                'email' =>
+                $request->input(
+                    'email'
+                ),
+            ])
+            ->with(
+                'app_message',
+                [
+
+                    /*
+                    |--------------------------------------------------------------------------
+                    | Unique Message ID
+                    |--------------------------------------------------------------------------
+                    |
+                    | Allows React to show the same warning repeatedly.
+                    |
+                    */
+
+                    'id' =>
+                    uniqid(
+                        'msg_',
+                        true
+                    ),
+
+                    /*
+                    |--------------------------------------------------------------------------
+                    | Message Type
+                    |--------------------------------------------------------------------------
+                    */
+
+                    'type' =>
+                    'warning',
+
+                    /*
+                    |--------------------------------------------------------------------------
+                    | Message
+                    |--------------------------------------------------------------------------
+                    */
+
+                    'message' =>
+                    $message,
+                ]
+            );
+    }
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Logout
+    |--------------------------------------------------------------------------
+    */
+
     public function destroy(
         Request $request
     ): Response {
@@ -122,24 +439,24 @@ class AuthenticatedSessionController extends Controller
         |--------------------------------------------------------------------------
         | Current User
         |--------------------------------------------------------------------------
-        |
-        | Capture the authenticated user before logout so that we can
-        | write the logout activity before destroying the session.
-        |
         */
 
-        $user = $request->user();
+        $user =
+            $request->user();
 
 
         /*
         |--------------------------------------------------------------------------
-        | Activity Log
+        | Log Logout Activity
         |--------------------------------------------------------------------------
         */
 
-        if ($user) {
+        if (
+            $user
+        ) {
 
-            $logoutTime = now();
+            $logoutTime =
+                now();
 
 
             ActivityLogger::log(
@@ -152,6 +469,7 @@ class AuthenticatedSessionController extends Controller
                 subject: $user,
 
                 newValues: [
+
                     'email' =>
                     $user->email,
 
@@ -169,21 +487,19 @@ class AuthenticatedSessionController extends Controller
         |--------------------------------------------------------------------------
         */
 
-        Auth::guard('web')
-            ->logout();
+        Auth::guard(
+            'web'
+        )->logout();
 
 
         /*
         |--------------------------------------------------------------------------
         | Invalidate Session
         |--------------------------------------------------------------------------
-        |
-        | This removes active_company_id, active_store_id and all other
-        | session data belonging to the logged-in user.
-        |
         */
 
-        $request->session()
+        $request
+            ->session()
             ->invalidate();
 
 
@@ -193,25 +509,20 @@ class AuthenticatedSessionController extends Controller
         |--------------------------------------------------------------------------
         */
 
-        $request->session()
+        $request
+            ->session()
             ->regenerateToken();
 
 
         /*
         |--------------------------------------------------------------------------
-        | Redirect to Login
+        | Redirect To React Login Page
         |--------------------------------------------------------------------------
-        |
-        | The Super Admin application uses Inertia/React while the login
-        | screen is currently a normal Blade page.
-        |
-        | Inertia::location() forces a full browser navigation instead of
-        | trying to load the Blade login page as an Inertia response.
-        |
         */
 
-        return Inertia::location(
-            route('login')
-        );
+        return redirect()
+            ->route(
+                'login'
+            );
     }
 }

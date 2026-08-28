@@ -17,7 +17,7 @@ export default function FlashNotification() {
     */
 
     const {
-        appMessage = null,
+        app_message = null,
     } = usePage().props;
 
 
@@ -43,8 +43,8 @@ export default function FlashNotification() {
         () => {
 
             if (
-                !appMessage?.id ||
-                !appMessage?.message
+                !app_message?.id ||
+                !app_message?.message
             ) {
 
                 return;
@@ -53,19 +53,19 @@ export default function FlashNotification() {
 
             setNotification({
                 id:
-                    appMessage.id,
+                    app_message.id,
 
                 type:
-                    appMessage.type
+                    app_message.type
                     ?? 'info',
 
                 message:
-                    appMessage.message,
+                    app_message.message,
             });
 
         },
         [
-            appMessage?.id,
+            app_message?.id,
         ]
     );
 

@@ -34,6 +34,9 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\SuperAdmin\NotificationController;
 
 
+use App\Http\Controllers\Auth\BusinessRegistrationController;
+use App\Http\Controllers\Auth\PasswordResetLinkController;
+
 
 
 use App\Http\Controllers\BranchContextController;
@@ -43,7 +46,6 @@ use App\Http\Controllers\Business\DashboardController as BusinessDashboardContro
 use App\Http\Controllers\Auth\LoginRedirectController;
 
 use App\Http\Controllers\BranchSelectionController;
-
 /*
 |--------------------------------------------------------------------------
 | Welcome
@@ -55,9 +57,61 @@ Route::get('/react-test', function () {
 })->middleware('auth');
 
 
-Route::get('/', function () {
-    return view('welcome');
-});
+Route::get(
+    '/',
+    fn() =>
+    Inertia::render(
+        'Welcome'
+    )
+)->name(
+    'home'
+);
+
+
+Route::middleware('guest')
+    ->group(function () {
+
+        Route::get(
+            '/register-business',
+            [
+                BusinessRegistrationController::class,
+                'create',
+            ]
+        )->name(
+            'business.register'
+        );
+
+        Route::post(
+            '/register-business',
+            [
+                BusinessRegistrationController::class,
+                'store',
+            ]
+        )->name(
+            'business.register.store'
+        );
+
+        Route::get(
+            'forgot-password',
+            [
+                PasswordResetLinkController::class,
+                'create',
+            ]
+        )->name(
+            'password.request'
+        );
+
+
+        Route::post(
+            'forgot-password',
+            [
+                PasswordResetLinkController::class,
+                'store',
+            ]
+        )->name(
+            'password.email'
+        );
+    });
 
 
 

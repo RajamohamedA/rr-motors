@@ -10,6 +10,12 @@
 @import './dashboard.css';
 @import './responsive.css';
 
+
+/* home page */
+@import './home.css';
+@import './register-business.css';
+@import './login.css';
+
 /* react */
 @import './business-layout.css';
 @import './business-sidebar.css';
@@ -60,6 +66,17 @@
     --rr-warning: #b45309;
     --rr-danger: #c62828;
     --rr-info: #0369a1;
+    
+    --rr-font-xs: 12px;
+    --rr-font-sm: 13px;
+    --rr-font-md: 14px;
+    --rr-font-base: 15px;
+    --rr-font-lg: 16px;
+    --rr-font-xl: 18px;
+    --rr-font-2xl: 22px;
+    --rr-font-3xl: 28px;
+    --rr-font-4xl: 38px;
+    --rr-font-hero: 56px;   
 }
 
 body {
