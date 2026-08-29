@@ -23,6 +23,7 @@
 @import './business-branch-switcher.css';
 @import './business-user-menu.css';
 @import './business/users.css';
+@import './business/roles.css';
 
 /* Super admin css */
 @import './super-admin-sidebar.css';

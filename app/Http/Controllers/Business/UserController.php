@@ -32,9 +32,11 @@ class UserController extends Controller
         $currentUser =
             $request->user();
 
+
         $this->ensureCompanyAdmin(
             $currentUser
         );
+
 
         $company =
             $this->getCompany(
@@ -55,12 +57,14 @@ class UserController extends Controller
                     ->toString()
             );
 
+
         $role =
             trim(
                 $request
                     ->string('role')
                     ->toString()
             );
+
 
         $status =
             $request->input(
@@ -88,7 +92,7 @@ class UserController extends Controller
             )
 
             ->with([
-                'roles:id,name',
+                'roles:id,company_id,name,status',
                 'stores:id,company_id,store_name,store_code,status',
             ])
 
@@ -129,16 +133,77 @@ class UserController extends Controller
                 }
             )
 
+            /*
+                |--------------------------------------------------------------------------
+                | Company Scoped Role Filter
+                |--------------------------------------------------------------------------
+                */
+
             ->when(
                 $role !== '',
                 function (
                     $query
                 ) use (
-                    $role
+                    $role,
+                    $company
                 ) {
 
-                    $query->role(
-                        $role
+                    $query->whereHas(
+                        'roles',
+                        function (
+                            $roleQuery
+                        ) use (
+                            $role,
+                            $company
+                        ) {
+
+                            $roleQuery
+                                ->where(
+                                    'roles.name',
+                                    $role
+                                )
+                                ->where(
+                                    function (
+                                        $q
+                                    ) use (
+                                        $company
+                                    ) {
+
+                                        /*
+                                            |--------------------------------------------------------------------------
+                                            | Company Admin Is Global
+                                            |--------------------------------------------------------------------------
+                                            */
+
+                                        $q->where(
+                                            function (
+                                                $globalQuery
+                                            ) {
+
+                                                $globalQuery
+                                                    ->whereNull(
+                                                        'roles.company_id'
+                                                    )
+                                                    ->where(
+                                                        'roles.name',
+                                                        'Company Admin'
+                                                    );
+                                            }
+                                        )
+
+                                            /*
+                                                |--------------------------------------------------------------------------
+                                                | Custom Company Roles
+                                                |--------------------------------------------------------------------------
+                                                */
+
+                                            ->orWhere(
+                                                'roles.company_id',
+                                                $company->id
+                                            );
+                                    }
+                                );
+                        }
                     );
                 }
             )
@@ -159,9 +224,13 @@ class UserController extends Controller
                 }
             )
 
-            ->orderBy('name')
+            ->orderBy(
+                'name'
+            )
 
-            ->paginate(15)
+            ->paginate(
+                15
+            )
 
             ->withQueryString();
 
@@ -210,7 +279,8 @@ class UserController extends Controller
                     'roles' =>
                     $user->roles
                         ->pluck('name')
-                        ->values(),
+                        ->values()
+                        ->all(),
 
                     /*
                     |--------------------------------------------------------------------------
@@ -243,14 +313,22 @@ class UserController extends Controller
                                 (bool) $store->status,
                             ]
                         )
-                        ->values(),
+                        ->values()
+                        ->all(),
 
                     'is_current_user' =>
                     (int) $currentUser->id ===
                         (int) $user->id,
 
+                    'is_company_admin' =>
+                    $isCompanyAdmin,
+
                     'created_at' =>
                     $user->created_at
+                        ?->toISOString(),
+
+                    'updated_at' =>
+                    $user->updated_at
                         ?->toISOString(),
                 ];
             }
@@ -294,12 +372,6 @@ class UserController extends Controller
                 )
                 ->count(),
 
-            /*
-            |--------------------------------------------------------------------------
-            | Number Of Active Company Branches
-            |--------------------------------------------------------------------------
-            */
-
             'branches' =>
             Store::query()
                 ->where(
@@ -316,13 +388,21 @@ class UserController extends Controller
 
         /*
         |--------------------------------------------------------------------------
-        | Roles For Filter
+        | Filter Roles
         |--------------------------------------------------------------------------
         */
 
         $roles =
-            $this->getAssignableRoles();
+            $this->getFilterRoles(
+                $company
+            );
 
+
+        /*
+        |--------------------------------------------------------------------------
+        | Response
+        |--------------------------------------------------------------------------
+        */
 
         return Inertia::render(
             'Business/Users/Index',
@@ -371,9 +451,11 @@ class UserController extends Controller
         $currentUser =
             $request->user();
 
+
         $this->ensureCompanyAdmin(
             $currentUser
         );
+
 
         $company =
             $this->getCompany(
@@ -391,7 +473,9 @@ class UserController extends Controller
                 ),
 
                 'roles' =>
-                $this->getAssignableRoles(),
+                $this->getAssignableRoles(
+                    $company
+                ),
 
                 'branches' =>
                 $this->getCompanyBranches(
@@ -415,9 +499,11 @@ class UserController extends Controller
         $currentUser =
             $request->user();
 
+
         $this->ensureCompanyAdmin(
             $currentUser
         );
+
 
         $company =
             $this->getCompany(
@@ -427,7 +513,7 @@ class UserController extends Controller
 
         /*
         |--------------------------------------------------------------------------
-        | Validate
+        | Validation
         |--------------------------------------------------------------------------
         */
 
@@ -444,6 +530,7 @@ class UserController extends Controller
                     'required',
                     'email',
                     'max:255',
+
                     Rule::unique(
                         'users',
                         'email'
@@ -468,11 +555,13 @@ class UserController extends Controller
                 ],
 
                 'store_ids' => [
-                    'nullable',
+                    'required',
                     'array',
+                    'min:1',
                 ],
 
                 'store_ids.*' => [
+                    'required',
                     'integer',
 
                     Rule::exists(
@@ -503,59 +592,20 @@ class UserController extends Controller
 
         /*
         |--------------------------------------------------------------------------
-        | Role Security
+        | Validate Company Role
         |--------------------------------------------------------------------------
         */
 
         $role =
             $this->getAllowedRole(
-                $validated['role']
+                $validated['role'],
+                $company
             );
 
 
         /*
         |--------------------------------------------------------------------------
-        | Company Admin Role Protection
-        |--------------------------------------------------------------------------
-        |
-        | Company Admin cannot create another Company Admin.
-        |
-        */
-
-        if (
-            $role->name ===
-            'Company Admin'
-        ) {
-
-            abort(
-                403,
-                'Company Admin accounts can only be managed by Super Admin.'
-            );
-        }
-
-
-        /*
-        |--------------------------------------------------------------------------
-        | Branch Required
-        |--------------------------------------------------------------------------
-        */
-
-        if (
-            empty($validated['store_ids'])
-        ) {
-
-            return back()
-                ->withErrors([
-                    'store_ids' =>
-                    'Select at least one branch for this user.',
-                ])
-                ->withInput();
-        }
-
-
-        /*
-        |--------------------------------------------------------------------------
-        | Create
+        | Create User
         |--------------------------------------------------------------------------
         */
 
@@ -566,6 +616,17 @@ class UserController extends Controller
                 $role
             ) {
 
+                $storeIds =
+                    array_values(
+                        array_unique(
+                            array_map(
+                                'intval',
+                                $validated['store_ids']
+                            )
+                        )
+                    );
+
+
                 $user =
                     User::create([
 
@@ -574,23 +635,32 @@ class UserController extends Controller
 
                         /*
                         |--------------------------------------------------------------------------
-                        | Primary Store
+                        | Primary Branch
                         |--------------------------------------------------------------------------
                         */
 
                         'store_id' =>
-                        $validated['store_ids'][0]
+                        $storeIds[0]
                             ?? null,
 
                         'name' =>
-                        $validated['name'],
+                        trim(
+                            $validated['name']
+                        ),
 
                         'email' =>
-                        $validated['email'],
+                        strtolower(
+                            trim(
+                                $validated['email']
+                            )
+                        ),
 
                         'mobile' =>
-                        $validated['mobile']
-                            ?? null,
+                        !empty($validated['mobile'])
+                            ? trim(
+                                $validated['mobile']
+                            )
+                            : null,
 
                         'password' =>
                         Hash::make(
@@ -602,7 +672,7 @@ class UserController extends Controller
 
                         /*
                         |--------------------------------------------------------------------------
-                        | Never Allow Business Portal Super Admin
+                        | Never Super Admin
                         |--------------------------------------------------------------------------
                         */
 
@@ -613,7 +683,7 @@ class UserController extends Controller
 
                 /*
                 |--------------------------------------------------------------------------
-                | Role
+                | Company Role
                 |--------------------------------------------------------------------------
                 */
 
@@ -631,7 +701,7 @@ class UserController extends Controller
                 $user
                     ->stores()
                     ->sync(
-                        $validated['store_ids']
+                        $storeIds
                     );
             }
         );
@@ -658,14 +728,17 @@ class UserController extends Controller
         $currentUser =
             $request->user();
 
+
         $this->ensureCompanyAdmin(
             $currentUser
         );
+
 
         $company =
             $this->getCompany(
                 $currentUser
             );
+
 
         $this->ensureUserBelongsToCompany(
             $user,
@@ -674,7 +747,7 @@ class UserController extends Controller
 
 
         $user->load([
-            'roles:id,name',
+            'roles:id,company_id,name,status',
             'stores:id,company_id,store_name,store_code,status',
         ]);
 
@@ -712,14 +785,17 @@ class UserController extends Controller
         $currentUser =
             $request->user();
 
+
         $this->ensureCompanyAdmin(
             $currentUser
         );
+
 
         $company =
             $this->getCompany(
                 $currentUser
             );
+
 
         $this->ensureUserBelongsToCompany(
             $user,
@@ -727,9 +803,28 @@ class UserController extends Controller
         );
 
 
+        /*
+        |--------------------------------------------------------------------------
+        | Protect Company Admin
+        |--------------------------------------------------------------------------
+        */
+
+        if (
+            $user->hasRole(
+                'Company Admin'
+            )
+        ) {
+
+            abort(
+                403,
+                'Company Admin accounts can only be managed by Super Admin.'
+            );
+        }
+
+
         $user->load([
-            'roles:id,name',
-            'stores:id',
+            'roles:id,company_id,name,status',
+            'stores:id,company_id,store_name,store_code,status',
         ]);
 
 
@@ -749,7 +844,9 @@ class UserController extends Controller
                 ),
 
                 'roles' =>
-                $this->getAssignableRoles(),
+                $this->getAssignableRoles(
+                    $company
+                ),
 
                 'branches' =>
                 $this->getCompanyBranches(
@@ -774,14 +871,17 @@ class UserController extends Controller
         $currentUser =
             $request->user();
 
+
         $this->ensureCompanyAdmin(
             $currentUser
         );
+
 
         $company =
             $this->getCompany(
                 $currentUser
             );
+
 
         $this->ensureUserBelongsToCompany(
             $user,
@@ -801,8 +901,7 @@ class UserController extends Controller
             )
         ) {
 
-            abort(
-                403,
+            return AppResponse::error(
                 'Company Admin accounts can only be managed by Super Admin.'
             );
         }
@@ -860,6 +959,7 @@ class UserController extends Controller
                 ],
 
                 'store_ids.*' => [
+                    'required',
                     'integer',
 
                     Rule::exists(
@@ -888,22 +988,17 @@ class UserController extends Controller
             ]);
 
 
+        /*
+        |--------------------------------------------------------------------------
+        | Validate Company Role
+        |--------------------------------------------------------------------------
+        */
+
         $role =
             $this->getAllowedRole(
-                $validated['role']
+                $validated['role'],
+                $company
             );
-
-
-        if (
-            $role->name ===
-            'Company Admin'
-        ) {
-
-            abort(
-                403,
-                'You cannot assign the Company Admin role.'
-            );
-        }
 
 
         /*
@@ -919,20 +1014,40 @@ class UserController extends Controller
                 $role
             ) {
 
+                $storeIds =
+                    array_values(
+                        array_unique(
+                            array_map(
+                                'intval',
+                                $validated['store_ids']
+                            )
+                        )
+                    );
+
+
                 $data = [
 
                     'name' =>
-                    $validated['name'],
+                    trim(
+                        $validated['name']
+                    ),
 
                     'email' =>
-                    $validated['email'],
+                    strtolower(
+                        trim(
+                            $validated['email']
+                        )
+                    ),
 
                     'mobile' =>
-                    $validated['mobile']
-                        ?? null,
+                    !empty($validated['mobile'])
+                        ? trim(
+                            $validated['mobile']
+                        )
+                        : null,
 
                     'store_id' =>
-                    $validated['store_ids'][0]
+                    $storeIds[0]
                         ?? null,
 
                     'status' =>
@@ -962,15 +1077,27 @@ class UserController extends Controller
                 );
 
 
+                /*
+                |--------------------------------------------------------------------------
+                | Company Role
+                |--------------------------------------------------------------------------
+                */
+
                 $user->syncRoles([
                     $role,
                 ]);
 
 
+                /*
+                |--------------------------------------------------------------------------
+                | Branch Access
+                |--------------------------------------------------------------------------
+                */
+
                 $user
                     ->stores()
                     ->sync(
-                        $validated['store_ids']
+                        $storeIds
                     );
             }
         );
@@ -997,14 +1124,17 @@ class UserController extends Controller
         $currentUser =
             $request->user();
 
+
         $this->ensureCompanyAdmin(
             $currentUser
         );
+
 
         $company =
             $this->getCompany(
                 $currentUser
             );
+
 
         $this->ensureUserBelongsToCompany(
             $user,
@@ -1047,6 +1177,12 @@ class UserController extends Controller
         }
 
 
+        /*
+        |--------------------------------------------------------------------------
+        | Validation
+        |--------------------------------------------------------------------------
+        */
+
         $validated =
             $request->validate([
 
@@ -1056,6 +1192,12 @@ class UserController extends Controller
                 ],
             ]);
 
+
+        /*
+        |--------------------------------------------------------------------------
+        | Update
+        |--------------------------------------------------------------------------
+        */
 
         $user->update([
             'status' =>
@@ -1094,13 +1236,16 @@ class UserController extends Controller
 
         $company =
             Company::query()
+
             ->whereKey(
                 $user->company_id
             )
+
             ->where(
                 'status',
                 true
             )
+
             ->first();
 
 
@@ -1133,9 +1278,17 @@ class UserController extends Controller
             !$user
         ) {
 
-            abort(401);
+            abort(
+                401
+            );
         }
 
+
+        /*
+        |--------------------------------------------------------------------------
+        | Super Admin Uses Super Admin Area
+        |--------------------------------------------------------------------------
+        */
 
         if (
             (bool) $user->is_super_user
@@ -1147,6 +1300,12 @@ class UserController extends Controller
             );
         }
 
+
+        /*
+        |--------------------------------------------------------------------------
+        | Company Admin Only
+        |--------------------------------------------------------------------------
+        */
 
         if (
             !$user->hasRole(
@@ -1175,7 +1334,8 @@ class UserController extends Controller
 
         abort_unless(
             (int) $user->company_id ===
-                (int) $company->id &&
+                (int) $company->id
+                &&
                 !(bool) $user->is_super_user,
             404
         );
@@ -1184,34 +1344,149 @@ class UserController extends Controller
 
     /*
     |--------------------------------------------------------------------------
-    | Assignable Roles
+    | Assignable Company Roles
     |--------------------------------------------------------------------------
+    |
+    | Only ACTIVE custom roles belonging to this company.
+    |
+    | Global roles such as:
+    |
+    | Super Admin
+    | Company Admin
+    |
+    | are automatically excluded because company_id is NULL.
+    |
     */
 
-    private function getAssignableRoles(): array
-    {
+    private function getAssignableRoles(
+        Company $company
+    ): array {
+
         return Role::query()
 
-            /*
-            |--------------------------------------------------------------------------
-            | Never Expose Super Admin Roles
-            |--------------------------------------------------------------------------
-            */
-
-            ->whereNotIn(
-                'name',
-                [
-                    'Super Admin',
-                    'super-admin',
-                    'super_admin',
-                    'Company Admin',
-                ]
+            ->where(
+                'company_id',
+                $company->id
             )
 
-            ->orderBy('name')
+            ->where(
+                'guard_name',
+                'web'
+            )
+
+            ->where(
+                'status',
+                true
+            )
+
+            ->orderBy(
+                'name'
+            )
 
             ->get([
                 'id',
+                'company_id',
+                'name',
+                'description',
+            ])
+
+            ->map(
+                fn(
+                    Role $role
+                ) => [
+
+                    'id' =>
+                    $role->id,
+
+                    'name' =>
+                    $role->name,
+
+                    'description' =>
+                    $role->description,
+                ]
+            )
+
+            ->values()
+
+            ->all();
+    }
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Filter Roles
+    |--------------------------------------------------------------------------
+    |
+    | Used by Users & Access index.
+    |
+    | Include:
+    |
+    | Company Admin
+    | +
+    | this company's custom roles
+    |
+    */
+
+    private function getFilterRoles(
+        Company $company
+    ): array {
+
+        return Role::query()
+
+            ->where(
+                'guard_name',
+                'web'
+            )
+
+            ->where(
+                function (
+                    $query
+                ) use (
+                    $company
+                ) {
+
+                    /*
+                    |--------------------------------------------------------------------------
+                    | Global Company Admin
+                    |--------------------------------------------------------------------------
+                    */
+
+                    $query->where(
+                        function (
+                            $globalQuery
+                        ) {
+
+                            $globalQuery
+                                ->whereNull(
+                                    'company_id'
+                                )
+                                ->where(
+                                    'name',
+                                    'Company Admin'
+                                );
+                        }
+                    )
+
+                        /*
+                        |--------------------------------------------------------------------------
+                        | Company's Custom Roles
+                        |--------------------------------------------------------------------------
+                        */
+
+                        ->orWhere(
+                            'company_id',
+                            $company->id
+                        );
+                }
+            )
+
+            ->orderBy(
+                'name'
+            )
+
+            ->get([
+                'id',
+                'company_id',
                 'name',
             ])
 
@@ -1236,20 +1511,50 @@ class UserController extends Controller
 
     /*
     |--------------------------------------------------------------------------
-    | Validate Role
+    | Validate Company Role
+    |--------------------------------------------------------------------------
+    |
+    | Important:
+    |
+    | Never search only by role name.
+    |
+    | Two different companies can both have:
+    |
+    | Sales Staff
+    | Cashier
+    | Branch Manager
+    |
     |--------------------------------------------------------------------------
     */
 
     private function getAllowedRole(
-        string $roleName
+        string $roleName,
+        Company $company
     ): Role {
 
         $role =
             Role::query()
+
+            ->where(
+                'company_id',
+                $company->id
+            )
+
             ->where(
                 'name',
                 $roleName
             )
+
+            ->where(
+                'guard_name',
+                'web'
+            )
+
+            ->where(
+                'status',
+                true
+            )
+
             ->first();
 
 
@@ -1259,31 +1564,7 @@ class UserController extends Controller
 
             abort(
                 422,
-                'The selected role is invalid.'
-            );
-        }
-
-
-        $blockedRoles = [
-
-            'Super Admin',
-            'super-admin',
-            'super_admin',
-            'Company Admin',
-        ];
-
-
-        if (
-            in_array(
-                $role->name,
-                $blockedRoles,
-                true
-            )
-        ) {
-
-            abort(
-                403,
-                'This role cannot be assigned from the Company Portal.'
+                'The selected role is invalid, inactive, or does not belong to this company.'
             );
         }
 
@@ -1294,7 +1575,7 @@ class UserController extends Controller
 
     /*
     |--------------------------------------------------------------------------
-    | Company Branches
+    | Active Company Branches
     |--------------------------------------------------------------------------
     */
 
@@ -1303,23 +1584,28 @@ class UserController extends Controller
     ): array {
 
         return Store::query()
+
             ->where(
                 'company_id',
                 $company->id
             )
+
             ->where(
                 'status',
                 true
             )
+
             ->orderBy(
                 'branch_number'
             )
+
             ->get([
                 'id',
                 'store_name',
                 'store_code',
                 'branch_number',
             ])
+
             ->map(
                 fn(
                     Store $store
@@ -1338,7 +1624,9 @@ class UserController extends Controller
                     $store->branch_number,
                 ]
             )
+
             ->values()
+
             ->all();
     }
 
@@ -1363,6 +1651,9 @@ class UserController extends Controller
 
             'company_code' =>
             $company->company_code,
+
+            'status' =>
+            (bool) $company->status,
         ];
     }
 
@@ -1379,7 +1670,7 @@ class UserController extends Controller
     ): array {
 
         $user->loadMissing([
-            'roles:id,name',
+            'roles:id,company_id,name,status',
             'stores:id,company_id,store_name,store_code,status',
         ]);
 
@@ -1412,13 +1703,44 @@ class UserController extends Controller
                 ->pluck('name')
                 ->first(),
 
+            'roles' =>
+            $user->roles
+                ->pluck('name')
+                ->values()
+                ->all(),
+
+            /*
+            |--------------------------------------------------------------------------
+            | Company Admin Has All Branch Access
+            |--------------------------------------------------------------------------
+            */
+
             'all_branches' =>
             $isCompanyAdmin,
+
+            /*
+            |--------------------------------------------------------------------------
+            | Edit Form Branch IDs
+            |--------------------------------------------------------------------------
+            */
 
             'store_ids' =>
             $user->stores
                 ->pluck('id')
-                ->values(),
+                ->map(
+                    fn(
+                        $id
+                    ) =>
+                    (int) $id
+                )
+                ->values()
+                ->all(),
+
+            /*
+            |--------------------------------------------------------------------------
+            | Branch Information
+            |--------------------------------------------------------------------------
+            */
 
             'branches' =>
             $user->stores
@@ -1440,7 +1762,8 @@ class UserController extends Controller
                         (bool) $store->status,
                     ]
                 )
-                ->values(),
+                ->values()
+                ->all(),
 
             'is_current_user' =>
             (int) $currentUser->id ===

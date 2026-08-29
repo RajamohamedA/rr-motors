@@ -289,6 +289,34 @@ export default function BusinessSidebar({
                                 true,
                         },
 
+                        {
+                            label:
+                                'Roles & Permissions',
+
+                            icon:
+                                'bi-shield-lock',
+
+                            href:
+                                '/company/roles',
+
+                            visible:
+                                true,
+                        },
+
+                        {
+                            label:
+                                'Add Role',
+
+                            icon:
+                                'bi-shield-plus',
+
+                            href:
+                                '/company/roles/create',
+
+                            visible:
+                                true,
+                        },
+
                     ],
                 },
 
@@ -1121,8 +1149,8 @@ function SidebarLink({
 }) {
 
     const active =
-        isCurrentPath(
-            item.href
+        isItemActive(
+            item
         );
 
 
@@ -1186,8 +1214,8 @@ function SidebarGroup({
             (
                 child
             ) =>
-                isCurrentPath(
-                    child.href
+                isItemActive(
+                    child
                 )
         );
 
@@ -1288,6 +1316,92 @@ function SidebarGroup({
             }
 
         </div>
+    );
+}
+
+
+/*
+|--------------------------------------------------------------------------
+| Menu Item Active State
+|--------------------------------------------------------------------------
+*/
+
+function isItemActive(
+    item
+) {
+
+    if (
+        !item?.href
+    ) {
+        return false;
+    }
+
+    if (
+        typeof window ===
+        'undefined'
+    ) {
+        return false;
+    }
+
+    const pathname =
+        window.location.pathname;
+
+    if (
+        item.href ===
+        '/company/users'
+    ) {
+        return (
+            pathname ===
+            '/company/users'
+            ||
+            (
+                pathname.startsWith(
+                    '/company/users/'
+                )
+                &&
+                pathname !==
+                '/company/users/create'
+            )
+        );
+    }
+
+    if (
+        item.href ===
+        '/company/users/create'
+    ) {
+        return pathname ===
+            '/company/users/create';
+    }
+
+    if (
+        item.href ===
+        '/company/roles'
+    ) {
+        return (
+            pathname ===
+            '/company/roles'
+            ||
+            (
+                pathname.startsWith(
+                    '/company/roles/'
+                )
+                &&
+                pathname !==
+                '/company/roles/create'
+            )
+        );
+    }
+
+    if (
+        item.href ===
+        '/company/roles/create'
+    ) {
+        return pathname ===
+            '/company/roles/create';
+    }
+
+    return isCurrentPath(
+        item.href
     );
 }
 

@@ -41,6 +41,7 @@ use App\Http\Controllers\Business\CompanyController as BusinessCompanyController
 use App\Http\Controllers\Business\NotificationController as BusinessNotificationController;
 use App\Http\Controllers\Business\BranchController as BusinessBranchController;
 use App\Http\Controllers\Business\UserController as BusinessUserController;
+use App\Http\Controllers\Business\RoleController as BusinessRoleController;
 
 /*
 |--------------------------------------------------------------------------
@@ -315,6 +316,58 @@ Route::prefix('company/users')
             'updateStatus'
         )->name('status');
 });
+
+/*
+|--------------------------------------------------------------------------
+| Company Roles & Permissions
+|--------------------------------------------------------------------------
+*/
+
+Route::prefix('company/roles')
+    ->name('business.roles.')
+    ->controller(BusinessRoleController::class)
+    ->group(function () {
+
+        Route::get(
+            '/',
+            'index'
+        )->name('index');
+
+        Route::get(
+            '/create',
+            'create'
+        )->name('create');
+
+        Route::post(
+            '/',
+            'store'
+        )->name('store');
+
+        Route::get(
+            '/{role}',
+            'show'
+        )->name('show');
+
+        Route::get(
+            '/{role}/edit',
+            'edit'
+        )->name('edit');
+
+        Route::put(
+            '/{role}',
+            'update'
+        )->name('update');
+
+        Route::patch(
+            '/{role}/status',
+            'updateStatus'
+        )->name('status');
+
+        Route::delete(
+            '/{role}',
+            'destroy'
+        )->name('destroy');
+    });
 
 
 /*
