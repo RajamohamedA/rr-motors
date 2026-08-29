@@ -1,0 +1,681 @@
+/* =========================================================
+   RR ERP
+   BUSINESS PAGE SHELL
+   ========================================================= */
+
+.rr-page-shell {
+    width: 100%;
+    min-width: 0;
+
+    padding:
+        16px 18px 24px;
+}
+
+
+/* =========================================================
+   BREADCRUMB
+   ========================================================= */
+
+.rr-page-breadcrumb {
+    min-height: 26px;
+
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+
+    gap: 4px;
+
+    margin-bottom: 8px;
+}
+
+
+.rr-page-breadcrumb-home,
+.rr-page-breadcrumb-item a,
+.rr-page-breadcrumb-item span {
+    min-height: 24px;
+
+    display: inline-flex;
+    align-items: center;
+
+    color: #64748b;
+
+    font-size: 12px;
+    font-weight: 650;
+
+    text-decoration: none;
+}
+
+
+.rr-page-breadcrumb-home {
+    width: 26px;
+
+    justify-content: center;
+
+    border-radius: 7px;
+
+    color: #64748b;
+
+    transition:
+        background 0.16s ease,
+        color 0.16s ease;
+}
+
+
+.rr-page-breadcrumb-home:hover {
+    background: #e2e8f0;
+
+    color: #1d4ed8;
+}
+
+
+.rr-page-breadcrumb-item {
+    display: flex;
+    align-items: center;
+
+    gap: 4px;
+}
+
+
+.rr-page-breadcrumb-item>i {
+    color: #cbd5e1;
+
+    font-size: 9px;
+}
+
+
+.rr-page-breadcrumb-item a {
+    padding:
+        0 5px;
+
+    border-radius: 6px;
+
+    transition:
+        background 0.16s ease,
+        color 0.16s ease;
+}
+
+
+.rr-page-breadcrumb-item a:hover {
+    background: #f1f5f9;
+
+    color: #2563eb;
+}
+
+
+.rr-page-breadcrumb-item span.active {
+    color: #334155;
+
+    font-weight: 750;
+}
+
+
+/* =========================================================
+   PAGE HERO
+   ========================================================= */
+
+.rr-page-hero {
+    position: relative;
+
+    min-height: 78px;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    gap: 12px;
+
+    overflow: hidden;
+
+    margin-bottom: 14px;
+
+    padding:
+        14px 16px;
+
+    border:
+        1px solid #dbe4f0;
+
+    border-radius: 12px;
+
+    background:
+        linear-gradient(135deg,
+            #ffffff 0%,
+            #f8fbff 55%,
+            #eff6ff 100%);
+
+    box-shadow:
+        0 8px 28px rgba(15,
+            23,
+            42,
+            0.06);
+}
+
+
+/*
+|--------------------------------------------------------------------------
+| Decorative background
+|--------------------------------------------------------------------------
+*/
+
+.rr-page-hero::before {
+    content: "";
+    display: none;
+
+    position: absolute;
+
+    width: 220px;
+    height: 220px;
+
+    top: -130px;
+    right: -60px;
+
+    border-radius: 50%;
+
+    background:
+        rgba(37,
+            99,
+            235,
+            0.06);
+
+    pointer-events: none;
+}
+
+
+.rr-page-hero::after {
+    content: "";
+    display: none;
+
+    position: absolute;
+
+    width: 110px;
+    height: 110px;
+
+    right: 150px;
+    bottom: -75px;
+
+    border-radius: 50%;
+
+    background:
+        rgba(14,
+            165,
+            233,
+            0.05);
+
+    pointer-events: none;
+}
+
+
+/* =========================================================
+   HERO MAIN
+   ========================================================= */
+
+.rr-page-hero-main {
+    position: relative;
+
+    z-index: 1;
+
+    display: flex;
+    align-items: center;
+
+    gap: 16px;
+
+    min-width: 0;
+}
+
+
+.rr-page-hero-icon {
+    width: 40px;
+    height: 40px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    flex:
+        0 0 40px;
+
+    border:
+        1px solid #bfdbfe;
+
+    border-radius: 9px;
+
+    background:
+        linear-gradient(145deg,
+            #eff6ff,
+            #dbeafe);
+
+    color: #2563eb;
+
+    font-size: 16px;
+
+    box-shadow:
+        inset 0 1px 0 rgba(255,
+            255,
+            255,
+            0.85);
+}
+
+
+/* =========================================================
+   HERO CONTENT
+   ========================================================= */
+
+.rr-page-hero-content {
+    min-width: 0;
+}
+
+
+.rr-page-eyebrow {
+    display: block;
+
+    margin-bottom: 5px;
+
+    color: #2563eb;
+
+    font-size: 11px;
+    font-weight: 800;
+
+    letter-spacing: 0.075em;
+
+    text-transform: uppercase;
+}
+
+
+.rr-page-hero-content h1 {
+    margin: 0;
+
+    color: #172033;
+
+    font-size: 18px;
+    font-weight: 800;
+
+    line-height: 1.25;
+}
+
+
+.rr-page-hero-content p {
+    max-width: 720px;
+
+    margin:
+        7px 0 0;
+
+    color: #64748b;
+
+    font-size: 13px;
+    font-weight: 500;
+
+    line-height: 1.55;
+}
+
+
+/* =========================================================
+   HERO ACTIONS
+   ========================================================= */
+
+.rr-page-hero-actions {
+    position: relative;
+
+    z-index: 1;
+
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+
+    flex-wrap: wrap;
+
+    gap: 9px;
+
+    flex-shrink: 0;
+}
+
+
+/* =========================================================
+   COMMON PRIMARY BUTTON
+   ========================================================= */
+
+.rr-page-primary-btn {
+    min-height: 36px;
+
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    gap: 8px;
+
+    padding:
+        7px 12px;
+
+    border:
+        1px solid #2563eb;
+
+    border-radius: 8px;
+
+    background:
+        linear-gradient(180deg,
+            #3b82f6,
+            #2563eb);
+
+    color: #ffffff;
+
+    font-size: 13px;
+    font-weight: 750;
+
+    text-decoration: none;
+
+    cursor: pointer;
+
+    box-shadow:
+        0 5px 13px rgba(37,
+            99,
+            235,
+            0.20);
+
+    transition:
+        transform 0.16s ease,
+        box-shadow 0.16s ease,
+        background 0.16s ease;
+}
+
+
+.rr-page-primary-btn:hover {
+    background:
+        linear-gradient(180deg,
+            #2563eb,
+            #1d4ed8);
+
+    color: #ffffff;
+
+    transform:
+        translateY(-1px);
+
+    box-shadow:
+        0 8px 18px rgba(37,
+            99,
+            235,
+            0.25);
+}
+
+
+/* =========================================================
+   SECONDARY BUTTON
+   ========================================================= */
+
+.rr-page-secondary-btn {
+    min-height: 36px;
+
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    gap: 8px;
+
+    padding:
+        7px 12px;
+
+    border:
+        1px solid #cbd5e1;
+
+    border-radius: 8px;
+
+    background: #ffffff;
+
+    color: #334155;
+
+    font-size: 13px;
+    font-weight: 700;
+
+    text-decoration: none;
+
+    cursor: pointer;
+
+    transition:
+        background 0.16s ease,
+        border-color 0.16s ease,
+        color 0.16s ease,
+        transform 0.16s ease;
+}
+
+
+.rr-page-secondary-btn:hover {
+    border-color: #93c5fd;
+
+    background: #eff6ff;
+
+    color: #2563eb;
+
+    transform:
+        translateY(-1px);
+}
+
+
+/* =========================================================
+   CONTENT
+   ========================================================= */
+
+.rr-page-shell-content {
+    min-width: 0;
+}
+
+
+/* =========================================================
+   COMMON PANEL
+   ========================================================= */
+
+.rr-page-panel {
+    overflow: hidden;
+
+    border:
+        1px solid #e2e8f0;
+
+    border-radius: 11px;
+
+    background: #ffffff;
+
+    box-shadow:
+        0 6px 22px rgba(15,
+            23,
+            42,
+            0.045);
+}
+
+
+.rr-page-panel-header {
+    min-height: 46px;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    gap: 14px;
+
+    padding:
+        10px 13px;
+
+    border-bottom:
+        1px solid #e8edf4;
+
+    background:
+        linear-gradient(180deg,
+            #ffffff,
+            #fbfdff);
+}
+
+
+.rr-page-panel-title {
+    min-width: 0;
+}
+
+
+.rr-page-panel-title h2 {
+    margin: 0;
+
+    color: #172033;
+
+    font-size: 13px;
+    font-weight: 800;
+}
+
+
+.rr-page-panel-title p {
+    margin:
+        3px 0 0;
+
+    color: #7b8799;
+
+    font-size: 12px;
+    font-weight: 500;
+}
+
+
+/* =========================================================
+   ANIMATION
+   ========================================================= */
+
+@keyframes rrPageShellEnter {
+
+    from {
+        opacity: 0;
+
+        transform:
+            translateY(5px);
+    }
+
+    to {
+        opacity: 1;
+
+        transform:
+            translateY(0);
+    }
+}
+
+
+.rr-page-shell {
+    animation:
+        rrPageShellEnter 0.28s ease-out;
+}
+
+
+/* =========================================================
+   TABLET
+   ========================================================= */
+
+@media (max-width: 900px) {
+
+    .rr-page-shell {
+        padding:
+            18px 18px 28px;
+    }
+
+
+    .rr-page-hero {
+        align-items: flex-start;
+
+        flex-direction: column;
+    }
+
+
+    .rr-page-hero-actions {
+        width: 100%;
+
+        justify-content: flex-start;
+    }
+}
+
+
+/* =========================================================
+   MOBILE
+   ========================================================= */
+
+@media (max-width: 640px) {
+
+    .rr-page-shell {
+        padding:
+            14px 13px 24px;
+    }
+
+
+    .rr-page-breadcrumb {
+        margin-bottom: 9px;
+    }
+
+
+    .rr-page-hero {
+        min-height: auto;
+
+        padding:
+            17px 15px;
+
+        border-radius: 13px;
+    }
+
+
+    .rr-page-hero-main {
+        align-items: flex-start;
+
+        gap: 12px;
+    }
+
+
+    .rr-page-hero-icon {
+        width: 42px;
+        height: 42px;
+
+        flex:
+            0 0 42px;
+
+        border-radius: 10px;
+
+        font-size: 15px;
+    }
+
+
+    .rr-page-hero-content h1 {
+        font-size: 18px;
+    }
+
+
+    .rr-page-hero-content p {
+        font-size: 13px;
+    }
+
+
+    .rr-page-hero-actions {
+        display: grid;
+
+        grid-template-columns:
+            minmax(0,
+                1fr);
+    }
+
+
+    .rr-page-primary-btn,
+    .rr-page-secondary-btn {
+        width: 100%;
+    }
+
+
+    .rr-page-panel-header {
+        align-items: flex-start;
+
+        flex-direction: column;
+    }
+}
+
+
+/* =========================================================
+   REDUCED MOTION
+   ========================================================= */
+
+@media (prefers-reduced-motion: reduce) {
+
+    .rr-page-shell {
+        animation: none;
+    }
+
+
+    .rr-page-shell *,
+    .rr-page-shell *::before,
+    .rr-page-shell *::after {
+        transition-duration:
+            0.01ms !important;
+    }
+}

@@ -43,6 +43,8 @@
 @import './business/dashboard.css';
 @import './business/sidebar.css';
 @import './business/topbar.css';
+@import './business/page-shell.css';
+@import './business/branches.css';
 
 
 /* customer colors */

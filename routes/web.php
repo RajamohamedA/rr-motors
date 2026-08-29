@@ -38,6 +38,8 @@ use App\Http\Controllers\Auth\LoginRedirectController;
 
 use App\Http\Controllers\Business\DashboardController as BusinessDashboardController;
 use App\Http\Controllers\Business\CompanyController as BusinessCompanyController;
+use App\Http\Controllers\Business\NotificationController as BusinessNotificationController;
+use App\Http\Controllers\Business\BranchController as BusinessBranchController;
 
 /*
 |--------------------------------------------------------------------------
@@ -113,10 +115,19 @@ Route::get(
 
 
 
-Route::get(
-    '/company/dashboard',
-    [CompanyDashboardController::class, 'index']
-)->name('business.company.dashboard');
+
+
+Route::get('/dashboard', function () {
+
+    $user = auth()->user();
+
+    if ($user->is_super_user) {
+        return redirect()->route('super-admin.dashboard');
+    }
+
+    return redirect()->route('business.dashboard');
+})->middleware('auth')->name('dashboard');
+
 
 
 /*
@@ -184,6 +195,126 @@ Route::middleware([
         'password.email'
     );
 });
+
+
+/*
+|--------------------------------------------------------------------------
+| dashboard
+|--------------------------------------------------------------------------
+*/
+
+Route::get(
+    '/company/dashboard',
+    [CompanyDashboardController::class, 'index']
+)->name('business.company.dashboard');
+
+
+
+
+/*
+|--------------------------------------------------------------------------
+| notification
+|--------------------------------------------------------------------------
+*/
+Route::get(
+    '/notifications',
+    [BusinessNotificationController::class, 'index']
+)->name('notifications.index');
+
+Route::post(
+    '/notifications/{notification}/read',
+    [BusinessNotificationController::class, 'markAsRead']
+)->name('notifications.read');
+
+Route::post(
+    '/notifications/read-all',
+    [BusinessNotificationController::class, 'markAllAsRead']
+)->name('notifications.read-all');
+
+
+/*
+|--------------------------------------------------------------------------
+| Company Admin - Branch Management
+|--------------------------------------------------------------------------
+|
+| React / Inertia branch management.
+|
+| Company Admin:
+| - View own company's branches
+| - Create branch
+| - View branch
+| - Edit branch
+|
+| Branch activation is controlled by Super Admin.
+|
+*/
+
+Route::prefix('company')
+    ->name('business.')
+    ->group(function () {
+
+        /*
+        |--------------------------------------------------------------------------
+        | Branch List
+        |--------------------------------------------------------------------------
+        */
+
+        Route::get(
+            '/branches',
+            [BusinessBranchController::class, 'index']
+        )->name('branches.index');
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Create Branch
+        |--------------------------------------------------------------------------
+        */
+
+        Route::get(
+            '/branches/create',
+            [BusinessBranchController::class, 'create']
+        )->name('branches.create');
+
+
+        Route::post(
+            '/branches',
+            [BusinessBranchController::class, 'store']
+        )->name('branches.store');
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Show Branch
+        |--------------------------------------------------------------------------
+        */
+
+        Route::get(
+            '/branches/{store}',
+            [BusinessBranchController::class, 'show']
+        )->name('branches.show');
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Edit Branch
+        |--------------------------------------------------------------------------
+        */
+
+        Route::get(
+            '/branches/{store}/edit',
+            [BusinessBranchController::class, 'edit']
+        )->name('branches.edit');
+
+
+        Route::put(
+            '/branches/{store}',
+            [BusinessBranchController::class, 'update']
+        )->name('branches.update');
+});
+
+
+
 
 
 /*
