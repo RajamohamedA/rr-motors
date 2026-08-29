@@ -12,8 +12,6 @@ import {
 export default function BusinessSidebar({
     open = false,
     collapsed = false,
-    permanentlyCollapsed = false,
-    onToggleCollapse = null,
     onClose = null,
     onMouseEnter = null,
     onMouseLeave = null,
@@ -28,7 +26,6 @@ export default function BusinessSidebar({
     const {
         auth,
         business,
-        notifications,
     } = usePage().props;
 
 
@@ -61,22 +58,6 @@ export default function BusinessSidebar({
     const isCompanyAdmin =
         roles.includes(
             'Company Admin'
-        );
-
-
-    /*
-    |--------------------------------------------------------------------------
-    | Active Branch Context
-    |--------------------------------------------------------------------------
-    |
-    | Company Admin can work at company level without selecting a branch.
-    | Operational ERP menus are shown only when a branch is active.
-    |
-    */
-
-    const hasActiveBranch =
-        Boolean(
-            business?.store_id
         );
 
 
@@ -205,18 +186,11 @@ export default function BusinessSidebar({
                         'bi-grid-1x2',
 
                     href:
-                        isCompanyAdmin &&
-                            !hasActiveBranch
-                            ? '/company/dashboard'
-                            : '/business/dashboard',
+                        '/business/dashboard',
 
                     visible:
-                        isCompanyAdmin ||
-                        (
-                            hasActiveBranch &&
-                            can(
-                                'dashboard.view'
-                            )
+                        can(
+                            'dashboard.view'
                         ),
                 },
 
@@ -339,7 +313,6 @@ export default function BusinessSidebar({
                         'bi-database',
 
                     visible:
-                        hasActiveBranch &&
                         canAny([
                             'customer.view',
                             'supplier.view',
@@ -471,7 +444,6 @@ export default function BusinessSidebar({
                         'bi-bag-check',
 
                     visible:
-                        hasActiveBranch &&
                         canAny([
                             'purchase.view',
                             'purchase.create',
@@ -551,7 +523,6 @@ export default function BusinessSidebar({
                         'bi-cart-check',
 
                     visible:
-                        hasActiveBranch &&
                         canAny([
                             'sales.view',
                             'sales.create',
@@ -648,7 +619,6 @@ export default function BusinessSidebar({
                         'bi-boxes',
 
                     visible:
-                        hasActiveBranch &&
                         canAny([
                             'stock.view',
                             'stock.adjust',
@@ -744,7 +714,6 @@ export default function BusinessSidebar({
                         'bi-wallet2',
 
                     visible:
-                        hasActiveBranch &&
                         canAny([
                             'customer.view',
                             'sales.view',
@@ -804,7 +773,6 @@ export default function BusinessSidebar({
                         'bi-bar-chart-line',
 
                     visible:
-                        hasActiveBranch &&
                         canAny([
                             'purchase.view',
                             'sales.view',
@@ -870,7 +838,6 @@ export default function BusinessSidebar({
                 roles,
                 isSuperAdmin,
                 isCompanyAdmin,
-                hasActiveBranch,
             ]
         );
 
@@ -903,36 +870,11 @@ export default function BusinessSidebar({
 
             <div className="rr-business-sidebar-company">
 
-                <button
-                    type="button"
-                    className="rr-business-sidebar-collapse-btn"
-                    onClick={onToggleCollapse}
-                    title={
-                        permanentlyCollapsed
-                            ? 'Expand sidebar'
-                            : 'Collapse sidebar'
-                    }
-                    aria-label={
-                        permanentlyCollapsed
-                            ? 'Expand sidebar'
-                            : 'Collapse sidebar'
-                    }
-                >
-                    <i
-                        className={
-                            permanentlyCollapsed
-                                ? 'bi bi-chevron-double-right'
-                                : 'bi bi-chevron-double-left'
-                        }
-                    ></i>
-                </button>
-
                 <div className="rr-business-sidebar-company-icon">
 
                     {
                         getInitials(
                             business?.company_name
-                            ?? 'Company'
                         )
                     }
 
@@ -954,21 +896,11 @@ export default function BusinessSidebar({
 
                             <span>
 
-                                <i
-                                    className={
-                                        hasActiveBranch
-                                            ? 'bi bi-shop'
-                                            : 'bi bi-building'
-                                    }
-                                ></i>
+                                <i className="bi bi-shop"></i>
 
                                 {
-                                    hasActiveBranch
-                                        ? (
-                                            business?.store_name
-                                            ?? 'Branch'
-                                        )
-                                        : 'Company Workspace'
+                                    business?.store_name
+                                    ?? 'No Branch Selected'
                                 }
 
                             </span>
@@ -1113,132 +1045,6 @@ export default function BusinessSidebar({
                 }
 
             </nav>
-
-
-            {/* =========================================================
-                UTILITIES
-               ========================================================= */}
-
-            <div className="rr-business-sidebar-utility">
-
-                <Link
-                    href="/notifications"
-                    className={
-                        `rr-business-sidebar-link ${isCurrentPath('/notifications')
-                            ? 'active'
-                            : ''
-                        }`
-                    }
-                    onClick={
-                        onClose
-                    }
-                    title={
-                        collapsed
-                            ? 'Notifications'
-                            : undefined
-                    }
-                >
-
-                    <i className="bi bi-bell"></i>
-
-                    {
-                        !collapsed && (
-
-                            <>
-                                <span>
-                                    Notifications
-                                </span>
-
-                                {
-                                    (
-                                        notifications?.unread_count
-                                        ?? 0
-                                    ) > 0 && (
-
-                                        <small className="rr-business-sidebar-badge">
-
-                                            {
-                                                notifications?.unread_count
-                                            }
-
-                                        </small>
-
-                                    )
-                                }
-                            </>
-
-                        )
-                    }
-
-                </Link>
-
-
-                <Link
-                    href="/help"
-                    className={
-                        `rr-business-sidebar-link ${isCurrentPath('/help')
-                            ? 'active'
-                            : ''
-                        }`
-                    }
-                    onClick={
-                        onClose
-                    }
-                    title={
-                        collapsed
-                            ? 'Help & Support'
-                            : undefined
-                    }
-                >
-
-                    <i className="bi bi-question-circle"></i>
-
-                    {
-                        !collapsed && (
-
-                            <span>
-                                Help & Support
-                            </span>
-
-                        )
-                    }
-
-                </Link>
-
-
-                <Link
-                    href="/settings"
-                    className={
-                        `rr-business-sidebar-link ${isCurrentPath('/settings')
-                            ? 'active'
-                            : ''
-                        }`
-                    }
-                    onClick={
-                        onClose
-                    }
-                    title={
-                        collapsed
-                            ? 'Settings'
-                            : undefined
-                    }
-                >
-
-                    <i className="bi bi-gear"></i>
-
-                    {
-                        !collapsed && (
-
-                            <span>
-                                Settings
-                            </span>
-
-                        )
-                    }
-
-                </Link>
-
-            </div>
 
 
             {/* =========================================================

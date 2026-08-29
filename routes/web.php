@@ -40,6 +40,7 @@ use App\Http\Controllers\Business\DashboardController as BusinessDashboardContro
 use App\Http\Controllers\Business\CompanyController as BusinessCompanyController;
 use App\Http\Controllers\Business\NotificationController as BusinessNotificationController;
 use App\Http\Controllers\Business\BranchController as BusinessBranchController;
+use App\Http\Controllers\Business\UserController as BusinessUserController;
 
 /*
 |--------------------------------------------------------------------------
@@ -230,6 +231,90 @@ Route::post(
     '/notifications/read-all',
     [BusinessNotificationController::class, 'markAllAsRead']
 )->name('notifications.read-all');
+
+
+/*
+|--------------------------------------------------------------------------
+| Company Users & Access
+|--------------------------------------------------------------------------
+*/
+
+Route::prefix('company/users')
+    ->name('business.users.')
+    ->controller(BusinessUserController::class)
+    ->group(function () {
+
+        /*
+        |--------------------------------------------------------------------------
+        | List
+        |--------------------------------------------------------------------------
+        */
+
+        Route::get(
+            '/',
+            'index'
+        )->name('index');
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Create
+        |--------------------------------------------------------------------------
+        */
+
+        Route::get(
+            '/create',
+            'create'
+        )->name('create');
+
+
+        Route::post(
+            '/',
+            'store'
+        )->name('store');
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Show
+        |--------------------------------------------------------------------------
+        */
+
+        Route::get(
+            '/{user}',
+            'show'
+        )->name('show');
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Edit
+        |--------------------------------------------------------------------------
+        */
+
+        Route::get(
+            '/{user}/edit',
+            'edit'
+        )->name('edit');
+
+
+        Route::put(
+            '/{user}',
+            'update'
+        )->name('update');
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Activate / Deactivate
+        |--------------------------------------------------------------------------
+        */
+
+        Route::patch(
+            '/{user}/status',
+            'updateStatus'
+        )->name('status');
+});
 
 
 /*

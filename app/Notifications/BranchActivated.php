@@ -28,11 +28,12 @@ class BranchActivated extends Notification
         object $notifiable
     ): array {
         return [
+
             'title' =>
             'Branch Activated',
 
             'message' =>
-            "Your branch {$this->store->store_name} has been activated and is ready to use.",
+            "Your branch {$this->store->store_name} ({$this->store->store_code}) has been activated and is ready to use.",
 
             'category' =>
             'branch',
@@ -56,7 +57,10 @@ class BranchActivated extends Notification
             $this->store->id,
 
             'fallback_url' =>
-            '/company/branches',
+            route(
+                'business.branches.show',
+                $this->store->id
+            ),
         ];
     }
 
