@@ -169,694 +169,330 @@ export default function BusinessSidebar({
         useMemo(
             () => [
 
-                /*
-                |--------------------------------------------------------------------------
-                | Dashboard
-                |--------------------------------------------------------------------------
-                */
-
                 {
-                    type:
-                        'link',
-
-                    label:
-                        'Dashboard',
-
-                    icon:
-                        'bi-grid-1x2',
-
-                    href:
-                        '/business/dashboard',
-
-                    visible:
-                        can(
-                            'dashboard.view'
-                        ),
+                    type: 'link',
+                    label: 'Dashboard',
+                    icon: 'bi-grid-1x2',
+                    href: '/business/dashboard',
+                    visible: can('dashboard.view'),
                 },
 
-
-                /*
-                |--------------------------------------------------------------------------
-                | Company Administration
-                |--------------------------------------------------------------------------
-                */
-
                 {
-                    type:
-                        'group',
-
-                    key:
-                        'administration',
-
-                    label:
-                        'Company',
-
-                    icon:
-                        'bi-buildings',
-
-                    visible:
-                        isCompanyAdmin,
-
+                    type: 'group',
+                    key: 'administration',
+                    label: 'Company',
+                    icon: 'bi-buildings',
+                    visible: isCompanyAdmin,
                     children: [
-
                         {
-                            label:
-                                'Company Profile',
-
-                            icon:
-                                'bi-building-gear',
-
-                            href:
-                                '/company/profile',
-
-                            visible:
-                                true,
+                            label: 'Company Profile',
+                            icon: 'bi-building-gear',
+                            href: '/company/profile',
+                            visible: can('company.view'),
                         },
-
                         {
-                            label:
-                                'Branches',
-
-                            icon:
-                                'bi-shop-window',
-
-                            href:
-                                '/company/branches',
-
-                            visible:
-                                true,
+                            label: 'Branches',
+                            icon: 'bi-shop-window',
+                            href: '/company/branches',
+                            activePrefix: '/company/branches',
+                            activeExclude: ['/company/branches/create'],
+                            visible: can('store.view'),
                         },
-
                         {
-                            label:
-                                'Add Branch',
-
-                            icon:
-                                'bi-plus-circle',
-
-                            href:
-                                '/company/branches/create',
-
-                            visible:
-                                true,
+                            label: 'Add Branch',
+                            icon: 'bi-plus-circle',
+                            href: '/company/branches/create',
+                            exact: true,
+                            visible: can('store.create'),
                         },
-
                         {
-                            label:
-                                'Users & Access',
-
-                            icon:
-                                'bi-people',
-
-                            href:
-                                '/company/users',
-
-                            visible:
-                                true,
+                            label: 'Users & Access',
+                            icon: 'bi-people',
+                            href: '/company/users',
+                            activePrefix: '/company/users',
+                            activeExclude: ['/company/users/create'],
+                            visible: can('users.view'),
                         },
-
                         {
-                            label:
-                                'Add User',
-
-                            icon:
-                                'bi-person-plus',
-
-                            href:
-                                '/company/users/create',
-
-                            visible:
-                                true,
+                            label: 'Add User',
+                            icon: 'bi-person-plus',
+                            href: '/company/users/create',
+                            exact: true,
+                            visible: can('users.create'),
                         },
-
                         {
-                            label:
-                                'Roles & Permissions',
-
-                            icon:
-                                'bi-shield-lock',
-
-                            href:
-                                '/company/roles',
-
-                            visible:
-                                true,
+                            label: 'Roles & Permissions',
+                            icon: 'bi-shield-lock',
+                            href: '/company/roles',
+                            activePrefix: '/company/roles',
+                            activeExclude: ['/company/roles/create'],
+                            visible: can('roles.view'),
                         },
-
                         {
-                            label:
-                                'Add Role',
-
-                            icon:
-                                'bi-shield-plus',
-
-                            href:
-                                '/company/roles/create',
-
-                            visible:
-                                true,
+                            label: 'Add Role',
+                            icon: 'bi-shield-plus',
+                            href: '/company/roles/create',
+                            exact: true,
+                            visible: can('roles.create'),
                         },
-
                     ],
                 },
 
-
-                /*
-                |--------------------------------------------------------------------------
-                | Masters
-                |--------------------------------------------------------------------------
-                */
-
                 {
-                    type:
-                        'group',
-
-                    key:
-                        'masters',
-
-                    label:
-                        'Masters',
-
-                    icon:
-                        'bi-database',
-
-                    visible:
-                        canAny([
-                            'customer.view',
-                            'supplier.view',
-                            'product.view',
-                            'category.view',
-                            'brand.view',
-                            'unit.view',
-                        ]),
-
+                    type: 'group',
+                    key: 'masters',
+                    label: 'Masters',
+                    icon: 'bi-database',
+                    visible: canAny([
+                        'customer.view',
+                        'supplier.view',
+                        'product.view',
+                        'category.view',
+                        'brand.view',
+                        'unit.view',
+                        'godown.view',
+                    ]),
                     children: [
-
                         {
-                            label:
-                                'Customers',
-
-                            icon:
-                                'bi-person-vcard',
-
-                            href:
-                                '/customers',
-
-                            visible:
-                                can(
-                                    'customer.view'
-                                ),
+                            label: 'Customers',
+                            icon: 'bi-person-vcard',
+                            href: '/customers',
+                            visible: can('customer.view'),
                         },
-
                         {
-                            label:
-                                'Suppliers',
-
-                            icon:
-                                'bi-truck',
-
-                            href:
-                                '/suppliers',
-
-                            visible:
-                                can(
-                                    'supplier.view'
-                                ),
+                            label: 'Suppliers',
+                            icon: 'bi-truck',
+                            href: '/suppliers',
+                            visible: can('supplier.view'),
                         },
-
                         {
-                            label:
-                                'Products',
-
-                            icon:
-                                'bi-box-seam',
-
-                            href:
-                                '/products',
-
-                            visible:
-                                can(
-                                    'product.view'
-                                ),
+                            label: 'Products',
+                            icon: 'bi-box-seam',
+                            href: '/products',
+                            visible: can('product.view'),
                         },
-
                         {
-                            label:
-                                'Categories',
-
-                            icon:
-                                'bi-tags',
-
-                            href:
-                                '/categories',
-
-                            visible:
-                                can(
-                                    'category.view'
-                                ),
+                            label: 'Categories',
+                            icon: 'bi-tags',
+                            href: '/categories',
+                            visible: can('category.view'),
                         },
-
                         {
-                            label:
-                                'Brands',
-
-                            icon:
-                                'bi-award',
-
-                            href:
-                                '/brands',
-
-                            visible:
-                                can(
-                                    'brand.view'
-                                ),
+                            label: 'Brands',
+                            icon: 'bi-award',
+                            href: '/brands',
+                            visible: can('brand.view'),
                         },
-
                         {
-                            label:
-                                'Units',
-
-                            icon:
-                                'bi-rulers',
-
-                            href:
-                                '/units',
-
-                            visible:
-                                can(
-                                    'unit.view'
-                                ),
+                            label: 'Units',
+                            icon: 'bi-rulers',
+                            href: '/units',
+                            visible: can('unit.view'),
                         },
-
+                        {
+                            label: 'Godowns',
+                            icon: 'bi-building',
+                            href: '/godowns',
+                            visible: can('godown.view'),
+                        },
                     ],
                 },
 
-
-                /*
-                |--------------------------------------------------------------------------
-                | Purchase
-                |--------------------------------------------------------------------------
-                */
-
                 {
-                    type:
-                        'group',
-
-                    key:
-                        'purchase',
-
-                    label:
-                        'Purchase',
-
-                    icon:
-                        'bi-bag-check',
-
-                    visible:
-                        canAny([
-                            'purchase.view',
-                            'purchase.create',
-                        ]),
-
+                    type: 'group',
+                    key: 'purchase',
+                    label: 'Purchase',
+                    icon: 'bi-bag-check',
+                    visible: canAny([
+                        'purchase.view',
+                        'purchase.create',
+                        'purchase-return.view',
+                        'purchase-return.create',
+                    ]),
                     children: [
-
                         {
-                            label:
-                                'Purchases',
-
-                            icon:
-                                'bi-receipt',
-
-                            href:
-                                '/purchases',
-
-                            visible:
-                                can(
-                                    'purchase.view'
-                                ),
+                            label: 'Purchases',
+                            icon: 'bi-receipt',
+                            href: '/purchases',
+                            activePrefix: '/purchases',
+                            activeExclude: ['/purchases/create'],
+                            visible: can('purchase.view'),
                         },
-
                         {
-                            label:
-                                'New Purchase',
-
-                            icon:
-                                'bi-plus-square',
-
-                            href:
-                                '/purchases/create',
-
-                            visible:
-                                can(
-                                    'purchase.create'
-                                ),
+                            label: 'New Purchase',
+                            icon: 'bi-plus-square',
+                            href: '/purchases/create',
+                            exact: true,
+                            visible: can('purchase.create'),
                         },
-
                         {
-                            label:
-                                'Purchase Returns',
-
-                            icon:
-                                'bi-arrow-return-left',
-
-                            href:
-                                '/purchase-returns',
-
-                            visible:
-                                can(
-                                    'purchase.view'
-                                ),
+                            label: 'Purchase Returns',
+                            icon: 'bi-arrow-return-left',
+                            href: '/purchase-returns',
+                            activePrefix: '/purchase-returns',
+                            visible: can('purchase-return.view'),
                         },
-
                     ],
                 },
 
-
-                /*
-                |--------------------------------------------------------------------------
-                | Sales
-                |--------------------------------------------------------------------------
-                */
-
                 {
-                    type:
-                        'group',
-
-                    key:
-                        'sales',
-
-                    label:
-                        'Sales',
-
-                    icon:
-                        'bi-cart-check',
-
-                    visible:
-                        canAny([
-                            'sales.view',
-                            'sales.create',
-                            'quotation.view',
-                        ]),
-
+                    type: 'group',
+                    key: 'sales',
+                    label: 'Sales',
+                    icon: 'bi-cart-check',
+                    visible: canAny([
+                        'sales.view',
+                        'sales.create',
+                        'sales-return.view',
+                        'sales-return.create',
+                        'quotation.view',
+                        'quotation.create',
+                    ]),
                     children: [
-
                         {
-                            label:
-                                'Sales',
-
-                            icon:
-                                'bi-receipt-cutoff',
-
-                            href:
-                                '/sales',
-
-                            visible:
-                                can(
-                                    'sales.view'
-                                ),
-                        },
-
-                        {
-                            label:
-                                'New Sale',
-
-                            icon:
-                                'bi-plus-square',
-
-                            href:
+                            label: 'Sales',
+                            icon: 'bi-receipt-cutoff',
+                            href: '/sales',
+                            activePrefix: '/sales',
+                            activeExclude: [
                                 '/sales/create',
-
-                            visible:
-                                can(
-                                    'sales.create'
-                                ),
-                        },
-
-                        {
-                            label:
-                                'Sales Returns',
-
-                            icon:
-                                'bi-arrow-return-right',
-
-                            href:
                                 '/sales-returns',
-
-                            visible:
-                                can(
-                                    'sales.view'
-                                ),
+                                '/reports/sales',
+                            ],
+                            visible: can('sales.view'),
                         },
-
                         {
-                            label:
-                                'Quotations',
-
-                            icon:
-                                'bi-file-earmark-text',
-
-                            href:
-                                '/quotations',
-
-                            visible:
-                                can(
-                                    'quotation.view'
-                                ),
+                            label: 'New Sale',
+                            icon: 'bi-plus-square',
+                            href: '/sales/create',
+                            exact: true,
+                            visible: can('sales.create'),
                         },
-
+                        {
+                            label: 'Sales Returns',
+                            icon: 'bi-arrow-return-right',
+                            href: '/sales-returns',
+                            activePrefix: '/sales-returns',
+                            visible: can('sales-return.view'),
+                        },
+                        {
+                            label: 'Quotations',
+                            icon: 'bi-file-earmark-text',
+                            href: '/quotations',
+                            activePrefix: '/quotations',
+                            visible: can('quotation.view'),
+                        },
                     ],
                 },
 
-
-                /*
-                |--------------------------------------------------------------------------
-                | Inventory
-                |--------------------------------------------------------------------------
-                */
-
                 {
-                    type:
-                        'group',
-
-                    key:
-                        'inventory',
-
-                    label:
-                        'Inventory',
-
-                    icon:
-                        'bi-boxes',
-
-                    visible:
-                        canAny([
-                            'stock.view',
-                            'stock.adjust',
-                        ]),
-
+                    type: 'group',
+                    key: 'inventory',
+                    label: 'Inventory',
+                    icon: 'bi-boxes',
+                    visible: canAny([
+                        'current-stock.view',
+                        'stock-ledger.view',
+                        'stock-adjustment.view',
+                        'stock-adjustment.create',
+                        'stock-transfer.view',
+                        'stock-transfer.create',
+                        'stock.view',
+                        'stock.adjust',
+                    ]),
                     children: [
-
                         {
-                            label:
-                                'Current Stock',
-
-                            icon:
-                                'bi-box-seam',
-
-                            href:
-                                '/current-stock',
-
-                            visible:
-                                can(
-                                    'stock.view'
-                                ),
+                            label: 'Current Stock',
+                            icon: 'bi-box-seam',
+                            href: '/inventory/current-stock',
+                            activePrefix: '/inventory/current-stock',
+                            visible: can('current-stock.view'),
                         },
-
                         {
-                            label:
-                                'Stock Ledger',
-
-                            icon:
-                                'bi-journal-text',
-
-                            href:
-                                '/stock-ledger',
-
-                            visible:
-                                can(
-                                    'stock.view'
-                                ),
+                            label: 'Stock Ledger',
+                            icon: 'bi-journal-text',
+                            href: '/stock-ledgers',
+                            activePrefix: '/stock-ledgers',
+                            visible: can('stock-ledger.view'),
                         },
-
                         {
-                            label:
-                                'Stock Adjustment',
-
-                            icon:
-                                'bi-sliders',
-
-                            href:
-                                '/stock-adjustments',
-
-                            visible:
-                                can(
-                                    'stock.adjust'
-                                ),
+                            label: 'Stock Adjustment',
+                            icon: 'bi-sliders',
+                            href: '/stock-adjustments',
+                            activePrefix: '/stock-adjustments',
+                            visible: can('stock-adjustment.view') || can('stock-adjustment.create'),
                         },
-
                         {
-                            label:
-                                'Stock Transfer',
-
-                            icon:
-                                'bi-arrow-left-right',
-
-                            href:
-                                '/stock-transfers',
-
-                            visible:
-                                can(
-                                    'stock.view'
-                                ),
+                            label: 'Stock Transfer',
+                            icon: 'bi-arrow-left-right',
+                            href: '/stock-transfers',
+                            activePrefix: '/stock-transfers',
+                            visible: can('stock-transfer.view') || can('stock-transfer.create'),
                         },
-
                     ],
                 },
 
-
-                /*
-                |--------------------------------------------------------------------------
-                | Accounts
-                |--------------------------------------------------------------------------
-                */
-
                 {
-                    type:
-                        'group',
-
-                    key:
-                        'accounts',
-
-                    label:
-                        'Accounts',
-
-                    icon:
-                        'bi-wallet2',
-
-                    visible:
-                        canAny([
-                            'customer.view',
-                            'sales.view',
-                        ]),
-
+                    type: 'group',
+                    key: 'accounts',
+                    label: 'Accounts',
+                    icon: 'bi-wallet2',
+                    visible: canAny([
+                        'accounts.view',
+                        'customer-payment.view',
+                        'customer-payment.create',
+                        'customer-ledger.view',
+                    ]),
                     children: [
-
                         {
-                            label:
-                                'Customer Payments',
-
-                            icon:
-                                'bi-cash-coin',
-
-                            href:
-                                '/customer-payments',
-
-                            visible:
-                                true,
+                            label: 'Customer Payments',
+                            icon: 'bi-cash-coin',
+                            href: '/customer-payments',
+                            activePrefix: '/customer-payments',
+                            visible: can('customer-payment.view') || can('customer-payment.create'),
                         },
-
                         {
-                            label:
-                                'Customer Ledger',
-
-                            icon:
-                                'bi-journal',
-
-                            href:
-                                '/customer-ledger',
-
-                            visible:
-                                true,
+                            label: 'Customer Ledger',
+                            icon: 'bi-journal',
+                            href: '/customer-ledger',
+                            visible: can('customer-ledger.view'),
                         },
-
                     ],
                 },
 
-
-                /*
-                |--------------------------------------------------------------------------
-                | Reports
-                |--------------------------------------------------------------------------
-                */
-
                 {
-                    type:
-                        'group',
-
-                    key:
-                        'reports',
-
-                    label:
-                        'Reports',
-
-                    icon:
-                        'bi-bar-chart-line',
-
-                    visible:
-                        canAny([
-                            'purchase.view',
-                            'sales.view',
-                            'stock.view',
-                        ]),
-
+                    type: 'group',
+                    key: 'reports',
+                    label: 'Reports',
+                    icon: 'bi-bar-chart-line',
+                    visible: canAny([
+                        'reports.view',
+                        'purchase-report.view',
+                        'sales-report.view',
+                        'current-stock.view',
+                    ]),
                     children: [
-
                         {
-                            label:
-                                'Purchase Report',
-
-                            icon:
-                                'bi-graph-down-arrow',
-
-                            href:
-                                '/purchase-reports',
-
-                            visible:
-                                can(
-                                    'purchase.view'
-                                ),
+                            label: 'Purchase Report',
+                            icon: 'bi-graph-down-arrow',
+                            href: '/purchase-reports',
+                            activePrefix: '/purchase-reports',
+                            visible: can('purchase-report.view'),
                         },
-
                         {
-                            label:
-                                'Sales Report',
-
-                            icon:
-                                'bi-graph-up-arrow',
-
-                            href:
-                                '/sales-reports',
-
-                            visible:
-                                can(
-                                    'sales.view'
-                                ),
+                            label: 'Sales Report',
+                            icon: 'bi-graph-up-arrow',
+                            href: '/reports/sales',
+                            activePrefix: '/reports/sales',
+                            visible: can('sales-report.view'),
                         },
-
                         {
-                            label:
-                                'Stock Report',
-
-                            icon:
-                                'bi-bar-chart',
-
-                            href:
-                                '/stock-reports',
-
-                            visible:
-                                can(
-                                    'stock.view'
-                                ),
+                            label: 'Current Stock Report',
+                            icon: 'bi-bar-chart',
+                            href: '/inventory/current-stock',
+                            activePrefix: '/inventory/current-stock',
+                            visible: can('reports.view') || can('current-stock.view'),
                         },
-
                     ],
                 },
 
@@ -1347,102 +983,58 @@ function isItemActive(
         window.location.pathname;
 
     if (
-        item.href ===
-        '/company/users'
-    ) {
-        return (
-            pathname ===
-            '/company/users'
-            ||
-            (
-                pathname.startsWith(
-                    '/company/users/'
-                )
-                &&
-                pathname !==
-                '/company/users/create'
-            )
-        );
-    }
-
-    if (
-        item.href ===
-        '/company/users/create'
+        item.exact
     ) {
         return pathname ===
-            '/company/users/create';
+            item.href;
     }
 
-    if (
-        item.href ===
-        '/company/roles'
-    ) {
-        return (
-            pathname ===
-            '/company/roles'
-            ||
-            (
+    const excluded =
+        (
+            item.activeExclude
+            ?? []
+        ).some(
+            path =>
+                pathname === path
+                ||
                 pathname.startsWith(
-                    '/company/roles/'
+                    `${path}/`
                 )
-                &&
-                pathname !==
-                '/company/roles/create'
-            )
         );
-    }
 
     if (
-        item.href ===
-        '/company/roles/create'
+        excluded
     ) {
-        return pathname ===
-            '/company/roles/create';
-    }
-
-    return isCurrentPath(
-        item.href
-    );
-}
-
-
-/*
-|--------------------------------------------------------------------------
-| Current Path
-|--------------------------------------------------------------------------
-*/
-
-function isCurrentPath(
-    href
-) {
-
-    if (
-        typeof window ===
-        'undefined'
-    ) {
-
         return false;
     }
 
-
-    const pathname =
-        window.location.pathname;
-
-
     if (
-        href ===
-        '/business/dashboard'
+        item.activePrefix
     ) {
-
         return pathname ===
-            href;
+            item.activePrefix
+            ||
+            pathname.startsWith(
+                `${item.activePrefix}/`
+            );
     }
 
+    if (
+        item.href ===
+        '/business/dashboard'
+        ||
+        item.href ===
+        '/company/dashboard'
+    ) {
+        return pathname ===
+            item.href;
+    }
 
     return pathname ===
-        href ||
+        item.href
+        ||
         pathname.startsWith(
-            `${href}/`
+            `${item.href}/`
         );
 }
 

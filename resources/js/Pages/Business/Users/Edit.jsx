@@ -67,6 +67,54 @@ export default function UserEdit({
 
     /*
     |--------------------------------------------------------------------------
+    | Role Groups
+    |--------------------------------------------------------------------------
+    */
+
+    const systemRoles =
+        (
+            roles
+            ?? []
+        ).filter(
+            role =>
+                role?.type ===
+                'system'
+                ||
+                Boolean(
+                    role?.is_system_role
+                )
+        );
+
+
+    const companyRoles =
+        (
+            roles
+            ?? []
+        ).filter(
+            role =>
+                role?.type ===
+                'company'
+                ||
+                !Boolean(
+                    role?.is_system_role
+                )
+        );
+
+
+    const selectedRole =
+        (
+            roles
+            ?? []
+        ).find(
+            role =>
+                role?.name ===
+                data.role
+        )
+        ?? null;
+
+
+    /*
+    |--------------------------------------------------------------------------
     | Toggle Branch
     |--------------------------------------------------------------------------
     */
@@ -581,71 +629,137 @@ export default function UserEdit({
                                             (
                                                 roles
                                                 ?? []
-                                            ).map(
-                                                role => (
+                                            ).length > 0
+                                                ? (
 
-                                                    <label
-                                                        key={
-                                                            role.id
+                                                    <>
+
+                                                        {
+                                                            systemRoles.length > 0 && (
+
+                                                                <RoleGroup
+                                                                    title="System Roles"
+                                                                    subtitle="Predefined employee roles managed by the system"
+                                                                    icon="bi-shield-check"
+                                                                    roles={
+                                                                        systemRoles
+                                                                    }
+                                                                    selectedRoleName={
+                                                                        data.role
+                                                                    }
+                                                                    onChange={
+                                                                        roleName =>
+                                                                            setData(
+                                                                                'role',
+                                                                                roleName
+                                                                            )
+                                                                    }
+                                                                />
+
+                                                            )
                                                         }
-                                                        className={
-                                                            `rr-user-role-option ${data.role === role.name
-                                                                ? 'selected'
-                                                                : ''
-                                                            }`
+
+
+                                                        {
+                                                            companyRoles.length > 0 && (
+
+                                                                <RoleGroup
+                                                                    title="Company Roles"
+                                                                    subtitle="Custom roles created for this company"
+                                                                    icon="bi-building-lock"
+                                                                    roles={
+                                                                        companyRoles
+                                                                    }
+                                                                    selectedRoleName={
+                                                                        data.role
+                                                                    }
+                                                                    onChange={
+                                                                        roleName =>
+                                                                            setData(
+                                                                                'role',
+                                                                                roleName
+                                                                            )
+                                                                    }
+                                                                />
+
+                                                            )
                                                         }
-                                                    >
 
-                                                        <input
-                                                            type="radio"
-                                                            name="role"
-                                                            value={
-                                                                role.name
-                                                            }
-                                                            checked={
-                                                                data.role === role.name
-                                                            }
-                                                            onChange={
-                                                                event =>
-                                                                    setData(
-                                                                        'role',
-                                                                        event.target.value
-                                                                    )
-                                                            }
-                                                        />
-
-
-                                                        <div className="rr-user-role-option-icon">
-
-                                                            <i className="bi bi-person-badge"></i>
-
-                                                        </div>
-
-
-                                                        <div>
-
-                                                            <strong>
-                                                                {
-                                                                    role.name
-                                                                }
-                                                            </strong>
-
-                                                            <span>
-                                                                Business access role
-                                                            </span>
-
-                                                        </div>
-
-
-                                                        <i className="bi bi-check-circle-fill rr-user-role-check"></i>
-
-                                                    </label>
+                                                    </>
 
                                                 )
-                                            )
+                                                : (
+
+                                                    <div className="rr-user-access-empty">
+
+                                                        <i className="bi bi-exclamation-circle"></i>
+
+                                                        No assignable roles available.
+
+                                                    </div>
+
+                                                )
                                         }
 
                                     </div>
+
+
+                                    {
+                                        selectedRole && (
+
+                                            <div className="rr-user-selected-role-summary">
+
+                                                <div className="rr-user-selected-role-summary-icon">
+
+                                                    <i
+                                                        className={
+                                                            selectedRole?.type ===
+                                                                'system'
+                                                                ||
+                                                                selectedRole?.is_system_role
+                                                                ? 'bi bi-shield-check'
+                                                                : 'bi bi-building-lock'
+                                                        }
+                                                    ></i>
+
+                                                </div>
+
+
+                                                <div>
+
+                                                    <span>
+                                                        Selected Role
+                                                    </span>
+
+                                                    <strong>
+                                                        {
+                                                            selectedRole.name
+                                                        }
+                                                    </strong>
+
+                                                    <small>
+
+                                                        {
+                                                            selectedRole.description
+                                                            ||
+                                                            (
+                                                                selectedRole?.type ===
+                                                                    'system'
+                                                                    ||
+                                                                    selectedRole?.is_system_role
+                                                                    ? 'Predefined system employee role.'
+                                                                    : 'Custom company role.'
+                                                            )
+                                                        }
+
+                                                    </small>
+
+                                                </div>
+
+                                            </div>
+
+                                        )
+                                    }
 
 
                                     {
@@ -980,6 +1094,178 @@ export default function UserEdit({
             </PageShell>
 
         </BusinessLayout>
+    );
+}
+
+
+/*
+|--------------------------------------------------------------------------
+| Role Group
+|--------------------------------------------------------------------------
+*/
+
+function RoleGroup({
+    title,
+    subtitle,
+    icon,
+    roles,
+    selectedRoleName,
+    onChange,
+}) {
+
+    return (
+
+        <div className="rr-user-role-group">
+
+            <div className="rr-user-role-group-header">
+
+                <div>
+                    <i className={`bi ${icon}`}></i>
+                </div>
+
+
+                <section>
+
+                    <strong>
+                        {title}
+                    </strong>
+
+                    <span>
+                        {subtitle}
+                    </span>
+
+                </section>
+
+            </div>
+
+
+            <div className="rr-user-role-group-list">
+
+                {
+                    roles.map(
+                        role => {
+
+                            const selected =
+                                selectedRoleName ===
+                                role.name;
+
+
+                            return (
+
+                                <label
+                                    key={
+                                        role.id
+                                    }
+                                    className={
+                                        `rr-user-role-option ${selected
+                                            ? 'selected'
+                                            : ''
+                                        }`
+                                    }
+                                >
+
+                                    <input
+                                        type="radio"
+                                        name="role"
+                                        value={
+                                            role.name
+                                        }
+                                        checked={
+                                            selected
+                                        }
+                                        onChange={
+                                            () =>
+                                                onChange(
+                                                    role.name
+                                                )
+                                        }
+                                    />
+
+
+                                    <div className="rr-user-role-option-icon">
+
+                                        <i
+                                            className={
+                                                role?.type ===
+                                                    'system'
+                                                    ||
+                                                    role?.is_system_role
+                                                    ? 'bi bi-shield-check'
+                                                    : 'bi bi-person-badge'
+                                            }
+                                        ></i>
+
+                                    </div>
+
+
+                                    <div className="rr-user-role-option-content">
+
+                                        <div className="rr-user-role-option-title">
+
+                                            <strong>
+                                                {
+                                                    role.name
+                                                }
+                                            </strong>
+
+
+                                            <span
+                                                className={
+                                                    role?.type ===
+                                                        'system'
+                                                        ||
+                                                        role?.is_system_role
+                                                        ? 'system'
+                                                        : 'company'
+                                                }
+                                            >
+
+                                                {
+                                                    role?.type ===
+                                                        'system'
+                                                        ||
+                                                        role?.is_system_role
+                                                        ? 'System'
+                                                        : 'Company'
+                                                }
+
+                                            </span>
+
+                                        </div>
+
+
+                                        <small>
+
+                                            {
+                                                role.description
+                                                ||
+                                                (
+                                                    role?.type ===
+                                                        'system'
+                                                        ||
+                                                        role?.is_system_role
+                                                        ? 'Predefined employee role.'
+                                                        : 'Custom company role.'
+                                                )
+                                            }
+
+                                        </small>
+
+                                    </div>
+
+
+                                    <i className="bi bi-check-circle-fill rr-user-role-check"></i>
+
+                                </label>
+
+                            );
+                        }
+                    )
+                }
+
+            </div>
+
+        </div>
     );
 }
 

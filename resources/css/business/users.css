@@ -3021,3 +3021,797 @@
             minmax(0, 1fr);
     }
 }
+
+
+/* =========================================================
+   USER ROLE CLASSIFICATION
+   ========================================================= */
+
+.rr-user-view-role-classification {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    gap: 10px;
+
+    margin-bottom: 8px;
+    padding: 8px 10px;
+
+    border: 1px solid #d7dee8;
+    border-radius: 6px;
+
+    background:
+        linear-gradient(180deg,
+            #ffffff,
+            #f8fafc);
+
+    box-shadow:
+        0 1px 3px rgba(15, 23, 42, 0.04);
+}
+
+
+.rr-user-view-role-classification.system {
+    border-left:
+        3px solid #2563eb;
+}
+
+
+.rr-user-view-role-classification.company {
+    border-left:
+        3px solid #7c3aed;
+}
+
+
+.rr-user-view-role-classification-icon {
+    width: 32px;
+    height: 32px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    flex: 0 0 32px;
+
+    border-radius: 5px;
+
+    font-size: 12px;
+}
+
+
+.rr-user-view-role-classification.system .rr-user-view-role-classification-icon {
+    background: #eff6ff;
+    color: #1d4ed8;
+}
+
+
+.rr-user-view-role-classification.company .rr-user-view-role-classification-icon {
+    background: #f5f3ff;
+    color: #6d28d9;
+}
+
+
+.rr-user-view-role-classification-main {
+    min-width: 0;
+    flex: 1;
+}
+
+
+.rr-user-view-role-classification-main>span {
+    display: block;
+
+    color: #8793a4;
+
+    font-size: 11px;
+    font-weight: 650;
+
+    text-transform: uppercase;
+}
+
+
+.rr-user-view-role-classification-main>strong {
+    display: block;
+
+    margin-top: 1px;
+
+    color: #172033;
+
+    font-size: 13px;
+    font-weight: 750;
+}
+
+
+.rr-user-view-role-classification-main>small {
+    display: block;
+
+    max-width: 620px;
+
+    overflow: hidden;
+
+    margin-top: 2px;
+
+    color: #64748b;
+
+    font-size: 11px;
+    line-height: 1.4;
+
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+
+.rr-user-view-role-type-badge {
+    flex-shrink: 0;
+
+    display: inline-flex;
+    align-items: center;
+
+    padding: 3px 7px;
+
+    border-radius: 999px;
+
+    font-size: 11px;
+    font-weight: 700;
+}
+
+
+.rr-user-view-role-type-badge.system {
+    border: 1px solid #bfdbfe;
+
+    background: #eff6ff;
+
+    color: #1d4ed8;
+}
+
+
+.rr-user-view-role-type-badge.company {
+    border: 1px solid #ddd6fe;
+
+    background: #f5f3ff;
+
+    color: #6d28d9;
+}
+
+
+/* =========================================================
+   CREATE / EDIT ROLE GROUPS
+   ========================================================= */
+
+.rr-user-role-group {
+    margin-bottom: 8px;
+
+    overflow: hidden;
+
+    border: 1px solid #dce3ec;
+    border-radius: 5px;
+
+    background: #ffffff;
+}
+
+
+.rr-user-role-group:last-child {
+    margin-bottom: 0;
+}
+
+
+.rr-user-role-group-header {
+    display: flex;
+    align-items: center;
+
+    gap: 7px;
+
+    min-height: 38px;
+
+    padding: 5px 7px;
+
+    border-bottom:
+        1px solid #e6ebf1;
+
+    background:
+        linear-gradient(180deg,
+            #fafbfd,
+            #f4f7fa);
+}
+
+
+.rr-user-role-group-header>div {
+    width: 25px;
+    height: 25px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    flex: 0 0 25px;
+
+    border-radius: 4px;
+
+    background: #ffffff;
+
+    color: #64748b;
+
+    font-size: 10px;
+}
+
+
+.rr-user-role-group-header section {
+    min-width: 0;
+}
+
+
+.rr-user-role-group-header strong {
+    display: block;
+
+    color: #334155;
+
+    font-size: 12px;
+    font-weight: 700;
+}
+
+
+.rr-user-role-group-header span {
+    display: block;
+
+    margin-top: 1px;
+
+    color: #8793a4;
+
+    font-size: 11px;
+}
+
+
+.rr-user-role-group-list {
+    padding: 5px;
+}
+
+
+/* =========================================================
+   ROLE OPTION CONTENT
+   ========================================================= */
+
+.rr-user-role-option-content {
+    min-width: 0;
+    flex: 1;
+}
+
+
+.rr-user-role-option-title {
+    display: flex;
+    align-items: center;
+
+    gap: 6px;
+
+    min-width: 0;
+}
+
+
+.rr-user-role-option-title strong {
+    overflow: hidden;
+
+    color: #263244;
+
+    font-size: 12px;
+    font-weight: 700;
+
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+
+.rr-user-role-option-title>span {
+    flex-shrink: 0;
+
+    padding: 2px 5px;
+
+    border-radius: 999px;
+
+    font-size: 10px;
+    font-weight: 700;
+}
+
+
+.rr-user-role-option-title>span.system {
+    background: #eff6ff;
+
+    color: #1d4ed8;
+}
+
+
+.rr-user-role-option-title>span.company {
+    background: #f5f3ff;
+
+    color: #6d28d9;
+}
+
+
+.rr-user-role-option-content>small {
+    display: block;
+
+    overflow: hidden;
+
+    margin-top: 2px;
+
+    color: #7b8798;
+
+    font-size: 11px;
+    line-height: 1.35;
+
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+
+/* =========================================================
+   SELECTED ROLE SUMMARY
+   ========================================================= */
+
+.rr-user-selected-role-summary {
+    display: flex;
+    align-items: flex-start;
+
+    gap: 7px;
+
+    margin-top: 7px;
+    padding: 7px;
+
+    border: 1px solid #bfdbfe;
+    border-radius: 5px;
+
+    background: #f8fbff;
+}
+
+
+.rr-user-selected-role-summary-icon {
+    width: 27px;
+    height: 27px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    flex: 0 0 27px;
+
+    border-radius: 4px;
+
+    background: #eff6ff;
+
+    color: #2563eb;
+
+    font-size: 10px;
+}
+
+
+.rr-user-selected-role-summary>div:last-child {
+    min-width: 0;
+}
+
+
+.rr-user-selected-role-summary span {
+    display: block;
+
+    color: #8793a4;
+
+    font-size: 10px;
+    font-weight: 650;
+
+    text-transform: uppercase;
+}
+
+
+.rr-user-selected-role-summary strong {
+    display: block;
+
+    margin-top: 1px;
+
+    color: #263244;
+
+    font-size: 12px;
+    font-weight: 750;
+}
+
+
+.rr-user-selected-role-summary small {
+    display: block;
+
+    margin-top: 2px;
+
+    color: #64748b;
+
+    font-size: 11px;
+    line-height: 1.4;
+}
+
+
+/* =========================================================
+   MOBILE
+   ========================================================= */
+
+@media (max-width: 700px) {
+
+    .rr-user-view-role-classification {
+        align-items: flex-start;
+
+        flex-wrap: wrap;
+    }
+
+
+    .rr-user-view-role-type-badge {
+        margin-left: 39px;
+    }
+
+
+    .rr-user-view-role-classification-main>small,
+    .rr-user-role-option-content>small {
+        white-space: normal;
+    }
+}
+
+
+/* =========================================================
+   USERS INDEX - ROLE CELL
+   ========================================================= */
+
+.rr-users-role-cell {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+
+    gap: 3px;
+
+    min-width: 120px;
+}
+
+
+/* =========================================================
+   ROLE BADGE
+   ========================================================= */
+
+.rr-users-role-badge {
+    display: inline-flex;
+    align-items: center;
+
+    gap: 5px;
+
+    max-width: 180px;
+
+    padding:
+        3px 7px;
+
+    border: 1px solid #d7dee8;
+    border-radius: 999px;
+
+    background: #f8fafc;
+
+    color: #475569;
+
+    font-size: 11px;
+    font-weight: 700;
+
+    line-height: 1.2;
+
+    white-space: nowrap;
+}
+
+
+.rr-users-role-badge i {
+    flex-shrink: 0;
+
+    font-size: 10px;
+}
+
+
+/* =========================================================
+   SYSTEM ROLE
+   ========================================================= */
+
+.rr-users-role-badge.system {
+    border-color: #bfdbfe;
+
+    background: #eff6ff;
+
+    color: #1d4ed8;
+}
+
+
+.rr-users-role-badge.system i {
+    color: #2563eb;
+}
+
+
+/* =========================================================
+   COMPANY ROLE
+   ========================================================= */
+
+.rr-users-role-badge.company {
+    border-color: #ddd6fe;
+
+    background: #f5f3ff;
+
+    color: #6d28d9;
+}
+
+
+.rr-users-role-badge.company i {
+    color: #7c3aed;
+}
+
+
+/* =========================================================
+   COMPANY ADMIN / PROTECTED ROLE
+   ========================================================= */
+
+.rr-users-role-badge.company-admin {
+    border-color: #fecaca;
+
+    background: #fff7ed;
+
+    color: #9a3412;
+}
+
+
+.rr-users-role-badge.company-admin i {
+    color: #ea580c;
+}
+
+
+/* =========================================================
+   ROLE TYPE TEXT
+   ========================================================= */
+
+.rr-users-role-type {
+    display: inline-flex;
+    align-items: center;
+
+    padding-left: 2px;
+
+    color: #8793a4;
+
+    font-size: 10px;
+    font-weight: 650;
+
+    line-height: 1.2;
+}
+
+
+.rr-users-role-type.system {
+    color: #2563eb;
+}
+
+
+.rr-users-role-type.company {
+    color: #7c3aed;
+}
+
+
+.rr-users-role-type.protected {
+    color: #c2410c;
+}
+
+
+/* =========================================================
+   TABLE ROLE COLUMN
+   ========================================================= */
+
+.rr-users-table th:nth-child(2),
+.rr-users-table td:nth-child(2) {
+    min-width: 150px;
+}
+
+
+/* =========================================================
+   ROLE FILTER OPTGROUP
+   ========================================================= */
+
+.rr-users-filter select optgroup {
+    color: #334155;
+
+    font-size: 11px;
+    font-weight: 700;
+}
+
+
+.rr-users-filter select option {
+    color: #334155;
+
+    font-size: 12px;
+    font-weight: 500;
+}
+
+
+/* =========================================================
+   RESPONSIVE
+   ========================================================= */
+
+@media (max-width: 700px) {
+
+    .rr-users-role-badge {
+        max-width: 150px;
+    }
+
+
+    .rr-users-role-cell {
+        min-width: 130px;
+    }
+}
+
+
+/* =========================================================
+   USER TABLE ACTION BUTTONS
+   ========================================================= */
+
+.rr-users-actions {
+    display: flex;
+    align-items: center;
+
+    gap: 5px;
+
+    white-space: nowrap;
+}
+
+
+.rr-users-action-btn {
+    height: 28px;
+
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    gap: 4px;
+
+    padding: 0 8px;
+
+    border: 1px solid transparent;
+    border-radius: 4px;
+
+    background: #ffffff;
+
+    font-size: 11px;
+    font-weight: 650;
+
+    line-height: 1;
+
+    text-decoration: none;
+
+    cursor: pointer;
+
+    transition:
+        background-color 0.12s ease,
+        border-color 0.12s ease,
+        color 0.12s ease,
+        box-shadow 0.12s ease;
+}
+
+
+.rr-users-action-btn i {
+    font-size: 11px;
+}
+
+
+/* =========================================================
+   VIEW - BLUE
+   ========================================================= */
+
+.rr-users-action-btn.view {
+    border-color: #bfdbfe;
+
+    background: #eff6ff;
+
+    color: #1d4ed8;
+}
+
+
+.rr-users-action-btn.view:hover {
+    border-color: #93c5fd;
+
+    background: #dbeafe;
+
+    color: #1e40af;
+
+    box-shadow:
+        0 1px 2px rgba(37, 99, 235, 0.12);
+}
+
+
+/* =========================================================
+   EDIT - AMBER
+   ========================================================= */
+
+.rr-users-action-btn.edit {
+    border-color: #fde68a;
+
+    background: #fffbeb;
+
+    color: #a16207;
+}
+
+
+.rr-users-action-btn.edit:hover {
+    border-color: #fcd34d;
+
+    background: #fef3c7;
+
+    color: #854d0e;
+
+    box-shadow:
+        0 1px 2px rgba(217, 119, 6, 0.12);
+}
+
+
+/* =========================================================
+   DISABLE - RED
+   ========================================================= */
+
+.rr-users-action-btn.disable {
+    border-color: #fecaca;
+
+    background: #fef2f2;
+
+    color: #b91c1c;
+}
+
+
+.rr-users-action-btn.disable:hover {
+    border-color: #fca5a5;
+
+    background: #fee2e2;
+
+    color: #991b1b;
+
+    box-shadow:
+        0 1px 2px rgba(220, 38, 38, 0.12);
+}
+
+
+/* =========================================================
+   ENABLE - GREEN
+   ========================================================= */
+
+.rr-users-action-btn.enable {
+    border-color: #bbf7d0;
+
+    background: #f0fdf4;
+
+    color: #15803d;
+}
+
+
+.rr-users-action-btn.enable:hover {
+    border-color: #86efac;
+
+    background: #dcfce7;
+
+    color: #166534;
+
+    box-shadow:
+        0 1px 2px rgba(22, 163, 74, 0.12);
+}
+
+
+/* =========================================================
+   DISABLED / PROTECTED
+   ========================================================= */
+
+.rr-users-action-btn:disabled,
+.rr-users-action-btn.disabled {
+    border-color: #e2e8f0;
+
+    background: #f8fafc;
+
+    color: #94a3b8;
+
+    cursor: not-allowed;
+
+    box-shadow: none;
+
+    opacity: 0.75;
+}
+
+
+/* =========================================================
+   FOCUS - KEYBOARD / WINDOWS APP FEEL
+   ========================================================= */
+
+.rr-users-action-btn:focus-visible {
+    outline: 2px solid #93c5fd;
+
+    outline-offset: 1px;
+}

@@ -92,7 +92,7 @@ class UserController extends Controller
             )
 
             ->with([
-                'roles:id,company_id,name,status',
+                'roles:id,company_id,name,description,status,is_system_role',
                 'stores:id,company_id,store_name,store_code,status',
             ])
 
@@ -198,6 +198,29 @@ class UserController extends Controller
                                                 */
 
                                             ->orWhere(
+                                                function (
+                                                    $systemQuery
+                                                ) {
+
+                                                    $systemQuery
+                                                        ->whereNull(
+                                                            'roles.company_id'
+                                                        )
+                                                        ->where(
+                                                            'roles.is_system_role',
+                                                            true
+                                                        )
+                                                        ->whereNotIn(
+                                                            'roles.name',
+                                                            [
+                                                                'Super Admin',
+                                                                'Company Admin',
+                                                            ]
+                                                        );
+                                                }
+                                            )
+
+                                            ->orWhere(
                                                 'roles.company_id',
                                                 $company->id
                                             );
@@ -271,10 +294,35 @@ class UserController extends Controller
                     'status' =>
                     (bool) $user->status,
 
+                    /*
+                    |--------------------------------------------------------------------------
+                    | Primary Role
+                    |--------------------------------------------------------------------------
+                    */
+
                     'role' =>
                     $user->roles
-                        ->pluck('name')
-                        ->first(),
+                        ->first()
+                        ?->name,
+
+                    'role_type' =>
+                    $this->getRoleType(
+                        $user->roles
+                            ->first()
+                    ),
+
+                    'is_system_role' =>
+                    (bool) (
+                        $user->roles
+                        ->first()
+                        ?->is_system_role
+                        ?? false
+                    ),
+
+                    'role_description' =>
+                    $user->roles
+                        ->first()
+                        ?->description,
 
                     'roles' =>
                     $user->roles
@@ -747,7 +795,7 @@ class UserController extends Controller
 
 
         $user->load([
-            'roles:id,company_id,name,status',
+            'roles:id,company_id,name,description,status,is_system_role',
             'stores:id,company_id,store_name,store_code,status',
         ]);
 
@@ -823,7 +871,7 @@ class UserController extends Controller
 
 
         $user->load([
-            'roles:id,company_id,name,status',
+            'roles:id,company_id,name,description,status,is_system_role',
             'stores:id,company_id,store_name,store_code,status',
         ]);
 
@@ -1362,52 +1410,47 @@ class UserController extends Controller
         Company $company
     ): array {
 
+        $protectedRoles = [
+            'Super Admin',
+            'Company Admin',
+        ];
+
         return Role::query()
-
-            ->where(
-                'company_id',
-                $company->id
-            )
-
-            ->where(
-                'guard_name',
-                'web'
-            )
-
-            ->where(
-                'status',
-                true
-            )
-
-            ->orderBy(
-                'name'
-            )
-
+            ->where('guard_name', 'web')
+            ->where('status', true)
+            ->whereNotIn('name', $protectedRoles)
+            ->where(function ($query) use ($company) {
+                $query->where(function ($systemQuery) {
+                    $systemQuery
+                        ->whereNull('company_id')
+                        ->where('is_system_role', true);
+                })
+                    ->orWhere(function ($companyQuery) use ($company) {
+                        $companyQuery
+                            ->where('company_id', $company->id)
+                            ->where('is_system_role', false);
+                    });
+            })
+            ->orderByDesc('is_system_role')
+            ->orderBy('name')
             ->get([
                 'id',
                 'company_id',
                 'name',
                 'description',
+                'guard_name',
+                'status',
+                'is_system_role',
             ])
-
-            ->map(
-                fn(
-                    Role $role
-                ) => [
-
-                    'id' =>
-                    $role->id,
-
-                    'name' =>
-                    $role->name,
-
-                    'description' =>
-                    $role->description,
-                ]
-            )
-
+            ->map(fn(Role $role) => [
+                'id' => $role->id,
+                'name' => $role->name,
+                'description' => $role->description,
+                'type' => (bool) $role->is_system_role ? 'system' : 'company',
+                'is_system_role' => (bool) $role->is_system_role,
+                'company_id' => $role->company_id,
+            ])
             ->values()
-
             ->all();
     }
 
@@ -1432,79 +1475,42 @@ class UserController extends Controller
     ): array {
 
         return Role::query()
-
-            ->where(
-                'guard_name',
-                'web'
-            )
-
-            ->where(
-                function (
-                    $query
-                ) use (
-                    $company
-                ) {
-
-                    /*
-                    |--------------------------------------------------------------------------
-                    | Global Company Admin
-                    |--------------------------------------------------------------------------
-                    */
-
-                    $query->where(
-                        function (
-                            $globalQuery
-                        ) {
-
-                            $globalQuery
-                                ->whereNull(
-                                    'company_id'
-                                )
-                                ->where(
-                                    'name',
-                                    'Company Admin'
-                                );
-                        }
-                    )
-
-                        /*
-                        |--------------------------------------------------------------------------
-                        | Company's Custom Roles
-                        |--------------------------------------------------------------------------
-                        */
-
-                        ->orWhere(
-                            'company_id',
-                            $company->id
-                        );
-                }
-            )
-
-            ->orderBy(
-                'name'
-            )
-
+            ->where('guard_name', 'web')
+            ->where(function ($query) use ($company) {
+                $query->where(function ($companyAdminQuery) {
+                    $companyAdminQuery
+                        ->whereNull('company_id')
+                        ->where('name', 'Company Admin');
+                })
+                    ->orWhere(function ($systemQuery) {
+                        $systemQuery
+                            ->whereNull('company_id')
+                            ->where('is_system_role', true)
+                            ->whereNotIn('name', [
+                                'Super Admin',
+                                'Company Admin',
+                            ]);
+                    })
+                    ->orWhere(function ($companyQuery) use ($company) {
+                        $companyQuery
+                            ->where('company_id', $company->id)
+                            ->where('is_system_role', false);
+                    });
+            })
+            ->orderByDesc('is_system_role')
+            ->orderBy('name')
             ->get([
                 'id',
                 'company_id',
                 'name',
+                'is_system_role',
             ])
-
-            ->map(
-                fn(
-                    Role $role
-                ) => [
-
-                    'id' =>
-                    $role->id,
-
-                    'name' =>
-                    $role->name,
-                ]
-            )
-
+            ->map(fn(Role $role) => [
+                'id' => $role->id,
+                'name' => $role->name,
+                'type' => (bool) $role->is_system_role ? 'system' : 'company',
+            ])
             ->values()
-
             ->all();
     }
 
@@ -1532,44 +1538,73 @@ class UserController extends Controller
         Company $company
     ): Role {
 
-        $role =
-            Role::query()
+        $protectedRoles = [
+            'Super Admin',
+            'Company Admin',
+        ];
 
-            ->where(
-                'company_id',
-                $company->id
-            )
-
-            ->where(
-                'name',
-                $roleName
-            )
-
-            ->where(
-                'guard_name',
-                'web'
-            )
-
-            ->where(
-                'status',
-                true
-            )
-
+        $role = Role::query()
+            ->where('name', $roleName)
+            ->where('guard_name', 'web')
+            ->where('status', true)
+            ->whereNotIn('name', $protectedRoles)
+            ->where(function ($query) use ($company) {
+                $query->where(function ($systemQuery) {
+                    $systemQuery
+                        ->whereNull('company_id')
+                        ->where('is_system_role', true);
+                })
+                    ->orWhere(function ($companyQuery) use ($company) {
+                        $companyQuery
+                            ->where('company_id', $company->id)
+                            ->where('is_system_role', false);
+                    });
+            })
             ->first();
 
+        if (!$role) {
+            abort(
+                422,
+                'The selected role is invalid, inactive, protected, or does not belong to this company.'
+            );
+        }
+
+        return $role;
+    }
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Role Type
+    |--------------------------------------------------------------------------
+    |
+    | Global predefined employee roles have:
+    |
+    | company_id = NULL
+    | is_system_role = true
+    |
+    | Company-created custom roles have:
+    |
+    | company_id = current company
+    | is_system_role = false
+    |
+    */
+
+    private function getRoleType(
+        ?Role $role
+    ): ?string {
 
         if (
             !$role
         ) {
 
-            abort(
-                422,
-                'The selected role is invalid, inactive, or does not belong to this company.'
-            );
+            return null;
         }
 
 
-        return $role;
+        return (bool) $role->is_system_role
+            ? 'system'
+            : 'company';
     }
 
 
@@ -1670,7 +1705,7 @@ class UserController extends Controller
     ): array {
 
         $user->loadMissing([
-            'roles:id,company_id,name,status',
+            'roles:id,company_id,name,description,status,is_system_role',
             'stores:id,company_id,store_name,store_code,status',
         ]);
 
@@ -1698,10 +1733,35 @@ class UserController extends Controller
             'status' =>
             (bool) $user->status,
 
+            /*
+            |--------------------------------------------------------------------------
+            | Primary Role
+            |--------------------------------------------------------------------------
+            */
+
             'role' =>
             $user->roles
-                ->pluck('name')
-                ->first(),
+                ->first()
+                ?->name,
+
+            'role_type' =>
+            $this->getRoleType(
+                $user->roles
+                    ->first()
+            ),
+
+            'is_system_role' =>
+            (bool) (
+                $user->roles
+                ->first()
+                ?->is_system_role
+                ?? false
+            ),
+
+            'role_description' =>
+            $user->roles
+                ->first()
+                ?->description,
 
             'roles' =>
             $user->roles

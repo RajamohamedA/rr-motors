@@ -58,6 +58,40 @@ export default function UsersIndex({
 
     /*
     |--------------------------------------------------------------------------
+    | Role Filter Groups
+    |--------------------------------------------------------------------------
+    */
+
+    const systemRoles =
+        (
+            roles
+            ?? []
+        ).filter(
+            role =>
+                role?.type === 'system'
+                ||
+                Boolean(
+                    role?.is_system_role
+                )
+        );
+
+
+    const companyRoles =
+        (
+            roles
+            ?? []
+        ).filter(
+            role =>
+                role?.type === 'company'
+                ||
+                !Boolean(
+                    role?.is_system_role
+                )
+        );
+
+
+    /*
+    |--------------------------------------------------------------------------
     | Apply Filters
     |--------------------------------------------------------------------------
     */
@@ -544,27 +578,67 @@ export default function UsersIndex({
                                         All Roles
                                     </option>
 
+
                                     {
-                                        (
-                                            roles
-                                            ?? []
-                                        ).map(
-                                            role => (
+                                        systemRoles.length > 0 && (
 
-                                                <option
-                                                    key={
-                                                        role.id
-                                                    }
-                                                    value={
-                                                        role.name
-                                                    }
-                                                >
-                                                    {
-                                                        role.name
-                                                    }
-                                                </option>
+                                            <optgroup label="System Roles">
 
-                                            )
+                                                {
+                                                    systemRoles.map(
+                                                        role => (
+
+                                                            <option
+                                                                key={
+                                                                    role.id
+                                                                }
+                                                                value={
+                                                                    role.name
+                                                                }
+                                                            >
+                                                                {
+                                                                    role.name
+                                                                }
+                                                            </option>
+
+                                                        )
+                                                    )
+                                                }
+
+                                            </optgroup>
+
+                                        )
+                                    }
+
+
+                                    {
+                                        companyRoles.length > 0 && (
+
+                                            <optgroup label="Company Roles">
+
+                                                {
+                                                    companyRoles.map(
+                                                        role => (
+
+                                                            <option
+                                                                key={
+                                                                    role.id
+                                                                }
+                                                                value={
+                                                                    role.name
+                                                                }
+                                                            >
+                                                                {
+                                                                    role.name
+                                                                }
+                                                            </option>
+
+                                                        )
+                                                    )
+                                                }
+
+                                            </optgroup>
+
                                         )
                                     }
 
@@ -881,6 +955,27 @@ function UserRow({
         'Company Admin';
 
 
+    const roleType =
+        user?.role_type
+        ?? (
+            user?.is_system_role
+                ? 'system'
+                : (
+                    isCompanyAdmin
+                        ? 'system'
+                        : 'company'
+                )
+        );
+
+
+    const roleTypeLabel =
+        isCompanyAdmin
+            ? 'Protected'
+            : roleType === 'system'
+                ? 'System'
+                : 'Company';
+
+
     const branches =
         user?.branches
         ?? [];
@@ -985,29 +1080,66 @@ function UserRow({
 
             <td>
 
-                <span
-                    className={
-                        `rr-users-role-badge ${isCompanyAdmin
-                            ? 'company-admin'
-                            : ''
-                        }`
-                    }
-                >
+                <div className="rr-users-role-cell">
 
-                    <i
+                    <span
                         className={
-                            isCompanyAdmin
-                                ? 'bi bi-shield-lock'
-                                : 'bi bi-person-badge'
+                            `rr-users-role-badge ${isCompanyAdmin
+                                ? 'company-admin'
+                                : roleType
+                            }`
                         }
-                    ></i>
+                    >
+
+                        <i
+                            className={
+                                isCompanyAdmin
+                                    ? 'bi bi-shield-lock'
+                                    : roleType === 'system'
+                                        ? 'bi bi-shield-check'
+                                        : 'bi bi-person-badge'
+                            }
+                        ></i>
+
+                        {
+                            user?.role
+                            ?? 'No Role'
+                        }
+
+                    </span>
+
 
                     {
-                        user?.role
-                        ?? 'No Role'
+                        user?.role && (
+
+                            <span
+                                className={
+                                    `rr-users-role-type ${isCompanyAdmin
+                                        ? 'protected'
+                                        : roleType
+                                    }`
+                                }
+                            >
+
+                                {
+                                    roleTypeLabel
+                                }
+
+                                {
+                                    !isCompanyAdmin &&
+                                        roleType === 'system'
+                                        ? ' Role'
+                                        : !isCompanyAdmin
+                                            ? ' Role'
+                                            : ''
+                                }
+
+                            </span>
+
+                        )
                     }
 
-                </span>
+                </div>
 
             </td>
 
@@ -1064,7 +1196,7 @@ function UserRow({
                         href={
                             `/company/users/${user.id}`
                         }
-                        className="rr-users-action-btn"
+                        className="rr-users-action-btn view"
                         title="View user"
                     >
 
@@ -1082,7 +1214,7 @@ function UserRow({
                                 href={
                                     `/company/users/${user.id}/edit`
                                 }
-                                className="rr-users-action-btn"
+                                className="rr-users-action-btn edit"
                                 title="Edit user"
                             >
 
@@ -1103,9 +1235,10 @@ function UserRow({
                             <button
                                 type="button"
                                 className={
-                                    user?.status
-                                        ? 'rr-users-status-action deactivate'
-                                        : 'rr-users-status-action activate'
+                                    `rr-users-action-btn ${user?.status
+                                        ? 'disable'
+                                        : 'enable'
+                                    }`
                                 }
                                 onClick={
                                     () =>

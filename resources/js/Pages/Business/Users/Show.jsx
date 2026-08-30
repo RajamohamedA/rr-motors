@@ -20,6 +20,44 @@ export default function UserShow({
         ?? [];
 
 
+    /*
+    |--------------------------------------------------------------------------
+    | Role Information
+    |--------------------------------------------------------------------------
+    */
+
+    const roleType =
+        managedUser?.role_type
+        ?? (
+            managedUser?.is_system_role
+                ? 'system'
+                : (
+                    managedUser?.is_company_admin
+                        ? 'system'
+                        : 'company'
+                )
+        );
+
+
+    const roleTypeLabel =
+        managedUser?.is_company_admin
+            ? 'Protected System Role'
+            : roleType === 'system'
+                ? 'System Role'
+                : 'Company Role';
+
+
+    const roleDescription =
+        managedUser?.role_description
+        ?? (
+            managedUser?.is_company_admin
+                ? 'Protected company administrator role with company-wide access.'
+                : roleType === 'system'
+                    ? 'Predefined employee role managed by the system.'
+                    : 'Custom role created for this company.'
+        );
+
+
     return (
 
         <BusinessLayout>
@@ -188,7 +226,11 @@ export default function UserShow({
                             managedUser?.role
                             ?? 'No Role'
                         }
-                        icon="bi-person-badge"
+                        icon={
+                            roleType === 'system'
+                                ? 'bi-shield-check'
+                                : 'bi-person-badge'
+                        }
                     />
 
 
@@ -230,6 +272,72 @@ export default function UserShow({
                         }
                         icon="bi-building"
                     />
+
+                </section>
+
+
+                {/* =====================================================
+                    ROLE CLASSIFICATION
+                   ===================================================== */}
+
+                <section
+                    className={
+                        `rr-user-view-role-classification ${roleType === 'system'
+                            ? 'system'
+                            : 'company'
+                        }`
+                    }
+                >
+
+                    <div className="rr-user-view-role-classification-icon">
+
+                        <i
+                            className={
+                                roleType === 'system'
+                                    ? 'bi bi-shield-check'
+                                    : 'bi bi-building-lock'
+                            }
+                        ></i>
+
+                    </div>
+
+
+                    <div className="rr-user-view-role-classification-main">
+
+                        <span>
+                            Access Role
+                        </span>
+
+                        <strong>
+                            {
+                                managedUser?.role
+                                ?? 'No Role'
+                            }
+                        </strong>
+
+                        <small>
+                            {
+                                roleDescription
+                            }
+                        </small>
+
+                    </div>
+
+
+                    <span
+                        className={
+                            `rr-user-view-role-type-badge ${roleType === 'system'
+                                ? 'system'
+                                : 'company'
+                            }`
+                        }
+                    >
+
+                        {
+                            roleTypeLabel
+                        }
+
+                    </span>
 
                 </section>
 
@@ -330,10 +438,36 @@ export default function UserShow({
                         <div className="rr-user-view-detail-list">
 
                             <DetailRow
-                                icon="bi-person-badge"
+                                icon={
+                                    roleType === 'system'
+                                        ? 'bi-shield-check'
+                                        : 'bi-person-badge'
+                                }
                                 label="Role"
                                 value={
                                     managedUser?.role
+                                }
+                            />
+
+
+                            <DetailRow
+                                icon={
+                                    roleType === 'system'
+                                        ? 'bi-shield-lock'
+                                        : 'bi-building-lock'
+                                }
+                                label="Role Type"
+                                value={
+                                    roleTypeLabel
+                                }
+                            />
+
+
+                            <DetailRow
+                                icon="bi-card-text"
+                                label="Role Description"
+                                value={
+                                    roleDescription
                                 }
                             />
 

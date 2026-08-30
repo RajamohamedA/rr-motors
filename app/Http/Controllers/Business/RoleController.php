@@ -22,22 +22,58 @@ class RoleController extends Controller
     |--------------------------------------------------------------------------
     */
 
-    public function index(Request $request): Response
-    {
-        $currentUser = $request->user();
+    public function index(
+        Request $request
+    ): Response {
 
-        $this->ensureCompanyAdmin($currentUser);
+        $currentUser =
+            $request->user();
 
-        $company = $this->getCompany($currentUser);
 
-        $search = trim(
-            $request->string('search')->toString()
+        $this->ensureCompanyAdmin(
+            $currentUser
         );
 
-        $status = $request->input('status');
 
-        $roles = Role::query()
-            ->where('company_id', $company->id)
+        $company =
+            $this->getCompany(
+                $currentUser
+            );
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Filters
+        |--------------------------------------------------------------------------
+        */
+
+        $search =
+            trim(
+                $request
+                    ->string('search')
+                    ->toString()
+            );
+
+
+        $status =
+            $request->input(
+                'status'
+            );
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Roles
+        |--------------------------------------------------------------------------
+        */
+
+        $roles =
+            Role::query()
+
+            ->where(
+                'company_id',
+                $company->id
+            )
 
             ->withCount([
                 'permissions',
@@ -46,39 +82,73 @@ class RoleController extends Controller
 
             ->when(
                 $search !== '',
-                function ($query) use ($search) {
-                    $query->where(function ($q) use ($search) {
-                        $q->where(
-                            'name',
-                            'like',
-                            "%{$search}%"
-                        )->orWhere(
-                            'description',
-                            'like',
-                            "%{$search}%"
-                        );
-                    });
+                function (
+                    $query
+                ) use (
+                    $search
+                ) {
+
+                    $query->where(
+                        function (
+                            $q
+                        ) use (
+                            $search
+                        ) {
+
+                            $q->where(
+                                'name',
+                                'like',
+                                "%{$search}%"
+                            )
+
+                                ->orWhere(
+                                    'description',
+                                    'like',
+                                    "%{$search}%"
+                                );
+                        }
+                    );
                 }
             )
 
             ->when(
                 $status !== null &&
                     $status !== '',
-                fn($query) =>
-                $query->where(
-                    'status',
-                    (bool) $status
-                )
+                function (
+                    $query
+                ) use (
+                    $status
+                ) {
+
+                    $query->where(
+                        'status',
+                        (bool) ((int) $status)
+                    );
+                }
             )
 
-            ->orderBy('name')
+            ->orderBy(
+                'name'
+            )
 
-            ->paginate(15)
+            ->paginate(
+                15
+            )
 
             ->withQueryString();
 
+
+        /*
+        |--------------------------------------------------------------------------
+        | Transform
+        |--------------------------------------------------------------------------
+        */
+
         $roles->through(
-            fn(Role $role) => [
+            fn(
+                Role $role
+            ) => [
+
                 'id' =>
                 $role->id,
 
@@ -101,12 +171,15 @@ class RoleController extends Controller
                 $role->users_count,
 
                 'created_at' =>
-                $role->created_at?->toISOString(),
+                $role->created_at
+                    ?->toISOString(),
 
                 'updated_at' =>
-                $role->updated_at?->toISOString(),
+                $role->updated_at
+                    ?->toISOString(),
             ]
         );
+
 
         /*
         |--------------------------------------------------------------------------
@@ -114,32 +187,65 @@ class RoleController extends Controller
         |--------------------------------------------------------------------------
         */
 
-        $baseQuery = Role::query()
+        $baseQuery =
+            Role::query()
+
             ->where(
                 'company_id',
                 $company->id
             );
 
+
         $summary = [
-            'total' => (clone $baseQuery)->count(),
+
+            'total' => (clone $baseQuery)
+                ->count(),
 
             'active' => (clone $baseQuery)
-                ->where('status', true)
+
+                ->where(
+                    'status',
+                    true
+                )
+
                 ->count(),
 
             'inactive' => (clone $baseQuery)
-                ->where('status', false)
+
+                ->where(
+                    'status',
+                    false
+                )
+
                 ->count(),
 
+            /*
+            |--------------------------------------------------------------------------
+            | Only Assignable Permissions
+            |--------------------------------------------------------------------------
+            */
+
             'permissions' =>
-            Permission::query()->count(),
+            $this
+                ->getAssignablePermissions()
+                ->count(),
         ];
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Response
+        |--------------------------------------------------------------------------
+        */
 
         return Inertia::render(
             'Business/Roles/Index',
             [
+
                 'company' =>
-                $this->companyData($company),
+                $this->companyData(
+                    $company
+                ),
 
                 'roles' =>
                 $roles,
@@ -148,6 +254,7 @@ class RoleController extends Controller
                 $summary,
 
                 'filters' => [
+
                     'search' =>
                     $search,
 
@@ -165,19 +272,33 @@ class RoleController extends Controller
     |--------------------------------------------------------------------------
     */
 
-    public function create(Request $request): Response
-    {
-        $currentUser = $request->user();
+    public function create(
+        Request $request
+    ): Response {
 
-        $this->ensureCompanyAdmin($currentUser);
+        $currentUser =
+            $request->user();
 
-        $company = $this->getCompany($currentUser);
+
+        $this->ensureCompanyAdmin(
+            $currentUser
+        );
+
+
+        $company =
+            $this->getCompany(
+                $currentUser
+            );
+
 
         return Inertia::render(
             'Business/Roles/Create',
             [
+
                 'company' =>
-                $this->companyData($company),
+                $this->companyData(
+                    $company
+                ),
 
                 'permissionGroups' =>
                 $this->getPermissionGroups(),
@@ -192,13 +313,24 @@ class RoleController extends Controller
     |--------------------------------------------------------------------------
     */
 
-    public function store(Request $request)
-    {
-        $currentUser = $request->user();
+    public function store(
+        Request $request
+    ) {
 
-        $this->ensureCompanyAdmin($currentUser);
+        $currentUser =
+            $request->user();
 
-        $company = $this->getCompany($currentUser);
+
+        $this->ensureCompanyAdmin(
+            $currentUser
+        );
+
+
+        $company =
+            $this->getCompany(
+                $currentUser
+            );
+
 
         /*
         |--------------------------------------------------------------------------
@@ -206,15 +338,21 @@ class RoleController extends Controller
         |--------------------------------------------------------------------------
         */
 
-        $validated = $request->validate([
-            'name' => [
-                'required',
-                'string',
-                'max:125',
+        $validated =
+            $request->validate([
 
-                Rule::unique('roles', 'name')
-                    ->where(
-                        fn($query) =>
+                'name' => [
+                    'required',
+                    'string',
+                    'max:125',
+
+                    Rule::unique(
+                        'roles',
+                        'name'
+                    )->where(
+                        fn(
+                            $query
+                        ) =>
                         $query
                             ->where(
                                 'company_id',
@@ -225,111 +363,123 @@ class RoleController extends Controller
                                 'web'
                             )
                     ),
-            ],
+                ],
 
-            'description' => [
-                'nullable',
-                'string',
-                'max:500',
-            ],
+                'description' => [
+                    'nullable',
+                    'string',
+                    'max:500',
+                ],
 
-            'status' => [
-                'required',
-                'boolean',
-            ],
+                'status' => [
+                    'required',
+                    'boolean',
+                ],
 
-            'permissions' => [
-                'nullable',
-                'array',
-            ],
+                'permissions' => [
+                    'nullable',
+                    'array',
+                ],
 
-            'permissions.*' => [
-                'required',
-                'integer',
-                Rule::exists(
-                    'permissions',
-                    'id'
-                ),
-            ],
-        ]);
+                'permissions.*' => [
+                    'required',
+                    'integer',
+
+                    Rule::exists(
+                        'permissions',
+                        'id'
+                    ),
+                ],
+            ]);
+
 
         /*
         |--------------------------------------------------------------------------
-        | Validate Permissions
+        | Resolve Permissions
         |--------------------------------------------------------------------------
         */
 
         $permissions =
             $this->resolvePermissions(
-                $validated['permissions'] ?? []
+                $validated['permissions']
+                    ?? []
             );
+
 
         /*
         |--------------------------------------------------------------------------
-        | Create Role
+        | Create
         |--------------------------------------------------------------------------
         */
 
-        $role = DB::transaction(
-            function () use (
-                $validated,
-                $company,
-                $permissions
-            ) {
-                /*
-                |--------------------------------------------------------------------------
-                | Important
-                |--------------------------------------------------------------------------
-                |
-                | We create the role directly instead of Role::create([
-                | 'name' => ...
-                | ]) alone because this role belongs to this company.
-                |
-                */
-
-                $role = new Role();
-
-                $role->company_id =
-                    $company->id;
-
-                $role->name =
-                    trim($validated['name']);
-
-                $role->description =
-                    $validated['description']
-                    ?? null;
-
-                $role->guard_name =
-                    'web';
-
-                $role->status =
-                    (bool) $validated['status'];
-
-                $role->save();
-
-                /*
-                |--------------------------------------------------------------------------
-                | Permissions
-                |--------------------------------------------------------------------------
-                */
-
-                $role->syncPermissions(
+        $role =
+            DB::transaction(
+                function () use (
+                    $validated,
+                    $company,
                     $permissions
-                );
+                ) {
 
-                return $role;
-            }
-        );
+                    $role =
+                        new Role();
 
-        return redirect()
-            ->route(
-                'business.roles.show',
-                $role
-            )
-            ->with(
-                'success',
-                'Role created successfully.'
+
+                    $role->company_id =
+                        $company->id;
+
+
+                    $role->name =
+                        trim(
+                            $validated['name']
+                        );
+
+
+                    $role->description =
+                        !empty($validated['description'])
+                        ? trim(
+                            $validated['description']
+                        )
+                        : null;
+
+
+                    $role->guard_name =
+                        'web';
+
+
+                    $role->status =
+                        (bool) $validated['status'];
+
+
+                    $role->save();
+
+
+                    /*
+                    |--------------------------------------------------------------------------
+                    | Permissions
+                    |--------------------------------------------------------------------------
+                    */
+
+                    $role->syncPermissions(
+                        $permissions
+                    );
+
+
+                    return $role;
+                }
             );
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Response
+        |--------------------------------------------------------------------------
+        */
+
+        return AppResponse::successRoute(
+            'business.roles.show',
+            'Role created successfully.',
+            $role
+        );
     }
 
 
@@ -343,33 +493,57 @@ class RoleController extends Controller
         Request $request,
         Role $role
     ): Response {
-        $currentUser = $request->user();
 
-        $this->ensureCompanyAdmin($currentUser);
+        $currentUser =
+            $request->user();
 
-        $company = $this->getCompany($currentUser);
+
+        $this->ensureCompanyAdmin(
+            $currentUser
+        );
+
+
+        $company =
+            $this->getCompany(
+                $currentUser
+            );
+
 
         $this->ensureRoleBelongsToCompany(
             $role,
             $company
         );
 
+
+        /*
+        |--------------------------------------------------------------------------
+        | Load
+        |--------------------------------------------------------------------------
+        */
+
         $role->load([
             'permissions:id,name,guard_name',
         ]);
+
 
         $role->loadCount([
             'users',
         ]);
 
+
         return Inertia::render(
             'Business/Roles/Show',
             [
+
                 'company' =>
-                $this->companyData($company),
+                $this->companyData(
+                    $company
+                ),
 
                 'managedRole' =>
-                $this->roleData($role),
+                $this->roleData(
+                    $role
+                ),
             ]
         );
     }
@@ -385,29 +559,52 @@ class RoleController extends Controller
         Request $request,
         Role $role
     ): Response {
-        $currentUser = $request->user();
 
-        $this->ensureCompanyAdmin($currentUser);
+        $currentUser =
+            $request->user();
 
-        $company = $this->getCompany($currentUser);
+
+        $this->ensureCompanyAdmin(
+            $currentUser
+        );
+
+
+        $company =
+            $this->getCompany(
+                $currentUser
+            );
+
 
         $this->ensureRoleBelongsToCompany(
             $role,
             $company
         );
 
+
+        /*
+        |--------------------------------------------------------------------------
+        | Load
+        |--------------------------------------------------------------------------
+        */
+
         $role->load([
             'permissions:id,name,guard_name',
         ]);
 
+
         return Inertia::render(
             'Business/Roles/Edit',
             [
+
                 'company' =>
-                $this->companyData($company),
+                $this->companyData(
+                    $company
+                ),
 
                 'managedRole' =>
-                $this->roleData($role),
+                $this->roleData(
+                    $role
+                ),
 
                 'permissionGroups' =>
                 $this->getPermissionGroups(),
@@ -426,16 +623,27 @@ class RoleController extends Controller
         Request $request,
         Role $role
     ) {
-        $currentUser = $request->user();
 
-        $this->ensureCompanyAdmin($currentUser);
+        $currentUser =
+            $request->user();
 
-        $company = $this->getCompany($currentUser);
+
+        $this->ensureCompanyAdmin(
+            $currentUser
+        );
+
+
+        $company =
+            $this->getCompany(
+                $currentUser
+            );
+
 
         $this->ensureRoleBelongsToCompany(
             $role,
             $company
         );
+
 
         /*
         |--------------------------------------------------------------------------
@@ -443,15 +651,21 @@ class RoleController extends Controller
         |--------------------------------------------------------------------------
         */
 
-        $validated = $request->validate([
-            'name' => [
-                'required',
-                'string',
-                'max:125',
+        $validated =
+            $request->validate([
 
-                Rule::unique('roles', 'name')
-                    ->where(
-                        fn($query) =>
+                'name' => [
+                    'required',
+                    'string',
+                    'max:125',
+
+                    Rule::unique(
+                        'roles',
+                        'name'
+                    )->where(
+                        fn(
+                            $query
+                        ) =>
                         $query
                             ->where(
                                 'company_id',
@@ -462,35 +676,38 @@ class RoleController extends Controller
                                 'web'
                             )
                     )
-                    ->ignore($role->id),
-            ],
+                        ->ignore(
+                            $role->id
+                        ),
+                ],
 
-            'description' => [
-                'nullable',
-                'string',
-                'max:500',
-            ],
+                'description' => [
+                    'nullable',
+                    'string',
+                    'max:500',
+                ],
 
-            'status' => [
-                'required',
-                'boolean',
-            ],
+                'status' => [
+                    'required',
+                    'boolean',
+                ],
 
-            'permissions' => [
-                'nullable',
-                'array',
-            ],
+                'permissions' => [
+                    'nullable',
+                    'array',
+                ],
 
-            'permissions.*' => [
-                'required',
-                'integer',
+                'permissions.*' => [
+                    'required',
+                    'integer',
 
-                Rule::exists(
-                    'permissions',
-                    'id'
-                ),
-            ],
-        ]);
+                    Rule::exists(
+                        'permissions',
+                        'id'
+                    ),
+                ],
+            ]);
+
 
         /*
         |--------------------------------------------------------------------------
@@ -504,6 +721,7 @@ class RoleController extends Controller
                     ?? []
             );
 
+
         /*
         |--------------------------------------------------------------------------
         | Update
@@ -516,17 +734,31 @@ class RoleController extends Controller
                 $validated,
                 $permissions
             ) {
+
                 $role->update([
+
                     'name' =>
-                    trim($validated['name']),
+                    trim(
+                        $validated['name']
+                    ),
 
                     'description' =>
-                    $validated['description']
-                        ?? null,
+                    !empty($validated['description'])
+                        ? trim(
+                            $validated['description']
+                        )
+                        : null,
 
                     'status' =>
                     (bool) $validated['status'],
                 ]);
+
+
+                /*
+                |--------------------------------------------------------------------------
+                | Sync Permissions
+                |--------------------------------------------------------------------------
+                */
 
                 $role->syncPermissions(
                     $permissions
@@ -534,15 +766,18 @@ class RoleController extends Controller
             }
         );
 
-        return redirect()
-            ->route(
-                'business.roles.show',
-                $role
-            )
-            ->with(
-                'success',
-                'Role updated successfully.'
-            );
+
+        /*
+        |--------------------------------------------------------------------------
+        | Response
+        |--------------------------------------------------------------------------
+        */
+
+        return AppResponse::successRoute(
+            'business.roles.show',
+            'Role updated successfully.',
+            $role
+        );
     }
 
 
@@ -556,43 +791,75 @@ class RoleController extends Controller
         Request $request,
         Role $role
     ) {
-        $currentUser = $request->user();
 
-        $this->ensureCompanyAdmin($currentUser);
+        $currentUser =
+            $request->user();
 
-        $company = $this->getCompany($currentUser);
+
+        $this->ensureCompanyAdmin(
+            $currentUser
+        );
+
+
+        $company =
+            $this->getCompany(
+                $currentUser
+            );
+
 
         $this->ensureRoleBelongsToCompany(
             $role,
             $company
         );
 
-        $validated = $request->validate([
-            'status' => [
-                'required',
-                'boolean',
-            ],
-        ]);
 
         /*
         |--------------------------------------------------------------------------
-        | Prevent Disabling Used Role
+        | Validation
+        |--------------------------------------------------------------------------
+        */
+
+        $validated =
+            $request->validate([
+
+                'status' => [
+                    'required',
+                    'boolean',
+                ],
+            ]);
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Prevent Disable When In Use
         |--------------------------------------------------------------------------
         */
 
         if (
             !(bool) $validated['status'] &&
-            $role->users()->exists()
+            $role
+            ->users()
+            ->exists()
         ) {
+
             return AppResponse::error(
                 'This role is assigned to users. Remove the role from those users before deactivating it.'
             );
         }
 
+
+        /*
+        |--------------------------------------------------------------------------
+        | Update
+        |--------------------------------------------------------------------------
+        */
+
         $role->update([
+
             'status' =>
             (bool) $validated['status'],
         ]);
+
 
         return AppResponse::success(
             $role->status
@@ -612,59 +879,71 @@ class RoleController extends Controller
         Request $request,
         Role $role
     ) {
-        $currentUser = $request->user();
 
-        $this->ensureCompanyAdmin($currentUser);
+        $currentUser =
+            $request->user();
 
-        $company = $this->getCompany($currentUser);
+
+        $this->ensureCompanyAdmin(
+            $currentUser
+        );
+
+
+        $company =
+            $this->getCompany(
+                $currentUser
+            );
+
 
         $this->ensureRoleBelongsToCompany(
             $role,
             $company
         );
 
+
         /*
         |--------------------------------------------------------------------------
-        | Protect Used Roles
+        | Prevent Delete When In Use
         |--------------------------------------------------------------------------
         */
 
         if (
-            $role->users()->exists()
+            $role
+            ->users()
+            ->exists()
         ) {
+
             return AppResponse::error(
                 'This role is assigned to one or more users and cannot be deleted.'
             );
         }
 
+
+        /*
+        |--------------------------------------------------------------------------
+        | Delete
+        |--------------------------------------------------------------------------
+        */
+
         DB::transaction(
-            function () use ($role) {
-                /*
-                |--------------------------------------------------------------------------
-                | Remove Permission Relationships
-                |--------------------------------------------------------------------------
-                */
+            function () use (
+                $role
+            ) {
 
-                $role->syncPermissions([]);
+                $role->syncPermissions(
+                    []
+                );
 
-                /*
-                |--------------------------------------------------------------------------
-                | Delete
-                |--------------------------------------------------------------------------
-                */
 
                 $role->delete();
             }
         );
 
-        return redirect()
-            ->route(
-                'business.roles.index'
-            )
-            ->with(
-                'success',
-                'Role deleted successfully.'
-            );
+
+        return AppResponse::successRoute(
+            'business.roles.index',
+            'Role deleted successfully.'
+        );
     }
 
 
@@ -677,33 +956,43 @@ class RoleController extends Controller
     private function getCompany(
         User $user
     ): Company {
+
         if (
             !$user->company_id
         ) {
+
             abort(
                 403,
                 'No company is assigned to this account.'
             );
         }
 
-        $company = Company::query()
+
+        $company =
+            Company::query()
+
             ->whereKey(
                 $user->company_id
             )
+
             ->where(
                 'status',
                 true
             )
+
             ->first();
+
 
         if (
             !$company
         ) {
+
             abort(
                 403,
                 'Your company is inactive or unavailable.'
             );
         }
+
 
         return $company;
     }
@@ -718,26 +1007,33 @@ class RoleController extends Controller
     private function ensureCompanyAdmin(
         ?User $user
     ): void {
+
         if (
             !$user
         ) {
-            abort(401);
+
+            abort(
+                401
+            );
         }
+
 
         /*
         |--------------------------------------------------------------------------
-        | Super Admin Must Use Super Admin Portal
+        | Super Admin Uses Super Admin Portal
         |--------------------------------------------------------------------------
         */
 
         if (
             (bool) $user->is_super_user
         ) {
+
             abort(
                 403,
                 'Use the Super Admin role management area.'
             );
         }
+
 
         /*
         |--------------------------------------------------------------------------
@@ -750,6 +1046,7 @@ class RoleController extends Controller
                 'Company Admin'
             )
         ) {
+
             abort(
                 403,
                 'Only Company Administrators can manage roles.'
@@ -760,7 +1057,7 @@ class RoleController extends Controller
 
     /*
     |--------------------------------------------------------------------------
-    | Company Role Isolation
+    | Role Company Isolation
     |--------------------------------------------------------------------------
     */
 
@@ -768,18 +1065,6 @@ class RoleController extends Controller
         Role $role,
         Company $company
     ): void {
-        /*
-        |--------------------------------------------------------------------------
-        | Global Roles Have company_id = NULL
-        |--------------------------------------------------------------------------
-        |
-        | This automatically protects:
-        |
-        | Super Admin
-        | Company Admin
-        | Any other platform/global role
-        |
-        */
 
         abort_unless(
             $role->company_id !== null &&
@@ -792,6 +1077,118 @@ class RoleController extends Controller
 
     /*
     |--------------------------------------------------------------------------
+    | Blocked Permission Rule
+    |--------------------------------------------------------------------------
+    |
+    | Custom business roles are operational roles.
+    |
+    | Company administration remains exclusively under Company Admin.
+    |
+    */
+
+    private function isBlockedCompanyRolePermission(
+        string $permission
+    ): bool {
+
+        /*
+        |--------------------------------------------------------------------------
+        | Block Entire Administrative Modules
+        |--------------------------------------------------------------------------
+        */
+
+        $blockedPrefixes = [
+
+            'company.',
+            'users.',
+            'roles.',
+            'super-admin.',
+        ];
+
+
+        foreach (
+            $blockedPrefixes as $prefix
+        ) {
+
+            if (
+                str_starts_with(
+                    $permission,
+                    $prefix
+                )
+            ) {
+
+                return true;
+            }
+        }
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Block Branch Management Actions
+        |--------------------------------------------------------------------------
+        |
+        | store.view may remain available for operational users if needed.
+        |
+        */
+
+        $blockedPermissions = [
+
+            'store.show',
+            'store.create',
+            'store.edit',
+            'store.delete',
+        ];
+
+
+        return in_array(
+            $permission,
+            $blockedPermissions,
+            true
+        );
+    }
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Assignable Permissions
+    |--------------------------------------------------------------------------
+    */
+
+    private function getAssignablePermissions()
+    {
+
+        return Permission::query()
+
+            ->where(
+                'guard_name',
+                'web'
+            )
+
+            ->orderBy(
+                'name'
+            )
+
+            ->get([
+                'id',
+                'name',
+                'guard_name',
+            ])
+
+            ->reject(
+                fn(
+                    Permission $permission
+                ) =>
+                $this
+                    ->isBlockedCompanyRolePermission(
+                        $permission->name
+                    )
+            )
+
+            ->values();
+    }
+
+
+    /*
+    |--------------------------------------------------------------------------
     | Resolve Allowed Permissions
     |--------------------------------------------------------------------------
     */
@@ -799,94 +1196,102 @@ class RoleController extends Controller
     private function resolvePermissions(
         array $permissionIds
     ) {
+
         if (
             empty($permissionIds)
         ) {
+
             return collect();
         }
 
-        $permissionIds = collect(
-            $permissionIds
-        )
-            ->map(
-                fn($id) =>
-                (int) $id
-            )
-            ->unique()
-            ->values();
 
         /*
         |--------------------------------------------------------------------------
-        | Only Web Permissions
+        | Normalize IDs
+        |--------------------------------------------------------------------------
+        */
+
+        $permissionIds =
+            collect(
+                $permissionIds
+            )
+
+            ->map(
+                fn(
+                    $id
+                ) =>
+                (int) $id
+            )
+
+            ->unique()
+
+            ->values();
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Load Permissions
         |--------------------------------------------------------------------------
         */
 
         $permissions =
             Permission::query()
+
             ->where(
                 'guard_name',
                 'web'
             )
+
             ->whereIn(
                 'id',
                 $permissionIds
             )
+
             ->get();
+
 
         /*
         |--------------------------------------------------------------------------
-        | Security Check
+        | Invalid ID Protection
         |--------------------------------------------------------------------------
-        |
-        | If somebody manually modifies the request and sends an unknown
-        | permission ID, reject the request.
-        |
         */
 
         if (
             $permissions->count() !==
             $permissionIds->count()
         ) {
+
             abort(
                 422,
                 'One or more selected permissions are invalid.'
             );
         }
 
+
         /*
         |--------------------------------------------------------------------------
-        | Block Platform Permissions
+        | Administrative Permission Protection
         |--------------------------------------------------------------------------
-        |
-        | Add any Super Admin/platform-only permission prefixes here.
-        |
         */
-
-        $blockedPrefixes = [
-            'super-admin.',
-            'company.manage',
-            'company.delete',
-        ];
 
         foreach (
             $permissions as $permission
         ) {
-            foreach (
-                $blockedPrefixes as $prefix
+
+            if (
+                $this
+                ->isBlockedCompanyRolePermission(
+                    $permission->name
+                )
             ) {
-                if (
-                    str_starts_with(
-                        $permission->name,
-                        $prefix
-                    )
-                ) {
-                    abort(
-                        403,
-                        "Permission {$permission->name} cannot be assigned from the Company Portal."
-                    );
-                }
+
+                abort(
+                    403,
+                    "Permission {$permission->name} cannot be assigned to a custom company role."
+                );
             }
         }
+
 
         return $permissions;
     }
@@ -896,151 +1301,483 @@ class RoleController extends Controller
     |--------------------------------------------------------------------------
     | Permission Groups
     |--------------------------------------------------------------------------
-    |
-    | Example:
-    |
-    | product.view
-    | product.create
-    | product.edit
-    |
-    | becomes:
-    |
-    | Product
-    |   View
-    |   Create
-    |   Edit
-    |
-    |--------------------------------------------------------------------------
     */
 
     private function getPermissionGroups(): array
     {
-        $permissions =
-            Permission::query()
-            ->where(
-                'guard_name',
-                'web'
-            )
-            ->orderBy(
-                'name'
-            )
-            ->get([
-                'id',
-                'name',
-            ]);
+        /*
+        |--------------------------------------------------------------------------
+        | Module Labels
+        |--------------------------------------------------------------------------
+        */
+
+        $moduleLabels = [
+
+            'dashboard' =>
+            'Dashboard',
+
+            'store' =>
+            'Branches',
+
+            'godown' =>
+            'Godowns',
+
+            'brand' =>
+            'Brands',
+
+            'unit' =>
+            'Units',
+
+            'category' =>
+            'Categories',
+
+            'product' =>
+            'Products',
+
+            'supplier' =>
+            'Suppliers',
+
+            'customer' =>
+            'Customers',
+
+            'purchase' =>
+            'Purchases',
+
+            'purchase-return' =>
+            'Purchase Returns',
+
+            'purchase-report' =>
+            'Purchase Reports',
+
+            'sales' =>
+            'Sales',
+
+            'sales-return' =>
+            'Sales Returns',
+
+            'sales-report' =>
+            'Sales Reports',
+
+            'quotation' =>
+            'Quotations',
+
+            'current-stock' =>
+            'Current Stock',
+
+            'stock-ledger' =>
+            'Stock Ledger',
+
+            'stock-adjustment' =>
+            'Stock Adjustment',
+
+            'stock-transfer' =>
+            'Stock Transfer',
+
+            'stock' =>
+            'Stock',
+
+            'accounts' =>
+            'Accounts',
+
+            'customer-payment' =>
+            'Customer Payments',
+
+            'customer-ledger' =>
+            'Customer Ledger',
+
+            'reports' =>
+            'Reports',
+        ];
+
 
         /*
         |--------------------------------------------------------------------------
-        | Remove Platform Permissions
+        | Action Labels
+        |--------------------------------------------------------------------------
+        */
+
+        $actionLabels = [
+
+            'view' =>
+            'View',
+
+            'show' =>
+            'Show',
+
+            'create' =>
+            'Create',
+
+            'edit' =>
+            'Edit',
+
+            'delete' =>
+            'Delete',
+
+            'status' =>
+            'Status',
+
+            'approve' =>
+            'Approve',
+
+            'print' =>
+            'Print',
+
+            'pdf' =>
+            'PDF',
+
+            'excel' =>
+            'Excel',
+
+            'adjust' =>
+            'Adjust',
+
+            'convert-sale' =>
+            'Convert to Sale',
+        ];
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Get Assignable Permissions
         |--------------------------------------------------------------------------
         */
 
         $permissions =
-            $permissions
-            ->reject(
-                function (
-                    Permission $permission
-                ) {
-                    return
-                        str_starts_with(
-                            $permission->name,
-                            'super-admin.'
+            $this->getAssignablePermissions();
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Groups
+        |--------------------------------------------------------------------------
+        */
+
+        $groups = [];
+
+
+        foreach (
+            $permissions as $permission
+        ) {
+
+            /*
+            |--------------------------------------------------------------------------
+            | Split At Last Dot
+            |--------------------------------------------------------------------------
+            */
+
+            $lastDotPosition =
+                strrpos(
+                    $permission->name,
+                    '.'
+                );
+
+
+            if (
+                $lastDotPosition ===
+                false
+            ) {
+
+                $module =
+                    $permission->name;
+
+
+                $action =
+                    'view';
+            } else {
+
+                $module =
+                    substr(
+                        $permission->name,
+                        0,
+                        $lastDotPosition
+                    );
+
+
+                $action =
+                    substr(
+                        $permission->name,
+                        $lastDotPosition + 1
+                    );
+            }
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | Create Module
+            |--------------------------------------------------------------------------
+            */
+
+            if (
+                !isset(
+                    $groups[$module]
+                )
+            ) {
+
+                $groups[$module] = [
+
+                    'module' =>
+                    $module,
+
+                    'label' =>
+                    $moduleLabels[$module]
+                        ??
+                        str(
+                            $module
                         )
-                        ||
-                        in_array(
-                            $permission->name,
+                        ->replace(
                             [
-                                'company.manage',
-                                'company.delete',
+                                '-',
+                                '_',
                             ],
-                            true
-                        );
+                            ' '
+                        )
+                        ->title()
+                        ->toString(),
+
+                    'permissions' =>
+                    [],
+                ];
+            }
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | Permission
+            |--------------------------------------------------------------------------
+            */
+
+            $groups[$module]['permissions'][] = [
+
+                'id' =>
+                $permission->id,
+
+                'name' =>
+                $permission->name,
+
+                'action' =>
+                $action,
+
+                'label' =>
+                $actionLabels[$action]
+                    ??
+                    str(
+                        $action
+                    )
+                    ->replace(
+                        [
+                            '-',
+                            '_',
+                        ],
+                        ' '
+                    )
+                    ->title()
+                    ->toString(),
+            ];
+        }
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Action Order
+        |--------------------------------------------------------------------------
+        */
+
+        $actionOrder = [
+
+            'view' =>
+            10,
+
+            'show' =>
+            20,
+
+            'create' =>
+            30,
+
+            'edit' =>
+            40,
+
+            'delete' =>
+            50,
+
+            'approve' =>
+            60,
+
+            'adjust' =>
+            70,
+
+            'convert-sale' =>
+            80,
+
+            'status' =>
+            90,
+
+            'print' =>
+            100,
+
+            'pdf' =>
+            110,
+
+            'excel' =>
+            120,
+        ];
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Sort Permissions
+        |--------------------------------------------------------------------------
+        */
+
+        foreach (
+            $groups as &$group
+        ) {
+
+            usort(
+                $group['permissions'],
+                function (
+                    array $a,
+                    array $b
+                ) use (
+                    $actionOrder
+                ) {
+
+                    $aOrder =
+                        $actionOrder[$a['action']]
+                        ?? 999;
+
+
+                    $bOrder =
+                        $actionOrder[$b['action']]
+                        ?? 999;
+
+
+                    return $aOrder
+                        <=>
+                        $bOrder;
                 }
             );
+        }
+
+
+        unset(
+            $group
+        );
+
 
         /*
         |--------------------------------------------------------------------------
-        | Group
+        | Module Order
         |--------------------------------------------------------------------------
         */
 
-        return $permissions
-            ->groupBy(
-                function (
-                    Permission $permission
+        $moduleOrder = [
+
+            'dashboard',
+
+            'customer',
+            'supplier',
+            'product',
+            'category',
+            'brand',
+            'unit',
+            'godown',
+
+            'purchase',
+            'purchase-return',
+
+            'sales',
+            'sales-return',
+            'quotation',
+
+            'current-stock',
+            'stock-ledger',
+            'stock-adjustment',
+            'stock-transfer',
+            'stock',
+
+            'customer-payment',
+            'customer-ledger',
+            'accounts',
+
+            'purchase-report',
+            'sales-report',
+            'reports',
+
+            /*
+            |--------------------------------------------------------------------------
+            | Only store.view survives the blocked branch-management rules.
+            |--------------------------------------------------------------------------
+            */
+
+            'store',
+        ];
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Sort Modules
+        |--------------------------------------------------------------------------
+        */
+
+        uasort(
+            $groups,
+            function (
+                array $a,
+                array $b
+            ) use (
+                $moduleOrder
+            ) {
+
+                $aPosition =
+                    array_search(
+                        $a['module'],
+                        $moduleOrder,
+                        true
+                    );
+
+
+                $bPosition =
+                    array_search(
+                        $b['module'],
+                        $moduleOrder,
+                        true
+                    );
+
+
+                $aPosition =
+                    $aPosition === false
+                    ? 999
+                    : $aPosition;
+
+
+                $bPosition =
+                    $bPosition === false
+                    ? 999
+                    : $bPosition;
+
+
+                if (
+                    $aPosition ===
+                    $bPosition
                 ) {
-                    $parts =
-                        explode(
-                            '.',
-                            $permission->name
-                        );
 
-                    return $parts[0]
-                        ?? 'other';
+                    return strcmp(
+                        $a['label'],
+                        $b['label']
+                    );
                 }
-            )
-            ->map(
-                function (
-                    $permissions,
-                    $module
-                ) {
-                    return [
-                        'module' =>
-                        $module,
 
-                        'label' =>
-                        str($module)
-                            ->replace(
-                                ['-', '_'],
-                                ' '
-                            )
-                            ->title()
-                            ->toString(),
 
-                        'permissions' =>
-                        $permissions
-                            ->map(
-                                function (
-                                    Permission $permission
-                                ) {
-                                    $parts =
-                                        explode(
-                                            '.',
-                                            $permission->name
-                                        );
+                return $aPosition
+                    <=>
+                    $bPosition;
+            }
+        );
 
-                                    $action =
-                                        $parts[1]
-                                        ?? $permission->name;
 
-                                    return [
-                                        'id' =>
-                                        $permission->id,
-
-                                        'name' =>
-                                        $permission->name,
-
-                                        'action' =>
-                                        $action,
-
-                                        'label' =>
-                                        str($action)
-                                            ->replace(
-                                                ['-', '_'],
-                                                ' '
-                                            )
-                                            ->title()
-                                            ->toString(),
-                                    ];
-                                }
-                            )
-                            ->values()
-                            ->all(),
-                    ];
-                }
-            )
-            ->values()
-            ->all();
+        return array_values(
+            $groups
+        );
     }
 
 
@@ -1053,7 +1790,9 @@ class RoleController extends Controller
     private function companyData(
         Company $company
     ): array {
+
         return [
+
             'id' =>
             $company->id,
 
@@ -1078,15 +1817,19 @@ class RoleController extends Controller
     private function roleData(
         Role $role
     ): array {
+
         $role->loadMissing([
             'permissions:id,name,guard_name',
         ]);
+
 
         $role->loadCount([
             'users',
         ]);
 
+
         return [
+
             'id' =>
             $role->id,
 
@@ -1106,39 +1849,50 @@ class RoleController extends Controller
             (bool) $role->status,
 
             'permissions_count' =>
-            $role->permissions->count(),
+            $role->permissions
+                ->count(),
 
             'users_count' =>
             $role->users_count,
 
             /*
             |--------------------------------------------------------------------------
-            | Edit Form
+            | Edit
             |--------------------------------------------------------------------------
             */
 
             'permission_ids' =>
             $role->permissions
-                ->pluck('id')
+
+                ->pluck(
+                    'id'
+                )
+
                 ->map(
-                    fn($id) =>
+                    fn(
+                        $id
+                    ) =>
                     (int) $id
                 )
+
                 ->values()
+
                 ->all(),
 
             /*
             |--------------------------------------------------------------------------
-            | Show Page
+            | Show
             |--------------------------------------------------------------------------
             */
 
             'permissions' =>
             $role->permissions
+
                 ->map(
                     fn(
                         Permission $permission
                     ) => [
+
                         'id' =>
                         $permission->id,
 
@@ -1146,7 +1900,9 @@ class RoleController extends Controller
                         $permission->name,
                     ]
                 )
+
                 ->values()
+
                 ->all(),
 
             'created_at' =>

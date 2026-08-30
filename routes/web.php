@@ -15,9 +15,6 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\BranchContextController;
 use App\Http\Controllers\BranchSelectionController;
 
-use App\Http\Controllers\RoleController;
-use App\Http\Controllers\UserController;
-
 
 /*
 |--------------------------------------------------------------------------
@@ -42,12 +39,6 @@ use App\Http\Controllers\Business\NotificationController as BusinessNotification
 use App\Http\Controllers\Business\BranchController as BusinessBranchController;
 use App\Http\Controllers\Business\UserController as BusinessUserController;
 use App\Http\Controllers\Business\RoleController as BusinessRoleController;
-
-/*
-|--------------------------------------------------------------------------
-| company Controllers
-|--------------------------------------------------------------------------
-*/
 use App\Http\Controllers\Business\CompanyDashboardController;
 
 
@@ -58,21 +49,13 @@ use App\Http\Controllers\Business\CompanyDashboardController;
 */
 
 use App\Http\Controllers\SuperAdmin\DashboardController as SuperAdminDashboardController;
-
 use App\Http\Controllers\SuperAdmin\CompanyController as SuperAdminCompanyController;
-
 use App\Http\Controllers\SuperAdmin\BranchController as SuperAdminBranchController;
-
 use App\Http\Controllers\SuperAdmin\UserController as SuperAdminUserController;
-
 use App\Http\Controllers\SuperAdmin\RoleController as SuperAdminRoleController;
-
 use App\Http\Controllers\SuperAdmin\PermissionController as SuperAdminPermissionController;
-
 use App\Http\Controllers\SuperAdmin\ActivityLogController;
-
 use App\Http\Controllers\SuperAdmin\SettingController as SuperAdminSettingController;
-
 use App\Http\Controllers\SuperAdmin\NotificationController;
 
 
@@ -116,20 +99,41 @@ Route::get(
 );
 
 
+/*
+|--------------------------------------------------------------------------
+| Generic Dashboard Redirect
+|--------------------------------------------------------------------------
+*/
+
+Route::get(
+    '/dashboard',
+    function () {
+
+        $user =
+            auth()->user();
 
 
+        if (
+            $user->is_super_user
+        ) {
 
-Route::get('/dashboard', function () {
+            return redirect()
+                ->route(
+                    'super-admin.dashboard'
+                );
+        }
 
-    $user = auth()->user();
 
-    if ($user->is_super_user) {
-        return redirect()->route('super-admin.dashboard');
+        return redirect()
+            ->route(
+                'business.dashboard'
+            );
     }
-
-    return redirect()->route('business.dashboard');
-})->middleware('auth')->name('dashboard');
-
+)->middleware(
+    'auth'
+)->name(
+    'dashboard'
+);
 
 
 /*
@@ -141,12 +145,6 @@ Route::get('/dashboard', function () {
 Route::middleware([
     'guest',
 ])->group(function () {
-
-    /*
-    |--------------------------------------------------------------------------
-    | Business Registration
-    |--------------------------------------------------------------------------
-    */
 
     Route::get(
         '/register-business',
@@ -169,12 +167,6 @@ Route::middleware([
         'business.register.store'
     );
 
-
-    /*
-    |--------------------------------------------------------------------------
-    | Forgot Password
-    |--------------------------------------------------------------------------
-    */
 
     Route::get(
         '/forgot-password',
@@ -201,258 +193,347 @@ Route::middleware([
 
 /*
 |--------------------------------------------------------------------------
-| dashboard
+| Company-Level Business Management
 |--------------------------------------------------------------------------
+|
+| These routes require login but do NOT require an active branch.
+|
+| This is intentional so Company Admin can:
+|
+| - view company dashboard
+| - manage profile
+| - manage branches
+| - manage users
+| - manage company roles
+| - read notifications
+|
 */
 
-Route::get(
-    '/company/dashboard',
-    [CompanyDashboardController::class, 'index']
-)->name('business.company.dashboard');
+Route::middleware([
+    'auth',
+    'verified',
+])->group(function () {
+
+    /*
+    |--------------------------------------------------------------------------
+    | Company Dashboard
+    |--------------------------------------------------------------------------
+    */
+
+    Route::get(
+        '/company/dashboard',
+        [
+            CompanyDashboardController::class,
+            'index',
+        ]
+    )->name(
+        'business.company.dashboard'
+    );
 
 
+    /*
+    |--------------------------------------------------------------------------
+    | Company Profile
+    |--------------------------------------------------------------------------
+    */
+
+    Route::get(
+        '/company/profile',
+        [
+            BusinessCompanyController::class,
+            'show',
+        ]
+    )->name(
+        'business.company.show'
+    );
 
 
-/*
-|--------------------------------------------------------------------------
-| notification
-|--------------------------------------------------------------------------
-*/
-Route::get(
-    '/notifications',
-    [BusinessNotificationController::class, 'index']
-)->name('notifications.index');
-
-Route::post(
-    '/notifications/{notification}/read',
-    [BusinessNotificationController::class, 'markAsRead']
-)->name('notifications.read');
-
-Route::post(
-    '/notifications/read-all',
-    [BusinessNotificationController::class, 'markAllAsRead']
-)->name('notifications.read-all');
+    Route::put(
+        '/company/profile',
+        [
+            BusinessCompanyController::class,
+            'update',
+        ]
+    )->name(
+        'business.company.update'
+    );
 
 
-/*
-|--------------------------------------------------------------------------
-| Company Users & Access
-|--------------------------------------------------------------------------
-*/
+    /*
+    |--------------------------------------------------------------------------
+    | Business Notifications
+    |--------------------------------------------------------------------------
+    */
 
-Route::prefix('company/users')
-    ->name('business.users.')
-    ->controller(BusinessUserController::class)
-    ->group(function () {
-
-        /*
-        |--------------------------------------------------------------------------
-        | List
-        |--------------------------------------------------------------------------
-        */
-
-        Route::get(
-            '/',
-            'index'
-        )->name('index');
+    Route::get(
+        '/notifications',
+        [
+            BusinessNotificationController::class,
+            'index',
+        ]
+    )->name(
+        'notifications.index'
+    );
 
 
-        /*
-        |--------------------------------------------------------------------------
-        | Create
-        |--------------------------------------------------------------------------
-        */
-
-        Route::get(
-            '/create',
-            'create'
-        )->name('create');
-
-
-        Route::post(
-            '/',
-            'store'
-        )->name('store');
+    Route::post(
+        '/notifications/{notification}/read',
+        [
+            BusinessNotificationController::class,
+            'markAsRead',
+        ]
+    )->name(
+        'notifications.read'
+    );
 
 
-        /*
-        |--------------------------------------------------------------------------
-        | Show
-        |--------------------------------------------------------------------------
-        */
-
-        Route::get(
-            '/{user}',
-            'show'
-        )->name('show');
-
-
-        /*
-        |--------------------------------------------------------------------------
-        | Edit
-        |--------------------------------------------------------------------------
-        */
-
-        Route::get(
-            '/{user}/edit',
-            'edit'
-        )->name('edit');
+    Route::post(
+        '/notifications/read-all',
+        [
+            BusinessNotificationController::class,
+            'markAllAsRead',
+        ]
+    )->name(
+        'notifications.read-all'
+    );
 
 
-        Route::put(
-            '/{user}',
-            'update'
-        )->name('update');
+    /*
+    |--------------------------------------------------------------------------
+    | Company Users & Access
+    |--------------------------------------------------------------------------
+    */
+
+    Route::prefix(
+        'company/users'
+    )
+        ->name(
+            'business.users.'
+        )
+        ->controller(
+            BusinessUserController::class
+        )
+        ->group(function () {
+
+            Route::get(
+                '/',
+                'index'
+            )->name(
+                'index'
+            );
 
 
-        /*
-        |--------------------------------------------------------------------------
-        | Activate / Deactivate
-        |--------------------------------------------------------------------------
-        */
+            Route::get(
+                '/create',
+                'create'
+            )->name(
+                'create'
+            );
 
-        Route::patch(
-            '/{user}/status',
-            'updateStatus'
-        )->name('status');
+
+            Route::post(
+                '/',
+                'store'
+            )->name(
+                'store'
+            );
+
+
+            Route::get(
+                '/{user}',
+                'show'
+            )->name(
+                'show'
+            );
+
+
+            Route::get(
+                '/{user}/edit',
+                'edit'
+            )->name(
+                'edit'
+            );
+
+
+            Route::put(
+                '/{user}',
+                'update'
+            )->name(
+                'update'
+            );
+
+
+            Route::patch(
+                '/{user}/status',
+                'updateStatus'
+            )->name(
+                'status'
+            );
+        });
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Company Roles & Permissions
+    |--------------------------------------------------------------------------
+    */
+
+    Route::prefix(
+        'company/roles'
+    )
+        ->name(
+            'business.roles.'
+        )
+        ->controller(
+            BusinessRoleController::class
+        )
+        ->group(function () {
+
+            Route::get(
+                '/',
+                'index'
+            )->name(
+                'index'
+            );
+
+
+            Route::get(
+                '/create',
+                'create'
+            )->name(
+                'create'
+            );
+
+
+            Route::post(
+                '/',
+                'store'
+            )->name(
+                'store'
+            );
+
+
+            Route::get(
+                '/{role}',
+                'show'
+            )->name(
+                'show'
+            );
+
+
+            Route::get(
+                '/{role}/edit',
+                'edit'
+            )->name(
+                'edit'
+            );
+
+
+            Route::put(
+                '/{role}',
+                'update'
+            )->name(
+                'update'
+            );
+
+
+            Route::patch(
+                '/{role}/status',
+                'updateStatus'
+            )->name(
+                'status'
+            );
+
+
+            Route::delete(
+                '/{role}',
+                'destroy'
+            )->name(
+                'destroy'
+            );
+        });
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Company Branch Management
+    |--------------------------------------------------------------------------
+    */
+
+    Route::prefix(
+        'company'
+    )
+        ->name(
+            'business.'
+        )
+        ->group(function () {
+
+            Route::get(
+                '/branches',
+                [
+                    BusinessBranchController::class,
+                    'index',
+                ]
+            )->name(
+                'branches.index'
+            );
+
+
+            Route::get(
+                '/branches/create',
+                [
+                    BusinessBranchController::class,
+                    'create',
+                ]
+            )->name(
+                'branches.create'
+            );
+
+
+            Route::post(
+                '/branches',
+                [
+                    BusinessBranchController::class,
+                    'store',
+                ]
+            )->name(
+                'branches.store'
+            );
+
+
+            Route::get(
+                '/branches/{store}',
+                [
+                    BusinessBranchController::class,
+                    'show',
+                ]
+            )->name(
+                'branches.show'
+            );
+
+
+            Route::get(
+                '/branches/{store}/edit',
+                [
+                    BusinessBranchController::class,
+                    'edit',
+                ]
+            )->name(
+                'branches.edit'
+            );
+
+
+            Route::put(
+                '/branches/{store}',
+                [
+                    BusinessBranchController::class,
+                    'update',
+                ]
+            )->name(
+                'branches.update'
+            );
+        });
 });
-
-/*
-|--------------------------------------------------------------------------
-| Company Roles & Permissions
-|--------------------------------------------------------------------------
-*/
-
-Route::prefix('company/roles')
-    ->name('business.roles.')
-    ->controller(BusinessRoleController::class)
-    ->group(function () {
-
-        Route::get(
-            '/',
-            'index'
-        )->name('index');
-
-        Route::get(
-            '/create',
-            'create'
-        )->name('create');
-
-        Route::post(
-            '/',
-            'store'
-        )->name('store');
-
-        Route::get(
-            '/{role}',
-            'show'
-        )->name('show');
-
-        Route::get(
-            '/{role}/edit',
-            'edit'
-        )->name('edit');
-
-        Route::put(
-            '/{role}',
-            'update'
-        )->name('update');
-
-        Route::patch(
-            '/{role}/status',
-            'updateStatus'
-        )->name('status');
-
-        Route::delete(
-            '/{role}',
-            'destroy'
-        )->name('destroy');
-    });
-
-
-/*
-|--------------------------------------------------------------------------
-| Company Admin - Branch Management
-|--------------------------------------------------------------------------
-|
-| React / Inertia branch management.
-|
-| Company Admin:
-| - View own company's branches
-| - Create branch
-| - View branch
-| - Edit branch
-|
-| Branch activation is controlled by Super Admin.
-|
-*/
-
-Route::prefix('company')
-    ->name('business.')
-    ->group(function () {
-
-        /*
-        |--------------------------------------------------------------------------
-        | Branch List
-        |--------------------------------------------------------------------------
-        */
-
-        Route::get(
-            '/branches',
-            [BusinessBranchController::class, 'index']
-        )->name('branches.index');
-
-
-        /*
-        |--------------------------------------------------------------------------
-        | Create Branch
-        |--------------------------------------------------------------------------
-        */
-
-        Route::get(
-            '/branches/create',
-            [BusinessBranchController::class, 'create']
-        )->name('branches.create');
-
-
-        Route::post(
-            '/branches',
-            [BusinessBranchController::class, 'store']
-        )->name('branches.store');
-
-
-        /*
-        |--------------------------------------------------------------------------
-        | Show Branch
-        |--------------------------------------------------------------------------
-        */
-
-        Route::get(
-            '/branches/{store}',
-            [BusinessBranchController::class, 'show']
-        )->name('branches.show');
-
-
-        /*
-        |--------------------------------------------------------------------------
-        | Edit Branch
-        |--------------------------------------------------------------------------
-        */
-
-        Route::get(
-            '/branches/{store}/edit',
-            [BusinessBranchController::class, 'edit']
-        )->name('branches.edit');
-
-
-        Route::put(
-            '/branches/{store}',
-            [BusinessBranchController::class, 'update']
-        )->name('branches.update');
-});
-
-
-
 
 
 /*
@@ -1152,6 +1233,8 @@ Route::middleware([
 
 Route::middleware([
     'auth',
+    'verified',
+    'business.context',
 ])->group(function () {
 
     Route::get(
@@ -1278,13 +1361,14 @@ Route::middleware([
 | Business Dashboard
 |--------------------------------------------------------------------------
 |
-| Later we will add EnsureBusinessContextActive middleware here.
+| Operational business pages require a valid active company + branch context.
 |
 */
 
 Route::middleware([
     'auth',
     'verified',
+    'business.context',
 ])->group(function () {
 
     Route::get(
@@ -1296,39 +1380,6 @@ Route::middleware([
     )->name(
         'business.dashboard'
     );
-
-    /*
-    |--------------------------------------------------------------------------
-    | Company Admin - Company Profile
-    |--------------------------------------------------------------------------
-    */
-
-    Route::middleware([
-        'auth',
-        'verified',
-    ])->group(function () {
-
-        Route::get(
-            '/company/profile',
-            [
-                BusinessCompanyController::class,
-                'show',
-            ]
-        )->name(
-            'business.company.show'
-        );
-
-
-        Route::put(
-            '/company/profile',
-            [
-                BusinessCompanyController::class,
-                'update',
-            ]
-        )->name(
-            'business.company.update'
-        );
-    });
 });
 
 
@@ -1340,6 +1391,8 @@ Route::middleware([
 
 Route::middleware([
     'auth',
+    'verified',
+    'business.context',
 ])->group(function () {
 
     /*
@@ -1520,58 +1573,6 @@ Route::middleware([
 
 /*
 |--------------------------------------------------------------------------
-| Legacy / Business Roles
-|--------------------------------------------------------------------------
-|
-| These are your existing non-Super-Admin role routes.
-|
-| Later we should decide whether these belong inside a Business prefix /
-| permission middleware.
-|
-*/
-
-Route::resource(
-    'roles',
-    RoleController::class
-);
-
-
-/*
-|--------------------------------------------------------------------------
-| Legacy / Business Users
-|--------------------------------------------------------------------------
-*/
-
-Route::resource(
-    'users',
-    UserController::class
-);
-
-
-Route::post(
-    '/users/{user}/deactivate',
-    [
-        UserController::class,
-        'deactivate',
-    ]
-)->name(
-    'users.deactivate'
-);
-
-
-Route::post(
-    '/users/{user}/activate',
-    [
-        UserController::class,
-        'activate',
-    ]
-)->name(
-    'users.activate'
-);
-
-
-/*
-|--------------------------------------------------------------------------
 | Authentication Routes
 |--------------------------------------------------------------------------
 */
@@ -1581,53 +1582,78 @@ require __DIR__ . '/auth.php';
 
 /*
 |--------------------------------------------------------------------------
-| Master Routes
+| Operational Business Routes
 |--------------------------------------------------------------------------
+|
+| Every route loaded below requires:
+|
+| - authenticated user
+| - verified account
+| - valid active company
+| - valid active branch
+| - valid branch access
+|
+| Individual route files may still apply permission middleware for each
+| module/action.
+|
 */
 
-require __DIR__ . '/masters.php';
+Route::middleware([
+    'auth',
+    'verified',
+    'business.context',
+])->group(function () {
+
+    /*
+    |--------------------------------------------------------------------------
+    | Master Routes
+    |--------------------------------------------------------------------------
+    */
+
+    require __DIR__ . '/masters.php';
 
 
-/*
-|--------------------------------------------------------------------------
-| Purchase Routes
-|--------------------------------------------------------------------------
-*/
+    /*
+    |--------------------------------------------------------------------------
+    | Purchase Routes
+    |--------------------------------------------------------------------------
+    */
 
-require __DIR__ . '/purchase.php';
-
-
-/*
-|--------------------------------------------------------------------------
-| Sales Routes
-|--------------------------------------------------------------------------
-*/
-
-require __DIR__ . '/sales.php';
+    require __DIR__ . '/purchase.php';
 
 
-/*
-|--------------------------------------------------------------------------
-| Inventory Routes
-|--------------------------------------------------------------------------
-*/
+    /*
+    |--------------------------------------------------------------------------
+    | Sales Routes
+    |--------------------------------------------------------------------------
+    */
 
-require __DIR__ . '/inventory.php';
-
-
-/*
-|--------------------------------------------------------------------------
-| Report Routes
-|--------------------------------------------------------------------------
-*/
-
-require __DIR__ . '/reports.php';
+    require __DIR__ . '/sales.php';
 
 
-/*
-|--------------------------------------------------------------------------
-| Stock Transfer Routes
-|--------------------------------------------------------------------------
-*/
+    /*
+    |--------------------------------------------------------------------------
+    | Inventory Routes
+    |--------------------------------------------------------------------------
+    */
 
-require __DIR__ . '/stocktransfer.php';
+    require __DIR__ . '/inventory.php';
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Report Routes
+    |--------------------------------------------------------------------------
+    */
+
+    require __DIR__ . '/reports.php';
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Stock Transfer Routes
+    |--------------------------------------------------------------------------
+    */
+
+    require __DIR__ . '/stocktransfer.php';
+});
