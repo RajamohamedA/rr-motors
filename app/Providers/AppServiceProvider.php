@@ -2,8 +2,13 @@
 
 namespace App\Providers;
 
+use App\Contracts\GstProviderInterface;
+use App\Models\Store;
+use App\Services\Gst\ApiGstProvider;
+use App\Services\Gst\MockGstProvider;
 use Illuminate\Support\ServiceProvider;
 use Inertia\Inertia;
+use RuntimeException;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -12,8 +17,54 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        /*
+        |--------------------------------------------------------------------------
+        | GST Provider Binding
+        |--------------------------------------------------------------------------
+        |
+        | GST_PROVIDER=mock
+        |
+        | or
+        |
+        | GST_PROVIDER=api
+        |
+        | CustomerController and GstLookupService do not need to know
+        | which provider is being used.
+        |
+        */
+
+        $this->app->bind(
+            GstProviderInterface::class,
+            function () {
+
+                $provider =
+                    config(
+                        'gst.provider',
+                        'mock'
+                    );
+
+
+                return match ($provider) {
+
+                    'mock' =>
+                    app(
+                        MockGstProvider::class
+                    ),
+
+                    'api' =>
+                    app(
+                        ApiGstProvider::class
+                    ),
+
+                    default =>
+                    throw new RuntimeException(
+                        "Unsupported GST provider: {$provider}"
+                    ),
+                };
+            }
+        );
     }
+
 
     /**
      * Bootstrap any application services.
@@ -30,38 +81,114 @@ class AppServiceProvider extends ServiceProvider
 
             'auth' => function () {
 
-                $user = auth()->user();
+                $user =
+                    auth()->user();
 
-                if (!$user) {
+
+                if (
+                    !$user
+                ) {
+
                     return null;
                 }
 
+
                 return [
+
                     'user' => [
-                        'id' => $user->id,
-                        'name' => $user->name,
-                        'email' => $user->email,
-                        'mobile' => $user->mobile,
-                        'is_super_user' => (bool) $user->is_super_user,
+
+                        'id' =>
+                        $user->id,
+
+                        'name' =>
+                        $user->name,
+
+                        'email' =>
+                        $user->email,
+
+                        'mobile' =>
+                        $user->mobile,
+
+                        'company_id' =>
+                        $user->company_id,
+
+                        'store_id' =>
+                        $user->store_id,
+
+                        'status' =>
+                        (bool) $user->status,
+
+                        'is_super_user' =>
+                        (bool) $user->is_super_user,
+
+                        /*
+                        |--------------------------------------------------------------------------
+                        | Roles
+                        |--------------------------------------------------------------------------
+                        |
+                        | These are also included inside auth.user because
+                        | Business Sidebar and page-level permission checks
+                        | commonly read:
+                        |
+                        | auth.user.roles
+                        |
+                        */
+
+                        'roles' =>
+                        $user
+                            ->getRoleNames()
+                            ->values()
+                            ->all(),
+
+                        /*
+                        |--------------------------------------------------------------------------
+                        | Permissions
+                        |--------------------------------------------------------------------------
+                        */
+
+                        'permissions' =>
+                        $user
+                            ->getAllPermissions()
+                            ->pluck(
+                                'name'
+                            )
+                            ->values()
+                            ->all(),
                     ],
 
-                    /*
-                    |--------------------------------------------------------------------------
-                    | Roles
-                    |--------------------------------------------------------------------------
-                    */
-
-                    'roles' => $user->getRoleNames()->values(),
 
                     /*
                     |--------------------------------------------------------------------------
-                    | Permissions
+                    | Legacy Top-Level Roles
+                    |--------------------------------------------------------------------------
+                    |
+                    | Keep these for existing React pages that may still use:
+                    |
+                    | auth.roles
+                    |
+                    */
+
+                    'roles' =>
+                    $user
+                        ->getRoleNames()
+                        ->values()
+                        ->all(),
+
+
+                    /*
+                    |--------------------------------------------------------------------------
+                    | Legacy Top-Level Permissions
                     |--------------------------------------------------------------------------
                     */
 
-                    'permissions' => $user->getAllPermissions()
-                        ->pluck('name')
-                        ->values(),
+                    'permissions' =>
+                    $user
+                        ->getAllPermissions()
+                        ->pluck(
+                            'name'
+                        )
+                        ->values()
+                        ->all(),
                 ];
             },
 
@@ -76,7 +203,9 @@ class AppServiceProvider extends ServiceProvider
 
                 return request()
                     ->attributes
-                    ->get('active_company');
+                    ->get(
+                        'active_company'
+                    );
             },
 
 
@@ -90,41 +219,76 @@ class AppServiceProvider extends ServiceProvider
 
                 return request()
                     ->attributes
-                    ->get('active_store');
+                    ->get(
+                        'active_store'
+                    );
             },
 
 
             /*
             |--------------------------------------------------------------------------
-            | Available store
+            | Available Stores
             |--------------------------------------------------------------------------
             */
+
             'availableStores' => function () {
 
-                $user = auth()->user();
+                $user =
+                    auth()->user();
 
-                if (!$user) {
+
+                if (
+                    !$user
+                ) {
+
                     return [];
                 }
 
-                $companyId = session('active_company_id');
 
-                if (!$companyId) {
+                $companyId =
+                    (int) session(
+                        'active_company_id'
+                    );
+
+
+                if (
+                    !$companyId
+                ) {
+
                     return [];
                 }
+
 
                 /*
                 |--------------------------------------------------------------------------
                 | Super Admin
                 |--------------------------------------------------------------------------
+                |
+                | Super Admin can access all active branches of the
+                | currently selected company.
+                |
                 */
 
-                if ($user->is_super_user) {
+                if (
+                    $user->is_super_user
+                ) {
 
-                    return \App\Models\Store::query()
-                        ->where('company_id', $companyId)
-                        ->where('status', 1)
-                        ->orderBy('store_name')
+                    return Store::query()
+
+                        ->where(
+                            'company_id',
+                            $companyId
+                        )
+
+                        ->where(
+                            'status',
+                            true
+                        )
+
+                        ->orderBy(
+                            'store_name'
+                        )
+
                         ->get([
                             'id',
                             'store_code',
@@ -132,19 +296,49 @@ class AppServiceProvider extends ServiceProvider
                             'company_id',
                         ]);
                 }
+
 
                 /*
                 |--------------------------------------------------------------------------
-                | Company Owner
+                | Company Admin
                 |--------------------------------------------------------------------------
+                |
+                | Company Admin can access every active branch belonging
+                | to their own company.
+                |
                 */
 
-                if ($user->hasRole('company-owner')) {
+                if (
+                    $user->hasRole(
+                        'Company Admin'
+                    )
+                ) {
 
-                    return $user->company
-                        ->stores()
-                        ->where('status', 1)
-                        ->orderBy('store_name')
+                    if (
+                        (int) $user->company_id !==
+                        $companyId
+                    ) {
+
+                        return [];
+                    }
+
+
+                    return Store::query()
+
+                        ->where(
+                            'company_id',
+                            $user->company_id
+                        )
+
+                        ->where(
+                            'status',
+                            true
+                        )
+
+                        ->orderBy(
+                            'store_name'
+                        )
+
                         ->get([
                             'id',
                             'store_code',
@@ -152,17 +346,35 @@ class AppServiceProvider extends ServiceProvider
                             'company_id',
                         ]);
                 }
+
 
                 /*
                 |--------------------------------------------------------------------------
                 | Normal User
                 |--------------------------------------------------------------------------
+                |
+                | Normal users only receive branches explicitly assigned
+                | through user_stores.
+                |
                 */
 
-                return $user->stores()
-                    ->where('stores.company_id', $companyId)
-                    ->where('stores.status', 1)
-                    ->orderBy('store_name')
+                return $user
+                    ->stores()
+
+                    ->where(
+                        'stores.company_id',
+                        $companyId
+                    )
+
+                    ->where(
+                        'stores.status',
+                        true
+                    )
+
+                    ->orderBy(
+                        'stores.store_name'
+                    )
+
                     ->get([
                         'stores.id',
                         'stores.store_code',

@@ -375,8 +375,10 @@ class CustomerController extends Controller implements HasMiddleware
 
 
         $validated =
-            $this->validateCustomer(
-                $request
+            $this->normalizeCustomerData(
+                $this->validateCustomer(
+                    $request
+                )
             );
 
 
@@ -668,6 +670,10 @@ class CustomerController extends Controller implements HasMiddleware
                 $companyId
             )
             ->where(
+                'store_id',
+                $storeId
+            )
+            ->where(
                 'customer_id',
                 $customer->id
             )
@@ -734,6 +740,17 @@ class CustomerController extends Controller implements HasMiddleware
                 'company_id',
                 $companyId
             )
+            ->when(
+                Schema::hasColumn(
+                    'customer_payments',
+                    'store_id'
+                ),
+                fn($query) =>
+                $query->where(
+                    'store_id',
+                    $storeId
+                )
+            )
             ->where(
                 'customer_id',
                 $customer->id
@@ -772,7 +789,9 @@ class CustomerController extends Controller implements HasMiddleware
             $this->customerTransactions(
                 customer: $customer,
 
-                companyId: $companyId
+                companyId: $companyId,
+
+                storeId: $storeId
             );
 
 
@@ -787,6 +806,10 @@ class CustomerController extends Controller implements HasMiddleware
                 ->where(
                     'company_id',
                     $companyId
+                )
+                ->where(
+                    'store_id',
+                    $storeId
                 )
                 ->where(
                     'customer_id',
@@ -804,6 +827,10 @@ class CustomerController extends Controller implements HasMiddleware
                     $companyId
                 )
                 ->where(
+                    'store_id',
+                    $storeId
+                )
+                ->where(
                     'customer_id',
                     $customer->id
                 )
@@ -816,7 +843,9 @@ class CustomerController extends Controller implements HasMiddleware
             $this->totalCustomerPayments(
                 companyId: $companyId,
 
-                customerId: $customer->id
+                customerId: $customer->id,
+
+                storeId: $storeId
             );
 
 
@@ -871,6 +900,10 @@ class CustomerController extends Controller implements HasMiddleware
                 $companyId
             )
             ->where(
+                'store_id',
+                $storeId
+            )
+            ->where(
                 'customer_id',
                 $customer->id
             )
@@ -891,6 +924,17 @@ class CustomerController extends Controller implements HasMiddleware
                 'company_id',
                 $companyId
             )
+            ->when(
+                Schema::hasColumn(
+                    'customer_payments',
+                    'store_id'
+                ),
+                fn($query) =>
+                $query->where(
+                    'store_id',
+                    $storeId
+                )
+            )
             ->where(
                 'customer_id',
                 $customer->id
@@ -910,6 +954,17 @@ class CustomerController extends Controller implements HasMiddleware
                 ),
 
                 'account_summary' => [
+                    'company_id' =>
+                    $companyId,
+
+                    'store_id' =>
+                    $storeId,
+
+                    'store_name' =>
+                    session(
+                        'active_store_name'
+                    ),
+
                     'opening_balance' =>
                     $openingBalance,
 
@@ -1062,9 +1117,11 @@ class CustomerController extends Controller implements HasMiddleware
 
 
         $validated =
-            $this->validateCustomer(
-                $request,
-                $customer->id
+            $this->normalizeCustomerData(
+                $this->validateCustomer(
+                    $request,
+                    $customer->id
+                )
             );
 
 
@@ -1638,7 +1695,8 @@ class CustomerController extends Controller implements HasMiddleware
             'gst_number' => [
                 'nullable',
                 'string',
-                'max:15',
+                'size:15',
+                'regex:/^[0-9]{2}[A-Za-z]{5}[0-9]{4}[A-Za-z][1-9A-Za-z]Z[0-9A-Za-z]$/',
 
                 Rule::unique(
                     'customers',
@@ -1659,7 +1717,8 @@ class CustomerController extends Controller implements HasMiddleware
             'pan_number' => [
                 'nullable',
                 'string',
-                'max:10',
+                'size:10',
+                'regex:/^[A-Za-z]{5}[0-9]{4}[A-Za-z]$/',
             ],
 
             'credit_limit' => [
@@ -1700,6 +1759,79 @@ class CustomerController extends Controller implements HasMiddleware
                 'max:2000',
             ],
         ]);
+    }
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Normalize Customer Data
+    |--------------------------------------------------------------------------
+    */
+
+    private function normalizeCustomerData(
+        array $data
+    ): array {
+
+        $data['customer_name'] =
+            trim(
+                $data['customer_name']
+            );
+
+        foreach (
+            [
+                'contact_person',
+                'phone',
+                'billing_address',
+                'shipping_address',
+                'city',
+                'state',
+                'pincode',
+                'remarks',
+            ] as $field
+        ) {
+
+            $data[$field] =
+                !empty($data[$field])
+                ? trim($data[$field])
+                : null;
+        }
+
+        $data['mobile'] =
+            !empty($data['mobile'])
+            ? preg_replace(
+                '/\s+/',
+                '',
+                trim($data['mobile'])
+            )
+            : null;
+
+        $data['email'] =
+            !empty($data['email'])
+            ? strtolower(
+                trim($data['email'])
+            )
+            : null;
+
+        $data['gst_number'] =
+            !empty($data['gst_number'])
+            ? strtoupper(
+                trim($data['gst_number'])
+            )
+            : null;
+
+        $data['pan_number'] =
+            !empty($data['pan_number'])
+            ? strtoupper(
+                trim($data['pan_number'])
+            )
+            : null;
+
+        $data['country'] =
+            !empty($data['country'])
+            ? trim($data['country'])
+            : 'India';
+
+        return $data;
     }
 
 
@@ -1951,7 +2083,8 @@ class CustomerController extends Controller implements HasMiddleware
 
     private function customerTransactions(
         Customer $customer,
-        int $companyId
+        int $companyId,
+        int $storeId
     ) {
 
         $paymentAmount =
@@ -1973,6 +2106,10 @@ class CustomerController extends Controller implements HasMiddleware
             ->where(
                 'company_id',
                 $companyId
+            )
+            ->where(
+                'store_id',
+                $storeId
             )
             ->where(
                 'customer_id',
@@ -1997,6 +2134,17 @@ class CustomerController extends Controller implements HasMiddleware
             ->where(
                 'company_id',
                 $companyId
+            )
+            ->when(
+                Schema::hasColumn(
+                    'customer_payments',
+                    'store_id'
+                ),
+                fn($query) =>
+                $query->where(
+                    'store_id',
+                    $storeId
+                )
             )
             ->where(
                 'customer_id',
@@ -2184,7 +2332,8 @@ class CustomerController extends Controller implements HasMiddleware
 
     private function totalCustomerPayments(
         int $companyId,
-        int $customerId
+        int $customerId,
+        int $storeId
     ): float {
 
         $amountColumn =
@@ -2204,6 +2353,17 @@ class CustomerController extends Controller implements HasMiddleware
             ->where(
                 'company_id',
                 $companyId
+            )
+            ->when(
+                Schema::hasColumn(
+                    'customer_payments',
+                    'store_id'
+                ),
+                fn($query) =>
+                $query->where(
+                    'store_id',
+                    $storeId
+                )
             )
             ->where(
                 'customer_id',
