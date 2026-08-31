@@ -1,0 +1,542 @@
+/* =========================================================
+   MASTER NAVIGATION
+   ========================================================= */
+
+.rr-master-nav-shell {
+    overflow: hidden;
+    margin-bottom: 14px;
+
+    border: 1px solid #d8e0ea;
+    border-radius: 7px;
+
+    background: #ffffff;
+
+    box-shadow:
+        0 2px 8px rgba(15, 23, 42, 0.05);
+}
+
+
+/* =========================================================
+   HEADER
+   ========================================================= */
+
+.rr-master-nav-header {
+    min-height: 66px;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    gap: 16px;
+
+    padding: 10px 12px;
+
+    border-bottom: 1px solid #e4e9f0;
+
+    background:
+        linear-gradient(180deg,
+            #ffffff 0%,
+            #f7f9fc 100%);
+}
+
+
+.rr-master-nav-header-left {
+    min-width: 0;
+
+    display: flex;
+    align-items: center;
+
+    gap: 12px;
+}
+
+
+/* =========================================================
+   BACK
+   ========================================================= */
+
+.rr-master-back-btn {
+    height: 34px;
+
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    gap: 6px;
+
+    flex: 0 0 auto;
+
+    padding: 0 11px;
+
+    border: 1px solid #cbd5e1;
+    border-radius: 5px;
+
+    background:
+        linear-gradient(180deg,
+            #ffffff,
+            #f3f6fa);
+
+    color: #334155;
+
+    font-size: 13px;
+    font-weight: 700;
+
+    cursor: pointer;
+
+    transition:
+        background-color .15s ease,
+        border-color .15s ease,
+        color .15s ease,
+        box-shadow .15s ease,
+        transform .15s ease;
+}
+
+
+.rr-master-back-btn:hover {
+    border-color: #94a3b8;
+
+    background: #eef2f7;
+
+    color: #0f172a;
+
+    box-shadow:
+        0 2px 5px rgba(15, 23, 42, 0.08);
+}
+
+
+.rr-master-back-btn:active {
+    transform: translateY(1px);
+}
+
+
+.rr-master-back-btn i {
+    font-size: 13px;
+}
+
+
+/* =========================================================
+   TITLE
+   ========================================================= */
+
+.rr-master-nav-title-block {
+    min-width: 0;
+
+    display: flex;
+    align-items: center;
+
+    gap: 9px;
+}
+
+
+.rr-master-nav-title-icon {
+    width: 36px;
+    height: 36px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    flex: 0 0 36px;
+
+    border: 1px solid #bfdbfe;
+    border-radius: 6px;
+
+    background: #eff6ff;
+
+    color: #2563eb;
+
+    font-size: 15px;
+}
+
+
+.rr-master-nav-title-block>div:last-child {
+    min-width: 0;
+}
+
+
+.rr-master-nav-title-block span {
+    display: block;
+
+    color: #64748b;
+
+    font-size: 12px;
+    font-weight: 700;
+
+    line-height: 1.2;
+
+    text-transform: uppercase;
+}
+
+
+.rr-master-nav-title-block strong {
+    display: block;
+
+    margin-top: 2px;
+
+    color: #172033;
+
+    font-size: 18px;
+    font-weight: 800;
+
+    line-height: 1.2;
+}
+
+
+.rr-master-nav-title-block small {
+    display: block;
+
+    margin-top: 2px;
+
+    color: #7b8798;
+
+    font-size: 12px;
+    line-height: 1.35;
+}
+
+
+/* =========================================================
+   BUSINESS CONTEXT
+   ========================================================= */
+
+.rr-master-nav-context {
+    max-width: 420px;
+
+    display: flex;
+    align-items: center;
+
+    gap: 10px;
+
+    padding: 6px 10px;
+
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+
+    background: #ffffff;
+}
+
+
+.rr-master-nav-context>div {
+    min-width: 0;
+}
+
+
+.rr-master-nav-context span {
+    display: block;
+
+    color: #94a3b8;
+
+    font-size: 12px;
+    font-weight: 650;
+}
+
+
+.rr-master-nav-context strong {
+    display: block;
+
+    max-width: 145px;
+
+    overflow: hidden;
+
+    margin-top: 1px;
+
+    color: #334155;
+
+    font-size: 13px;
+    font-weight: 750;
+
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+
+.rr-master-nav-context>i {
+    color: #94a3b8;
+
+    font-size: 11px;
+}
+
+
+/* =========================================================
+   COMMAND BAR
+   ========================================================= */
+
+.rr-master-commandbar {
+    display: flex;
+    align-items: stretch;
+
+    gap: 5px;
+
+    overflow-x: auto;
+
+    padding: 7px;
+
+    border-bottom: 1px solid #e4e9f0;
+
+    background: #f8fafc;
+
+    scrollbar-width: thin;
+}
+
+
+.rr-master-command-item {
+    min-width: max-content;
+
+    display: flex;
+    align-items: stretch;
+
+    overflow: hidden;
+
+    border: 1px solid #dce3ec;
+    border-radius: 5px;
+
+    background: #ffffff;
+
+    transition:
+        border-color .15s ease,
+        box-shadow .15s ease,
+        transform .15s ease;
+}
+
+
+.rr-master-command-item:hover {
+    border-color: #b9c6d6;
+
+    box-shadow:
+        0 2px 5px rgba(15, 23, 42, 0.06);
+}
+
+
+.rr-master-command-item.active {
+    border-color: #93c5fd;
+
+    background: #eff6ff;
+
+    box-shadow:
+        inset 0 -2px 0 #2563eb;
+}
+
+
+.rr-master-command-main {
+    height: 36px;
+
+    display: inline-flex;
+    align-items: center;
+
+    gap: 6px;
+
+    padding: 0 10px;
+
+    color: #475569;
+
+    font-size: 13px;
+    font-weight: 700;
+
+    text-decoration: none;
+
+    transition:
+        background-color .15s ease,
+        color .15s ease;
+}
+
+
+.rr-master-command-main:hover {
+    background: #f1f5f9;
+
+    color: #1e293b;
+}
+
+
+.rr-master-command-item.active .rr-master-command-main {
+    color: #1d4ed8;
+}
+
+
+.rr-master-command-main i {
+    font-size: 13px;
+}
+
+
+/* =========================================================
+   QUICK CREATE
+   ========================================================= */
+
+.rr-master-command-create {
+    width: 30px;
+
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    border-left: 1px solid #e2e8f0;
+
+    background: #fafcff;
+
+    color: #64748b;
+
+    text-decoration: none;
+
+    transition:
+        background-color .15s ease,
+        color .15s ease;
+}
+
+
+.rr-master-command-create:hover {
+    background: #dcfce7;
+
+    color: #15803d;
+}
+
+
+.rr-master-command-create i {
+    font-size: 12px;
+}
+
+
+/* =========================================================
+   FOOTER / CONTEXT STRIP
+   ========================================================= */
+
+.rr-master-nav-footer {
+    min-height: 34px;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    gap: 12px;
+
+    padding: 5px 10px;
+
+    background: #ffffff;
+}
+
+
+.rr-master-nav-footer>div {
+    min-width: 0;
+
+    display: flex;
+    align-items: center;
+
+    gap: 6px;
+}
+
+
+.rr-master-nav-footer i {
+    color: #94a3b8;
+
+    font-size: 11px;
+}
+
+
+.rr-master-nav-footer span {
+    color: #64748b;
+
+    font-size: 12px;
+    font-weight: 600;
+}
+
+
+.rr-master-nav-footer strong {
+    color: #334155;
+
+    font-size: 12px;
+    font-weight: 750;
+}
+
+
+.rr-master-nav-hint {
+    display: inline-flex;
+    align-items: center;
+
+    gap: 5px;
+
+    flex: 0 0 auto;
+
+    color: #94a3b8 !important;
+
+    font-size: 12px !important;
+}
+
+
+/* =========================================================
+   RESPONSIVE
+   ========================================================= */
+
+@media (max-width: 991px) {
+
+    .rr-master-nav-header {
+        align-items: flex-start;
+
+        flex-direction: column;
+    }
+
+
+    .rr-master-nav-context {
+        width: 100%;
+        max-width: none;
+    }
+
+
+    .rr-master-nav-context strong {
+        max-width: 220px;
+    }
+}
+
+
+@media (max-width: 640px) {
+
+    .rr-master-nav-header-left {
+        width: 100%;
+
+        align-items: flex-start;
+    }
+
+
+    .rr-master-back-btn span {
+        display: none;
+    }
+
+
+    .rr-master-back-btn {
+        width: 34px;
+
+        padding: 0;
+    }
+
+
+    .rr-master-nav-title-block strong {
+        font-size: 16px;
+    }
+
+
+    .rr-master-nav-context {
+        flex-wrap: wrap;
+    }
+
+
+    .rr-master-nav-context>i {
+        display: none;
+    }
+
+
+    .rr-master-nav-context>div {
+        width: calc(50% - 5px);
+    }
+
+
+    .rr-master-commandbar {
+        padding-bottom: 8px;
+    }
+
+
+    .rr-master-nav-footer {
+        align-items: flex-start;
+
+        flex-direction: column;
+    }
+
+
+    .rr-master-nav-hint {
+        display: none;
+    }
+}

@@ -1,0 +1,1852 @@
+/* =========================================================
+   CUSTOMER INDEX
+   ========================================================= */
+
+.rr-customers-page {
+    width: 100%;
+}
+
+
+/* =========================================================
+   HEADER
+   ========================================================= */
+
+.rr-customers-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    gap: 16px;
+
+    margin-bottom: 12px;
+    padding: 14px 16px;
+
+    border: 1px solid #d9e2ec;
+    border-radius: 7px;
+
+    background:
+        linear-gradient(180deg,
+            #ffffff 0%,
+            #f8fafc 100%);
+
+    box-shadow:
+        0 2px 8px rgba(15, 23, 42, 0.04);
+}
+
+
+.rr-customers-header-main {
+    min-width: 0;
+
+    display: flex;
+    align-items: center;
+
+    gap: 12px;
+}
+
+
+.rr-customers-header-icon {
+    width: 42px;
+    height: 42px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    flex: 0 0 42px;
+
+    border: 1px solid #bfdbfe;
+    border-radius: 7px;
+
+    background: #eff6ff;
+
+    color: #2563eb;
+
+    font-size: 18px;
+}
+
+
+.rr-customers-eyebrow {
+    display: block;
+
+    margin-bottom: 2px;
+
+    color: #64748b;
+
+    font-size: 12px;
+    font-weight: 750;
+
+    text-transform: uppercase;
+}
+
+
+.rr-customers-header h1 {
+    margin: 0;
+
+    color: #172033;
+
+    font-size: 23px;
+    font-weight: 850;
+
+    line-height: 1.15;
+}
+
+
+.rr-customers-header p {
+    margin: 4px 0 0;
+
+    color: #64748b;
+
+    font-size: 13px;
+    line-height: 1.4;
+}
+
+
+.rr-customers-header-actions {
+    display: flex;
+    align-items: center;
+
+    gap: 7px;
+
+    flex: 0 0 auto;
+}
+
+
+/* =========================================================
+   BUTTONS
+   ========================================================= */
+
+.rr-customer-toolbar-btn,
+.rr-customer-primary-btn,
+.rr-customer-search-btn,
+.rr-customers-clear-btn {
+    min-height: 35px;
+
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    gap: 6px;
+
+    padding: 0 12px;
+
+    border-radius: 5px;
+
+    font-size: 13px;
+    font-weight: 750;
+
+    text-decoration: none;
+
+    cursor: pointer;
+
+    transition:
+        background-color .15s ease,
+        border-color .15s ease,
+        color .15s ease,
+        box-shadow .15s ease,
+        transform .15s ease;
+}
+
+
+.rr-customer-toolbar-btn {
+    border: 1px solid #cbd5e1;
+
+    background:
+        linear-gradient(180deg,
+            #ffffff,
+            #f3f6fa);
+
+    color: #334155;
+}
+
+
+.rr-customer-toolbar-btn:hover {
+    border-color: #94a3b8;
+
+    background: #eef2f7;
+}
+
+
+.rr-customer-primary-btn {
+    border: 1px solid #1d4ed8;
+
+    background:
+        linear-gradient(180deg,
+            #3b82f6,
+            #2563eb);
+
+    color: #ffffff;
+
+    box-shadow:
+        0 2px 5px rgba(37, 99, 235, 0.18);
+}
+
+
+.rr-customer-primary-btn:hover {
+    background: #1d4ed8;
+
+    color: #ffffff;
+}
+
+
+.rr-customer-toolbar-btn:active,
+.rr-customer-primary-btn:active,
+.rr-customer-search-btn:active {
+    transform: translateY(1px);
+}
+
+
+/* =========================================================
+   SUMMARY
+   ========================================================= */
+
+.rr-customers-summary {
+    display: grid;
+
+    grid-template-columns:
+        repeat(4,
+            minmax(0,
+                1fr));
+
+    gap: 9px;
+
+    margin-bottom: 12px;
+}
+
+
+.rr-customer-summary-card {
+    min-height: 76px;
+
+    display: flex;
+    align-items: center;
+
+    gap: 10px;
+
+    padding: 11px 13px;
+
+    border: 1px solid #dde5ee;
+    border-radius: 6px;
+
+    background: #ffffff;
+
+    box-shadow:
+        0 2px 6px rgba(15, 23, 42, 0.035);
+}
+
+
+.rr-customer-summary-icon {
+    width: 36px;
+    height: 36px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    flex: 0 0 36px;
+
+    border-radius: 6px;
+
+    background: #eff6ff;
+
+    color: #2563eb;
+
+    font-size: 15px;
+}
+
+
+.rr-customer-summary-card.success .rr-customer-summary-icon {
+    background: #ecfdf5;
+    color: #059669;
+}
+
+
+.rr-customer-summary-card.warning .rr-customer-summary-icon {
+    background: #fffbeb;
+    color: #d97706;
+}
+
+
+.rr-customer-summary-card.muted .rr-customer-summary-icon {
+    background: #f1f5f9;
+    color: #64748b;
+}
+
+
+.rr-customer-summary-card span {
+    display: block;
+
+    color: #64748b;
+
+    font-size: 12px;
+    font-weight: 650;
+}
+
+
+.rr-customer-summary-card strong {
+    display: block;
+
+    margin-top: 2px;
+
+    color: #172033;
+
+    font-size: 21px;
+    font-weight: 850;
+
+    line-height: 1.1;
+}
+
+
+/* =========================================================
+   MAIN PANEL
+   ========================================================= */
+
+.rr-customers-panel {
+    overflow: hidden;
+
+    border: 1px solid #d8e0ea;
+    border-radius: 7px;
+
+    background: #ffffff;
+
+    box-shadow:
+        0 2px 9px rgba(15, 23, 42, 0.045);
+}
+
+
+/* =========================================================
+   TOOLBAR
+   ========================================================= */
+
+.rr-customers-toolbar {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+
+    gap: 12px;
+
+    padding: 9px 10px;
+
+    border-bottom: 1px solid #e2e8f0;
+
+    background: #f8fafc;
+}
+
+
+.rr-customers-search {
+    min-width: 340px;
+    max-width: 610px;
+
+    display: flex;
+    align-items: stretch;
+
+    gap: 6px;
+
+    flex: 1;
+}
+
+
+.rr-customers-search-box {
+    min-width: 0;
+
+    display: flex;
+    align-items: center;
+
+    flex: 1;
+
+    overflow: hidden;
+
+    border: 1px solid #cbd5e1;
+    border-radius: 5px;
+
+    background: #ffffff;
+}
+
+
+.rr-customers-search-box>i {
+    margin-left: 10px;
+
+    color: #94a3b8;
+
+    font-size: 13px;
+}
+
+
+.rr-customers-search-box input {
+    min-width: 0;
+    height: 34px;
+
+    flex: 1;
+
+    padding: 0 8px;
+
+    border: 0;
+    outline: 0;
+
+    background: transparent;
+
+    color: #172033;
+
+    font-size: 13px;
+}
+
+
+.rr-customers-search-box button {
+    width: 31px;
+    height: 34px;
+
+    border: 0;
+
+    background: transparent;
+
+    color: #94a3b8;
+
+    cursor: pointer;
+}
+
+
+.rr-customers-search-box button:hover {
+    color: #475569;
+}
+
+
+.rr-customer-search-btn {
+    border: 1px solid #475569;
+
+    background: #475569;
+
+    color: #ffffff;
+}
+
+
+.rr-customer-search-btn:hover {
+    background: #334155;
+}
+
+
+.rr-customers-filter-group {
+    display: flex;
+    align-items: flex-end;
+
+    gap: 7px;
+}
+
+
+.rr-customers-filter label {
+    display: block;
+
+    margin-bottom: 3px;
+
+    color: #64748b;
+
+    font-size: 12px;
+    font-weight: 700;
+}
+
+
+.rr-customers-filter select {
+    height: 34px;
+    min-width: 115px;
+
+    padding: 0 27px 0 8px;
+
+    border: 1px solid #cbd5e1;
+    border-radius: 5px;
+
+    background-color: #ffffff;
+
+    color: #334155;
+
+    font-size: 13px;
+}
+
+
+.rr-customers-clear-btn {
+    border: 1px solid #fecaca;
+
+    background: #fff7f7;
+
+    color: #b91c1c;
+}
+
+
+/* =========================================================
+   GRID STATUS
+   ========================================================= */
+
+.rr-customers-grid-status {
+    min-height: 34px;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    gap: 12px;
+
+    padding: 5px 10px;
+
+    border-bottom: 1px solid #e5eaf0;
+
+    background: #ffffff;
+}
+
+
+.rr-customers-grid-status>div,
+.rr-customers-row-limit {
+    display: flex;
+    align-items: center;
+
+    gap: 5px;
+
+    color: #64748b;
+
+    font-size: 12px;
+}
+
+
+.rr-customers-grid-status strong {
+    color: #334155;
+
+    font-weight: 800;
+}
+
+
+.rr-customers-grid-status i {
+    color: #94a3b8;
+}
+
+
+/* =========================================================
+   TABLE
+   ========================================================= */
+
+.rr-customers-table-wrap {
+    overflow-x: auto;
+}
+
+
+.rr-customers-table {
+    width: 100%;
+
+    border-collapse: collapse;
+
+    table-layout: auto;
+}
+
+
+.rr-customers-table thead {
+    background:
+        linear-gradient(180deg,
+            #f8fafc,
+            #f1f5f9);
+}
+
+
+.rr-customers-table th {
+    padding: 8px 10px;
+
+    border-bottom: 1px solid #d8e0ea;
+
+    color: #475569;
+
+    font-size: 12px;
+    font-weight: 800;
+
+    text-align: left;
+    white-space: nowrap;
+}
+
+
+.rr-customers-table td {
+    padding: 8px 10px;
+
+    border-bottom: 1px solid #edf1f5;
+
+    color: #334155;
+
+    font-size: 13px;
+
+    vertical-align: middle;
+}
+
+
+.rr-customers-table tbody tr:last-child td {
+    border-bottom: 0;
+}
+
+
+.rr-customers-table tbody tr {
+    transition:
+        background-color .12s ease,
+        box-shadow .12s ease;
+}
+
+
+.rr-customers-table tbody tr.is-clickable {
+    cursor: pointer;
+}
+
+
+.rr-customers-table tbody tr.is-clickable:hover {
+    background: #f8fbff;
+
+    box-shadow:
+        inset 3px 0 0 #3b82f6;
+}
+
+
+.rr-customers-table tbody tr.is-system-customer {
+    background: #f8fafc;
+}
+
+
+.rr-col-code {
+    width: 105px;
+}
+
+
+.rr-col-credit {
+    width: 125px;
+}
+
+
+.rr-col-status {
+    width: 105px;
+}
+
+
+.rr-col-actions {
+    width: 132px;
+
+    text-align: center !important;
+}
+
+
+/* =========================================================
+   CUSTOMER CELLS
+   ========================================================= */
+
+.rr-customer-code {
+    color: #1e3a8a;
+
+    font-size: 12px;
+    font-weight: 850;
+}
+
+
+.rr-customer-system-badge {
+    display: inline-flex;
+    align-items: center;
+
+    gap: 4px;
+
+    margin-top: 4px;
+
+    padding: 2px 5px;
+
+    border: 1px solid #cbd5e1;
+    border-radius: 4px;
+
+    background: #f8fafc;
+
+    color: #64748b;
+
+    font-size: 12px;
+    font-weight: 700;
+}
+
+
+.rr-customer-name-cell {
+    min-width: 230px;
+
+    display: flex;
+    align-items: center;
+
+    gap: 8px;
+}
+
+
+.rr-customer-avatar {
+    width: 32px;
+    height: 32px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    flex: 0 0 32px;
+
+    border: 1px solid #bfdbfe;
+    border-radius: 5px;
+
+    background: #eff6ff;
+
+    color: #1d4ed8;
+
+    font-size: 12px;
+    font-weight: 850;
+}
+
+
+.rr-customer-name-cell strong {
+    display: block;
+
+    color: #172033;
+
+    font-size: 13px;
+    font-weight: 800;
+}
+
+
+.rr-customer-meta-line {
+    display: flex;
+    align-items: center;
+
+    gap: 6px;
+
+    margin-top: 3px;
+
+    color: #7b8798;
+
+    font-size: 12px;
+}
+
+
+.rr-customer-shared-badge {
+    display: inline-flex;
+    align-items: center;
+
+    gap: 3px;
+
+    color: #7c3aed;
+
+    font-size: 12px;
+    font-weight: 700;
+}
+
+
+.rr-customer-contact strong,
+.rr-customer-location strong,
+.rr-customer-credit strong {
+    display: block;
+
+    color: #334155;
+
+    font-size: 13px;
+    font-weight: 750;
+}
+
+
+.rr-customer-contact span,
+.rr-customer-location span,
+.rr-customer-credit span {
+    display: block;
+
+    margin-top: 2px;
+
+    color: #7b8798;
+
+    font-size: 12px;
+}
+
+
+/* =========================================================
+   STATUS
+   ========================================================= */
+
+.rr-customer-status {
+    display: inline-flex;
+    align-items: center;
+
+    gap: 5px;
+
+    font-size: 12px;
+    font-weight: 750;
+}
+
+
+.rr-customer-status>span {
+    width: 7px;
+    height: 7px;
+
+    border-radius: 50%;
+}
+
+
+.rr-customer-status.active {
+    color: #047857;
+}
+
+
+.rr-customer-status.active>span {
+    background: #10b981;
+}
+
+
+.rr-customer-status.inactive {
+    color: #64748b;
+}
+
+
+.rr-customer-status.inactive>span {
+    background: #94a3b8;
+}
+
+
+/* =========================================================
+   ACTIONS
+   ========================================================= */
+
+.rr-customer-actions {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    gap: 5px;
+}
+
+
+.rr-customer-action-btn {
+    width: 30px;
+    height: 29px;
+
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    border: 1px solid #d7dee8;
+    border-radius: 5px;
+
+    background: #ffffff;
+
+    text-decoration: none;
+
+    cursor: pointer;
+
+    transition:
+        background-color .15s ease,
+        border-color .15s ease,
+        color .15s ease,
+        transform .15s ease;
+}
+
+
+.rr-customer-action-btn:hover {
+    transform: translateY(-1px);
+}
+
+
+.rr-customer-action-btn.view {
+    border-color: #bfdbfe;
+
+    background: #eff6ff;
+
+    color: #2563eb;
+}
+
+
+.rr-customer-action-btn.edit {
+    border-color: #fde68a;
+
+    background: #fffbeb;
+
+    color: #b45309;
+}
+
+
+.rr-customer-action-btn.remove {
+    border-color: #fecaca;
+
+    background: #fff1f2;
+
+    color: #be123c;
+}
+
+
+.rr-customer-action-btn.locked {
+    border-color: #e2e8f0;
+
+    background: #f8fafc;
+
+    color: #94a3b8;
+
+    cursor: not-allowed;
+}
+
+
+/* =========================================================
+   PAGINATION
+   ========================================================= */
+
+.rr-customers-pagination {
+    min-height: 48px;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    gap: 12px;
+
+    padding: 7px 10px;
+
+    border-top: 1px solid #e2e8f0;
+
+    background: #f8fafc;
+}
+
+
+.rr-customers-pagination-info {
+    display: flex;
+    align-items: center;
+
+    gap: 5px;
+
+    color: #64748b;
+
+    font-size: 12px;
+}
+
+
+.rr-customers-pagination-info strong {
+    color: #334155;
+}
+
+
+.rr-customers-pagination-links {
+    display: flex;
+    align-items: center;
+
+    gap: 4px;
+}
+
+
+.rr-customer-page-link {
+    min-width: 30px;
+    height: 30px;
+
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    padding: 0 7px;
+
+    border: 1px solid #cbd5e1;
+    border-radius: 4px;
+
+    background: #ffffff;
+
+    color: #475569;
+
+    font-size: 12px;
+    font-weight: 700;
+
+    text-decoration: none;
+}
+
+
+.rr-customer-page-link:hover {
+    border-color: #94a3b8;
+
+    background: #f1f5f9;
+}
+
+
+.rr-customer-page-link.active {
+    border-color: #2563eb;
+
+    background: #2563eb;
+
+    color: #ffffff;
+}
+
+
+.rr-customer-page-link.disabled {
+    opacity: .45;
+
+    cursor: not-allowed;
+}
+
+
+/* =========================================================
+   EMPTY
+   ========================================================= */
+
+.rr-customers-empty {
+    min-height: 260px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    flex-direction: column;
+
+    gap: 7px;
+
+    padding: 35px 20px;
+
+    text-align: center;
+}
+
+
+.rr-customers-empty-icon {
+    width: 48px;
+    height: 48px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    margin-bottom: 3px;
+
+    border: 1px solid #dbe4ef;
+    border-radius: 8px;
+
+    background: #f8fafc;
+
+    color: #94a3b8;
+
+    font-size: 20px;
+}
+
+
+.rr-customers-empty strong {
+    color: #334155;
+
+    font-size: 15px;
+    font-weight: 800;
+}
+
+
+.rr-customers-empty>span {
+    max-width: 430px;
+
+    color: #7b8798;
+
+    font-size: 13px;
+}
+
+
+/* =========================================================
+   RESPONSIVE
+   ========================================================= */
+
+@media (max-width: 1100px) {
+
+    .rr-customers-summary {
+        grid-template-columns:
+            repeat(2,
+                minmax(0,
+                    1fr));
+    }
+
+
+    .rr-customers-toolbar {
+        align-items: stretch;
+
+        flex-direction: column;
+    }
+
+
+    .rr-customers-search {
+        width: 100%;
+        max-width: none;
+    }
+
+
+    .rr-customers-filter-group {
+        justify-content: flex-end;
+    }
+}
+
+
+@media (max-width: 760px) {
+
+    .rr-customers-header {
+        align-items: stretch;
+
+        flex-direction: column;
+    }
+
+
+    .rr-customers-header-actions {
+        justify-content: flex-end;
+    }
+
+
+    .rr-customers-summary {
+        grid-template-columns: 1fr;
+    }
+
+
+    .rr-customers-filter-group {
+        align-items: stretch;
+
+        flex-direction: column;
+    }
+
+
+    .rr-customers-filter select {
+        width: 100%;
+    }
+
+
+    .rr-customers-grid-status {
+        align-items: flex-start;
+
+        flex-direction: column;
+    }
+
+
+    .rr-customers-pagination {
+        align-items: flex-start;
+
+        flex-direction: column;
+    }
+
+
+    .rr-customers-pagination-links {
+        max-width: 100%;
+
+        overflow-x: auto;
+
+        padding-bottom: 2px;
+    }
+}
+
+
+/* =========================================================
+   RR MOTORS - CUSTOMER CREATE / EDIT
+   Dedicated stylesheet
+   ========================================================= */
+
+.rr-customer-form-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+
+    margin-bottom: 12px;
+    padding: 14px 16px;
+
+    border: 1px solid #d9e2ec;
+    border-radius: 8px;
+
+    background: linear-gradient(180deg, #ffffff, #f8fafc);
+
+    box-shadow: 0 2px 8px rgba(15, 23, 42, 0.05);
+}
+
+.rr-customer-form-header>div:first-child>span {
+    display: block;
+    color: #64748b;
+    font-size: 12px;
+    font-weight: 800;
+    text-transform: uppercase;
+}
+
+.rr-customer-form-header h1 {
+    margin: 2px 0 0;
+    color: #172033;
+    font-size: 24px;
+    font-weight: 850;
+}
+
+.rr-customer-form-header p {
+    margin: 4px 0 0;
+    color: #64748b;
+    font-size: 13px;
+}
+
+.rr-customer-form-header-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.rr-customer-form-shell {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.rr-customer-form-section {
+    overflow: hidden;
+
+    border: 1px solid #d8e0ea;
+    border-radius: 8px;
+
+    background: #ffffff;
+
+    box-shadow: 0 2px 8px rgba(15, 23, 42, 0.04);
+}
+
+.rr-customer-form-section-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+
+    padding: 11px 13px;
+
+    border-bottom: 1px solid #e2e8f0;
+
+    background: linear-gradient(180deg, #f8fafc, #f1f5f9);
+}
+
+.rr-customer-form-section-icon {
+    width: 36px;
+    height: 36px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    flex: 0 0 36px;
+
+    border: 1px solid #bfdbfe;
+    border-radius: 7px;
+
+    background: #eff6ff;
+
+    color: #2563eb;
+
+    font-size: 15px;
+}
+
+.rr-customer-form-section-header span {
+    display: block;
+
+    color: #64748b;
+
+    font-size: 12px;
+    font-weight: 800;
+
+    text-transform: uppercase;
+}
+
+.rr-customer-form-section-header strong {
+    display: block;
+
+    margin-top: 1px;
+
+    color: #172033;
+
+    font-size: 16px;
+    font-weight: 850;
+}
+
+.rr-customer-form-section-header p {
+    margin: 2px 0 0;
+
+    color: #7b8798;
+
+    font-size: 12px;
+}
+
+.rr-customer-form-section-body {
+    padding: 14px;
+}
+
+.rr-customer-form-grid,
+.rr-customer-gst-grid {
+    display: grid;
+
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+
+    gap: 12px 14px;
+}
+
+.rr-customer-gst-grid {
+    grid-template-columns: minmax(0, 2fr) minmax(240px, 1fr);
+}
+
+.rr-customer-field {
+    display: block;
+    min-width: 0;
+}
+
+.rr-customer-field.wide {
+    grid-column: 1 / -1;
+}
+
+.rr-customer-field-label {
+    display: block;
+
+    margin-bottom: 5px;
+
+    color: #475569;
+
+    font-size: 13px;
+    font-weight: 750;
+}
+
+.rr-customer-field-label em {
+    margin-left: 3px;
+
+    color: #dc2626;
+
+    font-style: normal;
+}
+
+.rr-customer-field input,
+.rr-customer-field select,
+.rr-customer-field textarea {
+    width: 100%;
+
+    border: 1px solid #cbd5e1;
+    border-radius: 6px;
+
+    background: #ffffff;
+
+    color: #172033;
+
+    font-size: 13px;
+
+    outline: none;
+
+    transition:
+        border-color .15s ease,
+        box-shadow .15s ease,
+        background-color .15s ease;
+}
+
+.rr-customer-field input,
+.rr-customer-field select {
+    height: 38px;
+
+    padding: 0 10px;
+}
+
+.rr-customer-field textarea {
+    min-height: 84px;
+
+    padding: 9px 10px;
+
+    resize: vertical;
+}
+
+.rr-customer-field input:focus,
+.rr-customer-field select:focus,
+.rr-customer-field textarea:focus {
+    border-color: #3b82f6;
+
+    background: #ffffff;
+
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.10);
+}
+
+.rr-customer-field small {
+    display: block;
+
+    margin-top: 4px;
+
+    color: #7b8798;
+
+    font-size: 12px;
+}
+
+.rr-customer-field small.error {
+    color: #dc2626;
+    font-weight: 700;
+}
+
+
+/* GST LOOKUP */
+
+.rr-customer-gst-input {
+    display: flex;
+    gap: 7px;
+}
+
+.rr-customer-gst-input input {
+    flex: 1;
+}
+
+.rr-customer-gst-input button {
+    min-width: 118px;
+    height: 38px;
+
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    gap: 6px;
+
+    border: 1px solid #2563eb;
+    border-radius: 6px;
+
+    background: #eff6ff;
+
+    color: #1d4ed8;
+
+    font-size: 12px;
+    font-weight: 800;
+
+    cursor: pointer;
+}
+
+.rr-customer-gst-input button:hover {
+    background: #dbeafe;
+}
+
+.rr-customer-gst-input button:disabled {
+    opacity: .65;
+    cursor: wait;
+}
+
+.rr-customer-inline-message {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+
+    margin-top: 10px;
+    padding: 9px 10px;
+
+    border-radius: 6px;
+
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.rr-customer-inline-message.success {
+    border: 1px solid #bbf7d0;
+    background: #f0fdf4;
+    color: #047857;
+}
+
+.rr-customer-inline-message.error {
+    border: 1px solid #fecaca;
+    background: #fef2f2;
+    color: #b91c1c;
+}
+
+
+/* GST PREVIEW */
+
+.rr-customer-gst-preview {
+    margin-top: 10px;
+
+    overflow: hidden;
+
+    border: 1px solid #bfdbfe;
+    border-radius: 7px;
+
+    background: #f8fbff;
+}
+
+.rr-customer-gst-preview-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+
+    padding: 10px 11px;
+
+    border-bottom: 1px solid #dbeafe;
+
+    background: #eff6ff;
+}
+
+.rr-customer-gst-preview-header span {
+    display: block;
+    color: #64748b;
+    font-size: 12px;
+}
+
+.rr-customer-gst-preview-header strong {
+    display: block;
+    margin-top: 1px;
+    color: #1e3a8a;
+    font-size: 13px;
+}
+
+.rr-customer-gst-preview-header button {
+    min-height: 34px;
+
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+
+    padding: 0 11px;
+
+    border: 1px solid #2563eb;
+    border-radius: 6px;
+
+    background: #2563eb;
+
+    color: #ffffff;
+
+    font-size: 12px;
+    font-weight: 800;
+
+    cursor: pointer;
+}
+
+.rr-customer-gst-preview-grid {
+    display: grid;
+
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+
+    gap: 8px;
+
+    padding: 10px;
+}
+
+.rr-customer-preview-item {
+    padding: 8px 9px;
+
+    border: 1px solid #e2e8f0;
+    border-radius: 5px;
+
+    background: #ffffff;
+}
+
+.rr-customer-preview-item.wide {
+    grid-column: 1 / -1;
+}
+
+.rr-customer-preview-item span {
+    display: block;
+    color: #7b8798;
+    font-size: 12px;
+}
+
+.rr-customer-preview-item strong {
+    display: block;
+    margin-top: 2px;
+    color: #334155;
+    font-size: 12px;
+    font-weight: 750;
+}
+
+
+/* DUPLICATE CUSTOMER */
+
+.rr-customer-duplicate-panel {
+    display: flex;
+    align-items: center;
+    gap: 11px;
+
+    margin-bottom: 12px;
+    padding: 11px 13px;
+
+    border-radius: 7px;
+}
+
+.rr-customer-duplicate-panel.other-branch {
+    border: 1px solid #fde68a;
+    background: #fffbeb;
+}
+
+.rr-customer-duplicate-panel.same-branch {
+    border: 1px solid #fecaca;
+    background: #fef2f2;
+}
+
+.rr-customer-duplicate-icon {
+    width: 40px;
+    height: 40px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    flex: 0 0 40px;
+
+    border-radius: 7px;
+
+    background: rgba(255, 255, 255, .8);
+
+    font-size: 17px;
+}
+
+.other-branch .rr-customer-duplicate-icon {
+    color: #b45309;
+}
+
+.same-branch .rr-customer-duplicate-icon {
+    color: #b91c1c;
+}
+
+.rr-customer-duplicate-content {
+    min-width: 0;
+    flex: 1;
+}
+
+.rr-customer-duplicate-content>span {
+    display: block;
+    color: #64748b;
+    font-size: 12px;
+    font-weight: 800;
+    text-transform: uppercase;
+}
+
+.rr-customer-duplicate-content>strong {
+    display: block;
+    margin-top: 1px;
+    color: #172033;
+    font-size: 14px;
+    font-weight: 850;
+}
+
+.rr-customer-duplicate-content>div {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+    margin-top: 5px;
+}
+
+.rr-customer-duplicate-content>div>span {
+    padding: 2px 6px;
+
+    border: 1px solid rgba(148, 163, 184, .35);
+    border-radius: 4px;
+
+    background: rgba(255, 255, 255, .75);
+
+    color: #475569;
+
+    font-size: 12px;
+}
+
+.rr-customer-duplicate-content p {
+    margin: 6px 0 0;
+    color: #64748b;
+    font-size: 12px;
+}
+
+.rr-customer-attach-btn {
+    min-height: 36px;
+
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    gap: 5px;
+
+    padding: 0 12px;
+
+    border: 1px solid #d97706;
+    border-radius: 6px;
+
+    background: #d97706;
+
+    color: #ffffff;
+
+    font-size: 12px;
+    font-weight: 800;
+
+    cursor: pointer;
+}
+
+
+/* FOOTER */
+
+.rr-customer-form-footer {
+    position: sticky;
+    bottom: 0;
+    z-index: 20;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    gap: 12px;
+
+    padding: 10px 12px;
+
+    border: 1px solid #d8e0ea;
+    border-radius: 8px;
+
+    background: rgba(248, 250, 252, .97);
+
+    backdrop-filter: blur(8px);
+
+    box-shadow: 0 -3px 12px rgba(15, 23, 42, 0.07);
+}
+
+.rr-customer-form-footer-note {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+
+    color: #64748b;
+
+    font-size: 12px;
+}
+
+.rr-customer-form-footer-note i {
+    color: #2563eb;
+}
+
+.rr-customer-form-footer-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+
+/* SPINNER */
+
+.rr-customer-spinner {
+    width: 13px;
+    height: 13px;
+
+    display: inline-block;
+
+    border: 2px solid rgba(100, 116, 139, .25);
+    border-top-color: currentColor;
+    border-radius: 50%;
+
+    animation: rr-customer-create-spin .75s linear infinite;
+}
+
+@keyframes rr-customer-create-spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+
+/* RESPONSIVE */
+
+@media (max-width: 900px) {
+
+    .rr-customer-form-grid,
+    .rr-customer-gst-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .rr-customer-gst-preview-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 650px) {
+
+    .rr-customer-form-header,
+    .rr-customer-duplicate-panel,
+    .rr-customer-form-footer,
+    .rr-customer-gst-preview-header {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .rr-customer-gst-input {
+        flex-direction: column;
+    }
+
+    .rr-customer-gst-input button {
+        min-height: 38px;
+    }
+
+    .rr-customer-gst-preview-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .rr-customer-form-footer-actions {
+        justify-content: flex-end;
+    }
+}
+
+
+/* =========================================================
+   SAME BILLING / SHIPPING ADDRESS
+   ========================================================= */
+
+.rr-same-address-option {
+    display: flex;
+    align-items: center;
+
+    margin-bottom: 7px;
+}
+
+.rr-same-address-option label {
+    display: inline-flex;
+    align-items: center;
+
+    gap: 7px;
+
+    margin: 0;
+
+    color: #475569;
+
+    font-size: 12px;
+    font-weight: 700;
+
+    cursor: pointer;
+}
+
+.rr-same-address-option input[type="checkbox"] {
+    width: 16px;
+    height: 16px;
+
+    margin: 0;
+
+    accent-color: #2563eb;
+
+    cursor: pointer;
+}
+
+.rr-same-address-option span {
+    user-select: none;
+}
+
+.rr-customer-field textarea:disabled {
+    border-color: #dbe3ec;
+
+    background: #f1f5f9;
+
+    color: #64748b;
+
+    cursor: not-allowed;
+}
+
+/* =========================================================
+   SAME BILLING / SHIPPING ADDRESS
+   ========================================================= */
+
+.rr-same-address-option {
+    display: flex;
+    align-items: center;
+
+    margin-bottom: 7px;
+}
+
+.rr-same-address-option label {
+    display: inline-flex;
+    align-items: center;
+
+    gap: 7px;
+
+    margin: 0;
+
+    color: #475569;
+
+    font-size: 12px;
+    font-weight: 700;
+
+    cursor: pointer;
+}
+
+.rr-same-address-option input[type="checkbox"] {
+    width: 16px;
+    height: 16px;
+
+    margin: 0;
+
+    accent-color: #2563eb;
+
+    cursor: pointer;
+}
+
+.rr-same-address-option span {
+    user-select: none;
+}
+
+.rr-customer-field textarea:disabled {
+    border-color: #dbe3ec;
+
+    background: #f1f5f9;
+
+    color: #64748b;
+
+    cursor: not-allowed;
+}

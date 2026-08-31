@@ -1,0 +1,921 @@
+/* =========================================================
+   CUSTOMER SHOW / ACCOUNT
+   ========================================================= */
+
+.rr-customer-account-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+
+    margin-bottom: 12px;
+    padding: 14px 16px;
+
+    border: 1px solid #d9e2ec;
+    border-radius: 8px;
+
+    background: linear-gradient(180deg, #ffffff, #f8fafc);
+
+    box-shadow: 0 2px 8px rgba(15, 23, 42, 0.05);
+}
+
+.rr-customer-account-header-main {
+    min-width: 0;
+
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.rr-customer-account-back {
+    width: 34px;
+    height: 34px;
+
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    flex: 0 0 34px;
+
+    border: 1px solid #cbd5e1;
+    border-radius: 6px;
+
+    background: #ffffff;
+
+    color: #475569;
+
+    cursor: pointer;
+}
+
+.rr-customer-account-back:hover {
+    background: #f1f5f9;
+}
+
+.rr-customer-account-avatar {
+    width: 48px;
+    height: 48px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    flex: 0 0 48px;
+
+    border: 1px solid #bfdbfe;
+    border-radius: 8px;
+
+    background: #eff6ff;
+
+    color: #1d4ed8;
+
+    font-size: 16px;
+    font-weight: 850;
+}
+
+.rr-customer-account-identity {
+    min-width: 0;
+}
+
+.rr-customer-account-kicker {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.rr-customer-account-kicker>span:first-child {
+    color: #64748b;
+    font-size: 12px;
+    font-weight: 800;
+    text-transform: uppercase;
+}
+
+.rr-customer-account-identity h1 {
+    margin: 3px 0 0;
+
+    color: #172033;
+
+    font-size: 24px;
+    font-weight: 850;
+
+    line-height: 1.15;
+}
+
+.rr-customer-account-subline {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+
+    gap: 10px;
+
+    margin-top: 5px;
+
+    color: #64748b;
+
+    font-size: 12px;
+}
+
+.rr-customer-account-subline span {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.rr-customer-account-header-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+
+    flex: 0 0 auto;
+}
+
+.rr-customer-shared-warning {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+
+    margin-bottom: 12px;
+    padding: 9px 11px;
+
+    border: 1px solid #ddd6fe;
+    border-radius: 7px;
+
+    background: #faf5ff;
+
+    color: #6d28d9;
+}
+
+.rr-customer-shared-warning>i {
+    font-size: 16px;
+}
+
+.rr-customer-shared-warning strong,
+.rr-customer-shared-warning span {
+    display: block;
+}
+
+.rr-customer-shared-warning strong {
+    font-size: 13px;
+    font-weight: 800;
+}
+
+.rr-customer-shared-warning span {
+    margin-top: 1px;
+
+    color: #7c3aed;
+
+    font-size: 12px;
+}
+
+
+/* SUMMARY */
+
+.rr-customer-account-summary {
+    display: grid;
+
+    grid-template-columns:
+        repeat(6,
+            minmax(0, 1fr));
+
+    gap: 8px;
+
+    margin-bottom: 12px;
+}
+
+.rr-customer-account-stat {
+    min-width: 0;
+
+    display: flex;
+    align-items: center;
+    gap: 8px;
+
+    min-height: 72px;
+
+    padding: 10px;
+
+    border: 1px solid #dde5ee;
+    border-radius: 7px;
+
+    background: #ffffff;
+
+    box-shadow: 0 2px 6px rgba(15, 23, 42, 0.035);
+}
+
+.rr-customer-account-stat-icon {
+    width: 34px;
+    height: 34px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    flex: 0 0 34px;
+
+    border-radius: 6px;
+
+    background: #eff6ff;
+
+    color: #2563eb;
+
+    font-size: 14px;
+}
+
+.rr-customer-account-stat.success .rr-customer-account-stat-icon {
+    background: #ecfdf5;
+    color: #059669;
+}
+
+.rr-customer-account-stat.danger .rr-customer-account-stat-icon {
+    background: #fef2f2;
+    color: #dc2626;
+}
+
+.rr-customer-account-stat.warning .rr-customer-account-stat-icon {
+    background: #fffbeb;
+    color: #d97706;
+}
+
+.rr-customer-account-stat.muted .rr-customer-account-stat-icon {
+    background: #f1f5f9;
+    color: #64748b;
+}
+
+.rr-customer-account-stat span {
+    display: block;
+
+    color: #64748b;
+
+    font-size: 12px;
+    font-weight: 650;
+}
+
+.rr-customer-account-stat strong {
+    display: block;
+
+    margin-top: 2px;
+
+    color: #172033;
+
+    font-size: 15px;
+    font-weight: 850;
+
+    white-space: nowrap;
+}
+
+.rr-customer-account-stat strong small {
+    margin-left: 4px;
+
+    color: #64748b;
+
+    font-size: 12px;
+    font-weight: 700;
+}
+
+
+/* PANEL / TABS */
+
+.rr-customer-account-panel {
+    overflow: hidden;
+
+    border: 1px solid #d8e0ea;
+    border-radius: 8px;
+
+    background: #ffffff;
+
+    box-shadow: 0 2px 9px rgba(15, 23, 42, 0.045);
+}
+
+.rr-customer-account-tabs {
+    display: flex;
+    align-items: stretch;
+
+    overflow-x: auto;
+
+    border-bottom: 1px solid #d8e0ea;
+
+    background: #f8fafc;
+}
+
+.rr-customer-account-tab {
+    min-height: 43px;
+
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    gap: 6px;
+
+    padding: 0 14px;
+
+    border: 0;
+    border-right: 1px solid #e2e8f0;
+
+    background: transparent;
+
+    color: #64748b;
+
+    font-size: 12px;
+    font-weight: 750;
+
+    cursor: pointer;
+
+    white-space: nowrap;
+}
+
+.rr-customer-account-tab:hover {
+    background: #f1f5f9;
+    color: #334155;
+}
+
+.rr-customer-account-tab.active {
+    background: #ffffff;
+
+    color: #1d4ed8;
+
+    box-shadow: inset 0 -2px 0 #2563eb;
+}
+
+.rr-customer-account-tab small {
+    min-width: 19px;
+    height: 19px;
+
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    padding: 0 5px;
+
+    border-radius: 10px;
+
+    background: #e2e8f0;
+
+    color: #475569;
+
+    font-size: 12px;
+}
+
+.rr-customer-account-tab.active small {
+    background: #dbeafe;
+    color: #1d4ed8;
+}
+
+.rr-customer-account-tab-content {
+    padding: 12px;
+}
+
+
+/* OVERVIEW */
+
+.rr-customer-overview-grid {
+    display: grid;
+
+    grid-template-columns:
+        repeat(2,
+            minmax(0, 1fr));
+
+    gap: 10px;
+}
+
+.rr-customer-account-card {
+    overflow: hidden;
+
+    border: 1px solid #e2e8f0;
+    border-radius: 7px;
+
+    background: #ffffff;
+}
+
+.rr-customer-account-card-wide {
+    grid-column: 1 / -1;
+}
+
+.rr-customer-account-card-header {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+
+    min-height: 38px;
+
+    padding: 0 10px;
+
+    border-bottom: 1px solid #e2e8f0;
+
+    background: #f8fafc;
+
+    color: #334155;
+}
+
+.rr-customer-account-card-header i {
+    color: #2563eb;
+}
+
+.rr-customer-account-card-header strong {
+    font-size: 13px;
+    font-weight: 800;
+}
+
+.rr-customer-account-card-body {
+    padding: 9px 10px;
+}
+
+.rr-customer-info-row {
+    display: grid;
+
+    grid-template-columns:
+        minmax(130px, .8fr) minmax(0, 1.2fr);
+
+    gap: 10px;
+
+    padding: 7px 0;
+
+    border-bottom: 1px solid #edf1f5;
+}
+
+.rr-customer-info-row:last-child {
+    border-bottom: 0;
+}
+
+.rr-customer-info-row span {
+    color: #64748b;
+
+    font-size: 12px;
+}
+
+.rr-customer-info-row strong {
+    min-width: 0;
+
+    color: #334155;
+
+    font-size: 12px;
+    font-weight: 750;
+
+    text-align: right;
+
+    word-break: break-word;
+}
+
+.rr-customer-address-block {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+
+    color: #334155;
+
+    font-size: 13px;
+
+    line-height: 1.45;
+}
+
+.rr-customer-account-remarks {
+    margin: 0;
+
+    color: #475569;
+
+    font-size: 13px;
+
+    line-height: 1.55;
+}
+
+.rr-account-muted {
+    color: #94a3b8;
+
+    font-size: 12px;
+}
+
+
+/* DATA TABLES */
+
+.rr-customer-data-section {
+    overflow: hidden;
+
+    border: 1px solid #e2e8f0;
+    border-radius: 7px;
+}
+
+.rr-customer-data-section-header {
+    min-height: 44px;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    gap: 10px;
+
+    padding: 7px 10px;
+
+    border-bottom: 1px solid #e2e8f0;
+
+    background: #f8fafc;
+}
+
+.rr-customer-data-section-header>div {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.rr-customer-data-section-header>div>i {
+    color: #2563eb;
+}
+
+.rr-customer-data-section-header strong,
+.rr-customer-data-section-header span {
+    display: block;
+}
+
+.rr-customer-data-section-header strong {
+    color: #334155;
+
+    font-size: 13px;
+    font-weight: 800;
+}
+
+.rr-customer-data-section-header span {
+    color: #64748b;
+
+    font-size: 12px;
+}
+
+.rr-customer-account-table-wrap {
+    overflow-x: auto;
+}
+
+.rr-customer-account-table {
+    width: 100%;
+
+    border-collapse: collapse;
+}
+
+.rr-customer-account-table th {
+    padding: 8px 10px;
+
+    border-bottom: 1px solid #d8e0ea;
+
+    background: #f8fafc;
+
+    color: #475569;
+
+    font-size: 12px;
+    font-weight: 800;
+
+    text-align: left;
+
+    white-space: nowrap;
+}
+
+.rr-customer-account-table td {
+    padding: 8px 10px;
+
+    border-bottom: 1px solid #edf1f5;
+
+    color: #334155;
+
+    font-size: 12px;
+
+    vertical-align: middle;
+}
+
+.rr-customer-account-table tbody tr:hover {
+    background: #f8fbff;
+}
+
+.rr-customer-account-table tbody tr:last-child td {
+    border-bottom: 0;
+}
+
+.rr-customer-account-table .text-end {
+    text-align: right;
+}
+
+.rr-account-debit {
+    color: #b91c1c !important;
+    font-weight: 750;
+}
+
+.rr-account-credit {
+    color: #047857 !important;
+    font-weight: 750;
+}
+
+.rr-account-reference-link {
+    color: #1d4ed8;
+
+    font-weight: 800;
+
+    text-decoration: none;
+}
+
+.rr-account-reference-link:hover {
+    text-decoration: underline;
+}
+
+.rr-account-sale-status {
+    display: inline-flex;
+
+    padding: 2px 6px;
+
+    border: 1px solid #dbe4ef;
+    border-radius: 4px;
+
+    background: #f8fafc;
+
+    color: #475569;
+
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.rr-transaction-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+
+    padding: 3px 6px;
+
+    border-radius: 4px;
+
+    font-size: 12px;
+    font-weight: 750;
+}
+
+.rr-transaction-badge.sale {
+    border: 1px solid #fecaca;
+    background: #fff1f2;
+    color: #be123c;
+}
+
+.rr-transaction-badge.payment {
+    border: 1px solid #bbf7d0;
+    background: #f0fdf4;
+    color: #047857;
+}
+
+.rr-account-table-empty {
+    min-height: 180px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+
+    gap: 7px;
+
+    color: #94a3b8;
+
+    font-size: 12px;
+}
+
+.rr-account-table-empty i {
+    font-size: 22px;
+}
+
+
+/* PAGINATION */
+
+.rr-customer-account-pagination {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    gap: 10px;
+
+    min-height: 44px;
+
+    padding: 6px 9px;
+
+    border-top: 1px solid #e2e8f0;
+
+    background: #f8fafc;
+}
+
+.rr-customer-account-pagination>span {
+    color: #64748b;
+
+    font-size: 12px;
+}
+
+.rr-customer-account-pagination>div {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.rr-customer-account-page-link {
+    min-width: 30px;
+    height: 29px;
+
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    padding: 0 7px;
+
+    border: 1px solid #cbd5e1;
+    border-radius: 4px;
+
+    background: #ffffff;
+
+    color: #475569;
+
+    font-size: 12px;
+    font-weight: 700;
+
+    text-decoration: none;
+}
+
+.rr-customer-account-page-link.active {
+    border-color: #2563eb;
+    background: #2563eb;
+    color: #ffffff;
+}
+
+.rr-customer-account-page-link.disabled {
+    opacity: .45;
+}
+
+
+/* BRANCHES */
+
+.rr-customer-branches-grid {
+    display: grid;
+
+    grid-template-columns:
+        repeat(2,
+            minmax(0, 1fr));
+
+    gap: 9px;
+}
+
+.rr-customer-branch-card {
+    display: flex;
+    align-items: center;
+
+    gap: 9px;
+
+    padding: 10px;
+
+    border: 1px solid #e2e8f0;
+    border-radius: 7px;
+
+    background: #ffffff;
+}
+
+.rr-customer-branch-card.current {
+    border-color: #93c5fd;
+    background: #f8fbff;
+}
+
+.rr-customer-branch-card-icon {
+    width: 34px;
+    height: 34px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    flex: 0 0 34px;
+
+    border-radius: 6px;
+
+    background: #eff6ff;
+
+    color: #2563eb;
+}
+
+.rr-customer-branch-card>div:nth-child(2) {
+    min-width: 0;
+
+    flex: 1;
+}
+
+.rr-customer-branch-card strong,
+.rr-customer-branch-card span {
+    display: block;
+}
+
+.rr-customer-branch-card strong {
+    color: #334155;
+
+    font-size: 13px;
+    font-weight: 800;
+}
+
+.rr-customer-branch-card>div:nth-child(2) span {
+    margin-top: 2px;
+
+    color: #64748b;
+
+    font-size: 12px;
+}
+
+.rr-customer-branch-card-status {
+    display: flex;
+    align-items: flex-end;
+    flex-direction: column;
+
+    gap: 4px;
+}
+
+.rr-customer-branch-card-status span {
+    padding: 2px 6px;
+
+    border-radius: 4px;
+
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.rr-customer-branch-card-status .current {
+    border: 1px solid #bfdbfe;
+    background: #eff6ff;
+    color: #1d4ed8;
+}
+
+.rr-customer-branch-card-status .active {
+    border: 1px solid #bbf7d0;
+    background: #f0fdf4;
+    color: #047857;
+}
+
+.rr-customer-branch-card-status .inactive {
+    border: 1px solid #e2e8f0;
+    background: #f8fafc;
+    color: #64748b;
+}
+
+.rr-account-empty-state {
+    grid-column: 1 / -1;
+
+    min-height: 180px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+
+    gap: 6px;
+
+    color: #94a3b8;
+}
+
+.rr-account-empty-state i {
+    font-size: 23px;
+}
+
+.rr-account-empty-state strong {
+    color: #475569;
+
+    font-size: 13px;
+}
+
+.rr-account-empty-state span {
+    font-size: 12px;
+}
+
+
+/* RESPONSIVE */
+
+@media (max-width: 1250px) {
+    .rr-customer-account-summary {
+        grid-template-columns:
+            repeat(3,
+                minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 900px) {
+    .rr-customer-account-header {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .rr-customer-account-header-actions {
+        justify-content: flex-end;
+    }
+
+    .rr-customer-account-summary {
+        grid-template-columns:
+            repeat(2,
+                minmax(0, 1fr));
+    }
+
+    .rr-customer-overview-grid,
+    .rr-customer-branches-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 600px) {
+    .rr-customer-account-header-main {
+        align-items: flex-start;
+    }
+
+    .rr-customer-account-summary {
+        grid-template-columns: 1fr;
+    }
+
+    .rr-customer-account-pagination {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+}

@@ -49,6 +49,10 @@
 @import './business/branches.css';
 
 
+/* master module */
+@import './business/master-navigation.css';
+
+
 /* customer colors */
 
 :root {
