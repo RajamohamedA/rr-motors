@@ -1,0 +1,2643 @@
+/* =========================================================
+   RR MOTORS - SUPPLIER INDEX
+   Windows ERP style
+   ========================================================= */
+
+.rr-suppliers-page {
+    width: 100%;
+}
+
+.rr-suppliers-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    gap: 16px;
+
+    margin-bottom: 12px;
+    padding: 14px 16px;
+
+    border: 1px solid #d9e2ec;
+    border-radius: 7px;
+
+    background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+
+    box-shadow: 0 2px 8px rgba(15, 23, 42, 0.04);
+}
+
+.rr-suppliers-header-main {
+    min-width: 0;
+
+    display: flex;
+    align-items: center;
+
+    gap: 12px;
+}
+
+.rr-suppliers-header-icon {
+    width: 42px;
+    height: 42px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    flex: 0 0 42px;
+
+    border: 1px solid #bfdbfe;
+    border-radius: 7px;
+
+    background: #eff6ff;
+
+    color: #2563eb;
+
+    font-size: 18px;
+}
+
+.rr-suppliers-eyebrow {
+    display: block;
+
+    margin-bottom: 2px;
+
+    color: #64748b;
+
+    font-size: 12px;
+    font-weight: 750;
+
+    text-transform: uppercase;
+}
+
+.rr-suppliers-header h1 {
+    margin: 0;
+
+    color: #172033;
+
+    font-size: 23px;
+    font-weight: 850;
+
+    line-height: 1.15;
+}
+
+.rr-suppliers-header p {
+    margin: 4px 0 0;
+
+    color: #64748b;
+
+    font-size: 13px;
+    line-height: 1.4;
+}
+
+.rr-suppliers-header-actions {
+    display: flex;
+    align-items: center;
+
+    gap: 7px;
+
+    flex: 0 0 auto;
+}
+
+
+/* BUTTONS */
+
+.rr-supplier-toolbar-btn,
+.rr-supplier-primary-btn,
+.rr-supplier-search-btn,
+.rr-suppliers-clear-btn {
+    min-height: 35px;
+
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    gap: 6px;
+
+    padding: 0 12px;
+
+    border-radius: 5px;
+
+    font-size: 13px;
+    font-weight: 750;
+
+    text-decoration: none;
+
+    cursor: pointer;
+
+    transition:
+        background-color .15s ease,
+        border-color .15s ease,
+        color .15s ease,
+        transform .15s ease;
+}
+
+.rr-supplier-toolbar-btn {
+    border: 1px solid #cbd5e1;
+
+    background: linear-gradient(180deg, #ffffff, #f3f6fa);
+
+    color: #334155;
+}
+
+.rr-supplier-toolbar-btn:hover {
+    border-color: #94a3b8;
+
+    background: #eef2f7;
+}
+
+.rr-supplier-primary-btn {
+    border: 1px solid #1d4ed8;
+
+    background: linear-gradient(180deg, #3b82f6, #2563eb);
+
+    color: #ffffff;
+
+    box-shadow: 0 2px 5px rgba(37, 99, 235, 0.18);
+}
+
+.rr-supplier-primary-btn:hover {
+    background: #1d4ed8;
+
+    color: #ffffff;
+}
+
+.rr-supplier-search-btn {
+    border: 1px solid #475569;
+
+    background: #475569;
+
+    color: #ffffff;
+}
+
+.rr-supplier-search-btn:hover {
+    background: #334155;
+}
+
+.rr-suppliers-clear-btn {
+    border: 1px solid #fecaca;
+
+    background: #fff7f7;
+
+    color: #b91c1c;
+}
+
+
+/* SUMMARY */
+
+.rr-suppliers-summary {
+    display: grid;
+
+    grid-template-columns:
+        repeat(5,
+            minmax(0, 1fr));
+
+    gap: 9px;
+
+    margin-bottom: 12px;
+}
+
+.rr-supplier-summary-card {
+    min-height: 76px;
+
+    display: flex;
+    align-items: center;
+
+    gap: 10px;
+
+    padding: 11px 13px;
+
+    border: 1px solid #dde5ee;
+    border-radius: 6px;
+
+    background: #ffffff;
+
+    box-shadow: 0 2px 6px rgba(15, 23, 42, 0.035);
+}
+
+.rr-supplier-summary-icon {
+    width: 36px;
+    height: 36px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    flex: 0 0 36px;
+
+    border-radius: 6px;
+
+    background: #eff6ff;
+
+    color: #2563eb;
+
+    font-size: 15px;
+}
+
+.rr-supplier-summary-card.success .rr-supplier-summary-icon {
+    background: #ecfdf5;
+    color: #059669;
+}
+
+.rr-supplier-summary-card.warning .rr-supplier-summary-icon {
+    background: #fffbeb;
+    color: #d97706;
+}
+
+.rr-supplier-summary-card.muted .rr-supplier-summary-icon {
+    background: #f1f5f9;
+    color: #64748b;
+}
+
+.rr-supplier-summary-card span {
+    display: block;
+
+    color: #64748b;
+
+    font-size: 12px;
+    font-weight: 650;
+}
+
+.rr-supplier-summary-card strong {
+    display: block;
+
+    margin-top: 2px;
+
+    color: #172033;
+
+    font-size: 21px;
+    font-weight: 850;
+
+    line-height: 1.1;
+}
+
+
+/* PANEL */
+
+.rr-suppliers-panel {
+    overflow: hidden;
+
+    border: 1px solid #d8e0ea;
+    border-radius: 7px;
+
+    background: #ffffff;
+
+    box-shadow: 0 2px 9px rgba(15, 23, 42, 0.045);
+}
+
+
+/* TOOLBAR */
+
+.rr-suppliers-toolbar {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+
+    gap: 12px;
+
+    padding: 9px 10px;
+
+    border-bottom: 1px solid #e2e8f0;
+
+    background: #f8fafc;
+}
+
+.rr-suppliers-search {
+    min-width: 340px;
+    max-width: 610px;
+
+    display: flex;
+    align-items: stretch;
+
+    gap: 6px;
+
+    flex: 1;
+}
+
+.rr-suppliers-search-box {
+    min-width: 0;
+
+    display: flex;
+    align-items: center;
+
+    flex: 1;
+
+    overflow: hidden;
+
+    border: 1px solid #cbd5e1;
+    border-radius: 5px;
+
+    background: #ffffff;
+}
+
+.rr-suppliers-search-box>i {
+    margin-left: 10px;
+
+    color: #94a3b8;
+
+    font-size: 13px;
+}
+
+.rr-suppliers-search-box input {
+    min-width: 0;
+    height: 34px;
+
+    flex: 1;
+
+    padding: 0 8px;
+
+    border: 0;
+    outline: 0;
+
+    background: transparent;
+
+    color: #172033;
+
+    font-size: 13px;
+}
+
+.rr-suppliers-search-box button {
+    width: 31px;
+    height: 34px;
+
+    border: 0;
+
+    background: transparent;
+
+    color: #94a3b8;
+
+    cursor: pointer;
+}
+
+.rr-suppliers-filter-group {
+    display: flex;
+    align-items: flex-end;
+
+    gap: 7px;
+}
+
+.rr-suppliers-filter label {
+    display: block;
+
+    margin-bottom: 3px;
+
+    color: #64748b;
+
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.rr-suppliers-filter select {
+    height: 34px;
+    min-width: 115px;
+
+    padding: 0 27px 0 8px;
+
+    border: 1px solid #cbd5e1;
+    border-radius: 5px;
+
+    background-color: #ffffff;
+
+    color: #334155;
+
+    font-size: 13px;
+}
+
+
+/* GRID STATUS */
+
+.rr-suppliers-grid-status {
+    min-height: 34px;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    gap: 12px;
+
+    padding: 5px 10px;
+
+    border-bottom: 1px solid #e5eaf0;
+
+    background: #ffffff;
+}
+
+.rr-suppliers-grid-status>div,
+.rr-suppliers-row-limit {
+    display: flex;
+    align-items: center;
+
+    gap: 5px;
+
+    color: #64748b;
+
+    font-size: 12px;
+}
+
+.rr-suppliers-grid-status strong {
+    color: #334155;
+
+    font-weight: 800;
+}
+
+
+/* TABLE */
+
+.rr-suppliers-table-wrap {
+    overflow-x: auto;
+}
+
+.rr-suppliers-table {
+    width: 100%;
+
+    border-collapse: collapse;
+}
+
+.rr-suppliers-table thead {
+    background: linear-gradient(180deg, #f8fafc, #f1f5f9);
+}
+
+.rr-suppliers-table th {
+    padding: 8px 10px;
+
+    border-bottom: 1px solid #d8e0ea;
+
+    color: #475569;
+
+    font-size: 12px;
+    font-weight: 800;
+
+    text-align: left;
+
+    white-space: nowrap;
+}
+
+.rr-suppliers-table td {
+    padding: 8px 10px;
+
+    border-bottom: 1px solid #edf1f5;
+
+    color: #334155;
+
+    font-size: 13px;
+
+    vertical-align: middle;
+}
+
+.rr-suppliers-table tbody tr:last-child td {
+    border-bottom: 0;
+}
+
+.rr-suppliers-table tbody tr.is-clickable {
+    cursor: pointer;
+}
+
+.rr-suppliers-table tbody tr.is-clickable:hover {
+    background: #f8fbff;
+
+    box-shadow: inset 3px 0 0 #3b82f6;
+}
+
+.rr-supplier-col-code {
+    width: 105px;
+}
+
+.rr-supplier-col-credit {
+    width: 125px;
+}
+
+.rr-supplier-col-status {
+    width: 105px;
+}
+
+.rr-supplier-col-actions {
+    width: 132px;
+
+    text-align: center !important;
+}
+
+
+/* CELLS */
+
+.rr-supplier-code {
+    color: #1e3a8a;
+
+    font-size: 12px;
+    font-weight: 850;
+}
+
+.rr-supplier-name-cell {
+    min-width: 230px;
+
+    display: flex;
+    align-items: center;
+
+    gap: 8px;
+}
+
+.rr-supplier-avatar {
+    width: 32px;
+    height: 32px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    flex: 0 0 32px;
+
+    border: 1px solid #bfdbfe;
+    border-radius: 5px;
+
+    background: #eff6ff;
+
+    color: #1d4ed8;
+
+    font-size: 12px;
+    font-weight: 850;
+}
+
+.rr-supplier-name-cell strong {
+    display: block;
+
+    color: #172033;
+
+    font-size: 13px;
+    font-weight: 800;
+}
+
+.rr-supplier-meta-line {
+    display: flex;
+    align-items: center;
+
+    gap: 6px;
+
+    margin-top: 3px;
+
+    color: #7b8798;
+
+    font-size: 12px;
+}
+
+.rr-supplier-shared-badge {
+    display: inline-flex;
+    align-items: center;
+
+    gap: 3px;
+
+    color: #7c3aed;
+
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.rr-supplier-contact strong,
+.rr-supplier-location strong,
+.rr-supplier-credit strong {
+    display: block;
+
+    color: #334155;
+
+    font-size: 13px;
+    font-weight: 750;
+}
+
+.rr-supplier-contact span,
+.rr-supplier-location span,
+.rr-supplier-credit span {
+    display: block;
+
+    margin-top: 2px;
+
+    color: #7b8798;
+
+    font-size: 12px;
+}
+
+
+/* STATUS */
+
+.rr-supplier-status {
+    display: inline-flex;
+    align-items: center;
+
+    gap: 5px;
+
+    font-size: 12px;
+    font-weight: 750;
+}
+
+.rr-supplier-status>span {
+    width: 7px;
+    height: 7px;
+
+    border-radius: 50%;
+}
+
+.rr-supplier-status.active {
+    color: #047857;
+}
+
+.rr-supplier-status.active>span {
+    background: #10b981;
+}
+
+.rr-supplier-status.inactive {
+    color: #64748b;
+}
+
+.rr-supplier-status.inactive>span {
+    background: #94a3b8;
+}
+
+
+/* ACTIONS */
+
+.rr-supplier-actions {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    gap: 5px;
+}
+
+.rr-supplier-action-btn {
+    width: 30px;
+    height: 29px;
+
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    border: 1px solid #d7dee8;
+    border-radius: 5px;
+
+    background: #ffffff;
+
+    text-decoration: none;
+
+    cursor: pointer;
+
+    transition:
+        background-color .15s ease,
+        border-color .15s ease,
+        color .15s ease,
+        transform .15s ease;
+}
+
+.rr-supplier-action-btn:hover {
+    transform: translateY(-1px);
+}
+
+.rr-supplier-action-btn.view {
+    border-color: #bfdbfe;
+
+    background: #eff6ff;
+
+    color: #2563eb;
+}
+
+.rr-supplier-action-btn.edit {
+    border-color: #fde68a;
+
+    background: #fffbeb;
+
+    color: #b45309;
+}
+
+.rr-supplier-action-btn.remove {
+    border-color: #fecaca;
+
+    background: #fff1f2;
+
+    color: #be123c;
+}
+
+
+/* PAGINATION */
+
+.rr-suppliers-pagination {
+    min-height: 48px;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    gap: 12px;
+
+    padding: 7px 10px;
+
+    border-top: 1px solid #e2e8f0;
+
+    background: #f8fafc;
+}
+
+.rr-suppliers-pagination-info {
+    display: flex;
+    align-items: center;
+
+    gap: 5px;
+
+    color: #64748b;
+
+    font-size: 12px;
+}
+
+.rr-suppliers-pagination-links {
+    display: flex;
+    align-items: center;
+
+    gap: 4px;
+}
+
+.rr-supplier-page-link {
+    min-width: 30px;
+    height: 30px;
+
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    padding: 0 7px;
+
+    border: 1px solid #cbd5e1;
+    border-radius: 4px;
+
+    background: #ffffff;
+
+    color: #475569;
+
+    font-size: 12px;
+    font-weight: 700;
+
+    text-decoration: none;
+}
+
+.rr-supplier-page-link:hover {
+    border-color: #94a3b8;
+
+    background: #f1f5f9;
+}
+
+.rr-supplier-page-link.active {
+    border-color: #2563eb;
+
+    background: #2563eb;
+
+    color: #ffffff;
+}
+
+.rr-supplier-page-link.disabled {
+    opacity: .45;
+
+    cursor: not-allowed;
+}
+
+
+/* EMPTY */
+
+.rr-suppliers-empty {
+    min-height: 260px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    flex-direction: column;
+
+    gap: 7px;
+
+    padding: 35px 20px;
+
+    text-align: center;
+}
+
+.rr-suppliers-empty-icon {
+    width: 48px;
+    height: 48px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    margin-bottom: 3px;
+
+    border: 1px solid #dbe4ef;
+    border-radius: 8px;
+
+    background: #f8fafc;
+
+    color: #94a3b8;
+
+    font-size: 20px;
+}
+
+.rr-suppliers-empty strong {
+    color: #334155;
+
+    font-size: 15px;
+    font-weight: 800;
+}
+
+.rr-suppliers-empty>span {
+    max-width: 430px;
+
+    color: #7b8798;
+
+    font-size: 13px;
+}
+
+
+/* RESPONSIVE */
+
+@media (max-width: 1200px) {
+    .rr-suppliers-summary {
+        grid-template-columns:
+            repeat(3,
+                minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 900px) {
+    .rr-suppliers-summary {
+        grid-template-columns:
+            repeat(2,
+                minmax(0, 1fr));
+    }
+
+    .rr-suppliers-toolbar {
+        align-items: stretch;
+
+        flex-direction: column;
+    }
+
+    .rr-suppliers-search {
+        width: 100%;
+        max-width: none;
+    }
+
+    .rr-suppliers-filter-group {
+        justify-content: flex-end;
+    }
+}
+
+@media (max-width: 650px) {
+    .rr-suppliers-header {
+        align-items: stretch;
+
+        flex-direction: column;
+    }
+
+    .rr-suppliers-header-actions {
+        justify-content: flex-end;
+    }
+
+    .rr-suppliers-summary {
+        grid-template-columns: 1fr;
+    }
+
+    .rr-suppliers-filter-group {
+        align-items: stretch;
+
+        flex-direction: column;
+    }
+
+    .rr-suppliers-filter select {
+        width: 100%;
+    }
+
+    .rr-suppliers-grid-status,
+    .rr-suppliers-pagination {
+        align-items: flex-start;
+
+        flex-direction: column;
+    }
+
+    .rr-suppliers-pagination-links {
+        max-width: 100%;
+
+        overflow-x: auto;
+    }
+}
+
+
+/* =========================================================
+   SUPPLIER CREATE - WINDOWS ERP FORM
+   Append to resources/css/business/suppliers.css
+   ========================================================= */
+
+.rr-supplier-create-page {
+    width: 100%;
+}
+
+.rr-supplier-create-titlebar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 18px;
+    margin-bottom: 10px;
+    padding: 12px 14px;
+    border: 1px solid #d6dee8;
+    border-radius: 6px;
+    background: linear-gradient(180deg, #ffffff 0%, #f5f8fb 100%);
+    box-shadow: 0 2px 7px rgba(15, 23, 42, .04);
+}
+
+.rr-supplier-create-title {
+    min-width: 0;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.rr-supplier-back-btn {
+    width: 34px;
+    height: 34px;
+    flex: 0 0 34px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid #cbd5e1;
+    border-radius: 5px;
+    background: linear-gradient(180deg, #fff, #f1f5f9);
+    color: #334155;
+    cursor: pointer;
+}
+
+.rr-supplier-back-btn:hover {
+    border-color: #94a3b8;
+    background: #eaf0f6;
+}
+
+.rr-supplier-create-icon {
+    width: 40px;
+    height: 40px;
+    flex: 0 0 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid #bfdbfe;
+    border-radius: 6px;
+    background: #eff6ff;
+    color: #2563eb;
+    font-size: 17px;
+}
+
+.rr-supplier-create-title span {
+    display: block;
+    margin-bottom: 1px;
+    color: #64748b;
+    font-size: 11px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: .03em;
+}
+
+.rr-supplier-create-title h1 {
+    margin: 0;
+    color: #172033;
+    font-size: 21px;
+    font-weight: 850;
+    line-height: 1.15;
+}
+
+.rr-supplier-create-title p {
+    margin: 3px 0 0;
+    color: #64748b;
+    font-size: 12px;
+}
+
+.rr-supplier-create-context {
+    display: flex;
+    align-items: stretch;
+    gap: 6px;
+}
+
+.rr-supplier-create-context>div {
+    min-width: 135px;
+    padding: 7px 10px;
+    border: 1px solid #dde5ee;
+    border-radius: 5px;
+    background: #fff;
+}
+
+.rr-supplier-create-context span {
+    display: block;
+    color: #7b8798;
+    font-size: 10px;
+    font-weight: 750;
+    text-transform: uppercase;
+}
+
+.rr-supplier-create-context strong {
+    display: block;
+    margin-top: 1px;
+    overflow: hidden;
+    color: #334155;
+    font-size: 12px;
+    font-weight: 800;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+
+/* DUPLICATE */
+
+.rr-supplier-duplicate-panel {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 10px;
+    padding: 11px 13px;
+    border: 1px solid #f6cf73;
+    border-left: 4px solid #d97706;
+    border-radius: 6px;
+    background: #fffbeb;
+}
+
+.rr-supplier-duplicate-panel.danger {
+    border-color: #fecaca;
+    border-left-color: #dc2626;
+    background: #fff7f7;
+}
+
+.rr-supplier-duplicate-icon {
+    width: 37px;
+    height: 37px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 6px;
+    background: rgba(217, 119, 6, .1);
+    color: #b45309;
+    font-size: 17px;
+}
+
+.rr-supplier-duplicate-panel.danger .rr-supplier-duplicate-icon {
+    background: rgba(220, 38, 38, .08);
+    color: #dc2626;
+}
+
+.rr-supplier-duplicate-content strong {
+    color: #78350f;
+    font-size: 13px;
+    font-weight: 850;
+}
+
+.rr-supplier-duplicate-panel.danger .rr-supplier-duplicate-content strong {
+    color: #991b1b;
+}
+
+.rr-supplier-duplicate-content p {
+    margin: 2px 0 5px;
+    color: #6b7280;
+    font-size: 12px;
+}
+
+.rr-supplier-duplicate-details {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+}
+
+.rr-supplier-duplicate-details span {
+    padding: 2px 6px;
+    border: 1px solid rgba(148, 163, 184, .35);
+    border-radius: 4px;
+    background: rgba(255, 255, 255, .75);
+    color: #475569;
+    font-size: 11px;
+}
+
+.rr-supplier-duplicate-actions {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+
+/* WINDOW */
+
+.rr-supplier-create-window {
+    overflow: hidden;
+    border: 1px solid #cfd9e5;
+    border-radius: 6px;
+    background: #eef2f6;
+    box-shadow: 0 3px 10px rgba(15, 23, 42, .05);
+}
+
+.rr-supplier-create-toolbar {
+    min-height: 47px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 6px 9px;
+    border-bottom: 1px solid #cfd9e5;
+    background: linear-gradient(180deg, #ffffff, #f4f7fa);
+}
+
+.rr-supplier-create-toolbar>div {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.rr-supplier-form-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    color: #334155;
+    font-size: 12px;
+    font-weight: 800;
+}
+
+.rr-supplier-form-status i {
+    color: #10b981;
+    font-size: 7px;
+}
+
+.rr-supplier-lookup-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    color: #64748b;
+    font-size: 11px;
+}
+
+.rr-supplier-create-toolbar-actions {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.rr-supplier-secondary-btn,
+.rr-supplier-save-btn,
+.rr-supplier-attach-btn {
+    min-height: 33px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 0 11px;
+    border-radius: 5px;
+    font-size: 12px;
+    font-weight: 800;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.rr-supplier-secondary-btn {
+    border: 1px solid #cbd5e1;
+    background: linear-gradient(180deg, #fff, #f1f5f9);
+    color: #475569;
+}
+
+.rr-supplier-save-btn {
+    border: 1px solid #1d4ed8;
+    background: linear-gradient(180deg, #3b82f6, #2563eb);
+    color: #fff;
+    box-shadow: 0 2px 4px rgba(37, 99, 235, .16);
+}
+
+.rr-supplier-attach-btn {
+    border: 1px solid #047857;
+    background: linear-gradient(180deg, #10b981, #059669);
+    color: #fff;
+}
+
+.rr-supplier-save-btn:disabled,
+.rr-supplier-attach-btn:disabled {
+    opacity: .55;
+    cursor: not-allowed;
+}
+
+
+/* FORM BODY */
+
+.rr-supplier-form-body {
+    display: grid;
+    gap: 8px;
+    padding: 8px;
+}
+
+.rr-supplier-form-section {
+    overflow: hidden;
+    border: 1px solid #d5dee8;
+    border-radius: 5px;
+    background: #fff;
+}
+
+.rr-supplier-form-section-head {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-height: 43px;
+    padding: 6px 9px;
+    border-bottom: 1px solid #e2e8f0;
+    background: linear-gradient(180deg, #fafcff, #f5f8fb);
+}
+
+.rr-supplier-form-section-icon {
+    width: 29px;
+    height: 29px;
+    flex: 0 0 29px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid #dbeafe;
+    border-radius: 5px;
+    background: #eff6ff;
+    color: #2563eb;
+    font-size: 13px;
+}
+
+.rr-supplier-form-section-head h2 {
+    margin: 0;
+    color: #334155;
+    font-size: 13px;
+    font-weight: 850;
+}
+
+.rr-supplier-form-section-head p {
+    margin: 1px 0 0;
+    color: #7b8798;
+    font-size: 11px;
+}
+
+.rr-supplier-form-section-body {
+    padding: 9px;
+}
+
+.rr-supplier-form-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 8px 10px;
+}
+
+.rr-supplier-field {
+    min-width: 0;
+}
+
+.rr-supplier-field.span-2 {
+    grid-column: span 2;
+}
+
+.rr-supplier-field.span-3 {
+    grid-column: span 3;
+}
+
+.rr-supplier-field.span-4 {
+    grid-column: span 4;
+}
+
+.rr-supplier-field>label {
+    display: block;
+    margin-bottom: 3px;
+    color: #475569;
+    font-size: 11px;
+    font-weight: 800;
+}
+
+.rr-supplier-field>label .required {
+    display: inline;
+    margin-left: 3px;
+    color: #dc2626;
+}
+
+.rr-supplier-field input,
+.rr-supplier-field select,
+.rr-supplier-field textarea {
+    width: 100%;
+    border: 1px solid #cbd5e1;
+    border-radius: 4px;
+    outline: none;
+    background: #fff;
+    color: #1e293b;
+    font-size: 12px;
+    transition: border-color .15s ease, box-shadow .15s ease;
+}
+
+.rr-supplier-field input,
+.rr-supplier-field select {
+    height: 33px;
+    padding: 0 8px;
+}
+
+.rr-supplier-field textarea {
+    min-height: 57px;
+    padding: 7px 8px;
+    resize: vertical;
+}
+
+.rr-supplier-field input:focus,
+.rr-supplier-field select:focus,
+.rr-supplier-field textarea:focus {
+    border-color: #60a5fa;
+    box-shadow: 0 0 0 2px rgba(59, 130, 246, .09);
+}
+
+.rr-supplier-field-help {
+    display: block;
+    margin-top: 3px;
+    color: #8491a3;
+    font-size: 10px;
+}
+
+.rr-supplier-field-error {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    margin-top: 3px;
+    color: #dc2626;
+    font-size: 10px;
+    font-weight: 650;
+}
+
+
+/* GST */
+
+.rr-supplier-gst-control {
+    display: flex;
+    align-items: stretch;
+    gap: 5px;
+}
+
+.rr-supplier-gst-control input {
+    min-width: 0;
+    flex: 1;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    font-weight: 750;
+    letter-spacing: .025em;
+}
+
+.rr-supplier-gst-control button {
+    min-width: 104px;
+    min-height: 33px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    padding: 0 9px;
+    border: 1px solid #0f766e;
+    border-radius: 4px;
+    background: linear-gradient(180deg, #14b8a6, #0f766e);
+    color: #fff;
+    font-size: 11px;
+    font-weight: 800;
+    cursor: pointer;
+}
+
+.rr-supplier-gst-control button:disabled {
+    opacity: .5;
+    cursor: not-allowed;
+}
+
+.rr-supplier-gst-result-cell {
+    grid-column: span 1;
+    display: flex;
+    align-items: flex-end;
+}
+
+.rr-supplier-gst-message {
+    width: 100%;
+    min-height: 33px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 8px;
+    border: 1px solid;
+    border-radius: 4px;
+    font-size: 10px;
+    line-height: 1.3;
+}
+
+.rr-supplier-gst-message.success {
+    border-color: #a7f3d0;
+    background: #ecfdf5;
+    color: #047857;
+}
+
+.rr-supplier-gst-message.error {
+    border-color: #fecaca;
+    background: #fff1f2;
+    color: #b91c1c;
+}
+
+
+/* MONEY */
+
+.rr-supplier-money-input,
+.rr-supplier-days-input {
+    display: flex;
+    align-items: stretch;
+}
+
+.rr-supplier-money-input>span,
+.rr-supplier-days-input>span {
+    min-width: 31px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid #cbd5e1;
+    background: #f1f5f9;
+    color: #64748b;
+    font-size: 11px;
+    font-weight: 750;
+}
+
+.rr-supplier-money-input>span {
+    border-right: 0;
+    border-radius: 4px 0 0 4px;
+}
+
+.rr-supplier-days-input>span {
+    min-width: 45px;
+    border-left: 0;
+    border-radius: 0 4px 4px 0;
+}
+
+.rr-supplier-money-input input {
+    border-radius: 0 4px 4px 0;
+}
+
+.rr-supplier-days-input input {
+    border-radius: 4px 0 0 4px;
+}
+
+
+/* FOOTER */
+
+.rr-supplier-form-footer {
+    min-height: 47px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 7px 9px;
+    border-top: 1px solid #cfd9e5;
+    background: linear-gradient(180deg, #f8fafc, #f1f5f9);
+}
+
+.rr-supplier-form-footer>div {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.rr-supplier-form-footer>div:first-child {
+    color: #64748b;
+    font-size: 11px;
+}
+
+
+/* RESPONSIVE */
+
+@media (max-width: 1000px) {
+    .rr-supplier-create-titlebar {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .rr-supplier-create-context {
+        width: 100%;
+    }
+
+    .rr-supplier-create-context>div {
+        flex: 1;
+    }
+
+    .rr-supplier-form-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .rr-supplier-field.span-3,
+    .rr-supplier-field.span-4 {
+        grid-column: span 2;
+    }
+
+    .rr-supplier-gst-result-cell {
+        grid-column: span 2;
+    }
+}
+
+@media (max-width: 680px) {
+
+    .rr-supplier-create-context,
+    .rr-supplier-create-toolbar,
+    .rr-supplier-form-footer,
+    .rr-supplier-duplicate-panel {
+        display: flex;
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .rr-supplier-create-toolbar-actions,
+    .rr-supplier-duplicate-actions {
+        justify-content: flex-end;
+    }
+
+    .rr-supplier-form-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .rr-supplier-field.span-2,
+    .rr-supplier-field.span-3,
+    .rr-supplier-field.span-4,
+    .rr-supplier-gst-result-cell {
+        grid-column: span 1;
+    }
+
+    .rr-supplier-gst-control {
+        flex-direction: column;
+    }
+
+    .rr-supplier-form-footer>div:last-child {
+        justify-content: flex-end;
+    }
+}
+
+
+/* =========================================================
+   SUPPLIER SHOW / ACCOUNT
+   Append to resources/css/business/suppliers.css
+   ========================================================= */
+
+.rr-supplier-account-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 10px;
+    padding: 12px 14px;
+    border: 1px solid #d9e2ec;
+    border-radius: 7px;
+    background: linear-gradient(180deg, #ffffff, #f8fafc);
+    box-shadow: 0 2px 8px rgba(15, 23, 42, .04);
+}
+
+.rr-supplier-account-header-main {
+    min-width: 0;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.rr-supplier-account-back {
+    width: 34px;
+    height: 34px;
+    flex: 0 0 34px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid #cbd5e1;
+    border-radius: 5px;
+    background: #fff;
+    color: #475569;
+    cursor: pointer;
+}
+
+.rr-supplier-account-avatar {
+    width: 46px;
+    height: 46px;
+    flex: 0 0 46px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid #bfdbfe;
+    border-radius: 7px;
+    background: #eff6ff;
+    color: #1d4ed8;
+    font-size: 15px;
+    font-weight: 850;
+}
+
+.rr-supplier-account-identity {
+    min-width: 0;
+}
+
+.rr-supplier-account-kicker {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 5px;
+}
+
+.rr-supplier-account-kicker>span:first-child {
+    color: #64748b;
+    font-size: 11px;
+    font-weight: 800;
+    text-transform: uppercase;
+}
+
+.rr-supplier-account-shared {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 2px 6px;
+    border: 1px solid #ddd6fe;
+    border-radius: 4px;
+    background: #faf5ff;
+    color: #7c3aed;
+    font-size: 11px;
+    font-weight: 750;
+}
+
+.rr-supplier-account-identity h1 {
+    margin: 2px 0 0;
+    color: #172033;
+    font-size: 22px;
+    font-weight: 850;
+}
+
+.rr-supplier-account-subline {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 9px;
+    margin-top: 4px;
+    color: #64748b;
+    font-size: 11px;
+}
+
+.rr-supplier-account-subline span {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.rr-supplier-account-header-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.rr-supplier-shared-warning {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    margin-bottom: 10px;
+    padding: 8px 10px;
+    border: 1px solid #ddd6fe;
+    border-radius: 6px;
+    background: #faf5ff;
+    color: #6d28d9;
+}
+
+.rr-supplier-shared-warning strong,
+.rr-supplier-shared-warning span {
+    display: block;
+}
+
+.rr-supplier-shared-warning strong {
+    font-size: 12px;
+    font-weight: 800;
+}
+
+.rr-supplier-shared-warning span {
+    margin-top: 1px;
+    color: #7c3aed;
+    font-size: 11px;
+}
+
+
+/* SUMMARY */
+
+.rr-supplier-account-summary {
+    display: grid;
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+    gap: 7px;
+    margin-bottom: 10px;
+}
+
+.rr-supplier-account-stat {
+    min-width: 0;
+    min-height: 69px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 9px;
+    border: 1px solid #dde5ee;
+    border-radius: 6px;
+    background: #fff;
+}
+
+.rr-supplier-account-stat-icon {
+    width: 32px;
+    height: 32px;
+    flex: 0 0 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 5px;
+    background: #eff6ff;
+    color: #2563eb;
+}
+
+.rr-supplier-account-stat.success .rr-supplier-account-stat-icon {
+    background: #ecfdf5;
+    color: #059669;
+}
+
+.rr-supplier-account-stat.danger .rr-supplier-account-stat-icon {
+    background: #fef2f2;
+    color: #dc2626;
+}
+
+.rr-supplier-account-stat.warning .rr-supplier-account-stat-icon {
+    background: #fffbeb;
+    color: #d97706;
+}
+
+.rr-supplier-account-stat.muted .rr-supplier-account-stat-icon {
+    background: #f1f5f9;
+    color: #64748b;
+}
+
+.rr-supplier-account-stat span {
+    display: block;
+    color: #64748b;
+    font-size: 11px;
+}
+
+.rr-supplier-account-stat strong {
+    display: block;
+    margin-top: 1px;
+    color: #172033;
+    font-size: 14px;
+    font-weight: 850;
+    white-space: nowrap;
+}
+
+.rr-supplier-account-stat strong small {
+    margin-left: 3px;
+    color: #64748b;
+    font-size: 10px;
+}
+
+
+/* PANEL / TABS */
+
+.rr-supplier-account-panel {
+    overflow: hidden;
+    border: 1px solid #d8e0ea;
+    border-radius: 7px;
+    background: #fff;
+}
+
+.rr-supplier-account-tabs {
+    display: flex;
+    align-items: stretch;
+    overflow-x: auto;
+    border-bottom: 1px solid #d8e0ea;
+    background: #f8fafc;
+}
+
+.rr-supplier-account-tab {
+    min-height: 41px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    padding: 0 13px;
+    border: 0;
+    border-right: 1px solid #e2e8f0;
+    background: transparent;
+    color: #64748b;
+    font-size: 11px;
+    font-weight: 800;
+    cursor: pointer;
+    white-space: nowrap;
+}
+
+.rr-supplier-account-tab.active {
+    background: #fff;
+    color: #1d4ed8;
+    box-shadow: inset 0 -2px 0 #2563eb;
+}
+
+.rr-supplier-account-tab small {
+    min-width: 18px;
+    height: 18px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 5px;
+    border-radius: 9px;
+    background: #e2e8f0;
+    color: #475569;
+    font-size: 10px;
+}
+
+.rr-supplier-account-tab-content {
+    padding: 10px;
+}
+
+
+/* OVERVIEW */
+
+.rr-supplier-overview-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+}
+
+.rr-supplier-account-card {
+    overflow: hidden;
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+    background: #fff;
+}
+
+.rr-supplier-account-card-wide {
+    grid-column: 1 / -1;
+}
+
+.rr-supplier-account-card-header {
+    min-height: 36px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 0 9px;
+    border-bottom: 1px solid #e2e8f0;
+    background: #f8fafc;
+    color: #334155;
+}
+
+.rr-supplier-account-card-header i {
+    color: #2563eb;
+}
+
+.rr-supplier-account-card-header strong {
+    font-size: 12px;
+    font-weight: 800;
+}
+
+.rr-supplier-account-card-body {
+    padding: 8px 9px;
+}
+
+.rr-supplier-info-row {
+    display: grid;
+    grid-template-columns: minmax(125px, .8fr) minmax(0, 1.2fr);
+    gap: 8px;
+    padding: 6px 0;
+    border-bottom: 1px solid #edf1f5;
+}
+
+.rr-supplier-info-row:last-child {
+    border-bottom: 0;
+}
+
+.rr-supplier-info-row span {
+    color: #64748b;
+    font-size: 11px;
+}
+
+.rr-supplier-info-row strong {
+    color: #334155;
+    font-size: 11px;
+    font-weight: 750;
+    text-align: right;
+    word-break: break-word;
+}
+
+.rr-supplier-address-block {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    color: #334155;
+    font-size: 12px;
+    line-height: 1.45;
+}
+
+.rr-supplier-account-remarks {
+    margin: 0;
+    color: #475569;
+    font-size: 12px;
+    line-height: 1.5;
+}
+
+.rr-supplier-account-muted {
+    color: #94a3b8;
+    font-size: 11px;
+}
+
+
+/* TABLE */
+
+.rr-supplier-data-section {
+    overflow: hidden;
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+}
+
+.rr-supplier-data-section-header {
+    min-height: 42px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 9px;
+    padding: 6px 9px;
+    border-bottom: 1px solid #e2e8f0;
+    background: #f8fafc;
+}
+
+.rr-supplier-data-section-header>div {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+}
+
+.rr-supplier-data-section-header>div>i {
+    color: #2563eb;
+}
+
+.rr-supplier-data-section-header strong,
+.rr-supplier-data-section-header span {
+    display: block;
+}
+
+.rr-supplier-data-section-header strong {
+    color: #334155;
+    font-size: 12px;
+    font-weight: 800;
+}
+
+.rr-supplier-data-section-header span {
+    color: #64748b;
+    font-size: 11px;
+}
+
+.rr-supplier-account-table-wrap {
+    overflow-x: auto;
+}
+
+.rr-supplier-account-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.rr-supplier-account-table th {
+    padding: 7px 9px;
+    border-bottom: 1px solid #d8e0ea;
+    background: #f8fafc;
+    color: #475569;
+    font-size: 11px;
+    font-weight: 800;
+    text-align: left;
+    white-space: nowrap;
+}
+
+.rr-supplier-account-table td {
+    padding: 7px 9px;
+    border-bottom: 1px solid #edf1f5;
+    color: #334155;
+    font-size: 11px;
+    vertical-align: middle;
+}
+
+.rr-supplier-account-table tbody tr:hover {
+    background: #f8fbff;
+}
+
+.rr-supplier-account-table .text-end {
+    text-align: right;
+}
+
+.rr-supplier-reference-link {
+    color: #1d4ed8;
+    font-weight: 800;
+    text-decoration: none;
+}
+
+.rr-supplier-reference-link:hover {
+    text-decoration: underline;
+}
+
+.rr-supplier-account-debit {
+    color: #b91c1c !important;
+    font-weight: 750;
+}
+
+.rr-supplier-account-credit {
+    color: #047857 !important;
+    font-weight: 750;
+}
+
+.rr-supplier-purchase-status {
+    display: inline-flex;
+    padding: 2px 6px;
+    border: 1px solid #dbe4ef;
+    border-radius: 4px;
+    background: #f8fafc;
+    color: #475569;
+    font-size: 10px;
+    font-weight: 700;
+}
+
+.rr-supplier-table-empty {
+    min-height: 170px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    gap: 6px;
+    color: #94a3b8;
+    font-size: 11px;
+}
+
+.rr-supplier-table-empty i {
+    font-size: 21px;
+}
+
+
+/* PAGINATION */
+
+.rr-supplier-account-pagination {
+    min-height: 42px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 9px;
+    padding: 5px 8px;
+    border-top: 1px solid #e2e8f0;
+    background: #f8fafc;
+}
+
+.rr-supplier-account-pagination>span {
+    color: #64748b;
+    font-size: 11px;
+}
+
+.rr-supplier-account-pagination>div {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.rr-supplier-account-page-link {
+    min-width: 29px;
+    height: 28px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 6px;
+    border: 1px solid #cbd5e1;
+    border-radius: 4px;
+    background: #fff;
+    color: #475569;
+    font-size: 11px;
+    font-weight: 700;
+    text-decoration: none;
+}
+
+.rr-supplier-account-page-link.active {
+    border-color: #2563eb;
+    background: #2563eb;
+    color: #fff;
+}
+
+.rr-supplier-account-page-link.disabled {
+    opacity: .45;
+}
+
+
+/* BRANCHES */
+
+.rr-supplier-branches-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+}
+
+.rr-supplier-branch-card {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 9px;
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+    background: #fff;
+}
+
+.rr-supplier-branch-card.current {
+    border-color: #93c5fd;
+    background: #f8fbff;
+}
+
+.rr-supplier-branch-card-icon {
+    width: 32px;
+    height: 32px;
+    flex: 0 0 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 5px;
+    background: #eff6ff;
+    color: #2563eb;
+}
+
+.rr-supplier-branch-card>div:nth-child(2) {
+    min-width: 0;
+    flex: 1;
+}
+
+.rr-supplier-branch-card strong,
+.rr-supplier-branch-card span {
+    display: block;
+}
+
+.rr-supplier-branch-card strong {
+    color: #334155;
+    font-size: 12px;
+    font-weight: 800;
+}
+
+.rr-supplier-branch-card>div:nth-child(2) span {
+    margin-top: 1px;
+    color: #64748b;
+    font-size: 11px;
+}
+
+.rr-supplier-branch-card-status {
+    display: flex;
+    align-items: flex-end;
+    flex-direction: column;
+    gap: 3px;
+}
+
+.rr-supplier-branch-card-status span {
+    padding: 2px 5px;
+    border-radius: 4px;
+    font-size: 10px;
+    font-weight: 700;
+}
+
+.rr-supplier-branch-card-status .current {
+    border: 1px solid #bfdbfe;
+    background: #eff6ff;
+    color: #1d4ed8;
+}
+
+.rr-supplier-branch-card-status .active {
+    border: 1px solid #bbf7d0;
+    background: #f0fdf4;
+    color: #047857;
+}
+
+.rr-supplier-branch-card-status .inactive {
+    border: 1px solid #e2e8f0;
+    background: #f8fafc;
+    color: #64748b;
+}
+
+.rr-supplier-empty-state {
+    grid-column: 1 / -1;
+    min-height: 170px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    gap: 5px;
+    color: #94a3b8;
+}
+
+.rr-supplier-empty-state i {
+    font-size: 22px;
+}
+
+.rr-supplier-empty-state strong {
+    color: #475569;
+    font-size: 12px;
+}
+
+.rr-supplier-empty-state span {
+    font-size: 11px;
+}
+
+
+/* RESPONSIVE */
+
+@media (max-width: 1250px) {
+    .rr-supplier-account-summary {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 900px) {
+    .rr-supplier-account-header {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .rr-supplier-account-header-actions {
+        justify-content: flex-end;
+    }
+
+    .rr-supplier-account-summary {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .rr-supplier-overview-grid,
+    .rr-supplier-branches-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 600px) {
+    .rr-supplier-account-summary {
+        grid-template-columns: 1fr;
+    }
+
+    .rr-supplier-account-pagination {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+}
+
+
+.rr-supplier-validation-summary {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+
+    margin-bottom: 10px;
+    padding: 9px 11px;
+
+    border: 1px solid #fecaca;
+    border-left: 4px solid #dc2626;
+    border-radius: 6px;
+
+    background: #fff7f7;
+
+    color: #991b1b;
+}
+
+.rr-supplier-validation-summary>i {
+    font-size: 17px;
+}
+
+.rr-supplier-validation-summary strong,
+.rr-supplier-validation-summary span {
+    display: block;
+}
+
+.rr-supplier-validation-summary strong {
+    font-size: 13px;
+    font-weight: 800;
+}
+
+.rr-supplier-validation-summary span {
+    margin-top: 2px;
+
+    color: #b91c1c;
+
+    font-size: 12px;
+}
+
+
+
+/* =========================================================
+   SUPPLIER PROFESSIONAL CONFIRMATION MODAL
+   Append to resources/css/business/suppliers.css
+   ========================================================= */
+
+.rr-supplier-account-remove-btn,
+.rr-supplier-account-delete-btn {
+    min-height: 35px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 0 11px;
+    border-radius: 5px;
+    font-size: 12px;
+    font-weight: 800;
+    cursor: pointer;
+}
+
+.rr-supplier-account-remove-btn {
+    border: 1px solid #f59e0b;
+    background: #fffbeb;
+    color: #a16207;
+}
+
+.rr-supplier-account-delete-btn {
+    border: 1px solid #fecaca;
+    background: #fff1f2;
+    color: #be123c;
+}
+
+.rr-supplier-account-remove-btn:hover {
+    background: #fef3c7;
+}
+
+.rr-supplier-account-delete-btn:hover {
+    background: #ffe4e6;
+}
+
+
+.rr-supplier-confirm-backdrop {
+    position: fixed;
+    z-index: 3000;
+    inset: 0;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    padding: 18px;
+
+    background: rgba(15, 23, 42, .48);
+    backdrop-filter: blur(2px);
+
+    animation: rrSupplierModalFade .16s ease;
+}
+
+
+.rr-supplier-confirm-modal {
+    width: min(100%, 490px);
+
+    overflow: hidden;
+
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+
+    background: #ffffff;
+
+    box-shadow:
+        0 20px 45px rgba(15, 23, 42, .22),
+        0 5px 15px rgba(15, 23, 42, .12);
+
+    animation: rrSupplierModalOpen .18s ease;
+}
+
+
+.rr-supplier-confirm-header {
+    min-height: 68px;
+
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    align-items: center;
+
+    gap: 10px;
+
+    padding: 11px 13px;
+
+    border-bottom: 1px solid #e2e8f0;
+
+    background: linear-gradient(180deg, #ffffff, #f8fafc);
+}
+
+
+.rr-supplier-confirm-icon {
+    width: 40px;
+    height: 40px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 7px;
+
+    font-size: 17px;
+}
+
+
+.rr-supplier-confirm-icon.warning {
+    border: 1px solid #fde68a;
+
+    background: #fffbeb;
+
+    color: #b45309;
+}
+
+
+.rr-supplier-confirm-icon.danger {
+    border: 1px solid #fecaca;
+
+    background: #fff1f2;
+
+    color: #be123c;
+}
+
+
+.rr-supplier-confirm-header span {
+    display: block;
+
+    color: #64748b;
+
+    font-size: 11px;
+    font-weight: 800;
+
+    text-transform: uppercase;
+}
+
+
+.rr-supplier-confirm-header h2 {
+    margin: 2px 0 0;
+
+    color: #172033;
+
+    font-size: 16px;
+    font-weight: 850;
+}
+
+
+.rr-supplier-confirm-close {
+    width: 31px;
+    height: 31px;
+
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    border: 1px solid #dbe2ea;
+    border-radius: 5px;
+
+    background: #ffffff;
+
+    color: #64748b;
+
+    cursor: pointer;
+}
+
+
+.rr-supplier-confirm-close:hover {
+    background: #f1f5f9;
+
+    color: #334155;
+}
+
+
+.rr-supplier-confirm-body {
+    padding: 15px;
+}
+
+
+.rr-supplier-confirm-message {
+    margin: 0;
+
+    color: #334155;
+
+    font-size: 13px;
+    font-weight: 700;
+
+    line-height: 1.5;
+}
+
+
+.rr-supplier-confirm-detail {
+    display: flex;
+    align-items: flex-start;
+
+    gap: 7px;
+
+    margin-top: 11px;
+    padding: 9px 10px;
+
+    border: 1px solid #e2e8f0;
+    border-radius: 5px;
+
+    background: #f8fafc;
+
+    color: #64748b;
+
+    font-size: 12px;
+    line-height: 1.45;
+}
+
+
+.rr-supplier-confirm-detail i {
+    margin-top: 1px;
+
+    color: #2563eb;
+}
+
+
+.rr-supplier-confirm-footer {
+    min-height: 55px;
+
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+
+    gap: 7px;
+
+    padding: 8px 12px;
+
+    border-top: 1px solid #e2e8f0;
+
+    background: #f8fafc;
+}
+
+
+.rr-supplier-confirm-cancel,
+.rr-supplier-confirm-action {
+    min-height: 34px;
+
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    gap: 6px;
+
+    padding: 0 12px;
+
+    border-radius: 5px;
+
+    font-size: 12px;
+    font-weight: 800;
+
+    cursor: pointer;
+}
+
+
+.rr-supplier-confirm-cancel {
+    border: 1px solid #cbd5e1;
+
+    background: #ffffff;
+
+    color: #475569;
+}
+
+
+.rr-supplier-confirm-action.warning {
+    border: 1px solid #d97706;
+
+    background: linear-gradient(180deg, #f59e0b, #d97706);
+
+    color: #ffffff;
+}
+
+
+.rr-supplier-confirm-action.danger {
+    border: 1px solid #be123c;
+
+    background: linear-gradient(180deg, #e11d48, #be123c);
+
+    color: #ffffff;
+}
+
+
+.rr-supplier-confirm-cancel:disabled,
+.rr-supplier-confirm-action:disabled,
+.rr-supplier-confirm-close:disabled {
+    opacity: .55;
+
+    cursor: not-allowed;
+}
+
+
+@keyframes rrSupplierModalFade {
+
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+
+@keyframes rrSupplierModalOpen {
+
+    from {
+        opacity: 0;
+
+        transform:
+            translateY(8px) scale(.985);
+    }
+
+    to {
+        opacity: 1;
+
+        transform:
+            translateY(0) scale(1);
+    }
+}
+
+
+@media (max-width: 720px) {
+
+    .rr-supplier-account-header-actions {
+        flex-wrap: wrap;
+    }
+
+
+    .rr-supplier-confirm-modal {
+        width: 100%;
+    }
+
+
+    .rr-supplier-confirm-footer {
+        align-items: stretch;
+
+        flex-direction: column-reverse;
+    }
+
+
+    .rr-supplier-confirm-cancel,
+    .rr-supplier-confirm-action {
+        width: 100%;
+    }
+}

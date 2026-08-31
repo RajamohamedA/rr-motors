@@ -131,11 +131,6 @@ class Store extends Model
     |
     | One company customer can be linked to multiple branches.
     |
-    | customer_stores
-    |
-    | customer_id
-    | store_id
-    |
     */
 
     public function customers(): BelongsToMany
@@ -145,6 +140,27 @@ class Store extends Model
             'customer_stores',
             'store_id',
             'customer_id'
+        )
+            ->withTimestamps();
+    }
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Suppliers
+    |--------------------------------------------------------------------------
+    |
+    | One company supplier can be linked to multiple branches.
+    |
+    */
+
+    public function suppliers(): BelongsToMany
+    {
+        return $this->belongsToMany(
+            Supplier::class,
+            'supplier_stores',
+            'store_id',
+            'supplier_id'
         )
             ->withTimestamps();
     }

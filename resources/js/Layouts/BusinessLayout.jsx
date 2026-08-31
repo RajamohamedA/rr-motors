@@ -8,6 +8,9 @@ import Sidebar
 import Topbar
     from '../Components/Business/Topbar';
 
+import FlashNotification
+    from '../Components/FlashNotification';
+
 
 export default function BusinessLayout({
     children,
@@ -33,8 +36,6 @@ export default function BusinessLayout({
     | false = EXPANDED
     | true  = COLLAPSED
     |
-    | Therefore sidebar is EXPANDED BY DEFAULT.
-    |
     */
 
     const [
@@ -59,16 +60,6 @@ export default function BusinessLayout({
     |--------------------------------------------------------------------------
     | Effective Visual State
     |--------------------------------------------------------------------------
-    |
-    | Permanently expanded:
-    | sidebarCollapsed = false
-    |
-    | Permanently collapsed:
-    | sidebarCollapsed = true
-    |
-    | Collapsed + hover:
-    | visually expand temporarily
-    |
     */
 
     const visuallyCollapsed =
@@ -172,6 +163,13 @@ export default function BusinessLayout({
                             )
                     }
                 />
+
+
+                {/* ================================================
+                    GLOBAL FLASH NOTIFICATION
+                   ================================================ */}
+
+                <FlashNotification />
 
 
                 <main className="rr-business-content">

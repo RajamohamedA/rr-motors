@@ -61,7 +61,121 @@ Route::resource(
 
 /*
 |--------------------------------------------------------------------------
-| Supplier
+| Supplier - Lookup Routes
+|--------------------------------------------------------------------------
+|
+| These routes MUST be defined before:
+|
+| /suppliers/{supplier}
+|
+| Otherwise Laravel may treat:
+|
+| duplicate-lookup
+| gst-lookup
+|
+| as the {supplier} parameter.
+|
+*/
+
+
+/*
+|--------------------------------------------------------------------------
+| Duplicate Supplier Lookup
+|--------------------------------------------------------------------------
+|
+| Checks the current company for an existing supplier using:
+|
+| GST Number
+| Phone
+| Email
+|
+*/
+
+Route::post(
+    '/suppliers/duplicate-lookup',
+    [
+        SupplierController::class,
+        'duplicateLookup',
+    ]
+)->name(
+    'suppliers.duplicate-lookup'
+);
+
+
+/*
+|--------------------------------------------------------------------------
+| Supplier GST Lookup
+|--------------------------------------------------------------------------
+|
+| React
+|    ↓
+| SupplierController
+|    ↓
+| GstLookupService
+|    ↓
+| GstProviderInterface
+|
+*/
+
+Route::post(
+    '/suppliers/gst-lookup',
+    [
+        SupplierController::class,
+        'gstLookup',
+    ]
+)->name(
+    'suppliers.gst-lookup'
+);
+
+
+/*
+|--------------------------------------------------------------------------
+| Attach Existing Supplier To Current Branch
+|--------------------------------------------------------------------------
+|
+| Supplier already exists inside the same company, but is not yet linked
+| to the active branch.
+|
+| Only supplier_stores is updated.
+|
+*/
+
+Route::post(
+    '/suppliers/{supplier}/attach-existing',
+    [
+        SupplierController::class,
+        'attachExisting',
+    ]
+)->name(
+    'suppliers.attach-existing'
+);
+
+
+/*
+|--------------------------------------------------------------------------
+| Remove Supplier From Current Branch
+|--------------------------------------------------------------------------
+|
+| This DOES NOT delete the supplier master.
+|
+| Only the supplier_stores relationship for the current branch is removed.
+|
+*/
+
+Route::delete(
+    '/suppliers/{supplier}/remove-from-branch',
+    [
+        SupplierController::class,
+        'removeFromBranch',
+    ]
+)->name(
+    'suppliers.remove-from-branch'
+);
+
+
+/*
+|--------------------------------------------------------------------------
+| Supplier Resource
 |--------------------------------------------------------------------------
 */
 
@@ -80,8 +194,12 @@ Route::resource(
 |
 | /customers/{customer}
 |
-| Otherwise Laravel may treat "duplicate-lookup" or "gst-lookup"
-| as a customer route parameter.
+| Otherwise Laravel may treat:
+|
+| duplicate-lookup
+| gst-lookup
+|
+| as the {customer} parameter.
 |
 */
 
@@ -96,8 +214,6 @@ Route::resource(
 | GST
 | Mobile
 | Email
-|
-| Used by React Create Customer before saving.
 |
 */
 
@@ -114,7 +230,7 @@ Route::post(
 
 /*
 |--------------------------------------------------------------------------
-| GST Lookup
+| Customer GST Lookup
 |--------------------------------------------------------------------------
 |
 | React
@@ -123,7 +239,7 @@ Route::post(
 |    ↓
 | GstLookupService
 |    ↓
-| GST Provider
+| GstProviderInterface
 |
 */
 
@@ -146,7 +262,7 @@ Route::post(
 | The customer already exists in the same company but belongs to another
 | branch.
 |
-| This adds only the customer_stores relationship.
+| Only customer_stores is updated.
 |
 */
 
@@ -288,10 +404,13 @@ Route::get(
 | Get Stores For Company
 |--------------------------------------------------------------------------
 |
-| NOTE:
+| This helper is still available for modules that need branch loading.
 |
-| This route should eventually be moved behind proper company isolation.
-| Do not trust arbitrary company IDs from normal employees.
+| IMPORTANT:
+|
+| Do not trust arbitrary company IDs in business write operations.
+| Controllers must continue using active_company_id and active_store_id
+| from the trusted business session.
 |
 */
 

@@ -152,6 +152,140 @@ export default function Create() {
 
     /*
     |--------------------------------------------------------------------------
+    | Scroll / Focus Helpers
+    |--------------------------------------------------------------------------
+    */
+
+    const scrollToElement =
+        element => {
+
+            if (
+                !element
+            ) {
+
+                return;
+            }
+
+
+            element.scrollIntoView({
+                behavior:
+                    'smooth',
+
+                block:
+                    'center',
+            });
+        };
+
+
+    const focusFirstValidationError =
+        validationErrors => {
+
+            const keys =
+                Object.keys(
+                    validationErrors
+                    ?? {}
+                );
+
+
+            if (
+                keys.length === 0
+            ) {
+
+                scrollToElement(
+                    pageTopRef.current
+                );
+
+                return;
+            }
+
+
+            const firstField =
+                keys[0];
+
+
+            window.requestAnimationFrame(
+                () => {
+
+                    const element =
+                        document.querySelector(
+                            `[name="${firstField}"]`
+                        );
+
+
+                    if (
+                        element
+                    ) {
+
+                        scrollToElement(
+                            element
+                        );
+
+
+                        window.setTimeout(
+                            () => {
+
+                                element.focus?.();
+
+                            },
+                            350
+                        );
+
+
+                        return;
+                    }
+
+
+                    scrollToElement(
+                        pageTopRef.current
+                    );
+                }
+            );
+        };
+
+
+    const scrollToGlobalNotification =
+        () => {
+
+            window.requestAnimationFrame(
+                () => {
+
+                    const notification =
+                        document.querySelector(
+                            '.rr-notification-container'
+                        );
+
+
+                    if (
+                        notification
+                    ) {
+
+                        notification.scrollIntoView({
+                            behavior:
+                                'smooth',
+
+                            block:
+                                'start',
+                        });
+
+
+                        return;
+                    }
+
+
+                    window.scrollTo({
+                        top:
+                            0,
+
+                        behavior:
+                            'smooth',
+                    });
+                }
+            );
+        };
+
+
+    /*
+    |--------------------------------------------------------------------------
     | GST
     |--------------------------------------------------------------------------
     */
@@ -244,6 +378,24 @@ export default function Create() {
 
 
     const duplicateTimer =
+        useRef(
+            null
+        );
+
+
+    const pageTopRef =
+        useRef(
+            null
+        );
+
+
+    const duplicatePanelRef =
+        useRef(
+            null
+        );
+
+
+    const gstMessageRef =
         useRef(
             null
         );
@@ -404,6 +556,16 @@ export default function Create() {
                             ),
                     });
 
+
+                    window.requestAnimationFrame(
+                        () => {
+
+                            scrollToElement(
+                                duplicatePanelRef.current
+                            );
+                        }
+                    );
+
                 } else {
 
                     setDuplicateMatch(
@@ -459,6 +621,17 @@ export default function Create() {
                     text:
                         'Enter a valid 15-character GST number.',
                 });
+
+
+                window.requestAnimationFrame(
+                    () => {
+
+                        scrollToElement(
+                            gstMessageRef.current
+                        );
+                    }
+                );
+
 
                 return;
             }
@@ -517,6 +690,16 @@ export default function Create() {
                         'GST details fetched successfully. Review them before applying.',
                 });
 
+
+                window.requestAnimationFrame(
+                    () => {
+
+                        scrollToElement(
+                            gstMessageRef.current
+                        );
+                    }
+                );
+
             } catch (
             error
             ) {
@@ -530,6 +713,16 @@ export default function Create() {
                         ??
                         'Unable to fetch GST details. You can continue manually.',
                 });
+
+
+                window.requestAnimationFrame(
+                    () => {
+
+                        scrollToElement(
+                            gstMessageRef.current
+                        );
+                    }
+                );
 
             } finally {
 
@@ -628,6 +821,16 @@ export default function Create() {
                 text:
                     'GST details applied to the customer form.',
             });
+
+
+            window.requestAnimationFrame(
+                () => {
+
+                    scrollToElement(
+                        gstMessageRef.current
+                    );
+                }
+            );
         };
 
 
@@ -656,6 +859,12 @@ export default function Create() {
                 {
                     preserveScroll:
                         true,
+
+                    onSuccess:
+                        () => {
+
+                            scrollToGlobalNotification();
+                        },
                 }
             );
         };
@@ -696,6 +905,20 @@ export default function Create() {
                 {
                     preserveScroll:
                         true,
+
+                    onError:
+                        validationErrors => {
+
+                            focusFirstValidationError(
+                                validationErrors
+                            );
+                        },
+
+                    onSuccess:
+                        () => {
+
+                            scrollToGlobalNotification();
+                        },
                 }
             );
         };
@@ -716,7 +939,12 @@ export default function Create() {
             />
 
 
-            <div className="rr-customers-page">
+            <div
+                className="rr-customers-page"
+                ref={
+                    pageTopRef
+                }
+            >
 
                 <MasterNavigation
                     active="customers"
@@ -769,22 +997,62 @@ export default function Create() {
                 {
                     duplicateMatch && (
 
-                        <DuplicatePanel
-                            customer={
-                                duplicateMatch
+                        <div
+                            ref={
+                                duplicatePanelRef
                             }
-                            loading={
-                                duplicateLoading
-                            }
-                            canAttach={
-                                can(
-                                    'customer.create'
-                                )
-                            }
-                            onAttach={
-                                attachExisting
-                            }
-                        />
+                        >
+
+                            <DuplicatePanel
+                                customer={
+                                    duplicateMatch
+                                }
+                                loading={
+                                    duplicateLoading
+                                }
+                                canAttach={
+                                    can(
+                                        'customer.create'
+                                    )
+                                }
+                                onAttach={
+                                    attachExisting
+                                }
+                            />
+
+                        </div>
+
+                    )
+                }
+
+
+                {
+                    Object.keys(
+                        errors
+                        ?? {}
+                    ).length > 0 && (
+
+                        <section className="rr-customer-validation-summary">
+
+                            <i className="bi bi-exclamation-triangle"></i>
+
+                            <div>
+
+                                <strong>
+                                    Please correct the highlighted fields.
+                                </strong>
+
+                                <span>
+                                    {
+                                        Object.values(
+                                            errors
+                                        )[0]
+                                    }
+                                </span>
+
+                            </div>
+
+                        </section>
 
                     )
                 }
@@ -820,6 +1088,7 @@ export default function Create() {
 
                                 <input
                                     type="text"
+                                    name="customer_name"
                                     value={
                                         data.customer_name
                                     }
@@ -846,6 +1115,7 @@ export default function Create() {
 
                                 <input
                                     type="text"
+                                    name="contact_person"
                                     value={
                                         data.contact_person
                                     }
@@ -876,6 +1146,7 @@ export default function Create() {
 
                                 <input
                                     type="text"
+                                    name="mobile"
                                     value={
                                         data.mobile
                                     }
@@ -901,6 +1172,7 @@ export default function Create() {
 
                                 <input
                                     type="text"
+                                    name="phone"
                                     value={
                                         data.phone
                                     }
@@ -927,6 +1199,7 @@ export default function Create() {
 
                                 <input
                                     type="email"
+                                    name="email"
                                     value={
                                         data.email
                                     }
@@ -952,6 +1225,7 @@ export default function Create() {
                             >
 
                                 <select
+                                    name="status"
                                     value={
                                         data.status
                                             ? '1'
@@ -1009,6 +1283,7 @@ export default function Create() {
 
                                     <input
                                         type="text"
+                                        name="gst_number"
                                         maxLength="15"
                                         value={
                                             data.gst_number
@@ -1068,6 +1343,7 @@ export default function Create() {
 
                                 <input
                                     type="text"
+                                    name="pan_number"
                                     maxLength="10"
                                     value={
                                         data.pan_number
@@ -1093,6 +1369,9 @@ export default function Create() {
                             gstMessage && (
 
                                 <div
+                                    ref={
+                                        gstMessageRef
+                                    }
                                     className={
                                         `rr-customer-inline-message ${gstMessage.type}`
                                     }
@@ -1160,6 +1439,7 @@ export default function Create() {
 
                                 <textarea
                                     rows="3"
+                                    name="billing_address"
                                     value={
                                         data.billing_address
                                     }
@@ -1229,6 +1509,7 @@ export default function Create() {
 
                                 <textarea
                                     rows="3"
+                                    name="shipping_address"
                                     value={
                                         data.shipping_address
                                     }
@@ -1261,6 +1542,7 @@ export default function Create() {
 
                                 <input
                                     type="text"
+                                    name="city"
                                     value={
                                         data.city
                                     }
@@ -1285,6 +1567,7 @@ export default function Create() {
 
                                 <input
                                     type="text"
+                                    name="state"
                                     value={
                                         data.state
                                     }
@@ -1309,6 +1592,7 @@ export default function Create() {
 
                                 <input
                                     type="text"
+                                    name="pincode"
                                     value={
                                         data.pincode
                                     }
@@ -1333,6 +1617,7 @@ export default function Create() {
 
                                 <input
                                     type="text"
+                                    name="country"
                                     value={
                                         data.country
                                     }
@@ -1374,6 +1659,7 @@ export default function Create() {
 
                                 <input
                                     type="number"
+                                    name="credit_limit"
                                     min="0"
                                     step="0.01"
                                     value={
@@ -1400,6 +1686,7 @@ export default function Create() {
 
                                 <input
                                     type="number"
+                                    name="credit_days"
                                     min="0"
                                     step="1"
                                     value={
@@ -1426,6 +1713,7 @@ export default function Create() {
 
                                 <input
                                     type="number"
+                                    name="opening_balance"
                                     min="0"
                                     step="0.01"
                                     value={
@@ -1451,6 +1739,7 @@ export default function Create() {
                             >
 
                                 <select
+                                    name="balance_type"
                                     value={
                                         data.balance_type
                                     }
@@ -1501,6 +1790,7 @@ export default function Create() {
 
                             <textarea
                                 rows="4"
+                                name="remarks"
                                 value={
                                     data.remarks
                                 }

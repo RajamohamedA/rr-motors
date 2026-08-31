@@ -17,6 +17,9 @@ import BusinessLayout
 import MasterNavigation
     from '../../Components/Business/MasterNavigation';
 
+import ConfirmModal
+    from '../../Components/ConfirmModal';
+
 import '../../../css/business/customers.css';
 
 
@@ -115,6 +118,30 @@ export default function Index({
         useState(
             filters?.type
             ?? ''
+        );
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Confirm Remove
+    |--------------------------------------------------------------------------
+    */
+
+    const [
+        removeCustomer,
+        setRemoveCustomer,
+    ] =
+        useState(
+            null
+        );
+
+
+    const [
+        removeProcessing,
+        setRemoveProcessing,
+    ] =
+        useState(
+            false
         );
 
 
@@ -340,7 +367,7 @@ export default function Index({
     |--------------------------------------------------------------------------
     */
 
-    const removeFromBranch =
+    const askRemoveFromBranch =
         customer => {
 
             if (
@@ -351,21 +378,50 @@ export default function Index({
             }
 
 
+            setRemoveCustomer(
+                customer
+            );
+        };
+
+
+    const confirmRemoveFromBranch =
+        () => {
+
             if (
-                !window.confirm(
-                    `Remove ${customer.customer_name} from this branch?\n\nThe customer master will not be deleted.`
-                )
+                !removeCustomer ||
+                removeProcessing
             ) {
 
                 return;
             }
 
 
+            setRemoveProcessing(
+                true
+            );
+
+
             router.delete(
-                `/customers/${customer.id}/remove-from-branch`,
+                `/customers/${removeCustomer.id}/remove-from-branch`,
                 {
                     preserveScroll:
                         true,
+
+                    onSuccess:
+                        () => {
+
+                            setRemoveCustomer(
+                                null
+                            );
+                        },
+
+                    onFinish:
+                        () => {
+
+                            setRemoveProcessing(
+                                false
+                            );
+                        },
                 }
             );
         };
@@ -529,10 +585,6 @@ export default function Index({
                    ===================================================== */}
 
                 <section className="rr-customers-panel">
-
-                    {/* =================================================
-                        TOOLBAR
-                       ================================================= */}
 
                     <div className="rr-customers-toolbar">
 
@@ -700,10 +752,6 @@ export default function Index({
                     </div>
 
 
-                    {/* =================================================
-                        GRID STATUS
-                       ================================================= */}
-
                     <div className="rr-customers-grid-status">
 
                         <div>
@@ -749,10 +797,6 @@ export default function Index({
 
                     </div>
 
-
-                    {/* =================================================
-                        TABLE
-                       ================================================= */}
 
                     <div className="rr-customers-table-wrap">
 
@@ -822,7 +866,7 @@ export default function Index({
                                                         }
                                                         onRemove={
                                                             () =>
-                                                                removeFromBranch(
+                                                                askRemoveFromBranch(
                                                                     customer
                                                                 )
                                                         }
@@ -864,10 +908,6 @@ export default function Index({
 
                     </div>
 
-
-                    {/* =================================================
-                        PAGINATION
-                       ================================================= */}
 
                     {
                         pageInfo.total > 0 && (
@@ -927,6 +967,48 @@ export default function Index({
                     }
 
                 </section>
+
+
+                {/* =====================================================
+                    COMMON CONFIRM MODAL
+                   ===================================================== */}
+
+                <ConfirmModal
+                    show={
+                        Boolean(
+                            removeCustomer
+                        )
+                    }
+                    title="Remove Customer From This Branch?"
+                    message={
+                        removeCustomer
+                            ? `${removeCustomer.customer_name} will be removed from this branch. The customer master will remain available in other assigned branches.`
+                            : ''
+                    }
+                    confirmText="Remove From Branch"
+                    cancelText="Cancel"
+                    icon="bi-person-dash"
+                    variant="danger"
+                    processing={
+                        removeProcessing
+                    }
+                    onConfirm={
+                        confirmRemoveFromBranch
+                    }
+                    onCancel={
+                        () => {
+
+                            if (
+                                !removeProcessing
+                            ) {
+
+                                setRemoveCustomer(
+                                    null
+                                );
+                            }
+                        }
+                    }
+                />
 
             </div>
 

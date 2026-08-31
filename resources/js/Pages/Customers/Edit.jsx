@@ -7,6 +7,7 @@ import {
 
 import {
     useEffect,
+    useRef,
     useState,
 } from 'react';
 
@@ -66,8 +67,10 @@ export default function Edit({ customer }) {
     const {
         data,
         setData,
+        put,
         processing,
         errors,
+        clearErrors,
     } = useForm({
 
         customer_name:
@@ -148,6 +151,152 @@ export default function Edit({ customer }) {
             customer?.remarks
             ?? '',
     });
+
+
+    const pageTopRef =
+        useRef(
+            null
+        );
+
+
+    const gstMessageRef =
+        useRef(
+            null
+        );
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Scroll / Focus Helpers
+    |--------------------------------------------------------------------------
+    */
+
+    const scrollToElement =
+        element => {
+
+            if (
+                !element
+            ) {
+
+                return;
+            }
+
+
+            element.scrollIntoView({
+                behavior:
+                    'smooth',
+
+                block:
+                    'center',
+            });
+        };
+
+
+    const focusFirstValidationError =
+        validationErrors => {
+
+            const errorKeys =
+                Object.keys(
+                    validationErrors
+                    ?? {}
+                );
+
+
+            if (
+                errorKeys.length === 0
+            ) {
+
+                scrollToElement(
+                    pageTopRef.current
+                );
+
+                return;
+            }
+
+
+            const firstField =
+                errorKeys[0];
+
+
+            window.requestAnimationFrame(
+                () => {
+
+                    const element =
+                        document.querySelector(
+                            `[name="${firstField}"]`
+                        );
+
+
+                    if (
+                        element
+                    ) {
+
+                        scrollToElement(
+                            element
+                        );
+
+
+                        window.setTimeout(
+                            () => {
+
+                                element.focus?.();
+
+                            },
+                            350
+                        );
+
+
+                        return;
+                    }
+
+
+                    scrollToElement(
+                        pageTopRef.current
+                    );
+                }
+            );
+        };
+
+
+    const scrollToGlobalNotification =
+        () => {
+
+            window.requestAnimationFrame(
+                () => {
+
+                    const notification =
+                        document.querySelector(
+                            '.rr-notification-container'
+                        );
+
+
+                    if (
+                        notification
+                    ) {
+
+                        notification.scrollIntoView({
+                            behavior:
+                                'smooth',
+
+                            block:
+                                'start',
+                        });
+
+
+                        return;
+                    }
+
+
+                    window.scrollTo({
+                        top:
+                            0,
+
+                        behavior:
+                            'smooth',
+                    });
+                }
+            );
+        };
 
 
     /*
@@ -254,6 +403,17 @@ export default function Edit({ customer }) {
                         'Enter a valid 15-character GST number.',
                 });
 
+
+                window.requestAnimationFrame(
+                    () => {
+
+                        scrollToElement(
+                            gstMessageRef.current
+                        );
+                    }
+                );
+
+
                 return;
             }
 
@@ -311,6 +471,16 @@ export default function Edit({ customer }) {
                         'GST details fetched successfully. Review them before applying.',
                 });
 
+
+                window.requestAnimationFrame(
+                    () => {
+
+                        scrollToElement(
+                            gstMessageRef.current
+                        );
+                    }
+                );
+
             } catch (
             error
             ) {
@@ -324,6 +494,16 @@ export default function Edit({ customer }) {
                         ??
                         'Unable to fetch GST details. You can continue manually.',
                 });
+
+
+                window.requestAnimationFrame(
+                    () => {
+
+                        scrollToElement(
+                            gstMessageRef.current
+                        );
+                    }
+                );
 
             } finally {
 
@@ -422,6 +602,16 @@ export default function Edit({ customer }) {
                 text:
                     'GST details applied to the customer form.',
             });
+
+
+            window.requestAnimationFrame(
+                () => {
+
+                    scrollToElement(
+                        gstMessageRef.current
+                    );
+                }
+            );
         };
 
 
@@ -437,12 +627,28 @@ export default function Edit({ customer }) {
             event.preventDefault();
 
 
-            router.put(
+            clearErrors();
+
+
+            put(
                 `/customers/${customer.id}`,
-                data,
                 {
                     preserveScroll:
                         true,
+
+                    onError:
+                        validationErrors => {
+
+                            focusFirstValidationError(
+                                validationErrors
+                            );
+                        },
+
+                    onSuccess:
+                        () => {
+
+                            scrollToGlobalNotification();
+                        },
                 }
             );
         };
@@ -463,7 +669,12 @@ export default function Edit({ customer }) {
             />
 
 
-            <div className="rr-customers-page">
+            <div
+                className="rr-customers-page"
+                ref={
+                    pageTopRef
+                }
+            >
 
                 <MasterNavigation
                     active="customers"
@@ -545,6 +756,38 @@ export default function Edit({ customer }) {
                 }
 
 
+                {
+                    Object.keys(
+                        errors
+                        ?? {}
+                    ).length > 0 && (
+
+                        <section className="rr-customer-validation-summary">
+
+                            <i className="bi bi-exclamation-triangle"></i>
+
+                            <div>
+
+                                <strong>
+                                    Please correct the highlighted fields.
+                                </strong>
+
+                                <span>
+                                    {
+                                        Object.values(
+                                            errors
+                                        )[0]
+                                    }
+                                </span>
+
+                            </div>
+
+                        </section>
+
+                    )
+                }
+
+
                 <form
                     onSubmit={
                         submit
@@ -575,6 +818,7 @@ export default function Edit({ customer }) {
 
                                 <input
                                     type="text"
+                                    name="customer_name"
                                     value={
                                         data.customer_name
                                     }
@@ -601,6 +845,7 @@ export default function Edit({ customer }) {
 
                                 <input
                                     type="text"
+                                    name="contact_person"
                                     value={
                                         data.contact_person
                                     }
@@ -627,6 +872,7 @@ export default function Edit({ customer }) {
 
                                 <input
                                     type="text"
+                                    name="mobile"
                                     value={
                                         data.mobile
                                     }
@@ -652,6 +898,7 @@ export default function Edit({ customer }) {
 
                                 <input
                                     type="text"
+                                    name="phone"
                                     value={
                                         data.phone
                                     }
@@ -678,6 +925,7 @@ export default function Edit({ customer }) {
 
                                 <input
                                     type="email"
+                                    name="email"
                                     value={
                                         data.email
                                     }
@@ -703,6 +951,7 @@ export default function Edit({ customer }) {
                             >
 
                                 <select
+                                    name="status"
                                     value={
                                         data.status
                                             ? '1'
@@ -760,6 +1009,7 @@ export default function Edit({ customer }) {
 
                                     <input
                                         type="text"
+                                        name="gst_number"
                                         maxLength="15"
                                         value={
                                             data.gst_number
@@ -819,6 +1069,7 @@ export default function Edit({ customer }) {
 
                                 <input
                                     type="text"
+                                    name="pan_number"
                                     maxLength="10"
                                     value={
                                         data.pan_number
@@ -844,6 +1095,9 @@ export default function Edit({ customer }) {
                             gstMessage && (
 
                                 <div
+                                    ref={
+                                        gstMessageRef
+                                    }
                                     className={
                                         `rr-customer-inline-message ${gstMessage.type}`
                                     }
@@ -911,6 +1165,7 @@ export default function Edit({ customer }) {
 
                                 <textarea
                                     rows="3"
+                                    name="billing_address"
                                     value={
                                         data.billing_address
                                     }
@@ -980,6 +1235,7 @@ export default function Edit({ customer }) {
 
                                 <textarea
                                     rows="3"
+                                    name="shipping_address"
                                     value={
                                         data.shipping_address
                                     }
@@ -1012,6 +1268,7 @@ export default function Edit({ customer }) {
 
                                 <input
                                     type="text"
+                                    name="city"
                                     value={
                                         data.city
                                     }
@@ -1036,6 +1293,7 @@ export default function Edit({ customer }) {
 
                                 <input
                                     type="text"
+                                    name="state"
                                     value={
                                         data.state
                                     }
@@ -1060,6 +1318,7 @@ export default function Edit({ customer }) {
 
                                 <input
                                     type="text"
+                                    name="pincode"
                                     value={
                                         data.pincode
                                     }
@@ -1084,6 +1343,7 @@ export default function Edit({ customer }) {
 
                                 <input
                                     type="text"
+                                    name="country"
                                     value={
                                         data.country
                                     }
@@ -1125,6 +1385,7 @@ export default function Edit({ customer }) {
 
                                 <input
                                     type="number"
+                                    name="credit_limit"
                                     min="0"
                                     step="0.01"
                                     value={
@@ -1151,6 +1412,7 @@ export default function Edit({ customer }) {
 
                                 <input
                                     type="number"
+                                    name="credit_days"
                                     min="0"
                                     step="1"
                                     value={
@@ -1177,6 +1439,7 @@ export default function Edit({ customer }) {
 
                                 <input
                                     type="number"
+                                    name="opening_balance"
                                     min="0"
                                     step="0.01"
                                     value={
@@ -1202,6 +1465,7 @@ export default function Edit({ customer }) {
                             >
 
                                 <select
+                                    name="balance_type"
                                     value={
                                         data.balance_type
                                     }
@@ -1252,6 +1516,7 @@ export default function Edit({ customer }) {
 
                             <textarea
                                 rows="4"
+                                name="remarks"
                                 value={
                                     data.remarks
                                 }

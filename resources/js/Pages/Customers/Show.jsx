@@ -16,6 +16,9 @@ import BusinessLayout
 import MasterNavigation
     from '../../Components/Business/MasterNavigation';
 
+import ConfirmModal
+    from '../../Components/ConfirmModal';
+
 import '../../../css/business/customers.css';
 import '../../../css/business/customer-show.css';
 
@@ -77,6 +80,12 @@ export default function Show({
             );
         };
 
+
+    /*
+    |--------------------------------------------------------------------------
+    | Tabs
+    |--------------------------------------------------------------------------
+    */
 
     const [
         activeTab,
@@ -166,6 +175,12 @@ export default function Show({
         );
 
 
+    /*
+    |--------------------------------------------------------------------------
+    | Customer State
+    |--------------------------------------------------------------------------
+    */
+
     const isShared =
         Boolean(
             customer?.shared
@@ -176,6 +191,214 @@ export default function Show({
         Boolean(
             customer?.is_system_customer
         );
+
+
+    const canDelete =
+        can(
+            'customer.delete'
+        );
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Confirm Modal
+    |--------------------------------------------------------------------------
+    */
+
+    const [
+        confirmAction,
+        setConfirmAction,
+    ] =
+        useState(
+            null
+        );
+
+
+    const [
+        actionProcessing,
+        setActionProcessing,
+    ] =
+        useState(
+            false
+        );
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Navigation
+    |--------------------------------------------------------------------------
+    */
+
+    const goBack =
+        () => {
+
+            if (
+                window.history.length > 1
+            ) {
+
+                window.history.back();
+
+                return;
+            }
+
+
+            router.visit(
+                '/customers'
+            );
+        };
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Remove From Branch
+    |--------------------------------------------------------------------------
+    */
+
+    const askRemoveFromBranch =
+        () => {
+
+            if (
+                isSystemCustomer
+            ) {
+
+                return;
+            }
+
+
+            setConfirmAction({
+
+                type:
+                    'remove',
+
+                title:
+                    'Remove Customer From This Branch?',
+
+                message:
+                    `${customer?.customer_name ?? 'This customer'} will no longer be available in the current branch. The customer master will remain available in other assigned branches.`,
+
+                confirmText:
+                    'Remove From Branch',
+
+                icon:
+                    'bi-person-dash',
+
+                variant:
+                    'danger',
+            });
+        };
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Delete Customer
+    |--------------------------------------------------------------------------
+    */
+
+    const askDeleteCustomer =
+        () => {
+
+            if (
+                isSystemCustomer
+            ) {
+
+                return;
+            }
+
+
+            setConfirmAction({
+
+                type:
+                    'delete',
+
+                title:
+                    'Delete Customer Permanently?',
+
+                message:
+                    `Are you sure you want to permanently delete ${customer?.customer_name ?? 'this customer'}? The server will block deletion if sales, payments, or other transactions exist.`,
+
+                confirmText:
+                    'Delete Customer',
+
+                icon:
+                    'bi-trash3',
+
+                variant:
+                    'danger',
+            });
+        };
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Execute Action
+    |--------------------------------------------------------------------------
+    */
+
+    const executeConfirmedAction =
+        () => {
+
+            if (
+                !confirmAction ||
+                actionProcessing
+            ) {
+
+                return;
+            }
+
+
+            setActionProcessing(
+                true
+            );
+
+
+            const options = {
+
+                preserveScroll:
+                    true,
+
+                onSuccess:
+                    () => {
+
+                        setConfirmAction(
+                            null
+                        );
+                    },
+
+                onFinish:
+                    () => {
+
+                        setActionProcessing(
+                            false
+                        );
+                    },
+            };
+
+
+            if (
+                confirmAction.type ===
+                'remove'
+            ) {
+
+                router.delete(
+                    `/customers/${customer.id}/remove-from-branch`,
+                    options
+                );
+
+                return;
+            }
+
+
+            if (
+                confirmAction.type ===
+                'delete'
+            ) {
+
+                router.delete(
+                    `/customers/${customer.id}`,
+                    options
+                );
+            }
+        };
 
 
     return (
@@ -211,8 +434,7 @@ export default function Show({
                             type="button"
                             className="rr-customer-account-back"
                             onClick={
-                                () =>
-                                    window.history.back()
+                                goBack
                             }
                             title="Back"
                         >
@@ -404,6 +626,72 @@ export default function Show({
                             )
                         }
 
+
+                        {
+                            canDelete &&
+                            !isSystemCustomer &&
+                            isShared && (
+
+                                <button
+                                    type="button"
+                                    className="rr-customer-account-remove-btn"
+                                    onClick={
+                                        askRemoveFromBranch
+                                    }
+                                >
+
+                                    <i className="bi bi-person-dash"></i>
+
+                                    Remove Branch
+
+                                </button>
+
+                            )
+                        }
+
+
+                        {
+                            canDelete &&
+                            !isSystemCustomer &&
+                            !isShared && (
+
+                                <button
+                                    type="button"
+                                    className="rr-customer-account-delete-btn"
+                                    onClick={
+                                        askDeleteCustomer
+                                    }
+                                >
+
+                                    <i className="bi bi-trash3"></i>
+
+                                    Delete
+
+                                </button>
+
+                            )
+                        }
+
+
+                        {
+                            isSystemCustomer && (
+
+                                <button
+                                    type="button"
+                                    className="rr-customer-account-locked-btn"
+                                    disabled
+                                    title="Protected system customer"
+                                >
+
+                                    <i className="bi bi-lock"></i>
+
+                                    Protected
+
+                                </button>
+
+                            )
+                        }
+
                     </div>
 
                 </section>
@@ -429,6 +717,35 @@ export default function Show({
 
                                 <span>
                                     Changes to this customer profile affect all branches where this customer is assigned.
+                                </span>
+
+                            </div>
+
+                        </section>
+
+                    )
+                }
+
+
+                {/* =====================================================
+                    SYSTEM CUSTOMER WARNING
+                   ===================================================== */}
+
+                {
+                    isSystemCustomer && (
+
+                        <section className="rr-customer-system-warning">
+
+                            <i className="bi bi-shield-lock"></i>
+
+                            <div>
+
+                                <strong>
+                                    Protected Walk-in Customer
+                                </strong>
+
+                                <span>
+                                    This customer is required for quick counter sales and cannot be edited, removed from a branch, or deleted.
                                 </span>
 
                             </div>
@@ -682,6 +999,59 @@ export default function Show({
                     </div>
 
                 </section>
+
+
+                {/* =====================================================
+                    COMMON CONFIRM MODAL
+                   ===================================================== */}
+
+                <ConfirmModal
+                    show={
+                        Boolean(
+                            confirmAction
+                        )
+                    }
+                    title={
+                        confirmAction?.title
+                        ?? 'Confirm Action'
+                    }
+                    message={
+                        confirmAction?.message
+                        ?? ''
+                    }
+                    confirmText={
+                        confirmAction?.confirmText
+                        ?? 'Confirm'
+                    }
+                    cancelText="Cancel"
+                    icon={
+                        confirmAction?.icon
+                        ?? 'bi-exclamation-triangle'
+                    }
+                    variant={
+                        confirmAction?.variant
+                        ?? 'danger'
+                    }
+                    processing={
+                        actionProcessing
+                    }
+                    onConfirm={
+                        executeConfirmedAction
+                    }
+                    onCancel={
+                        () => {
+
+                            if (
+                                !actionProcessing
+                            ) {
+
+                                setConfirmAction(
+                                    null
+                                );
+                            }
+                        }
+                    }
+                />
 
             </div>
 
@@ -1295,9 +1665,7 @@ function SalesTab({
 
                                         <td>
 
-                                            <span
-                                                className="rr-account-sale-status"
-                                            >
+                                            <span className="rr-account-sale-status">
                                                 {
                                                     sale.status
                                                     ?? 'Recorded'
@@ -2004,8 +2372,7 @@ function TransactionBadge({
 
         <span
             className={
-                `rr-transaction-badge ${normalized
-                }`
+                `rr-transaction-badge ${normalized}`
             }
         >
 
