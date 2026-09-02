@@ -420,6 +420,67 @@ Route::resource(
 );
 
 
+Route::patch(
+    '/brands/{brand}/toggle-status',
+    [
+        BrandController::class,
+        'toggleStatus',
+    ]
+)->name(
+    'brands.toggle-status'
+);
+
+
+Route::get(
+    '/brands/{brand}/products',
+    [
+        BrandController::class,
+        'products',
+    ]
+)->name(
+    'brands.products'
+);
+
+
+Route::get(
+    '/brands/{brand}/products/export/csv',
+    [
+        BrandController::class,
+        'exportProductsCsv',
+    ]
+)->name(
+    'brands.products.export.csv'
+);
+
+
+Route::get(
+    '/brands/{brand}/products/export/pdf',
+    [
+        BrandController::class,
+        'exportProductsPdf',
+    ]
+)->name(
+    'brands.products.export.pdf'
+);
+
+
+Route::get(
+    '/brands/{brand}/products/print',
+    [
+        BrandController::class,
+        'printProducts',
+    ]
+)->name(
+    'brands.products.print'
+);
+
+
+Route::resource(
+    'brands',
+    BrandController::class
+);
+
+
 /*
 |--------------------------------------------------------------------------
 | Brand

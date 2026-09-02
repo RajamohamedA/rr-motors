@@ -11,33 +11,136 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('brands', function (Blueprint $table) {
+        Schema::create(
+            'brands',
+            function (
+                Blueprint $table
+            ) {
 
-            $table->id();
-        
-            $table->foreignId('company_id')
-                ->constrained()
-                ->cascadeOnDelete();
-        
-            $table->string('brand_code',20)->unique();
-        
-            $table->string('brand_name',100);
-        
-            $table->text('description')->nullable();
-        
-            $table->boolean('status')->default(true);
-        
-            $table->timestamps();
-        
-            $table->unique(['company_id','brand_name']);
-        });
+                $table->id();
+
+
+                /*
+                |--------------------------------------------------------------------------
+                | Company
+                |--------------------------------------------------------------------------
+                */
+
+                $table->foreignId(
+                    'company_id'
+                )
+                    ->constrained(
+                        'companies'
+                    )
+                    ->cascadeOnDelete();
+
+
+                /*
+                |--------------------------------------------------------------------------
+                | Store / Branch
+                |--------------------------------------------------------------------------
+                */
+
+                $table->foreignId(
+                    'store_id'
+                )
+                    ->constrained(
+                        'stores'
+                    )
+                    ->cascadeOnDelete();
+
+
+                /*
+                |--------------------------------------------------------------------------
+                | Brand Details
+                |--------------------------------------------------------------------------
+                */
+
+                $table->string(
+                    'brand_code',
+                    20
+                );
+
+
+                $table->string(
+                    'brand_name',
+                    100
+                );
+
+
+                $table->text(
+                    'description'
+                )
+                    ->nullable();
+
+
+                $table->boolean(
+                    'status'
+                )
+                    ->default(
+                        true
+                    );
+
+
+                $table->timestamps();
+
+
+                /*
+                |--------------------------------------------------------------------------
+                | Branch Scoped Unique Brand Name
+                |--------------------------------------------------------------------------
+                */
+
+                $table->unique(
+                    [
+                        'store_id',
+                        'brand_name',
+                    ],
+                    'brands_store_id_brand_name_unique'
+                );
+
+
+                /*
+                |--------------------------------------------------------------------------
+                | Branch Scoped Unique Brand Code
+                |--------------------------------------------------------------------------
+                */
+
+                $table->unique(
+                    [
+                        'store_id',
+                        'brand_code',
+                    ],
+                    'brands_store_id_brand_code_unique'
+                );
+
+
+                /*
+                |--------------------------------------------------------------------------
+                | Context Index
+                |--------------------------------------------------------------------------
+                */
+
+                $table->index(
+                    [
+                        'company_id',
+                        'store_id',
+                        'status',
+                    ],
+                    'brands_company_store_status_index'
+                );
+            }
+        );
     }
+
 
     /**
      * Reverse the migrations.
      */
     public function down(): void
     {
-        Schema::dropIfExists('brands');
+        Schema::dropIfExists(
+            'brands'
+        );
     }
 };

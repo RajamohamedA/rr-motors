@@ -1,0 +1,4289 @@
+/* ==========================================================================
+   RR MOTORS - BRAND MASTER
+   resources/css/business/brands.css
+   ========================================================================== */
+
+
+/* ==========================================================================
+   PAGE
+   ========================================================================== */
+
+.rr-brands-page {
+    width: 100%;
+    min-width: 0;
+    padding-bottom: 32px;
+}
+
+
+/* ==========================================================================
+   HEADER
+   ========================================================================== */
+
+.rr-brands-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+
+    margin-bottom: 18px;
+    padding: 18px 20px;
+
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+
+    background: #ffffff;
+}
+
+
+.rr-brands-header-main {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+
+    min-width: 0;
+}
+
+
+.rr-brands-header-icon {
+    width: 48px;
+    height: 48px;
+
+    flex: 0 0 48px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 10px;
+
+    background: #eff6ff;
+
+    color: #2563eb;
+}
+
+
+.rr-brands-header-icon i {
+    font-size: 22px;
+}
+
+
+.rr-brands-eyebrow {
+    display: block;
+
+    margin-bottom: 3px;
+
+    color: #64748b;
+
+    font-size: 11px;
+    font-weight: 700;
+
+    letter-spacing: .5px;
+    text-transform: uppercase;
+}
+
+
+.rr-brands-header h1 {
+    margin: 0;
+
+    color: #0f172a;
+
+    font-size: 22px;
+    font-weight: 800;
+
+    line-height: 1.2;
+}
+
+
+.rr-brands-header p {
+    margin: 4px 0 0;
+
+    color: #64748b;
+
+    font-size: 13px;
+    line-height: 1.5;
+}
+
+
+.rr-brands-header-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+
+    flex-shrink: 0;
+}
+
+
+/* ==========================================================================
+   BUTTONS
+   ========================================================================== */
+
+.rr-brand-toolbar-btn,
+.rr-brand-primary-btn,
+.rr-brand-search-btn,
+.rr-brands-clear-btn {
+    min-height: 38px;
+
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    gap: 7px;
+
+    padding: 0 14px;
+
+    border-radius: 7px;
+
+    font-size: 13px;
+    font-weight: 700;
+
+    text-decoration: none;
+
+    cursor: pointer;
+
+    transition:
+        background .15s ease,
+        border-color .15s ease,
+        color .15s ease,
+        box-shadow .15s ease,
+        transform .12s ease;
+}
+
+
+.rr-brand-toolbar-btn {
+    border: 1px solid #cbd5e1;
+
+    background: #ffffff;
+
+    color: #334155;
+}
+
+
+.rr-brand-toolbar-btn:hover {
+    border-color: #94a3b8;
+
+    background: #f8fafc;
+
+    color: #0f172a;
+}
+
+
+.rr-brand-primary-btn {
+    border: 1px solid #2563eb;
+
+    background: #2563eb;
+
+    color: #ffffff;
+}
+
+
+.rr-brand-primary-btn:hover {
+    border-color: #1d4ed8;
+
+    background: #1d4ed8;
+
+    color: #ffffff;
+
+    box-shadow: 0 4px 10px rgba(37, 99, 235, .18);
+}
+
+
+.rr-brand-search-btn {
+    border: 1px solid #334155;
+
+    background: #334155;
+
+    color: #ffffff;
+}
+
+
+.rr-brand-search-btn:hover {
+    background: #1e293b;
+
+    border-color: #1e293b;
+}
+
+
+.rr-brands-clear-btn {
+    border: 1px solid #e2e8f0;
+
+    background: #ffffff;
+
+    color: #64748b;
+}
+
+
+.rr-brands-clear-btn:hover {
+    border-color: #cbd5e1;
+
+    background: #f8fafc;
+
+    color: #334155;
+}
+
+
+/* ==========================================================================
+   SUMMARY
+   ========================================================================== */
+
+.rr-brands-summary {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+
+    gap: 12px;
+
+    margin-bottom: 18px;
+}
+
+
+.rr-brand-summary-card {
+    min-width: 0;
+
+    display: flex;
+    align-items: center;
+
+    gap: 12px;
+
+    padding: 15px 16px;
+
+    border: 1px solid #e2e8f0;
+    border-radius: 9px;
+
+    background: #ffffff;
+}
+
+
+.rr-brand-summary-icon {
+    width: 40px;
+    height: 40px;
+
+    flex: 0 0 40px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 8px;
+
+    background: #eff6ff;
+
+    color: #2563eb;
+}
+
+
+.rr-brand-summary-icon i {
+    font-size: 18px;
+}
+
+
+.rr-brand-summary-card>div:last-child {
+    min-width: 0;
+
+    display: flex;
+    flex-direction: column;
+}
+
+
+.rr-brand-summary-card span {
+    color: #64748b;
+
+    font-size: 12px;
+    font-weight: 600;
+}
+
+
+.rr-brand-summary-card strong {
+    margin-top: 2px;
+
+    color: #0f172a;
+
+    font-size: 21px;
+    font-weight: 800;
+
+    line-height: 1.2;
+}
+
+
+.rr-brand-summary-card.success .rr-brand-summary-icon {
+    background: #ecfdf5;
+
+    color: #059669;
+}
+
+
+.rr-brand-summary-card.muted .rr-brand-summary-icon {
+    background: #f1f5f9;
+
+    color: #64748b;
+}
+
+
+.rr-brand-summary-card.warning .rr-brand-summary-icon {
+    background: #fffbeb;
+
+    color: #d97706;
+}
+
+
+/* ==========================================================================
+   MAIN PANEL
+   ========================================================================== */
+
+.rr-brands-panel {
+    overflow: hidden;
+
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+
+    background: #ffffff;
+}
+
+
+/* ==========================================================================
+   TOOLBAR
+   ========================================================================== */
+
+.rr-brands-toolbar {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+
+    gap: 16px;
+
+    padding: 15px 16px;
+
+    border-bottom: 1px solid #e2e8f0;
+
+    background: #ffffff;
+}
+
+
+.rr-brands-search {
+    width: min(580px, 100%);
+
+    display: flex;
+    align-items: center;
+
+    gap: 8px;
+}
+
+
+.rr-brands-search-box {
+    min-width: 0;
+    flex: 1;
+
+    position: relative;
+}
+
+
+.rr-brands-search-box>i {
+    position: absolute;
+
+    top: 50%;
+    left: 12px;
+
+    transform: translateY(-50%);
+
+    color: #94a3b8;
+
+    font-size: 14px;
+
+    pointer-events: none;
+}
+
+
+.rr-brands-search-box input {
+    width: 100%;
+    height: 38px;
+
+    padding: 0 38px 0 36px;
+
+    border: 1px solid #cbd5e1;
+    border-radius: 7px;
+
+    outline: none;
+
+    background: #ffffff;
+
+    color: #0f172a;
+
+    font-size: 13px;
+
+    transition:
+        border-color .15s ease,
+        box-shadow .15s ease;
+}
+
+
+.rr-brands-search-box input::placeholder {
+    color: #94a3b8;
+}
+
+
+.rr-brands-search-box input:focus {
+    border-color: #3b82f6;
+
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, .10);
+}
+
+
+.rr-brands-search-box button {
+    width: 30px;
+    height: 30px;
+
+    position: absolute;
+
+    top: 4px;
+    right: 4px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    padding: 0;
+
+    border: 0;
+    border-radius: 6px;
+
+    background: transparent;
+
+    color: #94a3b8;
+
+    cursor: pointer;
+}
+
+
+.rr-brands-search-box button:hover {
+    background: #f1f5f9;
+
+    color: #334155;
+}
+
+
+.rr-brands-filter-group {
+    display: flex;
+    align-items: flex-end;
+
+    gap: 8px;
+
+    flex-shrink: 0;
+}
+
+
+.rr-brands-filter {
+    display: flex;
+    flex-direction: column;
+
+    gap: 4px;
+}
+
+
+.rr-brands-filter label {
+    color: #64748b;
+
+    font-size: 11px;
+    font-weight: 700;
+}
+
+
+.rr-brands-filter select {
+    min-width: 135px;
+    height: 38px;
+
+    padding: 0 32px 0 10px;
+
+    border: 1px solid #cbd5e1;
+    border-radius: 7px;
+
+    outline: none;
+
+    background: #ffffff;
+
+    color: #334155;
+
+    font-size: 13px;
+    font-weight: 600;
+
+    cursor: pointer;
+}
+
+
+.rr-brands-filter select:focus {
+    border-color: #3b82f6;
+
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, .10);
+}
+
+
+/* ==========================================================================
+   GRID STATUS
+   ========================================================================== */
+
+.rr-brands-grid-status {
+    min-height: 42px;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    gap: 12px;
+
+    padding: 8px 16px;
+
+    border-bottom: 1px solid #e2e8f0;
+
+    background: #f8fafc;
+
+    color: #64748b;
+
+    font-size: 12px;
+}
+
+
+.rr-brands-grid-status>div {
+    display: flex;
+    align-items: center;
+
+    gap: 5px;
+}
+
+
+.rr-brands-grid-status strong {
+    color: #334155;
+
+    font-weight: 800;
+}
+
+
+.rr-brands-grid-status i {
+    margin-right: 3px;
+
+    color: #64748b;
+}
+
+
+.rr-brands-row-limit {
+    display: inline-flex;
+    align-items: center;
+
+    gap: 4px;
+
+    white-space: nowrap;
+}
+
+
+/* ==========================================================================
+   TABLE
+   ========================================================================== */
+
+.rr-brands-table-wrap {
+    width: 100%;
+
+    overflow-x: auto;
+}
+
+
+.rr-brands-table {
+    width: 100%;
+    min-width: 920px;
+
+    border-collapse: collapse;
+}
+
+
+.rr-brands-table thead th {
+    padding: 11px 14px;
+
+    border-bottom: 1px solid #cbd5e1;
+
+    background: #f8fafc;
+
+    color: #475569;
+
+    font-size: 11px;
+    font-weight: 800;
+
+    letter-spacing: .35px;
+
+    text-align: left;
+    text-transform: uppercase;
+
+    white-space: nowrap;
+}
+
+
+.rr-brands-table tbody td {
+    padding: 12px 14px;
+
+    border-bottom: 1px solid #edf2f7;
+
+    color: #334155;
+
+    font-size: 13px;
+
+    vertical-align: middle;
+}
+
+
+.rr-brands-table tbody tr:last-child td {
+    border-bottom: 0;
+}
+
+
+.rr-brands-table tbody tr {
+    transition:
+        background .12s ease;
+}
+
+
+.rr-brands-table tbody tr.is-clickable {
+    cursor: pointer;
+}
+
+
+.rr-brands-table tbody tr.is-clickable:hover {
+    background: #f8fbff;
+}
+
+
+.rr-brand-col-code {
+    width: 125px;
+}
+
+
+.rr-brand-col-products {
+    width: 110px;
+
+    text-align: center !important;
+}
+
+
+.rr-brand-col-status {
+    width: 110px;
+
+    text-align: center !important;
+}
+
+
+.rr-brand-col-actions {
+    width: 190px;
+
+    text-align: center !important;
+}
+
+
+/* ==========================================================================
+   BRAND CODE
+   ========================================================================== */
+
+.rr-brand-code {
+    display: inline-flex;
+    align-items: center;
+
+    min-height: 28px;
+
+    padding: 0 8px;
+
+    border: 1px solid #dbeafe;
+    border-radius: 5px;
+
+    background: #eff6ff;
+
+    color: #1d4ed8;
+
+    font-size: 11px;
+    font-weight: 800;
+
+    letter-spacing: .3px;
+
+    white-space: nowrap;
+}
+
+
+/* ==========================================================================
+   BRAND NAME
+   ========================================================================== */
+
+.rr-brand-name-cell {
+    display: flex;
+    align-items: center;
+
+    gap: 10px;
+
+    min-width: 190px;
+}
+
+
+.rr-brand-avatar {
+    width: 36px;
+    height: 36px;
+
+    flex: 0 0 36px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 8px;
+
+    background: #f1f5f9;
+
+    color: #334155;
+
+    font-size: 12px;
+    font-weight: 800;
+}
+
+
+.rr-brand-name-cell>div:last-child {
+    min-width: 0;
+
+    display: flex;
+    flex-direction: column;
+
+    gap: 2px;
+}
+
+
+.rr-brand-name-cell strong {
+    overflow: hidden;
+
+    color: #0f172a;
+
+    font-size: 13px;
+    font-weight: 800;
+
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+
+.rr-brand-name-cell span {
+    color: #94a3b8;
+
+    font-size: 11px;
+    font-weight: 600;
+}
+
+
+/* ==========================================================================
+   DESCRIPTION
+   ========================================================================== */
+
+.rr-brand-description {
+    max-width: 360px;
+
+    overflow: hidden;
+
+    color: #64748b;
+
+    line-height: 1.45;
+
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+
+/* ==========================================================================
+   PRODUCT COUNT
+   ========================================================================== */
+
+.rr-brand-product-count {
+    display: flex;
+    align-items: baseline;
+    justify-content: center;
+
+    gap: 4px;
+
+    white-space: nowrap;
+}
+
+
+.rr-brand-product-count strong {
+    color: #0f172a;
+
+    font-size: 14px;
+    font-weight: 800;
+}
+
+
+.rr-brand-product-count span {
+    color: #94a3b8;
+
+    font-size: 11px;
+}
+
+
+/* ==========================================================================
+   STATUS
+   ========================================================================== */
+
+.rr-brand-status {
+    min-width: 78px;
+
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    gap: 6px;
+
+    padding: 5px 8px;
+
+    border-radius: 999px;
+
+    font-size: 11px;
+    font-weight: 800;
+
+    white-space: nowrap;
+}
+
+
+.rr-brand-status>span {
+    width: 6px;
+    height: 6px;
+
+    border-radius: 50%;
+}
+
+
+.rr-brand-status.active {
+    border: 1px solid #a7f3d0;
+
+    background: #ecfdf5;
+
+    color: #047857;
+}
+
+
+.rr-brand-status.active>span {
+    background: #10b981;
+}
+
+
+.rr-brand-status.inactive {
+    border: 1px solid #e2e8f0;
+
+    background: #f8fafc;
+
+    color: #64748b;
+}
+
+
+.rr-brand-status.inactive>span {
+    background: #94a3b8;
+}
+
+
+/* ==========================================================================
+   ACTIONS
+   ========================================================================== */
+
+.rr-brand-actions {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    gap: 6px;
+}
+
+
+.rr-brand-action-btn {
+    width: 36px;
+    height: 36px;
+
+    flex: 0 0 36px;
+
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    padding: 0;
+
+    border-radius: 7px;
+
+    text-decoration: none;
+
+    cursor: pointer;
+
+    transition:
+        background .14s ease,
+        border-color .14s ease,
+        color .14s ease,
+        transform .12s ease,
+        box-shadow .14s ease;
+}
+
+
+.rr-brand-action-btn i {
+    font-size: 16px;
+    line-height: 1;
+}
+
+
+.rr-brand-action-btn:hover {
+    transform: translateY(-1px);
+}
+
+
+.rr-brand-action-btn.view {
+    border: 1px solid #cbd5e1;
+
+    background: #ffffff;
+
+    color: #475569;
+}
+
+
+.rr-brand-action-btn.view:hover {
+    border-color: #94a3b8;
+
+    background: #f8fafc;
+
+    color: #0f172a;
+}
+
+
+.rr-brand-action-btn.edit {
+    border: 1px solid #bfdbfe;
+
+    background: #eff6ff;
+
+    color: #2563eb;
+}
+
+
+.rr-brand-action-btn.edit:hover {
+    border-color: #93c5fd;
+
+    background: #dbeafe;
+
+    color: #1d4ed8;
+}
+
+
+.rr-brand-action-btn.activate {
+    border: 1px solid #a7f3d0;
+
+    background: #ecfdf5;
+
+    color: #059669;
+}
+
+
+.rr-brand-action-btn.activate:hover {
+    background: #d1fae5;
+
+    color: #047857;
+}
+
+
+.rr-brand-action-btn.deactivate {
+    border: 1px solid #fde68a;
+
+    background: #fffbeb;
+
+    color: #d97706;
+}
+
+
+.rr-brand-action-btn.deactivate:hover {
+    background: #fef3c7;
+
+    color: #b45309;
+}
+
+
+.rr-brand-action-btn.delete {
+    border: 1px solid #fecaca;
+
+    background: #fff1f2;
+
+    color: #be123c;
+}
+
+
+.rr-brand-action-btn.delete:hover {
+    border-color: #fda4af;
+
+    background: #ffe4e6;
+
+    color: #9f1239;
+}
+
+
+/* ==========================================================================
+   EMPTY STATE
+   ========================================================================== */
+
+.rr-brands-empty {
+    min-height: 280px;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+
+    padding: 40px 20px;
+
+    text-align: center;
+}
+
+
+.rr-brands-empty-icon {
+    width: 52px;
+    height: 52px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    margin-bottom: 12px;
+
+    border-radius: 12px;
+
+    background: #f1f5f9;
+
+    color: #64748b;
+}
+
+
+.rr-brands-empty-icon i {
+    font-size: 22px;
+}
+
+
+.rr-brands-empty strong {
+    color: #0f172a;
+
+    font-size: 15px;
+    font-weight: 800;
+}
+
+
+.rr-brands-empty>span {
+    max-width: 430px;
+
+    margin: 6px 0 16px;
+
+    color: #64748b;
+
+    font-size: 13px;
+    line-height: 1.6;
+}
+
+
+/* ==========================================================================
+   PAGINATION
+   ========================================================================== */
+
+.rr-brands-pagination {
+    min-height: 56px;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    gap: 16px;
+
+    padding: 10px 16px;
+
+    border-top: 1px solid #e2e8f0;
+
+    background: #ffffff;
+}
+
+
+.rr-brands-pagination-info {
+    display: flex;
+    align-items: center;
+
+    gap: 5px;
+
+    color: #64748b;
+
+    font-size: 12px;
+}
+
+
+.rr-brands-pagination-info strong {
+    color: #334155;
+
+    font-weight: 800;
+}
+
+
+.rr-brands-pagination-links {
+    display: flex;
+    align-items: center;
+
+    gap: 4px;
+}
+
+
+.rr-brand-page-link {
+    min-width: 34px;
+    height: 34px;
+
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    padding: 0 8px;
+
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+
+    background: #ffffff;
+
+    color: #475569;
+
+    font-size: 12px;
+    font-weight: 700;
+
+    text-decoration: none;
+}
+
+
+.rr-brand-page-link:hover {
+    border-color: #bfdbfe;
+
+    background: #eff6ff;
+
+    color: #2563eb;
+}
+
+
+.rr-brand-page-link.active {
+    border-color: #2563eb;
+
+    background: #2563eb;
+
+    color: #ffffff;
+}
+
+
+.rr-brand-page-link.disabled {
+    opacity: .45;
+
+    cursor: not-allowed;
+
+    pointer-events: none;
+}
+
+
+/* ==========================================================================
+   RESPONSIVE - TABLET
+   ========================================================================== */
+
+@media (max-width: 1100px) {
+
+    .rr-brands-summary {
+        grid-template-columns:
+            repeat(2,
+                minmax(0, 1fr));
+    }
+
+
+    .rr-brands-toolbar {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+
+    .rr-brands-search {
+        width: 100%;
+    }
+
+
+    .rr-brands-filter-group {
+        justify-content: flex-end;
+    }
+}
+
+
+/* ==========================================================================
+   RESPONSIVE - MOBILE
+   ========================================================================== */
+
+@media (max-width: 767px) {
+
+    .rr-brands-header {
+        align-items: stretch;
+        flex-direction: column;
+
+        padding: 15px;
+    }
+
+
+    .rr-brands-header-actions {
+        width: 100%;
+    }
+
+
+    .rr-brands-header-actions>* {
+        flex: 1;
+    }
+
+
+    .rr-brands-summary {
+        grid-template-columns: 1fr;
+    }
+
+
+    .rr-brands-search {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+
+    .rr-brand-search-btn {
+        width: 100%;
+    }
+
+
+    .rr-brands-filter-group {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+
+    .rr-brands-filter select {
+        width: 100%;
+    }
+
+
+    .rr-brands-clear-btn {
+        width: 100%;
+    }
+
+
+    .rr-brands-grid-status {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+
+    .rr-brands-row-limit {
+        display: none;
+    }
+
+
+    .rr-brands-pagination {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+
+    .rr-brands-pagination-links {
+        overflow-x: auto;
+
+        padding-bottom: 3px;
+    }
+}
+
+
+/* ==========================================================================
+   VERY SMALL SCREEN
+   ========================================================================== */
+
+@media (max-width: 480px) {
+
+    .rr-brands-header-main {
+        align-items: flex-start;
+    }
+
+
+    .rr-brands-header-icon {
+        width: 42px;
+        height: 42px;
+
+        flex-basis: 42px;
+    }
+
+
+    .rr-brands-header h1 {
+        font-size: 19px;
+    }
+
+
+    .rr-brand-summary-card {
+        padding: 13px 14px;
+    }
+}
+
+
+/* ==========================================================================
+   BRAND FORM PAGE
+   ========================================================================== */
+
+.rr-brand-form-page {
+    width: 100%;
+    min-width: 0;
+
+    padding-bottom: 32px;
+}
+
+
+/* ==========================================================================
+   FORM HEADER
+   ========================================================================== */
+
+.rr-brand-form-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    gap: 20px;
+
+    margin-bottom: 18px;
+
+    padding: 18px 20px;
+
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+
+    background: #ffffff;
+}
+
+
+.rr-brand-form-header-main {
+    min-width: 0;
+
+    display: flex;
+    align-items: center;
+
+    gap: 13px;
+}
+
+
+.rr-brand-form-back {
+    width: 38px;
+    height: 38px;
+
+    flex: 0 0 38px;
+
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    padding: 0;
+
+    border: 1px solid #dbe3ec;
+    border-radius: 7px;
+
+    background: #ffffff;
+
+    color: #475569;
+
+    cursor: pointer;
+
+    transition:
+        border-color .15s ease,
+        background .15s ease,
+        color .15s ease,
+        transform .12s ease;
+}
+
+
+.rr-brand-form-back i {
+    font-size: 16px;
+}
+
+
+.rr-brand-form-back:hover {
+    border-color: #bfdbfe;
+
+    background: #eff6ff;
+
+    color: #2563eb;
+
+    transform: translateX(-1px);
+}
+
+
+.rr-brand-form-header-icon {
+    width: 48px;
+    height: 48px;
+
+    flex: 0 0 48px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 10px;
+
+    background: #eff6ff;
+
+    color: #2563eb;
+}
+
+
+.rr-brand-form-header-icon i {
+    font-size: 22px;
+}
+
+
+.rr-brand-form-eyebrow {
+    display: block;
+
+    margin-bottom: 3px;
+
+    color: #64748b;
+
+    font-size: 11px;
+    font-weight: 700;
+
+    letter-spacing: .45px;
+    text-transform: uppercase;
+}
+
+
+.rr-brand-form-header h1 {
+    margin: 0;
+
+    color: #0f172a;
+
+    font-size: 22px;
+    font-weight: 800;
+
+    line-height: 1.2;
+}
+
+
+.rr-brand-form-header p {
+    margin: 4px 0 0;
+
+    color: #64748b;
+
+    font-size: 13px;
+    line-height: 1.5;
+}
+
+
+/* ==========================================================================
+   CONTEXT
+   ========================================================================== */
+
+.rr-brand-form-context {
+    display: flex;
+    align-items: stretch;
+
+    gap: 8px;
+
+    flex-shrink: 0;
+}
+
+
+.rr-brand-form-context>div {
+    min-width: 145px;
+
+    display: flex;
+    flex-direction: column;
+
+    gap: 3px;
+
+    padding: 9px 11px;
+
+    border: 1px solid #e2e8f0;
+    border-radius: 7px;
+
+    background: #f8fafc;
+}
+
+
+.rr-brand-form-context span {
+    color: #94a3b8;
+
+    font-size: 10px;
+    font-weight: 700;
+
+    letter-spacing: .35px;
+    text-transform: uppercase;
+}
+
+
+.rr-brand-form-context strong {
+    overflow: hidden;
+
+    color: #334155;
+
+    font-size: 12px;
+    font-weight: 800;
+
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+
+/* ==========================================================================
+   VALIDATION SUMMARY
+   ========================================================================== */
+
+.rr-brand-validation-summary {
+    display: flex;
+    align-items: flex-start;
+
+    gap: 11px;
+
+    margin-bottom: 16px;
+
+    padding: 12px 14px;
+
+    border: 1px solid #fecaca;
+    border-left: 4px solid #dc2626;
+    border-radius: 8px;
+
+    background: #fef2f2;
+}
+
+
+.rr-brand-validation-summary-icon {
+    width: 34px;
+    height: 34px;
+
+    flex: 0 0 34px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 7px;
+
+    background: #fee2e2;
+
+    color: #dc2626;
+}
+
+
+.rr-brand-validation-summary-icon i {
+    font-size: 16px;
+}
+
+
+.rr-brand-validation-summary>div:last-child {
+    display: flex;
+    flex-direction: column;
+
+    gap: 2px;
+}
+
+
+.rr-brand-validation-summary strong {
+    color: #991b1b;
+
+    font-size: 13px;
+    font-weight: 800;
+}
+
+
+.rr-brand-validation-summary span {
+    color: #b91c1c;
+
+    font-size: 12px;
+    line-height: 1.45;
+}
+
+
+/* ==========================================================================
+   FORM WINDOW
+   ========================================================================== */
+
+.rr-brand-form-window {
+    overflow: hidden;
+
+    border: 1px solid #dbe3ec;
+    border-radius: 10px;
+
+    background: #ffffff;
+
+    box-shadow:
+        0 4px 14px rgba(15, 23, 42, .04);
+}
+
+
+/* ==========================================================================
+   TOOLBAR
+   ========================================================================== */
+
+.rr-brand-form-toolbar {
+    min-height: 56px;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    gap: 14px;
+
+    padding: 10px 14px;
+
+    border-bottom: 1px solid #e2e8f0;
+
+    background:
+        linear-gradient(180deg,
+            #ffffff,
+            #f8fafc);
+}
+
+
+.rr-brand-form-toolbar-status {
+    display: inline-flex;
+    align-items: center;
+
+    gap: 7px;
+
+    color: #475569;
+
+    font-size: 12px;
+    font-weight: 700;
+}
+
+
+.rr-brand-form-toolbar-status i {
+    color: #2563eb;
+
+    font-size: 7px;
+}
+
+
+.rr-brand-form-toolbar-actions {
+    display: flex;
+    align-items: center;
+
+    gap: 7px;
+}
+
+
+/* ==========================================================================
+   FORM BUTTONS
+   ========================================================================== */
+
+.rr-brand-form-secondary-btn,
+.rr-brand-form-save-btn {
+    min-height: 38px;
+
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    gap: 7px;
+
+    padding: 0 14px;
+
+    border-radius: 7px;
+
+    font-size: 13px;
+    font-weight: 700;
+
+    cursor: pointer;
+
+    transition:
+        background .15s ease,
+        border-color .15s ease,
+        color .15s ease,
+        box-shadow .15s ease,
+        transform .12s ease;
+}
+
+
+.rr-brand-form-secondary-btn {
+    border: 1px solid #cbd5e1;
+
+    background: #ffffff;
+
+    color: #475569;
+}
+
+
+.rr-brand-form-secondary-btn:hover {
+    border-color: #94a3b8;
+
+    background: #f8fafc;
+
+    color: #0f172a;
+}
+
+
+.rr-brand-form-save-btn {
+    border: 1px solid #2563eb;
+
+    background: #2563eb;
+
+    color: #ffffff;
+}
+
+
+.rr-brand-form-save-btn:hover:not(:disabled) {
+    border-color: #1d4ed8;
+
+    background: #1d4ed8;
+
+    box-shadow:
+        0 4px 10px rgba(37, 99, 235, .18);
+}
+
+
+.rr-brand-form-save-btn:disabled,
+.rr-brand-form-secondary-btn:disabled {
+    opacity: .55;
+
+    cursor: not-allowed;
+}
+
+
+/* ==========================================================================
+   BODY
+   ========================================================================== */
+
+.rr-brand-form-body {
+    padding: 18px;
+}
+
+
+/* ==========================================================================
+   SECTION
+   ========================================================================== */
+
+.rr-brand-form-section {
+    overflow: hidden;
+
+    border: 1px solid #e2e8f0;
+    border-radius: 9px;
+
+    background: #ffffff;
+}
+
+
+.rr-brand-form-section-head {
+    display: flex;
+    align-items: center;
+
+    gap: 11px;
+
+    padding: 13px 15px;
+
+    border-bottom: 1px solid #e2e8f0;
+
+    background: #f8fafc;
+}
+
+
+.rr-brand-form-section-icon {
+    width: 36px;
+    height: 36px;
+
+    flex: 0 0 36px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 8px;
+
+    background: #eff6ff;
+
+    color: #2563eb;
+}
+
+
+.rr-brand-form-section-icon i {
+    font-size: 16px;
+}
+
+
+.rr-brand-form-section-head h2 {
+    margin: 0;
+
+    color: #0f172a;
+
+    font-size: 15px;
+    font-weight: 800;
+}
+
+
+.rr-brand-form-section-head p {
+    margin: 2px 0 0;
+
+    color: #64748b;
+
+    font-size: 12px;
+    line-height: 1.4;
+}
+
+
+.rr-brand-form-section-body {
+    padding: 16px;
+}
+
+
+/* ==========================================================================
+   GRID
+   ========================================================================== */
+
+.rr-brand-form-grid {
+    display: grid;
+
+    grid-template-columns:
+        repeat(3,
+            minmax(0, 1fr));
+
+    gap: 15px;
+}
+
+
+.rr-brand-form-grid .span-2 {
+    grid-column: span 2;
+}
+
+
+.rr-brand-form-grid .span-3 {
+    grid-column: span 3;
+}
+
+
+/* ==========================================================================
+   FIELD
+   ========================================================================== */
+
+.rr-brand-form-field {
+    min-width: 0;
+
+    display: flex;
+    flex-direction: column;
+
+    gap: 6px;
+}
+
+
+.rr-brand-form-field>label {
+    color: #475569;
+
+    font-size: 12px;
+    font-weight: 700;
+}
+
+
+.rr-brand-form-field .required {
+    margin-left: 3px;
+
+    color: #dc2626;
+}
+
+
+.rr-brand-form-field input,
+.rr-brand-form-field select,
+.rr-brand-form-field textarea {
+    width: 100%;
+
+    border: 1px solid #cbd5e1;
+    border-radius: 7px;
+
+    outline: none;
+
+    background: #ffffff;
+
+    color: #0f172a;
+
+    font-size: 13px;
+
+    transition:
+        border-color .15s ease,
+        box-shadow .15s ease,
+        background .15s ease;
+}
+
+
+.rr-brand-form-field input,
+.rr-brand-form-field select {
+    height: 40px;
+
+    padding: 0 11px;
+}
+
+
+.rr-brand-form-field textarea {
+    min-height: 110px;
+
+    padding: 10px 11px;
+
+    line-height: 1.5;
+
+    resize: vertical;
+}
+
+
+.rr-brand-form-field input::placeholder,
+.rr-brand-form-field textarea::placeholder {
+    color: #94a3b8;
+}
+
+
+.rr-brand-form-field input:focus,
+.rr-brand-form-field select:focus,
+.rr-brand-form-field textarea:focus {
+    border-color: #3b82f6;
+
+    box-shadow:
+        0 0 0 3px rgba(59, 130, 246, .10);
+}
+
+
+/* ==========================================================================
+   INVALID FIELD
+   ========================================================================== */
+
+.rr-brand-form-field.has-error input,
+.rr-brand-form-field.has-error select,
+.rr-brand-form-field.has-error textarea {
+    border-color: #f87171;
+
+    background: #fffafa;
+}
+
+
+.rr-brand-form-field.has-error input:focus,
+.rr-brand-form-field.has-error select:focus,
+.rr-brand-form-field.has-error textarea:focus {
+    border-color: #dc2626;
+
+    box-shadow:
+        0 0 0 3px rgba(220, 38, 38, .10);
+}
+
+
+.rr-brand-form-field-error {
+    display: flex;
+    align-items: flex-start;
+
+    gap: 5px;
+
+    color: #dc2626;
+
+    font-size: 11px;
+    font-weight: 600;
+
+    line-height: 1.4;
+}
+
+
+.rr-brand-form-field-error i {
+    margin-top: 1px;
+
+    font-size: 12px;
+
+    flex-shrink: 0;
+}
+
+
+/* ==========================================================================
+   FOOTER
+   ========================================================================== */
+
+.rr-brand-form-footer {
+    min-height: 60px;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    gap: 14px;
+
+    padding: 11px 14px;
+
+    border-top: 1px solid #e2e8f0;
+
+    background: #f8fafc;
+}
+
+
+.rr-brand-form-footer-info {
+    display: flex;
+    align-items: center;
+
+    gap: 7px;
+
+    color: #64748b;
+
+    font-size: 12px;
+}
+
+
+.rr-brand-form-footer-info i {
+    color: #2563eb;
+
+    font-size: 14px;
+}
+
+
+.rr-brand-form-footer-actions {
+    display: flex;
+    align-items: center;
+
+    gap: 7px;
+}
+
+
+/* ==========================================================================
+   RESPONSIVE
+   ========================================================================== */
+
+@media (max-width: 991px) {
+
+    .rr-brand-form-header {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+
+    .rr-brand-form-context {
+        width: 100%;
+    }
+
+
+    .rr-brand-form-context>div {
+        min-width: 0;
+
+        flex: 1;
+    }
+
+
+    .rr-brand-form-grid {
+        grid-template-columns:
+            repeat(2,
+                minmax(0, 1fr));
+    }
+
+
+    .rr-brand-form-grid .span-3 {
+        grid-column: span 2;
+    }
+}
+
+
+@media (max-width: 767px) {
+
+    .rr-brand-form-header {
+        padding: 15px;
+    }
+
+
+    .rr-brand-form-header-main {
+        align-items: flex-start;
+    }
+
+
+    .rr-brand-form-context {
+        flex-direction: column;
+    }
+
+
+    .rr-brand-form-toolbar {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+
+    .rr-brand-form-toolbar-actions {
+        width: 100%;
+    }
+
+
+    .rr-brand-form-toolbar-actions>button {
+        flex: 1;
+    }
+
+
+    .rr-brand-form-body {
+        padding: 12px;
+    }
+
+
+    .rr-brand-form-grid {
+        grid-template-columns: 1fr;
+    }
+
+
+    .rr-brand-form-grid .span-2,
+    .rr-brand-form-grid .span-3 {
+        grid-column: span 1;
+    }
+
+
+    .rr-brand-form-footer {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+
+    .rr-brand-form-footer-actions {
+        width: 100%;
+    }
+
+
+    .rr-brand-form-footer-actions>button {
+        flex: 1;
+    }
+}
+
+
+/* ==========================================================================
+   BRAND EDIT
+   ========================================================================== */
+
+.rr-brand-form-toolbar-status .is-active {
+    color: #10b981;
+}
+
+.rr-brand-form-toolbar-status .is-inactive {
+    color: #94a3b8;
+}
+
+
+.rr-brand-form-count {
+    min-width: 20px;
+    height: 20px;
+
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    padding: 0 6px;
+
+    border-radius: 999px;
+
+    background: #e2e8f0;
+
+    color: #334155;
+
+    font-size: 10px;
+    font-weight: 800;
+}
+
+
+.rr-brand-code-input {
+    position: relative;
+}
+
+
+.rr-brand-code-input>i {
+    position: absolute;
+
+    top: 50%;
+    left: 11px;
+
+    transform: translateY(-50%);
+
+    color: #64748b;
+
+    font-size: 14px;
+
+    pointer-events: none;
+}
+
+
+.rr-brand-code-input input {
+    padding-left: 35px;
+
+    background: #f8fafc;
+
+    color: #475569;
+
+    font-weight: 700;
+
+    cursor: default;
+}
+
+
+.rr-brand-field-help {
+    display: flex;
+    align-items: flex-start;
+
+    gap: 5px;
+
+    color: #94a3b8;
+
+    font-size: 10px;
+    line-height: 1.4;
+}
+
+
+.rr-brand-field-help i {
+    margin-top: 1px;
+
+    flex-shrink: 0;
+}
+
+
+.rr-brand-edit-usage {
+    display: flex;
+    align-items: center;
+
+    gap: 12px;
+
+    margin-top: 14px;
+
+    padding: 14px 15px;
+
+    border: 1px solid #e2e8f0;
+    border-radius: 9px;
+
+    background: #f8fafc;
+}
+
+
+.rr-brand-edit-usage-icon {
+    width: 40px;
+    height: 40px;
+
+    flex: 0 0 40px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 8px;
+
+    background: #eff6ff;
+
+    color: #2563eb;
+}
+
+
+.rr-brand-edit-usage-icon i {
+    font-size: 17px;
+}
+
+
+.rr-brand-edit-usage-content {
+    min-width: 0;
+    flex: 1;
+
+    display: flex;
+    flex-direction: column;
+
+    gap: 1px;
+}
+
+
+.rr-brand-edit-usage-content>span {
+    color: #64748b;
+
+    font-size: 10px;
+    font-weight: 700;
+
+    letter-spacing: .35px;
+    text-transform: uppercase;
+}
+
+
+.rr-brand-edit-usage-content strong {
+    color: #0f172a;
+
+    font-size: 14px;
+    font-weight: 800;
+}
+
+
+.rr-brand-edit-usage-content small {
+    margin-top: 2px;
+
+    color: #64748b;
+
+    font-size: 11px;
+}
+
+
+.rr-brand-view-products-btn {
+    min-height: 36px;
+
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    gap: 7px;
+
+    padding: 0 12px;
+
+    border: 1px solid #bfdbfe;
+    border-radius: 7px;
+
+    background: #eff6ff;
+
+    color: #2563eb;
+
+    font-size: 12px;
+    font-weight: 700;
+
+    cursor: pointer;
+}
+
+
+.rr-brand-view-products-btn:hover {
+    border-color: #93c5fd;
+
+    background: #dbeafe;
+
+    color: #1d4ed8;
+}
+
+
+@media (max-width: 767px) {
+
+    .rr-brand-edit-usage {
+        align-items: flex-start;
+        flex-wrap: wrap;
+    }
+
+
+    .rr-brand-view-products-btn {
+        width: 100%;
+
+        margin-top: 4px;
+    }
+}
+
+/* ==========================================================================
+   BRAND PRODUCTS PAGE
+   ========================================================================== */
+
+.rr-brand-products-page {
+    width: 100%;
+    min-width: 0;
+    padding-bottom: 32px;
+}
+
+
+/* ==========================================================================
+   HEADER
+   ========================================================================== */
+
+.rr-brand-products-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    gap: 18px;
+
+    margin-bottom: 16px;
+    padding: 18px 20px;
+
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+
+    background: #ffffff;
+}
+
+
+.rr-brand-products-header-main {
+    min-width: 0;
+
+    display: flex;
+    align-items: center;
+
+    gap: 13px;
+}
+
+
+.rr-brand-products-back {
+    width: 38px;
+    height: 38px;
+
+    flex: 0 0 38px;
+
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    border: 1px solid #dbe3ec;
+    border-radius: 7px;
+
+    background: #ffffff;
+
+    color: #475569;
+
+    text-decoration: none;
+
+    transition:
+        background .15s ease,
+        border-color .15s ease,
+        color .15s ease,
+        transform .12s ease;
+}
+
+
+.rr-brand-products-back:hover {
+    border-color: #bfdbfe;
+
+    background: #eff6ff;
+
+    color: #2563eb;
+
+    transform: translateX(-1px);
+}
+
+
+.rr-brand-products-header-icon {
+    width: 48px;
+    height: 48px;
+
+    flex: 0 0 48px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 10px;
+
+    background: #eff6ff;
+
+    color: #2563eb;
+}
+
+
+.rr-brand-products-header-icon i {
+    font-size: 22px;
+}
+
+
+.rr-brand-products-eyebrow {
+    display: block;
+
+    margin-bottom: 3px;
+
+    color: #64748b;
+
+    font-size: 11px;
+    font-weight: 700;
+
+    letter-spacing: .45px;
+    text-transform: uppercase;
+}
+
+
+.rr-brand-products-header h1 {
+    margin: 0;
+
+    color: #0f172a;
+
+    font-size: 22px;
+    font-weight: 800;
+
+    line-height: 1.2;
+}
+
+
+.rr-brand-products-header p {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+
+    gap: 5px;
+
+    margin: 4px 0 0;
+
+    color: #64748b;
+
+    font-size: 12px;
+}
+
+
+.rr-brand-products-divider {
+    color: #cbd5e1;
+}
+
+
+.rr-brand-products-header-actions {
+    display: flex;
+    align-items: center;
+
+    gap: 7px;
+
+    flex-shrink: 0;
+}
+
+
+/* ==========================================================================
+   EXPORT BUTTONS
+   ========================================================================== */
+
+.rr-brand-export-btn {
+    min-height: 38px;
+
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    gap: 7px;
+
+    padding: 0 13px;
+
+    border: 1px solid #cbd5e1;
+    border-radius: 7px;
+
+    background: #ffffff;
+
+    color: #334155;
+
+    font-size: 12px;
+    font-weight: 700;
+
+    text-decoration: none;
+
+    cursor: pointer;
+
+    transition:
+        background .15s ease,
+        border-color .15s ease,
+        color .15s ease,
+        box-shadow .15s ease;
+}
+
+
+.rr-brand-export-btn:hover {
+    border-color: #94a3b8;
+
+    background: #f8fafc;
+
+    color: #0f172a;
+}
+
+
+.rr-brand-export-btn.pdf {
+    border-color: #fecaca;
+
+    background: #fff1f2;
+
+    color: #b91c1c;
+}
+
+
+.rr-brand-export-btn.pdf:hover {
+    border-color: #fca5a5;
+
+    background: #ffe4e6;
+
+    color: #991b1b;
+}
+
+
+.rr-brand-export-btn.csv {
+    border-color: #bbf7d0;
+
+    background: #f0fdf4;
+
+    color: #15803d;
+}
+
+
+.rr-brand-export-btn.csv:hover {
+    border-color: #86efac;
+
+    background: #dcfce7;
+
+    color: #166534;
+}
+
+
+/* ==========================================================================
+   BRAND INFO
+   ========================================================================== */
+
+.rr-brand-products-info {
+    display: grid;
+
+    grid-template-columns:
+        1fr 1fr 1fr minmax(220px, 2fr);
+
+    gap: 0;
+
+    margin-bottom: 14px;
+
+    overflow: hidden;
+
+    border: 1px solid #e2e8f0;
+    border-radius: 9px;
+
+    background: #ffffff;
+}
+
+
+.rr-brand-products-info>div {
+    min-width: 0;
+
+    padding: 11px 13px;
+
+    border-right: 1px solid #e2e8f0;
+
+    background: #f8fafc;
+}
+
+
+.rr-brand-products-info>div:last-child {
+    border-right: 0;
+}
+
+
+.rr-brand-products-info span {
+    display: block;
+
+    margin-bottom: 3px;
+
+    color: #94a3b8;
+
+    font-size: 10px;
+    font-weight: 700;
+
+    letter-spacing: .35px;
+    text-transform: uppercase;
+}
+
+
+.rr-brand-products-info strong {
+    display: block;
+
+    overflow: hidden;
+
+    color: #334155;
+
+    font-size: 12px;
+    font-weight: 800;
+
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+
+.rr-brand-products-info strong.active {
+    color: #047857;
+}
+
+
+.rr-brand-products-info strong.inactive {
+    color: #64748b;
+}
+
+
+/* ==========================================================================
+   SUMMARY
+   ========================================================================== */
+
+.rr-brand-products-summary {
+    display: grid;
+
+    grid-template-columns:
+        repeat(3,
+            minmax(0, 1fr));
+
+    gap: 11px;
+
+    margin-bottom: 14px;
+}
+
+
+.rr-brand-product-summary-card {
+    display: flex;
+    align-items: center;
+
+    gap: 11px;
+
+    padding: 14px 15px;
+
+    border: 1px solid #e2e8f0;
+    border-radius: 9px;
+
+    background: #ffffff;
+}
+
+
+.rr-brand-product-summary-icon {
+    width: 38px;
+    height: 38px;
+
+    flex: 0 0 38px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 8px;
+
+    background: #eff6ff;
+
+    color: #2563eb;
+}
+
+
+.rr-brand-product-summary-icon i {
+    font-size: 17px;
+}
+
+
+.rr-brand-product-summary-card>div:last-child {
+    display: flex;
+    flex-direction: column;
+}
+
+
+.rr-brand-product-summary-card span {
+    color: #64748b;
+
+    font-size: 11px;
+    font-weight: 600;
+}
+
+
+.rr-brand-product-summary-card strong {
+    margin-top: 2px;
+
+    color: #0f172a;
+
+    font-size: 20px;
+    font-weight: 800;
+}
+
+
+.rr-brand-product-summary-card.success .rr-brand-product-summary-icon {
+    background: #ecfdf5;
+
+    color: #059669;
+}
+
+
+.rr-brand-product-summary-card.muted .rr-brand-product-summary-icon {
+    background: #f1f5f9;
+
+    color: #64748b;
+}
+
+
+/* ==========================================================================
+   PANEL
+   ========================================================================== */
+
+.rr-brand-products-panel {
+    overflow: hidden;
+
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+
+    background: #ffffff;
+}
+
+
+/* ==========================================================================
+   TOOLBAR
+   ========================================================================== */
+
+.rr-brand-products-toolbar {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+
+    gap: 14px;
+
+    padding: 14px 15px;
+
+    border-bottom: 1px solid #e2e8f0;
+}
+
+
+.rr-brand-products-search {
+    width: min(580px, 100%);
+
+    display: flex;
+    align-items: center;
+
+    gap: 8px;
+}
+
+
+.rr-brand-products-search-box {
+    position: relative;
+
+    min-width: 0;
+    flex: 1;
+}
+
+
+.rr-brand-products-search-box>i {
+    position: absolute;
+
+    top: 50%;
+    left: 12px;
+
+    transform: translateY(-50%);
+
+    color: #94a3b8;
+
+    font-size: 14px;
+}
+
+
+.rr-brand-products-search-box input {
+    width: 100%;
+    height: 38px;
+
+    padding: 0 38px 0 36px;
+
+    border: 1px solid #cbd5e1;
+    border-radius: 7px;
+
+    outline: none;
+
+    background: #ffffff;
+
+    color: #0f172a;
+
+    font-size: 13px;
+}
+
+
+.rr-brand-products-search-box input:focus {
+    border-color: #3b82f6;
+
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, .10);
+}
+
+
+.rr-brand-products-search-box button {
+    width: 30px;
+    height: 30px;
+
+    position: absolute;
+
+    top: 4px;
+    right: 4px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    padding: 0;
+
+    border: 0;
+    border-radius: 6px;
+
+    background: transparent;
+
+    color: #94a3b8;
+
+    cursor: pointer;
+}
+
+
+.rr-brand-products-search-box button:hover {
+    background: #f1f5f9;
+
+    color: #334155;
+}
+
+
+.rr-brand-product-search-btn,
+.rr-brand-products-clear {
+    min-height: 38px;
+
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    gap: 7px;
+
+    padding: 0 13px;
+
+    border-radius: 7px;
+
+    font-size: 12px;
+    font-weight: 700;
+
+    cursor: pointer;
+}
+
+
+.rr-brand-product-search-btn {
+    border: 1px solid #334155;
+
+    background: #334155;
+
+    color: #ffffff;
+}
+
+
+.rr-brand-product-search-btn:hover {
+    background: #1e293b;
+
+    border-color: #1e293b;
+}
+
+
+.rr-brand-products-filters {
+    display: flex;
+    align-items: flex-end;
+
+    gap: 8px;
+
+    flex-shrink: 0;
+}
+
+
+.rr-brand-product-filter {
+    display: flex;
+    flex-direction: column;
+
+    gap: 4px;
+}
+
+
+.rr-brand-product-filter label {
+    color: #64748b;
+
+    font-size: 10px;
+    font-weight: 700;
+}
+
+
+.rr-brand-product-filter select {
+    min-width: 135px;
+    height: 38px;
+
+    padding: 0 31px 0 10px;
+
+    border: 1px solid #cbd5e1;
+    border-radius: 7px;
+
+    outline: none;
+
+    background: #ffffff;
+
+    color: #334155;
+
+    font-size: 12px;
+    font-weight: 600;
+}
+
+
+.rr-brand-products-clear {
+    border: 1px solid #e2e8f0;
+
+    background: #ffffff;
+
+    color: #64748b;
+}
+
+
+.rr-brand-products-clear:hover {
+    background: #f8fafc;
+
+    color: #334155;
+}
+
+
+/* ==========================================================================
+   TABLE INFO
+   ========================================================================== */
+
+.rr-brand-products-table-info {
+    min-height: 42px;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    gap: 12px;
+
+    padding: 8px 15px;
+
+    border-bottom: 1px solid #e2e8f0;
+
+    background: #f8fafc;
+
+    color: #64748b;
+
+    font-size: 11px;
+}
+
+
+.rr-brand-products-table-info>div {
+    display: flex;
+    align-items: center;
+
+    gap: 5px;
+}
+
+
+.rr-brand-products-table-info strong {
+    color: #334155;
+
+    font-weight: 800;
+}
+
+
+.rr-brand-products-table-info>span {
+    padding: 3px 7px;
+
+    border: 1px solid #bfdbfe;
+    border-radius: 999px;
+
+    background: #eff6ff;
+
+    color: #2563eb;
+
+    font-weight: 700;
+}
+
+
+/* ==========================================================================
+   TABLE
+   ========================================================================== */
+
+.rr-brand-products-table-wrap {
+    width: 100%;
+
+    overflow-x: auto;
+}
+
+
+.rr-brand-products-table {
+    width: 100%;
+    min-width: 1100px;
+
+    border-collapse: collapse;
+}
+
+
+.rr-brand-products-table th {
+    padding: 10px 11px;
+
+    border-bottom: 1px solid #cbd5e1;
+
+    background: #f8fafc;
+
+    color: #475569;
+
+    font-size: 10px;
+    font-weight: 800;
+
+    letter-spacing: .3px;
+
+    text-align: left;
+    text-transform: uppercase;
+
+    white-space: nowrap;
+}
+
+
+.rr-brand-products-table td {
+    padding: 11px;
+
+    border-bottom: 1px solid #edf2f7;
+
+    color: #334155;
+
+    font-size: 12px;
+
+    vertical-align: middle;
+}
+
+
+.rr-brand-products-table tbody tr:last-child td {
+    border-bottom: 0;
+}
+
+
+.rr-brand-products-table tbody tr.is-clickable {
+    cursor: pointer;
+}
+
+
+.rr-brand-products-table tbody tr.is-clickable:hover {
+    background: #f8fbff;
+}
+
+
+.rr-brand-products-table .number {
+    text-align: right;
+}
+
+
+.rr-brand-products-table .center {
+    text-align: center;
+}
+
+
+.rr-brand-products-table .action {
+    width: 68px;
+}
+
+
+/* ==========================================================================
+   PRODUCT CODE / NAME
+   ========================================================================== */
+
+.rr-brand-product-code {
+    display: inline-flex;
+
+    padding: 4px 7px;
+
+    border: 1px solid #dbeafe;
+    border-radius: 5px;
+
+    background: #eff6ff;
+
+    color: #1d4ed8;
+
+    font-size: 10px;
+    font-weight: 800;
+
+    white-space: nowrap;
+}
+
+
+.rr-brand-product-name {
+    min-width: 180px;
+
+    display: flex;
+    flex-direction: column;
+
+    gap: 2px;
+}
+
+
+.rr-brand-product-name strong {
+    color: #0f172a;
+
+    font-size: 12px;
+    font-weight: 800;
+}
+
+
+.rr-brand-product-name span {
+    color: #94a3b8;
+
+    font-size: 10px;
+}
+
+
+/* ==========================================================================
+   PRODUCT STATUS
+   ========================================================================== */
+
+.rr-brand-product-status {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    min-width: 64px;
+
+    padding: 4px 7px;
+
+    border-radius: 999px;
+
+    font-size: 10px;
+    font-weight: 800;
+}
+
+
+.rr-brand-product-status.active {
+    border: 1px solid #a7f3d0;
+
+    background: #ecfdf5;
+
+    color: #047857;
+}
+
+
+.rr-brand-product-status.inactive {
+    border: 1px solid #e2e8f0;
+
+    background: #f8fafc;
+
+    color: #64748b;
+}
+
+
+/* ==========================================================================
+   VIEW BUTTON
+   ========================================================================== */
+
+.rr-brand-product-view {
+    width: 34px;
+    height: 34px;
+
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    border: 1px solid #bfdbfe;
+    border-radius: 7px;
+
+    background: #eff6ff;
+
+    color: #2563eb;
+
+    text-decoration: none;
+
+    transition:
+        background .15s ease,
+        border-color .15s ease,
+        color .15s ease,
+        transform .12s ease;
+}
+
+
+.rr-brand-product-view i {
+    font-size: 15px;
+}
+
+
+.rr-brand-product-view:hover {
+    border-color: #93c5fd;
+
+    background: #dbeafe;
+
+    color: #1d4ed8;
+
+    transform: translateY(-1px);
+}
+
+
+/* ==========================================================================
+   EMPTY
+   ========================================================================== */
+
+.rr-brand-products-empty {
+    min-height: 240px;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+
+    padding: 32px 20px;
+
+    text-align: center;
+}
+
+
+.rr-brand-products-empty>div {
+    width: 48px;
+    height: 48px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    margin-bottom: 10px;
+
+    border-radius: 10px;
+
+    background: #f1f5f9;
+
+    color: #64748b;
+}
+
+
+.rr-brand-products-empty>div i {
+    font-size: 20px;
+}
+
+
+.rr-brand-products-empty strong {
+    color: #0f172a;
+
+    font-size: 14px;
+    font-weight: 800;
+}
+
+
+.rr-brand-products-empty span {
+    max-width: 430px;
+
+    margin-top: 5px;
+
+    color: #64748b;
+
+    font-size: 12px;
+    line-height: 1.5;
+}
+
+
+/* ==========================================================================
+   PAGINATION
+   ========================================================================== */
+
+.rr-brand-products-pagination {
+    min-height: 56px;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    gap: 14px;
+
+    padding: 10px 15px;
+
+    border-top: 1px solid #e2e8f0;
+}
+
+
+.rr-brand-products-pagination>div:first-child {
+    display: flex;
+    align-items: center;
+
+    gap: 5px;
+
+    color: #64748b;
+
+    font-size: 11px;
+}
+
+
+.rr-brand-products-pagination strong {
+    color: #334155;
+
+    font-weight: 800;
+}
+
+
+.rr-brand-products-pages {
+    display: flex;
+    align-items: center;
+
+    gap: 4px;
+}
+
+
+.rr-brand-product-page {
+    min-width: 34px;
+    height: 34px;
+
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    padding: 0 8px;
+
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+
+    background: #ffffff;
+
+    color: #475569;
+
+    font-size: 11px;
+    font-weight: 700;
+
+    text-decoration: none;
+}
+
+
+.rr-brand-product-page:hover {
+    border-color: #bfdbfe;
+
+    background: #eff6ff;
+
+    color: #2563eb;
+}
+
+
+.rr-brand-product-page.active {
+    border-color: #2563eb;
+
+    background: #2563eb;
+
+    color: #ffffff;
+}
+
+
+.rr-brand-product-page.disabled {
+    opacity: .45;
+
+    pointer-events: none;
+}
+
+
+/* ==========================================================================
+   RESPONSIVE
+   ========================================================================== */
+
+@media (max-width: 1100px) {
+
+    .rr-brand-products-header {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+
+    .rr-brand-products-header-actions {
+        justify-content: flex-end;
+    }
+
+
+    .rr-brand-products-info {
+        grid-template-columns:
+            repeat(2,
+                minmax(0, 1fr));
+    }
+
+
+    .rr-brand-products-info>div:nth-child(2) {
+        border-right: 0;
+    }
+
+
+    .rr-brand-products-info>div:nth-child(-n + 2) {
+        border-bottom: 1px solid #e2e8f0;
+    }
+
+
+    .rr-brand-products-toolbar {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+
+    .rr-brand-products-search {
+        width: 100%;
+    }
+
+
+    .rr-brand-products-filters {
+        justify-content: flex-end;
+    }
+}
+
+
+@media (max-width: 767px) {
+
+    .rr-brand-products-header {
+        padding: 15px;
+    }
+
+
+    .rr-brand-products-header-main {
+        align-items: flex-start;
+    }
+
+
+    .rr-brand-products-header-actions {
+        display: grid;
+
+        grid-template-columns:
+            repeat(3,
+                1fr);
+    }
+
+
+    .rr-brand-export-btn {
+        width: 100%;
+    }
+
+
+    .rr-brand-products-info {
+        grid-template-columns: 1fr;
+    }
+
+
+    .rr-brand-products-info>div {
+        border-right: 0;
+        border-bottom: 1px solid #e2e8f0;
+    }
+
+
+    .rr-brand-products-info>div:last-child {
+        border-bottom: 0;
+    }
+
+
+    .rr-brand-products-summary {
+        grid-template-columns: 1fr;
+    }
+
+
+    .rr-brand-products-search {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+
+    .rr-brand-product-search-btn {
+        width: 100%;
+    }
+
+
+    .rr-brand-products-filters {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+
+    .rr-brand-product-filter select {
+        width: 100%;
+    }
+
+
+    .rr-brand-products-clear {
+        width: 100%;
+    }
+
+
+    .rr-brand-products-table-info {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+
+    .rr-brand-products-pagination {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+
+    .rr-brand-products-pages {
+        overflow-x: auto;
+
+        padding-bottom: 3px;
+    }
+}
+
+/* ==========================================================================
+   BRAND SHOW PAGE
+   ========================================================================== */
+
+.rr-brand-show-page {
+    width: 100%;
+    min-width: 0;
+
+    padding-bottom: 32px;
+}
+
+
+/* ==========================================================================
+   HEADER
+   ========================================================================== */
+
+.rr-brand-show-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    gap: 18px;
+
+    margin-bottom: 16px;
+
+    padding: 18px 20px;
+
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+
+    background: #ffffff;
+}
+
+
+.rr-brand-show-header-main {
+    min-width: 0;
+
+    display: flex;
+    align-items: center;
+
+    gap: 13px;
+}
+
+
+.rr-brand-show-back {
+    width: 38px;
+    height: 38px;
+
+    flex: 0 0 38px;
+
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    padding: 0;
+
+    border: 1px solid #dbe3ec;
+    border-radius: 7px;
+
+    background: #ffffff;
+
+    color: #475569;
+
+    cursor: pointer;
+
+    transition:
+        background .15s ease,
+        border-color .15s ease,
+        color .15s ease,
+        transform .12s ease;
+}
+
+
+.rr-brand-show-back i {
+    font-size: 16px;
+}
+
+
+.rr-brand-show-back:hover {
+    border-color: #bfdbfe;
+
+    background: #eff6ff;
+
+    color: #2563eb;
+
+    transform: translateX(-1px);
+}
+
+
+.rr-brand-show-avatar {
+    width: 52px;
+    height: 52px;
+
+    flex: 0 0 52px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 11px;
+
+    background: #eff6ff;
+
+    color: #1d4ed8;
+
+    font-size: 16px;
+    font-weight: 900;
+}
+
+
+.rr-brand-show-identity {
+    min-width: 0;
+}
+
+
+.rr-brand-show-eyebrow {
+    display: block;
+
+    margin-bottom: 3px;
+
+    color: #64748b;
+
+    font-size: 11px;
+    font-weight: 700;
+
+    letter-spacing: .45px;
+    text-transform: uppercase;
+}
+
+
+.rr-brand-show-title-line {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+
+    gap: 10px;
+}
+
+
+.rr-brand-show-title-line h1 {
+    margin: 0;
+
+    color: #0f172a;
+
+    font-size: 23px;
+    font-weight: 800;
+
+    line-height: 1.2;
+}
+
+
+.rr-brand-show-subline {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+
+    gap: 10px;
+
+    margin-top: 6px;
+}
+
+
+.rr-brand-show-subline>span {
+    display: inline-flex;
+    align-items: center;
+
+    gap: 5px;
+
+    color: #64748b;
+
+    font-size: 12px;
+    font-weight: 600;
+}
+
+
+.rr-brand-show-subline i {
+    color: #94a3b8;
+
+    font-size: 12px;
+}
+
+
+.rr-brand-show-header-actions {
+    display: flex;
+    align-items: center;
+
+    gap: 8px;
+
+    flex-shrink: 0;
+}
+
+
+.rr-brand-show-secondary-btn {
+    min-height: 38px;
+
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    gap: 7px;
+
+    padding: 0 13px;
+
+    border: 1px solid #cbd5e1;
+    border-radius: 7px;
+
+    background: #ffffff;
+
+    color: #334155;
+
+    font-size: 12px;
+    font-weight: 700;
+
+    cursor: pointer;
+
+    transition:
+        background .15s ease,
+        border-color .15s ease,
+        color .15s ease;
+}
+
+
+.rr-brand-show-secondary-btn:hover {
+    border-color: #94a3b8;
+
+    background: #f8fafc;
+
+    color: #0f172a;
+}
+
+
+/* ==========================================================================
+   SUMMARY
+   ========================================================================== */
+
+.rr-brand-show-summary {
+    display: grid;
+
+    grid-template-columns:
+        repeat(4,
+            minmax(0, 1fr));
+
+    gap: 11px;
+
+    margin-bottom: 16px;
+}
+
+
+.rr-brand-show-stat {
+    min-width: 0;
+
+    display: flex;
+    align-items: center;
+
+    gap: 11px;
+
+    padding: 14px 15px;
+
+    border: 1px solid #e2e8f0;
+    border-radius: 9px;
+
+    background: #ffffff;
+}
+
+
+.rr-brand-show-stat-icon {
+    width: 40px;
+    height: 40px;
+
+    flex: 0 0 40px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 8px;
+
+    background: #eff6ff;
+
+    color: #2563eb;
+}
+
+
+.rr-brand-show-stat-icon i {
+    font-size: 17px;
+}
+
+
+.rr-brand-show-stat>div:last-child {
+    min-width: 0;
+
+    display: flex;
+    flex-direction: column;
+}
+
+
+.rr-brand-show-stat span {
+    color: #64748b;
+
+    font-size: 11px;
+    font-weight: 600;
+}
+
+
+.rr-brand-show-stat strong {
+    margin-top: 2px;
+
+    overflow: hidden;
+
+    color: #0f172a;
+
+    font-size: 18px;
+    font-weight: 800;
+
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+
+.rr-brand-show-stat.success .rr-brand-show-stat-icon {
+    background: #ecfdf5;
+
+    color: #059669;
+}
+
+
+.rr-brand-show-stat.muted .rr-brand-show-stat-icon {
+    background: #f1f5f9;
+
+    color: #64748b;
+}
+
+
+/* ==========================================================================
+   DETAILS GRID
+   ========================================================================== */
+
+.rr-brand-show-grid {
+    display: grid;
+
+    grid-template-columns:
+        repeat(2,
+            minmax(0, 1fr));
+
+    gap: 14px;
+
+    margin-bottom: 16px;
+}
+
+
+.rr-brand-show-card {
+    overflow: hidden;
+
+    border: 1px solid #e2e8f0;
+    border-radius: 9px;
+
+    background: #ffffff;
+}
+
+
+.rr-brand-show-card-wide {
+    grid-column: span 2;
+}
+
+
+.rr-brand-show-card-header {
+    min-height: 48px;
+
+    display: flex;
+    align-items: center;
+
+    gap: 9px;
+
+    padding: 10px 13px;
+
+    border-bottom: 1px solid #e2e8f0;
+
+    background: #f8fafc;
+}
+
+
+.rr-brand-show-card-header>div {
+    width: 32px;
+    height: 32px;
+
+    flex: 0 0 32px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 7px;
+
+    background: #eff6ff;
+
+    color: #2563eb;
+}
+
+
+.rr-brand-show-card-header i {
+    font-size: 14px;
+}
+
+
+.rr-brand-show-card-header strong {
+    color: #0f172a;
+
+    font-size: 13px;
+    font-weight: 800;
+}
+
+
+.rr-brand-show-card-body {
+    padding: 13px 15px;
+}
+
+
+/* ==========================================================================
+   INFO ROWS
+   ========================================================================== */
+
+.rr-brand-show-info-row {
+    min-height: 38px;
+
+    display: grid;
+
+    grid-template-columns:
+        minmax(130px, .8fr) minmax(0, 1.4fr);
+
+    align-items: center;
+
+    gap: 14px;
+
+    padding: 7px 0;
+
+    border-bottom: 1px solid #f1f5f9;
+}
+
+
+.rr-brand-show-info-row:last-child {
+    border-bottom: 0;
+}
+
+
+.rr-brand-show-info-row>span {
+    color: #64748b;
+
+    font-size: 11px;
+    font-weight: 600;
+}
+
+
+.rr-brand-show-info-row>strong {
+    overflow-wrap: anywhere;
+
+    color: #334155;
+
+    font-size: 12px;
+    font-weight: 800;
+
+    text-align: right;
+}
+
+
+/* ==========================================================================
+   DESCRIPTION
+   ========================================================================== */
+
+.rr-brand-show-description {
+    margin: 0;
+
+    color: #475569;
+
+    font-size: 13px;
+    line-height: 1.7;
+
+    white-space: pre-wrap;
+}
+
+
+.rr-brand-show-empty-text {
+    min-height: 80px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    gap: 7px;
+
+    color: #94a3b8;
+
+    font-size: 12px;
+}
+
+
+.rr-brand-show-empty-text i {
+    font-size: 14px;
+}
+
+
+/* ==========================================================================
+   AUDIT GRID
+   ========================================================================== */
+
+.rr-brand-show-audit-grid {
+    display: grid;
+
+    grid-template-columns:
+        repeat(2,
+            minmax(0, 1fr));
+
+    gap: 0 30px;
+}
+
+
+/* ==========================================================================
+   PRODUCTS BANNER
+   ========================================================================== */
+
+.rr-brand-show-products-banner {
+    display: flex;
+    align-items: center;
+
+    gap: 13px;
+
+    padding: 15px 16px;
+
+    border: 1px solid #bfdbfe;
+    border-radius: 10px;
+
+    background:
+        linear-gradient(135deg,
+            #eff6ff,
+            #ffffff);
+}
+
+
+.rr-brand-show-products-banner-icon {
+    width: 44px;
+    height: 44px;
+
+    flex: 0 0 44px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 9px;
+
+    background: #dbeafe;
+
+    color: #2563eb;
+}
+
+
+.rr-brand-show-products-banner-icon i {
+    font-size: 19px;
+}
+
+
+.rr-brand-show-products-banner-content {
+    min-width: 0;
+    flex: 1;
+
+    display: flex;
+    flex-direction: column;
+}
+
+
+.rr-brand-show-products-banner-content>span {
+    color: #64748b;
+
+    font-size: 10px;
+    font-weight: 700;
+
+    letter-spacing: .35px;
+    text-transform: uppercase;
+}
+
+
+.rr-brand-show-products-banner-content strong {
+    margin-top: 2px;
+
+    color: #0f172a;
+
+    font-size: 14px;
+    font-weight: 800;
+}
+
+
+.rr-brand-show-products-banner-content small {
+    margin-top: 2px;
+
+    color: #64748b;
+
+    font-size: 11px;
+    line-height: 1.4;
+}
+
+
+.rr-brand-show-products-btn {
+    min-height: 38px;
+
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    gap: 7px;
+
+    flex-shrink: 0;
+
+    padding: 0 13px;
+
+    border: 1px solid #2563eb;
+    border-radius: 7px;
+
+    background: #2563eb;
+
+    color: #ffffff;
+
+    font-size: 12px;
+    font-weight: 700;
+
+    cursor: pointer;
+
+    transition:
+        background .15s ease,
+        border-color .15s ease,
+        box-shadow .15s ease,
+        transform .12s ease;
+}
+
+
+.rr-brand-show-products-btn:hover {
+    border-color: #1d4ed8;
+
+    background: #1d4ed8;
+
+    box-shadow:
+        0 4px 10px rgba(37, 99, 235, .16);
+
+    transform: translateY(-1px);
+}
+
+
+/* ==========================================================================
+   RESPONSIVE
+   ========================================================================== */
+
+@media (max-width: 1100px) {
+
+    .rr-brand-show-summary {
+        grid-template-columns:
+            repeat(2,
+                minmax(0, 1fr));
+    }
+}
+
+
+@media (max-width: 900px) {
+
+    .rr-brand-show-header {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+
+    .rr-brand-show-header-actions {
+        justify-content: flex-end;
+    }
+}
+
+
+@media (max-width: 767px) {
+
+    .rr-brand-show-header {
+        padding: 15px;
+    }
+
+
+    .rr-brand-show-header-main {
+        align-items: flex-start;
+    }
+
+
+    .rr-brand-show-header-actions {
+        display: grid;
+
+        grid-template-columns:
+            repeat(2,
+                minmax(0, 1fr));
+    }
+
+
+    .rr-brand-show-header-actions>* {
+        width: 100%;
+    }
+
+
+    .rr-brand-show-summary {
+        grid-template-columns: 1fr;
+    }
+
+
+    .rr-brand-show-grid {
+        grid-template-columns: 1fr;
+    }
+
+
+    .rr-brand-show-card-wide {
+        grid-column: span 1;
+    }
+
+
+    .rr-brand-show-audit-grid {
+        grid-template-columns: 1fr;
+    }
+
+
+    .rr-brand-show-info-row {
+        grid-template-columns: 1fr;
+
+        gap: 3px;
+    }
+
+
+    .rr-brand-show-info-row>strong {
+        text-align: left;
+    }
+
+
+    .rr-brand-show-products-banner {
+        align-items: flex-start;
+        flex-wrap: wrap;
+    }
+
+
+    .rr-brand-show-products-btn {
+        width: 100%;
+
+        margin-top: 4px;
+    }
+}
