@@ -66,6 +66,7 @@ class CustomerController extends Controller implements HasMiddleware
                 only: [
                     'edit',
                     'update',
+                    'toggleStatus',
                 ]
             ),
 
@@ -2533,5 +2534,142 @@ class CustomerController extends Controller implements HasMiddleware
 
                 ->all(),
         ];
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | Toggle Customer Status
+    |--------------------------------------------------------------------------
+    */
+
+    public function toggleStatus(
+        Customer $customer
+    ) {
+
+        /*
+        |--------------------------------------------------------------------------
+        | Resolve Active Context
+        |--------------------------------------------------------------------------
+        */
+
+        $companyId =
+            (int) session(
+                'active_company_id'
+            );
+
+
+        $storeId =
+            (int) session(
+                'active_store_id'
+            );
+
+
+        if (
+            !$companyId ||
+            !$storeId
+        ) {
+
+            abort(
+                403,
+                'No active company or branch selected.'
+            );
+        }
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Company Isolation
+        |--------------------------------------------------------------------------
+        */
+
+        if (
+            (int) $customer->company_id !==
+            $companyId
+        ) {
+
+            abort(
+                404
+            );
+        }
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Branch Access
+        |--------------------------------------------------------------------------
+        */
+
+        $belongsToBranch =
+            $customer
+            ->stores()
+            ->where(
+                'stores.id',
+                $storeId
+            )
+            ->exists();
+
+
+        if (
+            !$belongsToBranch
+        ) {
+
+            abort(
+                404
+            );
+        }
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Protect Walk-in Customer
+        |--------------------------------------------------------------------------
+        */
+
+        if (
+            $customer->is_system_customer
+        ) {
+
+            return AppResponse::error(
+                'The Walk-in Customer is a protected system customer and cannot be deactivated.'
+            );
+        }
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Toggle
+        |--------------------------------------------------------------------------
+        */
+
+        $newStatus =
+            !$customer->status;
+
+
+        try {
+
+            $customer->update([
+                'status' =>
+                $newStatus,
+            ]);
+        } catch (
+            \Throwable $exception
+        ) {
+
+            report(
+                $exception
+            );
+
+
+            return AppResponse::error(
+                'Customer status could not be updated. Please try again.'
+            );
+        }
+
+
+        return AppResponse::success(
+            $newStatus
+                ? 'Customer activated successfully.'
+                : 'Customer deactivated successfully.'
+        );
     }
 }

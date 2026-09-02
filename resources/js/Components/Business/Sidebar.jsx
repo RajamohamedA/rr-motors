@@ -4,6 +4,7 @@ import {
 } from '@inertiajs/react';
 
 import {
+    useEffect,
     useMemo,
     useState,
 } from 'react';
@@ -23,10 +24,19 @@ export default function BusinessSidebar({
     |--------------------------------------------------------------------------
     */
 
+    const page =
+        usePage();
+
+
     const {
         auth,
         business,
-    } = usePage().props;
+    } = page.props;
+
+
+    const currentUrl =
+        page.url
+        ?? '/';
 
 
     const user =
@@ -112,49 +122,262 @@ export default function BusinessSidebar({
     |--------------------------------------------------------------------------
     */
 
+    const getGroupFromUrl =
+        url => {
+
+            const path =
+                String(
+                    url
+                    ?? ''
+                )
+                    .split(
+                        '?'
+                    )[0];
+
+
+            if (
+                path.startsWith(
+                    '/company/'
+                )
+                ||
+                path.startsWith(
+                    '/companies'
+                )
+                ||
+                path.startsWith(
+                    '/stores'
+                )
+            ) {
+
+                return 'administration';
+            }
+
+
+            if (
+                path.startsWith(
+                    '/customers'
+                )
+                ||
+                path.startsWith(
+                    '/suppliers'
+                )
+                ||
+                path.startsWith(
+                    '/products'
+                )
+                ||
+                path.startsWith(
+                    '/categories'
+                )
+                ||
+                path.startsWith(
+                    '/brands'
+                )
+                ||
+                path.startsWith(
+                    '/units'
+                )
+                ||
+                path.startsWith(
+                    '/godowns'
+                )
+            ) {
+
+                return 'masters';
+            }
+
+
+            if (
+                path.startsWith(
+                    '/purchases'
+                )
+                ||
+                path.startsWith(
+                    '/purchase-returns'
+                )
+            ) {
+
+                return 'purchase';
+            }
+
+
+            if (
+                path.startsWith(
+                    '/sales'
+                )
+                ||
+                path.startsWith(
+                    '/sales-returns'
+                )
+                ||
+                path.startsWith(
+                    '/quotations'
+                )
+            ) {
+
+                return 'sales';
+            }
+
+
+            if (
+                path.startsWith(
+                    '/inventory'
+                )
+                ||
+                path.startsWith(
+                    '/stock-ledgers'
+                )
+                ||
+                path.startsWith(
+                    '/stock-adjustments'
+                )
+                ||
+                path.startsWith(
+                    '/stock-transfers'
+                )
+            ) {
+
+                return 'inventory';
+            }
+
+
+            if (
+                path.startsWith(
+                    '/customer-payments'
+                )
+                ||
+                path.startsWith(
+                    '/customer-ledger'
+                )
+                ||
+                path.startsWith(
+                    '/accounts'
+                )
+            ) {
+
+                return 'accounts';
+            }
+
+
+            if (
+                path.startsWith(
+                    '/reports'
+                )
+                ||
+                path.startsWith(
+                    '/purchase-reports'
+                )
+            ) {
+
+                return 'reports';
+            }
+
+
+            return null;
+        };
+
+
+    const createGroupState =
+        activeGroup => ({
+
+            masters:
+                activeGroup ===
+                'masters',
+
+            purchase:
+                activeGroup ===
+                'purchase',
+
+            sales:
+                activeGroup ===
+                'sales',
+
+            inventory:
+                activeGroup ===
+                'inventory',
+
+            accounts:
+                activeGroup ===
+                'accounts',
+
+            reports:
+                activeGroup ===
+                'reports',
+
+            administration:
+                activeGroup ===
+                'administration',
+        });
+
+
     const [
         openGroups,
         setOpenGroups,
-    ] = useState({
-        masters:
-            false,
+    ] =
+        useState(
+            () =>
+                createGroupState(
+                    getGroupFromUrl(
+                        currentUrl
+                    )
+                )
+        );
 
-        purchase:
-            false,
 
-        sales:
-            false,
+    useEffect(
+        () => {
 
-        inventory:
-            false,
+            const activeGroup =
+                getGroupFromUrl(
+                    currentUrl
+                );
 
-        accounts:
-            false,
 
-        reports:
-            false,
+            if (
+                !activeGroup
+            ) {
 
-        administration:
-            true,
-    });
+                return;
+            }
+
+
+            setOpenGroups(
+                createGroupState(
+                    activeGroup
+                )
+            );
+
+        },
+        [
+            currentUrl,
+        ]
+    );
 
 
     const toggleGroup =
-        (
-            group
-        ) => {
+        group => {
 
             setOpenGroups(
-                (
-                    current
-                ) => ({
+                current => {
 
-                    ...current,
+                    const willOpen =
+                        !current[group];
 
-                    [group]:
-                        !current[group],
 
-                })
+                    if (
+                        !willOpen
+                    ) {
+
+                        return createGroupState(
+                            null
+                        );
+                    }
+
+
+                    return createGroupState(
+                        group
+                    );
+                }
             );
         };
 

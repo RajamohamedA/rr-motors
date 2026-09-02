@@ -280,6 +280,30 @@ export default function Index({
 
     /*
     |--------------------------------------------------------------------------
+    | Status Confirmation
+    |--------------------------------------------------------------------------
+    */
+
+    const [
+        statusSupplier,
+        setStatusSupplier,
+    ] =
+        useState(
+            null
+        );
+
+
+    const [
+        statusProcessing,
+        setStatusProcessing,
+    ] =
+        useState(
+            false
+        );
+
+
+    /*
+    |--------------------------------------------------------------------------
     | Actions
     |--------------------------------------------------------------------------
     */
@@ -347,6 +371,113 @@ export default function Index({
                         () => {
 
                             setRemoveProcessing(
+                                false
+                            );
+                        },
+                }
+            );
+        };
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Activate / Deactivate
+    |--------------------------------------------------------------------------
+    */
+
+    const requestStatusChange =
+        supplier => {
+
+            if (
+                !can(
+                    'supplier.edit'
+                )
+            ) {
+
+                return;
+            }
+
+
+            setStatusSupplier(
+                supplier
+            );
+        };
+
+
+    const closeStatusChange =
+        () => {
+
+            if (
+                statusProcessing
+            ) {
+
+                return;
+            }
+
+
+            setStatusSupplier(
+                null
+            );
+        };
+
+
+    const confirmStatusChange =
+        () => {
+
+            if (
+                !statusSupplier ||
+                statusProcessing
+            ) {
+
+                return;
+            }
+
+
+            setStatusProcessing(
+                true
+            );
+
+
+            router.patch(
+                `/suppliers/${statusSupplier.id}/toggle-status`,
+                {},
+                {
+                    preserveScroll:
+                        true,
+
+                    onSuccess:
+                        () => {
+
+                            setStatusSupplier(
+                                null
+                            );
+
+
+                            window.scrollTo({
+                                top:
+                                    0,
+
+                                behavior:
+                                    'smooth',
+                            });
+                        },
+
+                    onError:
+                        () => {
+
+                            window.scrollTo({
+                                top:
+                                    0,
+
+                                behavior:
+                                    'smooth',
+                            });
+                        },
+
+                    onFinish:
+                        () => {
+
+                            setStatusProcessing(
                                 false
                             );
                         },
@@ -767,6 +898,12 @@ export default function Index({
                                                                 supplier
                                                             )
                                                     }
+                                                    onStatusChange={
+                                                        () =>
+                                                            requestStatusChange(
+                                                                supplier
+                                                            )
+                                                    }
                                                 />
 
                                             )
@@ -908,6 +1045,54 @@ export default function Index({
                     }
                 />
 
+
+                <ConfirmModal
+                    show={
+                        Boolean(
+                            statusSupplier
+                        )
+                    }
+                    title={
+                        statusSupplier?.status
+                            ? 'Deactivate Supplier?'
+                            : 'Activate Supplier?'
+                    }
+                    message={
+                        statusSupplier
+                            ? (
+                                statusSupplier.status
+                                    ? `${statusSupplier.supplier_name} will become inactive and should no longer be available for new purchase transactions.`
+                                    : `${statusSupplier.supplier_name} will become active and available for purchase transactions again.`
+                            )
+                            : ''
+                    }
+                    confirmText={
+                        statusSupplier?.status
+                            ? 'Deactivate Supplier'
+                            : 'Activate Supplier'
+                    }
+                    cancelText="Cancel"
+                    icon={
+                        statusSupplier?.status
+                            ? 'bi-pause-circle'
+                            : 'bi-play-circle'
+                    }
+                    variant={
+                        statusSupplier?.status
+                            ? 'danger'
+                            : 'primary'
+                    }
+                    processing={
+                        statusProcessing
+                    }
+                    onConfirm={
+                        confirmStatusChange
+                    }
+                    onCancel={
+                        closeStatusChange
+                    }
+                />
+
             </div>
 
         </BusinessLayout>
@@ -926,6 +1111,7 @@ function SupplierRow({
     can,
     onOpen,
     onRemove,
+    onStatusChange,
 }) {
 
     const clickable =
@@ -1183,6 +1369,43 @@ function SupplierRow({
                                 <i className="bi bi-pencil"></i>
 
                             </Link>
+
+                        )
+                    }
+
+
+                    {
+                        can(
+                            'supplier.edit'
+                        ) && (
+
+                            <button
+                                type="button"
+                                className={
+                                    `rr-supplier-action-btn ${supplier.status
+                                        ? 'deactivate'
+                                        : 'activate'
+                                    }`
+                                }
+                                title={
+                                    supplier.status
+                                        ? 'Deactivate supplier'
+                                        : 'Activate supplier'
+                                }
+                                onClick={
+                                    onStatusChange
+                                }
+                            >
+
+                                <i
+                                    className={
+                                        supplier.status
+                                            ? 'bi bi-pause-circle'
+                                            : 'bi bi-play-circle'
+                                    }
+                                ></i>
+
+                            </button>
 
                         )
                     }

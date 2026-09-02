@@ -22,15 +22,15 @@ use App\Models\Store;
 |
 | IMPORTANT:
 |
-| This file is already loaded from routes/web.php inside:
+| This file is loaded from routes/web.php inside:
 |
 | auth
 | verified
 | business.context
 |
-| So we do not repeat those middleware here.
+| Therefore we do not repeat those middleware here.
 |
-| Individual controllers continue to enforce their own permissions.
+| Individual controllers continue enforcing their own module permissions.
 |
 */
 
@@ -64,7 +64,9 @@ Route::resource(
 | Supplier - Lookup Routes
 |--------------------------------------------------------------------------
 |
-| These routes MUST be defined before:
+| IMPORTANT:
+|
+| These routes MUST be declared before:
 |
 | /suppliers/{supplier}
 |
@@ -73,7 +75,7 @@ Route::resource(
 | duplicate-lookup
 | gst-lookup
 |
-| as the {supplier} parameter.
+| as the {supplier} route parameter.
 |
 */
 
@@ -82,13 +84,6 @@ Route::resource(
 |--------------------------------------------------------------------------
 | Duplicate Supplier Lookup
 |--------------------------------------------------------------------------
-|
-| Checks the current company for an existing supplier using:
-|
-| GST Number
-| Phone
-| Email
-|
 */
 
 Route::post(
@@ -106,15 +101,6 @@ Route::post(
 |--------------------------------------------------------------------------
 | Supplier GST Lookup
 |--------------------------------------------------------------------------
-|
-| React
-|    ↓
-| SupplierController
-|    ↓
-| GstLookupService
-|    ↓
-| GstProviderInterface
-|
 */
 
 Route::post(
@@ -133,8 +119,8 @@ Route::post(
 | Attach Existing Supplier To Current Branch
 |--------------------------------------------------------------------------
 |
-| Supplier already exists inside the same company, but is not yet linked
-| to the active branch.
+| Supplier already exists in the company but is not linked to the active
+| branch.
 |
 | Only supplier_stores is updated.
 |
@@ -156,9 +142,14 @@ Route::post(
 | Remove Supplier From Current Branch
 |--------------------------------------------------------------------------
 |
-| This DOES NOT delete the supplier master.
+| This does NOT delete the supplier master.
 |
-| Only the supplier_stores relationship for the current branch is removed.
+| Only the relationship between:
+|
+| supplier
+| active branch
+|
+| is removed.
 |
 */
 
@@ -170,6 +161,23 @@ Route::delete(
     ]
 )->name(
     'suppliers.remove-from-branch'
+);
+
+
+/*
+|--------------------------------------------------------------------------
+| Supplier Activate / Deactivate
+|--------------------------------------------------------------------------
+*/
+
+Route::patch(
+    '/suppliers/{supplier}/toggle-status',
+    [
+        SupplierController::class,
+        'toggleStatus',
+    ]
+)->name(
+    'suppliers.toggle-status'
 );
 
 
@@ -190,16 +198,11 @@ Route::resource(
 | Customer - Lookup Routes
 |--------------------------------------------------------------------------
 |
-| These routes MUST be defined before:
+| IMPORTANT:
+|
+| These routes MUST be declared before:
 |
 | /customers/{customer}
-|
-| Otherwise Laravel may treat:
-|
-| duplicate-lookup
-| gst-lookup
-|
-| as the {customer} parameter.
 |
 */
 
@@ -208,13 +211,6 @@ Route::resource(
 |--------------------------------------------------------------------------
 | Duplicate Customer Lookup
 |--------------------------------------------------------------------------
-|
-| Checks current company for matching:
-|
-| GST
-| Mobile
-| Email
-|
 */
 
 Route::post(
@@ -232,15 +228,6 @@ Route::post(
 |--------------------------------------------------------------------------
 | Customer GST Lookup
 |--------------------------------------------------------------------------
-|
-| React
-|    ↓
-| CustomerController
-|    ↓
-| GstLookupService
-|    ↓
-| GstProviderInterface
-|
 */
 
 Route::post(
@@ -259,8 +246,8 @@ Route::post(
 | Attach Existing Customer To Current Branch
 |--------------------------------------------------------------------------
 |
-| The customer already exists in the same company but belongs to another
-| branch.
+| Customer already exists in the company but is not assigned to the
+| active branch.
 |
 | Only customer_stores is updated.
 |
@@ -282,13 +269,9 @@ Route::post(
 | Remove Customer From Current Branch
 |--------------------------------------------------------------------------
 |
-| Does NOT permanently delete the customer.
+| Does NOT permanently delete the customer master.
 |
-| Only removes:
-|
-| customer_stores
-|
-| current customer + current branch
+| Only removes the customer_stores relationship for the active branch.
 |
 */
 
@@ -300,6 +283,23 @@ Route::delete(
     ]
 )->name(
     'customers.remove-from-branch'
+);
+
+
+/*
+|--------------------------------------------------------------------------
+| Customer Activate / Deactivate
+|--------------------------------------------------------------------------
+*/
+
+Route::patch(
+    '/customers/{customer}/toggle-status',
+    [
+        CustomerController::class,
+        'toggleStatus',
+    ]
+)->name(
+    'customers.toggle-status'
 );
 
 
@@ -317,7 +317,100 @@ Route::resource(
 
 /*
 |--------------------------------------------------------------------------
-| Category
+| Category Related Products
+|--------------------------------------------------------------------------
+|
+| Category belongs to:
+|
+| active company
+| active branch
+|
+| Product list is also restricted to the same company + branch.
+|
+*/
+
+
+/*
+|--------------------------------------------------------------------------
+| Category Products
+|--------------------------------------------------------------------------
+*/
+
+Route::get(
+    '/categories/{category}/products',
+    [
+        CategoryController::class,
+        'products',
+    ]
+)->name(
+    'categories.products'
+);
+
+
+/*
+|--------------------------------------------------------------------------
+| Category Products CSV Export
+|--------------------------------------------------------------------------
+*/
+
+Route::get(
+    '/categories/{category}/products/export/csv',
+    [
+        CategoryController::class,
+        'exportProductsCsv',
+    ]
+)->name(
+    'categories.products.export.csv'
+);
+
+Route::get(
+    '/categories/{category}/products/print',
+    [
+        CategoryController::class,
+        'printProducts',
+    ]
+)->name(
+    'categories.products.print'
+);
+
+
+/*
+|--------------------------------------------------------------------------
+| Category Products PDF Export
+|--------------------------------------------------------------------------
+*/
+
+Route::get(
+    '/categories/{category}/products/export/pdf',
+    [
+        CategoryController::class,
+        'exportProductsPdf',
+    ]
+)->name(
+    'categories.products.export.pdf'
+);
+
+
+/*
+|--------------------------------------------------------------------------
+| Category Activate / Deactivate
+|--------------------------------------------------------------------------
+*/
+
+Route::patch(
+    '/categories/{category}/toggle-status',
+    [
+        CategoryController::class,
+        'toggleStatus',
+    ]
+)->name(
+    'categories.toggle-status'
+);
+
+
+/*
+|--------------------------------------------------------------------------
+| Category Resource
 |--------------------------------------------------------------------------
 */
 
@@ -386,6 +479,14 @@ Route::resource(
 |--------------------------------------------------------------------------
 | Product Search
 |--------------------------------------------------------------------------
+|
+| ProductController must enforce:
+|
+| active_company_id
+| active_store_id
+|
+| Do not trust company_id or store_id supplied from the browser.
+|
 */
 
 Route::get(
@@ -404,13 +505,20 @@ Route::get(
 | Get Stores For Company
 |--------------------------------------------------------------------------
 |
-| This helper is still available for modules that need branch loading.
+| This helper is still available for modules that genuinely need to load
+| branches for a company.
 |
 | IMPORTANT:
 |
-| Do not trust arbitrary company IDs in business write operations.
-| Controllers must continue using active_company_id and active_store_id
-| from the trusted business session.
+| Business write operations must never trust this route or an arbitrary
+| company ID sent by React.
+|
+| Controllers must use:
+|
+| session('active_company_id')
+| session('active_store_id')
+|
+| for trusted business context.
 |
 */
 

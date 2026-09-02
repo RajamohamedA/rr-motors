@@ -66,6 +66,7 @@ class SupplierController extends Controller implements HasMiddleware
                 only: [
                     'edit',
                     'update',
+                    'toggleStatus',
                 ]
             ),
 
@@ -2202,5 +2203,91 @@ class SupplierController extends Controller implements HasMiddleware
 
                 ->all(),
         ];
+    }
+    
+
+    public function toggleStatus(
+        Supplier $supplier
+    ) {
+        $companyId =
+            (int) session(
+                'active_company_id'
+            );
+
+        $storeId =
+            (int) session(
+                'active_store_id'
+            );
+
+
+        if (
+            !$companyId ||
+            !$storeId
+        ) {
+            abort(
+                403,
+                'No active company or branch selected.'
+            );
+        }
+
+
+        if (
+            (int) $supplier->company_id !==
+            $companyId
+        ) {
+            abort(
+                404
+            );
+        }
+
+
+        $belongsToBranch =
+            $supplier
+            ->stores()
+            ->where(
+                'stores.id',
+                $storeId
+            )
+            ->exists();
+
+
+        if (
+            !$belongsToBranch
+        ) {
+            abort(
+                404
+            );
+        }
+
+
+        $newStatus =
+            !$supplier->status;
+
+
+        try {
+
+            $supplier->update([
+                'status' =>
+                $newStatus,
+            ]);
+        } catch (
+            \Throwable $exception
+        ) {
+
+            report(
+                $exception
+            );
+
+            return AppResponse::error(
+                'Supplier status could not be updated. Please try again.'
+            );
+        }
+
+
+        return AppResponse::success(
+            $newStatus
+                ? 'Supplier activated successfully.'
+                : 'Supplier deactivated successfully.'
+        );
     }
 }

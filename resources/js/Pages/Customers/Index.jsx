@@ -147,6 +147,30 @@ export default function Index({
 
     /*
     |--------------------------------------------------------------------------
+    | Confirm Status Change
+    |--------------------------------------------------------------------------
+    */
+
+    const [
+        statusCustomer,
+        setStatusCustomer,
+    ] =
+        useState(
+            null
+        );
+
+
+    const [
+        statusProcessing,
+        setStatusProcessing,
+    ] =
+        useState(
+            false
+        );
+
+
+    /*
+    |--------------------------------------------------------------------------
     | Search
     |--------------------------------------------------------------------------
     */
@@ -419,6 +443,121 @@ export default function Index({
                         () => {
 
                             setRemoveProcessing(
+                                false
+                            );
+                        },
+                }
+            );
+        };
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Activate / Deactivate
+    |--------------------------------------------------------------------------
+    */
+
+    const askStatusChange =
+        customer => {
+
+            if (
+                customer.is_system_customer
+            ) {
+
+                return;
+            }
+
+
+            if (
+                !can(
+                    'customer.edit'
+                )
+            ) {
+
+                return;
+            }
+
+
+            setStatusCustomer(
+                customer
+            );
+        };
+
+
+    const closeStatusChange =
+        () => {
+
+            if (
+                statusProcessing
+            ) {
+
+                return;
+            }
+
+
+            setStatusCustomer(
+                null
+            );
+        };
+
+
+    const confirmStatusChange =
+        () => {
+
+            if (
+                !statusCustomer ||
+                statusProcessing
+            ) {
+
+                return;
+            }
+
+
+            setStatusProcessing(
+                true
+            );
+
+
+            router.patch(
+                `/customers/${statusCustomer.id}/toggle-status`,
+                {},
+                {
+                    preserveScroll:
+                        true,
+
+                    onSuccess:
+                        () => {
+
+                            setStatusCustomer(
+                                null
+                            );
+
+
+                            window.scrollTo({
+                                top:
+                                    0,
+
+                                behavior:
+                                    'smooth',
+                            });
+                        },
+
+                    onError:
+                        () => {
+
+                            window.scrollTo({
+                                top:
+                                    0,
+
+                                behavior:
+                                    'smooth',
+                            });
+                        },
+
+                    onFinish:
+                        () => {
+
+                            setStatusProcessing(
                                 false
                             );
                         },
@@ -870,6 +1009,12 @@ export default function Index({
                                                                     customer
                                                                 )
                                                         }
+                                                        onStatusChange={
+                                                            () =>
+                                                                askStatusChange(
+                                                                    customer
+                                                                )
+                                                        }
                                                     />
 
                                                 )
@@ -1010,6 +1155,54 @@ export default function Index({
                     }
                 />
 
+
+                <ConfirmModal
+                    show={
+                        Boolean(
+                            statusCustomer
+                        )
+                    }
+                    title={
+                        statusCustomer?.status
+                            ? 'Deactivate Customer?'
+                            : 'Activate Customer?'
+                    }
+                    message={
+                        statusCustomer
+                            ? (
+                                statusCustomer.status
+                                    ? `${statusCustomer.customer_name} will become inactive and should no longer be available for new transactions.`
+                                    : `${statusCustomer.customer_name} will become active and available for transactions again.`
+                            )
+                            : ''
+                    }
+                    confirmText={
+                        statusCustomer?.status
+                            ? 'Deactivate Customer'
+                            : 'Activate Customer'
+                    }
+                    cancelText="Cancel"
+                    icon={
+                        statusCustomer?.status
+                            ? 'bi-pause-circle'
+                            : 'bi-play-circle'
+                    }
+                    variant={
+                        statusCustomer?.status
+                            ? 'danger'
+                            : 'primary'
+                    }
+                    processing={
+                        statusProcessing
+                    }
+                    onConfirm={
+                        confirmStatusChange
+                    }
+                    onCancel={
+                        closeStatusChange
+                    }
+                />
+
             </div>
 
         </BusinessLayout>
@@ -1028,6 +1221,7 @@ function CustomerRow({
     can,
     onOpen,
     onRemove,
+    onStatusChange,
 }) {
 
     const clickable =
@@ -1322,6 +1516,46 @@ function CustomerRow({
                                 <i className="bi bi-pencil"></i>
 
                             </Link>
+
+                        )
+                    }
+
+
+                    {
+                        can(
+                            'customer.edit'
+                        )
+                        &&
+                        !customer.is_system_customer
+                        && (
+
+                            <button
+                                type="button"
+                                className={
+                                    `rr-customer-action-btn ${customer.status
+                                        ? 'deactivate'
+                                        : 'activate'
+                                    }`
+                                }
+                                title={
+                                    customer.status
+                                        ? 'Deactivate customer'
+                                        : 'Activate customer'
+                                }
+                                onClick={
+                                    onStatusChange
+                                }
+                            >
+
+                                <i
+                                    className={
+                                        customer.status
+                                            ? 'bi bi-pause-circle'
+                                            : 'bi bi-play-circle'
+                                    }
+                                ></i>
+
+                            </button>
 
                         )
                     }
