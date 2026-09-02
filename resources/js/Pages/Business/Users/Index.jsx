@@ -3,6 +3,7 @@ import {
     Link,
     router,
     useForm,
+    usePage,
 } from '@inertiajs/react';
 
 import BusinessLayout
@@ -19,6 +20,27 @@ export default function UsersIndex({
     roles,
     filters,
 }) {
+
+    /*
+    |--------------------------------------------------------------------------
+    | Current User
+    |--------------------------------------------------------------------------
+    */
+
+    const {
+        auth,
+    } = usePage().props;
+
+
+    const currentUser =
+        auth?.user;
+
+
+    const isSuperAdmin =
+        Boolean(
+            currentUser?.is_super_user
+        );
+
 
     /*
     |--------------------------------------------------------------------------
@@ -294,9 +316,17 @@ export default function UsersIndex({
 
             if (
                 !managedUser?.id ||
-                managedUser?.is_current_user ||
+                managedUser?.is_current_user
+            ) {
+                return;
+            }
+
+
+            if (
                 managedUser?.role ===
-                'Company Admin'
+                    'Company Admin'
+                &&
+                !isSuperAdmin
             ) {
                 return;
             }
@@ -777,6 +807,10 @@ export default function UsersIndex({
                                                             onStatusChange={
                                                                 changeUserStatus
                                                             }
+
+                                                            isSuperAdmin={
+                                                                isSuperAdmin
+                                                            }
                                                         />
 
                                                     )
@@ -948,6 +982,7 @@ function SummaryItem({
 function UserRow({
     user,
     onStatusChange,
+    isSuperAdmin,
 }) {
 
     const isCompanyAdmin =
@@ -970,7 +1005,11 @@ function UserRow({
 
     const roleTypeLabel =
         isCompanyAdmin
-            ? 'Protected'
+            ? (
+                isSuperAdmin
+                    ? 'Company Admin'
+                    : 'Protected'
+            )
             : roleType === 'system'
                 ? 'System'
                 : 'Company';
@@ -1208,14 +1247,22 @@ function UserRow({
 
 
                     {
-                        !isCompanyAdmin && (
+                        (
+                            !isCompanyAdmin
+                            ||
+                            isSuperAdmin
+                        ) && (
 
                             <Link
                                 href={
                                     `/company/users/${user.id}/edit`
                                 }
                                 className="rr-users-action-btn edit"
-                                title="Edit user"
+                                title={
+                                    isCompanyAdmin
+                                        ? 'Edit Company Admin'
+                                        : 'Edit user'
+                                }
                             >
 
                                 <i className="bi bi-pencil-square"></i>
@@ -1229,8 +1276,13 @@ function UserRow({
 
 
                     {
-                        !user?.is_current_user &&
-                        !isCompanyAdmin && (
+                        !user?.is_current_user
+                        &&
+                        (
+                            !isCompanyAdmin
+                            ||
+                            isSuperAdmin
+                        ) && (
 
                             <button
                                 type="button"
@@ -1246,6 +1298,11 @@ function UserRow({
                                             user,
                                             !user.status
                                         )
+                                }
+                                title={
+                                    user?.status
+                                        ? 'Deactivate user'
+                                        : 'Activate user'
                                 }
                             >
 

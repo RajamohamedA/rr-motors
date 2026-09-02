@@ -957,6 +957,69 @@ class RoleController extends Controller
         User $user
     ): Company {
 
+        /*
+        |--------------------------------------------------------------------------
+        | Super Admin
+        |--------------------------------------------------------------------------
+        */
+
+        if (
+            (bool) $user->is_super_user
+        ) {
+
+            $companyId =
+                (int) session(
+                    'active_company_id'
+                );
+
+
+            if (
+                !$companyId
+            ) {
+
+                abort(
+                    403,
+                    'No active company is selected.'
+                );
+            }
+
+
+            $company =
+                Company::query()
+
+                ->whereKey(
+                    $companyId
+                )
+
+                ->where(
+                    'status',
+                    true
+                )
+
+                ->first();
+
+
+            if (
+                !$company
+            ) {
+
+                abort(
+                    403,
+                    'The selected company is inactive or unavailable.'
+                );
+            }
+
+
+            return $company;
+        }
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Company Admin
+        |--------------------------------------------------------------------------
+        */
+
         if (
             !$user->company_id
         ) {
@@ -1020,7 +1083,7 @@ class RoleController extends Controller
 
         /*
         |--------------------------------------------------------------------------
-        | Super Admin Uses Super Admin Portal
+        | Super Admin
         |--------------------------------------------------------------------------
         */
 
@@ -1028,16 +1091,30 @@ class RoleController extends Controller
             (bool) $user->is_super_user
         ) {
 
-            abort(
-                403,
-                'Use the Super Admin role management area.'
-            );
+            $companyId =
+                (int) session(
+                    'active_company_id'
+                );
+
+
+            if (
+                !$companyId
+            ) {
+
+                abort(
+                    403,
+                    'No active company is selected.'
+                );
+            }
+
+
+            return;
         }
 
 
         /*
         |--------------------------------------------------------------------------
-        | Company Admin Only
+        | Company Admin
         |--------------------------------------------------------------------------
         */
 
@@ -1090,10 +1167,42 @@ class RoleController extends Controller
         string $permission
     ): bool {
 
+        $currentUser =
+            auth()->user();
+
+
         /*
         |--------------------------------------------------------------------------
-        | Block Entire Administrative Modules
+        | Super Admin
         |--------------------------------------------------------------------------
+        |
+        | Super Admin may assign any normal web permission while working
+        | inside a selected company context.
+        |
+        */
+
+        if (
+            (bool) (
+                $currentUser?->is_super_user
+                ?? false
+            )
+        ) {
+
+            return str_starts_with(
+                $permission,
+                'super-admin.'
+            );
+        }
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Company Admin
+        |--------------------------------------------------------------------------
+        |
+        | Company-created operational roles cannot receive company/user/role
+        | administration permissions.
+        |
         */
 
         $blockedPrefixes = [
@@ -1120,15 +1229,6 @@ class RoleController extends Controller
             }
         }
 
-
-        /*
-        |--------------------------------------------------------------------------
-        | Block Branch Management Actions
-        |--------------------------------------------------------------------------
-        |
-        | store.view may remain available for operational users if needed.
-        |
-        */
 
         $blockedPermissions = [
 

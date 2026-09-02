@@ -405,7 +405,9 @@ export default function BusinessSidebar({
                     key: 'administration',
                     label: 'Company',
                     icon: 'bi-buildings',
-                    visible: isCompanyAdmin,
+                    visible:
+                        isSuperAdmin ||
+                        isCompanyAdmin,
                     children: [
                         {
                             label: 'Company Profile',

@@ -861,6 +861,8 @@ class UserController extends Controller
             $user->hasRole(
                 'Company Admin'
             )
+            &&
+            !(bool) $currentUser->is_super_user
         ) {
 
             abort(
@@ -947,6 +949,8 @@ class UserController extends Controller
             $user->hasRole(
                 'Company Admin'
             )
+            &&
+            !(bool) $currentUser->is_super_user
         ) {
 
             return AppResponse::error(
@@ -1217,6 +1221,8 @@ class UserController extends Controller
             $user->hasRole(
                 'Company Admin'
             )
+            &&
+            !(bool) $currentUser->is_super_user
         ) {
 
             return AppResponse::error(
@@ -1270,6 +1276,69 @@ class UserController extends Controller
     private function getCompany(
         User $user
     ): Company {
+
+        /*
+        |--------------------------------------------------------------------------
+        | Super Admin
+        |--------------------------------------------------------------------------
+        */
+
+        if (
+            (bool) $user->is_super_user
+        ) {
+
+            $companyId =
+                (int) session(
+                    'active_company_id'
+                );
+
+
+            if (
+                !$companyId
+            ) {
+
+                abort(
+                    403,
+                    'No active company is selected.'
+                );
+            }
+
+
+            $company =
+                Company::query()
+
+                ->whereKey(
+                    $companyId
+                )
+
+                ->where(
+                    'status',
+                    true
+                )
+
+                ->first();
+
+
+            if (
+                !$company
+            ) {
+
+                abort(
+                    403,
+                    'The selected company is inactive or unavailable.'
+                );
+            }
+
+
+            return $company;
+        }
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Company Admin
+        |--------------------------------------------------------------------------
+        */
 
         if (
             !$user->company_id
@@ -1334,7 +1403,7 @@ class UserController extends Controller
 
         /*
         |--------------------------------------------------------------------------
-        | Super Admin Uses Super Admin Area
+        | Super Admin
         |--------------------------------------------------------------------------
         */
 
@@ -1342,16 +1411,30 @@ class UserController extends Controller
             (bool) $user->is_super_user
         ) {
 
-            abort(
-                403,
-                'Use the Super Admin user management area.'
-            );
+            $companyId =
+                (int) session(
+                    'active_company_id'
+                );
+
+
+            if (
+                !$companyId
+            ) {
+
+                abort(
+                    403,
+                    'No active company is selected.'
+                );
+            }
+
+
+            return;
         }
 
 
         /*
         |--------------------------------------------------------------------------
-        | Company Admin Only
+        | Company Admin
         |--------------------------------------------------------------------------
         */
 
@@ -1410,29 +1493,136 @@ class UserController extends Controller
         Company $company
     ): array {
 
-        $protectedRoles = [
-            'Super Admin',
-            'Company Admin',
-        ];
+        $currentUser =
+            auth()->user();
+
+
+        $isSuperAdmin =
+            (bool) (
+                $currentUser?->is_super_user
+                ?? false
+            );
+
 
         return Role::query()
-            ->where('guard_name', 'web')
-            ->where('status', true)
-            ->whereNotIn('name', $protectedRoles)
-            ->where(function ($query) use ($company) {
-                $query->where(function ($systemQuery) {
-                    $systemQuery
-                        ->whereNull('company_id')
-                        ->where('is_system_role', true);
-                })
-                    ->orWhere(function ($companyQuery) use ($company) {
-                        $companyQuery
-                            ->where('company_id', $company->id)
-                            ->where('is_system_role', false);
-                    });
-            })
-            ->orderByDesc('is_system_role')
-            ->orderBy('name')
+
+            ->where(
+                'guard_name',
+                'web'
+            )
+
+            ->where(
+                'status',
+                true
+            )
+
+            ->where(
+                'name',
+                '!=',
+                'Super Admin'
+            )
+
+            ->where(
+                function (
+                    $query
+                ) use (
+                    $company,
+                    $isSuperAdmin
+                ) {
+
+                    /*
+                    |--------------------------------------------------------------------------
+                    | Company Admin
+                    |--------------------------------------------------------------------------
+                    */
+
+                    if (
+                        $isSuperAdmin
+                    ) {
+
+                        $query->orWhere(
+                            function (
+                                $companyAdminQuery
+                            ) {
+
+                                $companyAdminQuery
+                                    ->whereNull(
+                                        'company_id'
+                                    )
+                                    ->where(
+                                        'name',
+                                        'Company Admin'
+                                    );
+                            }
+                        );
+                    }
+
+
+                    /*
+                    |--------------------------------------------------------------------------
+                    | Global System Roles
+                    |--------------------------------------------------------------------------
+                    */
+
+                    $query->orWhere(
+                        function (
+                            $systemQuery
+                        ) {
+
+                            $systemQuery
+                                ->whereNull(
+                                    'company_id'
+                                )
+                                ->where(
+                                    'is_system_role',
+                                    true
+                                )
+                                ->whereNotIn(
+                                    'name',
+                                    [
+                                        'Super Admin',
+                                        'Company Admin',
+                                    ]
+                                );
+                        }
+                    );
+
+
+                    /*
+                    |--------------------------------------------------------------------------
+                    | Company Custom Roles
+                    |--------------------------------------------------------------------------
+                    */
+
+                    $query->orWhere(
+                        function (
+                            $companyQuery
+                        ) use (
+                            $company
+                        ) {
+
+                            $companyQuery
+                                ->where(
+                                    'company_id',
+                                    $company->id
+                                )
+                                ->where(
+                                    'is_system_role',
+                                    false
+                                );
+                        }
+                    );
+                }
+            )
+
+            ->orderByDesc(
+                'is_system_role'
+            )
+
+            ->orderBy(
+                'name'
+            )
+
             ->get([
                 'id',
                 'company_id',
@@ -1442,15 +1632,36 @@ class UserController extends Controller
                 'status',
                 'is_system_role',
             ])
-            ->map(fn(Role $role) => [
-                'id' => $role->id,
-                'name' => $role->name,
-                'description' => $role->description,
-                'type' => (bool) $role->is_system_role ? 'system' : 'company',
-                'is_system_role' => (bool) $role->is_system_role,
-                'company_id' => $role->company_id,
-            ])
+
+            ->map(
+                fn(
+                    Role $role
+                ) => [
+
+                    'id' =>
+                    $role->id,
+
+                    'name' =>
+                    $role->name,
+
+                    'description' =>
+                    $role->description,
+
+                    'type' =>
+                    (bool) $role->is_system_role
+                        ? 'system'
+                        : 'company',
+
+                    'is_system_role' =>
+                    (bool) $role->is_system_role,
+
+                    'company_id' =>
+                    $role->company_id,
+                ]
+            )
+
             ->values()
+
             ->all();
     }
 
@@ -1538,36 +1749,161 @@ class UserController extends Controller
         Company $company
     ): Role {
 
-        $protectedRoles = [
-            'Super Admin',
-            'Company Admin',
-        ];
+        $currentUser =
+            auth()->user();
 
-        $role = Role::query()
-            ->where('name', $roleName)
-            ->where('guard_name', 'web')
-            ->where('status', true)
-            ->whereNotIn('name', $protectedRoles)
-            ->where(function ($query) use ($company) {
-                $query->where(function ($systemQuery) {
-                    $systemQuery
-                        ->whereNull('company_id')
-                        ->where('is_system_role', true);
-                })
-                    ->orWhere(function ($companyQuery) use ($company) {
-                        $companyQuery
-                            ->where('company_id', $company->id)
-                            ->where('is_system_role', false);
-                    });
-            })
+
+        $isSuperAdmin =
+            (bool) (
+                $currentUser?->is_super_user
+                ?? false
+            );
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Never Assign Super Admin Here
+        |--------------------------------------------------------------------------
+        */
+
+        if (
+            $roleName ===
+            'Super Admin'
+        ) {
+
+            abort(
+                422,
+                'The Super Admin role cannot be assigned from company user management.'
+            );
+        }
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Company Admin Only By Super Admin
+        |--------------------------------------------------------------------------
+        */
+
+        if (
+            $roleName ===
+            'Company Admin'
+            &&
+            !$isSuperAdmin
+        ) {
+
+            abort(
+                422,
+                'Company Admin accounts can only be assigned by Super Admin.'
+            );
+        }
+
+
+        $role =
+            Role::query()
+
+            ->where(
+                'name',
+                $roleName
+            )
+
+            ->where(
+                'guard_name',
+                'web'
+            )
+
+            ->where(
+                'status',
+                true
+            )
+
+            ->where(
+                function (
+                    $query
+                ) use (
+                    $company,
+                    $isSuperAdmin
+                ) {
+
+                    if (
+                        $isSuperAdmin
+                    ) {
+
+                        $query->orWhere(
+                            function (
+                                $companyAdminQuery
+                            ) {
+
+                                $companyAdminQuery
+                                    ->whereNull(
+                                        'company_id'
+                                    )
+                                    ->where(
+                                        'name',
+                                        'Company Admin'
+                                    );
+                            }
+                        );
+                    }
+
+
+                    $query->orWhere(
+                        function (
+                            $systemQuery
+                        ) {
+
+                            $systemQuery
+                                ->whereNull(
+                                    'company_id'
+                                )
+                                ->where(
+                                    'is_system_role',
+                                    true
+                                )
+                                ->whereNotIn(
+                                    'name',
+                                    [
+                                        'Super Admin',
+                                        'Company Admin',
+                                    ]
+                                );
+                        }
+                    );
+
+
+                    $query->orWhere(
+                        function (
+                            $companyQuery
+                        ) use (
+                            $company
+                        ) {
+
+                            $companyQuery
+                                ->where(
+                                    'company_id',
+                                    $company->id
+                                )
+                                ->where(
+                                    'is_system_role',
+                                    false
+                                );
+                        }
+                    );
+                }
+            )
+
             ->first();
 
-        if (!$role) {
+
+        if (
+            !$role
+        ) {
+
             abort(
                 422,
                 'The selected role is invalid, inactive, protected, or does not belong to this company.'
             );
         }
+
 
         return $role;
     }

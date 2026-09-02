@@ -404,7 +404,8 @@ class BranchController extends Controller
             DB::transaction(
                 function () use (
                     $validated,
-                    $company
+                    $company,
+                    $user
                 ) {
 
                     /*
@@ -583,7 +584,7 @@ class BranchController extends Controller
                         */
 
                         'status' =>
-                        false,
+                        (bool) $user->is_super_user,
                     ]);
                 }
             );
@@ -595,10 +596,15 @@ class BranchController extends Controller
         |--------------------------------------------------------------------------
         */
 
-        $this->notifySuperAdmins(
-            $company,
-            $store
-        );
+        if (
+            !(bool) $user->is_super_user
+        ) {
+
+            $this->notifySuperAdmins(
+                $company,
+                $store
+            );
+        }
 
 
         /*
@@ -609,7 +615,9 @@ class BranchController extends Controller
 
         return AppResponse::successRoute(
             'business.branches.index',
-            "Branch {$store->store_code} created successfully and is waiting for Super Admin approval."
+            (bool) $user->is_super_user
+                ? "Branch {$store->store_code} created and activated successfully."
+                : "Branch {$store->store_code} created successfully and is waiting for Super Admin approval."
         );
     }
 
@@ -945,11 +953,56 @@ class BranchController extends Controller
         User $user
     ): Company {
 
-        /*
-        |--------------------------------------------------------------------------
-        | User Must Belong To A Company
-        |--------------------------------------------------------------------------
-        */
+        if (
+            (bool) $user->is_super_user
+        ) {
+
+            $companyId =
+                (int) session(
+                    'active_company_id'
+                );
+
+
+            if (
+                !$companyId
+            ) {
+
+                abort(
+                    403,
+                    'No active company is selected.'
+                );
+            }
+
+
+            $company =
+                Company::query()
+
+                ->whereKey(
+                    $companyId
+                )
+
+                ->where(
+                    'status',
+                    true
+                )
+
+                ->first();
+
+
+            if (
+                !$company
+            ) {
+
+                abort(
+                    403,
+                    'The selected company is inactive or unavailable.'
+                );
+            }
+
+
+            return $company;
+        }
+
 
         if (
             !$user->company_id
@@ -962,21 +1015,18 @@ class BranchController extends Controller
         }
 
 
-        /*
-        |--------------------------------------------------------------------------
-        | Company Must Be Active
-        |--------------------------------------------------------------------------
-        */
-
         $company =
             Company::query()
+
             ->whereKey(
                 $user->company_id
             )
+
             ->where(
                 'status',
                 true
             )
+
             ->first();
 
 
@@ -1005,12 +1055,6 @@ class BranchController extends Controller
         ?User $user
     ): void {
 
-        /*
-        |--------------------------------------------------------------------------
-        | Authentication
-        |--------------------------------------------------------------------------
-        */
-
         if (
             !$user
         ) {
@@ -1021,28 +1065,30 @@ class BranchController extends Controller
         }
 
 
-        /*
-        |--------------------------------------------------------------------------
-        | Super Admin Uses Super Admin Portal
-        |--------------------------------------------------------------------------
-        */
-
         if (
             (bool) $user->is_super_user
         ) {
 
-            abort(
-                403,
-                'Use the Super Admin branch management area.'
-            );
+            $companyId =
+                (int) session(
+                    'active_company_id'
+                );
+
+
+            if (
+                !$companyId
+            ) {
+
+                abort(
+                    403,
+                    'No active company is selected.'
+                );
+            }
+
+
+            return;
         }
 
-
-        /*
-        |--------------------------------------------------------------------------
-        | Company Admin Only
-        |--------------------------------------------------------------------------
-        */
 
         if (
             !$user->hasRole(

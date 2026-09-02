@@ -47,6 +47,11 @@ export default function BusinessTopbar({
         );
 
 
+    const canManageCompanyWorkspace =
+        isSuperAdmin ||
+        isCompanyAdmin;
+
+
     /*
     |--------------------------------------------------------------------------
     | Business Context
@@ -506,6 +511,21 @@ export default function BusinessTopbar({
                                             {companyName}
                                         </strong>
 
+
+                                        {
+                                            isSuperAdmin && (
+
+                                                <small className="rr-business-superadmin-context-label">
+
+                                                    <i className="bi bi-shield-check"></i>
+
+                                                    Super Admin Context
+
+                                                </small>
+
+                                            )
+                                        }
+
                                     </div>
 
 
@@ -525,7 +545,7 @@ export default function BusinessTopbar({
                                    ===================================== */}
 
                                 {
-                                    isCompanyAdmin && (
+                                    canManageCompanyWorkspace && (
 
                                         <button
                                             type="button"
@@ -575,7 +595,7 @@ export default function BusinessTopbar({
 
 
                                 {
-                                    isCompanyAdmin &&
+                                    canManageCompanyWorkspace &&
                                     availableBranches.length > 0 && (
 
                                         <div className="rr-business-branch-dropdown-separator"></div>
@@ -711,7 +731,7 @@ export default function BusinessTopbar({
                                    ===================================== */}
 
                                 {
-                                    isCompanyAdmin && (
+                                    canManageCompanyWorkspace && (
 
                                         <div className="rr-business-branch-dropdown-footer">
 
@@ -915,7 +935,7 @@ export default function BusinessTopbar({
 
 
                                     {
-                                        isCompanyAdmin && (
+                                        canManageCompanyWorkspace && (
 
                                             <Link
                                                 href="/company/dashboard"
@@ -932,6 +952,26 @@ export default function BusinessTopbar({
                                                 Company Dashboard
 
                                             </Link>
+
+                                        )
+                                    }
+
+
+                                    {
+                                        business?.is_super_admin_context && (
+
+                                            <button
+                                                type="button"
+                                                onClick={
+                                                    exitBusinessContext
+                                                }
+                                            >
+
+                                                <i className="bi bi-arrow-left-circle"></i>
+
+                                                Back to Super Admin
+
+                                            </button>
 
                                         )
                                     }

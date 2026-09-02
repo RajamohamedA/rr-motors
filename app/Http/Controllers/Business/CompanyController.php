@@ -42,32 +42,20 @@ class CompanyController extends Controller
 
         /*
         |--------------------------------------------------------------------------
-        | Company Admin Only
-        |--------------------------------------------------------------------------
-        */
-
-        abort_unless(
-            $user->hasRole(
-                'Company Admin'
-            ),
-            403,
-            'You do not have permission to manage the company profile.'
-        );
-
-
-        /*
-        |--------------------------------------------------------------------------
-        | Company
+        | Access
         |--------------------------------------------------------------------------
         |
-        | Never accept company_id from the browser.
+        | Super Admin:
+        |   Use the active company selected in business context.
+        |
+        | Company Admin:
+        |   Use the company assigned to the authenticated user.
         |
         */
 
         $company =
-            Company::query()
-            ->findOrFail(
-                $user->company_id
+            $this->resolveCompany(
+                $request
             );
 
 
@@ -80,7 +68,9 @@ class CompanyController extends Controller
         abort_unless(
             (bool) $company->status,
             403,
-            'Your company is inactive.'
+            $user->is_super_user
+                ? 'The selected company is inactive.'
+                : 'Your company is inactive.'
         );
 
 
@@ -191,29 +181,13 @@ class CompanyController extends Controller
 
         /*
         |--------------------------------------------------------------------------
-        | Company Admin Only
-        |--------------------------------------------------------------------------
-        */
-
-        abort_unless(
-            $user->hasRole(
-                'Company Admin'
-            ),
-            403,
-            'You do not have permission to edit the company profile.'
-        );
-
-
-        /*
-        |--------------------------------------------------------------------------
-        | Company
+        | Access / Company
         |--------------------------------------------------------------------------
         */
 
         $company =
-            Company::query()
-            ->findOrFail(
-                $user->company_id
+            $this->resolveCompany(
+                $request
             );
 
 
@@ -228,7 +202,9 @@ class CompanyController extends Controller
         ) {
 
             return AppResponse::error(
-                'Your company is inactive. Please contact the Super Administrator.'
+                $user->is_super_user
+                    ? 'The selected company is inactive.'
+                    : 'Your company is inactive. Please contact the Super Administrator.'
             );
         }
 
@@ -552,7 +528,9 @@ class CompanyController extends Controller
 
                 action: 'updated',
 
-                description: "Company Admin updated company profile {$company->company_name}",
+                description: $user->is_super_user
+                    ? "Super Admin updated company profile {$company->company_name}"
+                    : "Company Admin updated company profile {$company->company_name}",
 
                 subject: $company,
 
@@ -565,6 +543,29 @@ class CompanyController extends Controller
 
         /*
         |--------------------------------------------------------------------------
+        | Refresh Active Company Session
+        |--------------------------------------------------------------------------
+        */
+
+        if (
+            (int) session(
+                'active_company_id'
+            ) ===
+            (int) $company->id
+        ) {
+
+            session([
+                'active_company_name' =>
+                $company->company_name,
+
+                'active_company_code' =>
+                $company->company_code,
+            ]);
+        }
+
+
+        /*
+        |--------------------------------------------------------------------------
         | Response
         |--------------------------------------------------------------------------
         */
@@ -572,5 +573,97 @@ class CompanyController extends Controller
         return AppResponse::success(
             'Company profile updated successfully.'
         );
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | Resolve Accessible Company
+    |--------------------------------------------------------------------------
+    |
+    | Super Admin:
+    |   Company comes from active business context.
+    |
+    | Company Admin:
+    |   Company comes from authenticated user's company_id.
+    |
+    | Normal User:
+    |   Access denied.
+    |
+    */
+
+    private function resolveCompany(
+        Request $request
+    ): Company {
+
+        $user =
+            $request->user();
+
+
+        abort_unless(
+            $user,
+            401
+        );
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Super Admin
+        |--------------------------------------------------------------------------
+        */
+
+        if (
+            (bool) $user->is_super_user
+        ) {
+
+            $companyId =
+                (int) session(
+                    'active_company_id'
+                );
+
+
+            abort_if(
+                !$companyId,
+                403,
+                'No active company is selected.'
+            );
+
+
+            return Company::query()
+                ->findOrFail(
+                    $companyId
+                );
+        }
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Company Admin
+        |--------------------------------------------------------------------------
+        */
+
+        abort_unless(
+            $user->hasRole(
+                'Company Admin'
+            ),
+            403,
+            'You do not have permission to manage the company profile.'
+        );
+
+
+        $companyId =
+            (int) $user->company_id;
+
+
+        abort_if(
+            !$companyId,
+            403,
+            'No company is assigned to your account.'
+        );
+
+
+        return Company::query()
+            ->findOrFail(
+                $companyId
+            );
     }
 }
