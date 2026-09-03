@@ -20,17 +20,15 @@ use App\Models\Store;
 | Master Modules
 |--------------------------------------------------------------------------
 |
-| IMPORTANT:
-|
 | This file is loaded from routes/web.php inside:
 |
 | auth
 | verified
 | business.context
 |
-| Therefore we do not repeat those middleware here.
+| Therefore these middleware do not need to be repeated here.
 |
-| Individual controllers continue enforcing their own module permissions.
+| Individual controllers continue to enforce their own permissions.
 |
 */
 
@@ -61,28 +59,21 @@ Route::resource(
 
 /*
 |--------------------------------------------------------------------------
-| Supplier - Lookup Routes
+| Supplier
 |--------------------------------------------------------------------------
 |
 | IMPORTANT:
 |
-| These routes MUST be declared before:
+| Custom routes must stay before:
 |
 | /suppliers/{supplier}
-|
-| Otherwise Laravel may treat:
-|
-| duplicate-lookup
-| gst-lookup
-|
-| as the {supplier} route parameter.
 |
 */
 
 
 /*
 |--------------------------------------------------------------------------
-| Duplicate Supplier Lookup
+| Supplier Duplicate Lookup
 |--------------------------------------------------------------------------
 */
 
@@ -116,14 +107,8 @@ Route::post(
 
 /*
 |--------------------------------------------------------------------------
-| Attach Existing Supplier To Current Branch
+| Attach Existing Supplier
 |--------------------------------------------------------------------------
-|
-| Supplier already exists in the company but is not linked to the active
-| branch.
-|
-| Only supplier_stores is updated.
-|
 */
 
 Route::post(
@@ -139,18 +124,8 @@ Route::post(
 
 /*
 |--------------------------------------------------------------------------
-| Remove Supplier From Current Branch
+| Remove Supplier From Branch
 |--------------------------------------------------------------------------
-|
-| This does NOT delete the supplier master.
-|
-| Only the relationship between:
-|
-| supplier
-| active branch
-|
-| is removed.
-|
 */
 
 Route::delete(
@@ -166,7 +141,7 @@ Route::delete(
 
 /*
 |--------------------------------------------------------------------------
-| Supplier Activate / Deactivate
+| Supplier Status
 |--------------------------------------------------------------------------
 */
 
@@ -195,12 +170,10 @@ Route::resource(
 
 /*
 |--------------------------------------------------------------------------
-| Customer - Lookup Routes
+| Customer
 |--------------------------------------------------------------------------
 |
-| IMPORTANT:
-|
-| These routes MUST be declared before:
+| Custom routes must stay before:
 |
 | /customers/{customer}
 |
@@ -209,7 +182,7 @@ Route::resource(
 
 /*
 |--------------------------------------------------------------------------
-| Duplicate Customer Lookup
+| Customer Duplicate Lookup
 |--------------------------------------------------------------------------
 */
 
@@ -243,14 +216,8 @@ Route::post(
 
 /*
 |--------------------------------------------------------------------------
-| Attach Existing Customer To Current Branch
+| Attach Existing Customer
 |--------------------------------------------------------------------------
-|
-| Customer already exists in the company but is not assigned to the
-| active branch.
-|
-| Only customer_stores is updated.
-|
 */
 
 Route::post(
@@ -266,13 +233,8 @@ Route::post(
 
 /*
 |--------------------------------------------------------------------------
-| Remove Customer From Current Branch
+| Remove Customer From Branch
 |--------------------------------------------------------------------------
-|
-| Does NOT permanently delete the customer master.
-|
-| Only removes the customer_stores relationship for the active branch.
-|
 */
 
 Route::delete(
@@ -288,7 +250,7 @@ Route::delete(
 
 /*
 |--------------------------------------------------------------------------
-| Customer Activate / Deactivate
+| Customer Status
 |--------------------------------------------------------------------------
 */
 
@@ -317,16 +279,8 @@ Route::resource(
 
 /*
 |--------------------------------------------------------------------------
-| Category Related Products
+| Category
 |--------------------------------------------------------------------------
-|
-| Category belongs to:
-|
-| active company
-| active branch
-|
-| Product list is also restricted to the same company + branch.
-|
 */
 
 
@@ -349,7 +303,7 @@ Route::get(
 
 /*
 |--------------------------------------------------------------------------
-| Category Products CSV Export
+| Category Products CSV
 |--------------------------------------------------------------------------
 */
 
@@ -362,6 +316,13 @@ Route::get(
 )->name(
     'categories.products.export.csv'
 );
+
+
+/*
+|--------------------------------------------------------------------------
+| Category Products Print
+|--------------------------------------------------------------------------
+*/
 
 Route::get(
     '/categories/{category}/products/print',
@@ -376,7 +337,7 @@ Route::get(
 
 /*
 |--------------------------------------------------------------------------
-| Category Products PDF Export
+| Category Products PDF
 |--------------------------------------------------------------------------
 */
 
@@ -393,7 +354,7 @@ Route::get(
 
 /*
 |--------------------------------------------------------------------------
-| Category Activate / Deactivate
+| Category Status
 |--------------------------------------------------------------------------
 */
 
@@ -420,6 +381,19 @@ Route::resource(
 );
 
 
+/*
+|--------------------------------------------------------------------------
+| Brand
+|--------------------------------------------------------------------------
+*/
+
+
+/*
+|--------------------------------------------------------------------------
+| Brand Status
+|--------------------------------------------------------------------------
+*/
+
 Route::patch(
     '/brands/{brand}/toggle-status',
     [
@@ -430,6 +404,12 @@ Route::patch(
     'brands.toggle-status'
 );
 
+
+/*
+|--------------------------------------------------------------------------
+| Brand Products
+|--------------------------------------------------------------------------
+*/
 
 Route::get(
     '/brands/{brand}/products',
@@ -442,6 +422,12 @@ Route::get(
 );
 
 
+/*
+|--------------------------------------------------------------------------
+| Brand Products CSV
+|--------------------------------------------------------------------------
+*/
+
 Route::get(
     '/brands/{brand}/products/export/csv',
     [
@@ -452,6 +438,12 @@ Route::get(
     'brands.products.export.csv'
 );
 
+
+/*
+|--------------------------------------------------------------------------
+| Brand Products PDF
+|--------------------------------------------------------------------------
+*/
 
 Route::get(
     '/brands/{brand}/products/export/pdf',
@@ -464,6 +456,12 @@ Route::get(
 );
 
 
+/*
+|--------------------------------------------------------------------------
+| Brand Products Print
+|--------------------------------------------------------------------------
+*/
+
 Route::get(
     '/brands/{brand}/products/print',
     [
@@ -475,15 +473,9 @@ Route::get(
 );
 
 
-Route::resource(
-    'brands',
-    BrandController::class
-);
-
-
 /*
 |--------------------------------------------------------------------------
-| Brand
+| Brand Resource
 |--------------------------------------------------------------------------
 */
 
@@ -499,6 +491,13 @@ Route::resource(
 |--------------------------------------------------------------------------
 */
 
+
+/*
+|--------------------------------------------------------------------------
+| Unit Status
+|--------------------------------------------------------------------------
+*/
+
 Route::patch(
     '/units/{unit}/toggle-status',
     [
@@ -510,10 +509,11 @@ Route::patch(
 );
 
 
-Route::resource(
-    'units',
-    UnitController::class
-);
+/*
+|--------------------------------------------------------------------------
+| Unit Resource
+|--------------------------------------------------------------------------
+*/
 
 Route::resource(
     'units',
@@ -536,6 +536,101 @@ Route::resource(
 /*
 |--------------------------------------------------------------------------
 | Godown
+|--------------------------------------------------------------------------
+|
+| Custom Godown inventory routes MUST stay before the resource route.
+|
+*/
+
+
+/*
+|--------------------------------------------------------------------------
+| Godown Products
+|--------------------------------------------------------------------------
+*/
+
+Route::get(
+    '/godowns/{godown}/products',
+    [
+        GodownController::class,
+        'products',
+    ]
+)->name(
+    'godowns.products'
+);
+
+
+/*
+|--------------------------------------------------------------------------
+| Godown Products CSV
+|--------------------------------------------------------------------------
+*/
+
+Route::get(
+    '/godowns/{godown}/products/export/csv',
+    [
+        GodownController::class,
+        'exportProductsCsv',
+    ]
+)->name(
+    'godowns.products.export.csv'
+);
+
+
+/*
+|--------------------------------------------------------------------------
+| Godown Products PDF
+|--------------------------------------------------------------------------
+*/
+
+Route::get(
+    '/godowns/{godown}/products/export/pdf',
+    [
+        GodownController::class,
+        'exportProductsPdf',
+    ]
+)->name(
+    'godowns.products.export.pdf'
+);
+
+
+/*
+|--------------------------------------------------------------------------
+| Godown Products Print
+|--------------------------------------------------------------------------
+*/
+
+Route::get(
+    '/godowns/{godown}/products/print',
+    [
+        GodownController::class,
+        'printProducts',
+    ]
+)->name(
+    'godowns.products.print'
+);
+
+
+/*
+|--------------------------------------------------------------------------
+| Godown Status
+|--------------------------------------------------------------------------
+*/
+
+Route::patch(
+    '/godowns/{godown}/toggle-status',
+    [
+        GodownController::class,
+        'toggleStatus',
+    ]
+)->name(
+    'godowns.toggle-status'
+);
+
+
+/*
+|--------------------------------------------------------------------------
+| Godown Resource
 |--------------------------------------------------------------------------
 */
 
@@ -562,7 +657,7 @@ Route::resource(
 | active_company_id
 | active_store_id
 |
-| Do not trust company_id or store_id supplied from the browser.
+| Do not trust company_id or store_id supplied from React.
 |
 */
 
@@ -582,20 +677,11 @@ Route::get(
 | Get Stores For Company
 |--------------------------------------------------------------------------
 |
-| This helper is still available for modules that genuinely need to load
+| This helper remains available for modules that genuinely need to load
 | branches for a company.
 |
-| IMPORTANT:
-|
-| Business write operations must never trust this route or an arbitrary
-| company ID sent by React.
-|
-| Controllers must use:
-|
-| session('active_company_id')
-| session('active_store_id')
-|
-| for trusted business context.
+| Business write operations must never trust arbitrary company/store IDs
+| from the browser.
 |
 */
 

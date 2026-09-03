@@ -1,0 +1,4319 @@
+/* ==========================================================================
+   RR MOTORS ERP - GODOWNS
+   resources/css/business/godowns.css
+   ========================================================================== */
+
+
+/* ==========================================================================
+   PAGE
+   ========================================================================== */
+
+.rr-godowns-page {
+    width: 100%;
+    min-width: 0;
+    padding-bottom: 32px;
+}
+
+
+/* ==========================================================================
+   HEADER
+   ========================================================================== */
+
+.rr-godowns-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    gap: 18px;
+
+    margin-bottom: 16px;
+    padding: 18px 20px;
+
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+
+    background: #ffffff;
+}
+
+
+.rr-godowns-header-main {
+    min-width: 0;
+
+    display: flex;
+    align-items: center;
+
+    gap: 13px;
+}
+
+
+.rr-godowns-header-icon {
+    width: 48px;
+    height: 48px;
+
+    flex: 0 0 48px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 10px;
+
+    background: #eff6ff;
+
+    color: #2563eb;
+}
+
+
+.rr-godowns-header-icon i {
+    font-size: 22px;
+}
+
+
+.rr-godowns-eyebrow {
+    display: block;
+
+    margin-bottom: 3px;
+
+    color: #64748b;
+
+    font-size: 12px;
+    font-weight: 700;
+
+    letter-spacing: .45px;
+    text-transform: uppercase;
+}
+
+
+.rr-godowns-header h1 {
+    margin: 0;
+
+    color: #0f172a;
+
+    font-size: 24px;
+    font-weight: 800;
+
+    line-height: 1.2;
+}
+
+
+.rr-godowns-header p {
+    margin: 4px 0 0;
+
+    color: #64748b;
+
+    font-size: 13px;
+    line-height: 1.5;
+}
+
+
+.rr-godowns-header-actions {
+    display: flex;
+    align-items: center;
+
+    gap: 8px;
+
+    flex-shrink: 0;
+}
+
+
+/* ==========================================================================
+   BUTTONS
+   ========================================================================== */
+
+.rr-godown-toolbar-btn,
+.rr-godown-primary-btn,
+.rr-godown-search-btn,
+.rr-godowns-clear-btn {
+    min-height: 38px;
+
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    gap: 7px;
+
+    padding: 0 14px;
+
+    border-radius: 7px;
+
+    font-size: 13px;
+    font-weight: 700;
+
+    text-decoration: none;
+
+    cursor: pointer;
+
+    transition:
+        background .15s ease,
+        border-color .15s ease,
+        color .15s ease,
+        box-shadow .15s ease,
+        transform .12s ease;
+}
+
+
+.rr-godown-toolbar-btn {
+    border: 1px solid #cbd5e1;
+
+    background: #ffffff;
+
+    color: #334155;
+}
+
+
+.rr-godown-toolbar-btn:hover {
+    border-color: #94a3b8;
+
+    background: #f8fafc;
+
+    color: #0f172a;
+}
+
+
+.rr-godown-primary-btn {
+    border: 1px solid #2563eb;
+
+    background: #2563eb;
+
+    color: #ffffff;
+}
+
+
+.rr-godown-primary-btn:hover {
+    border-color: #1d4ed8;
+
+    background: #1d4ed8;
+
+    color: #ffffff;
+
+    box-shadow:
+        0 4px 10px rgba(37, 99, 235, .18);
+}
+
+
+.rr-godown-search-btn {
+    border: 1px solid #334155;
+
+    background: #334155;
+
+    color: #ffffff;
+}
+
+
+.rr-godown-search-btn:hover {
+    border-color: #1e293b;
+
+    background: #1e293b;
+}
+
+
+.rr-godowns-clear-btn {
+    border: 1px solid #e2e8f0;
+
+    background: #ffffff;
+
+    color: #64748b;
+}
+
+
+.rr-godowns-clear-btn:hover {
+    border-color: #cbd5e1;
+
+    background: #f8fafc;
+
+    color: #334155;
+}
+
+
+/* ==========================================================================
+   SUMMARY
+   ========================================================================== */
+
+.rr-godowns-summary {
+    display: grid;
+
+    grid-template-columns:
+        repeat(3,
+            minmax(0, 1fr));
+
+    gap: 12px;
+
+    margin-bottom: 16px;
+}
+
+
+.rr-godown-summary-card {
+    min-width: 0;
+
+    display: flex;
+    align-items: center;
+
+    gap: 12px;
+
+    padding: 15px 16px;
+
+    border: 1px solid #e2e8f0;
+    border-radius: 9px;
+
+    background: #ffffff;
+}
+
+
+.rr-godown-summary-icon {
+    width: 40px;
+    height: 40px;
+
+    flex: 0 0 40px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 8px;
+
+    background: #eff6ff;
+
+    color: #2563eb;
+}
+
+
+.rr-godown-summary-icon i {
+    font-size: 18px;
+}
+
+
+.rr-godown-summary-card>div:last-child {
+    min-width: 0;
+
+    display: flex;
+    flex-direction: column;
+}
+
+
+.rr-godown-summary-card span {
+    color: #64748b;
+
+    font-size: 12px;
+    font-weight: 600;
+}
+
+
+.rr-godown-summary-card strong {
+    margin-top: 2px;
+
+    color: #0f172a;
+
+    font-size: 21px;
+    font-weight: 800;
+
+    line-height: 1.2;
+}
+
+
+.rr-godown-summary-card.success .rr-godown-summary-icon {
+    background: #ecfdf5;
+
+    color: #059669;
+}
+
+
+.rr-godown-summary-card.muted .rr-godown-summary-icon {
+    background: #f1f5f9;
+
+    color: #64748b;
+}
+
+
+/* ==========================================================================
+   PANEL
+   ========================================================================== */
+
+.rr-godowns-panel {
+    overflow: hidden;
+
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+
+    background: #ffffff;
+}
+
+
+/* ==========================================================================
+   TOOLBAR
+   ========================================================================== */
+
+.rr-godowns-toolbar {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+
+    gap: 16px;
+
+    padding: 15px 16px;
+
+    border-bottom: 1px solid #e2e8f0;
+}
+
+
+.rr-godowns-search {
+    width: min(620px, 100%);
+
+    display: flex;
+    align-items: center;
+
+    gap: 8px;
+}
+
+
+.rr-godowns-search-box {
+    position: relative;
+
+    min-width: 0;
+    flex: 1;
+}
+
+
+.rr-godowns-search-box>i {
+    position: absolute;
+
+    top: 50%;
+    left: 12px;
+
+    transform: translateY(-50%);
+
+    color: #94a3b8;
+
+    font-size: 14px;
+
+    pointer-events: none;
+}
+
+
+.rr-godowns-search-box input {
+    width: 100%;
+    height: 38px;
+
+    padding: 0 38px 0 36px;
+
+    border: 1px solid #cbd5e1;
+    border-radius: 7px;
+
+    outline: none;
+
+    background: #ffffff;
+
+    color: #0f172a;
+
+    font-size: 13px;
+}
+
+
+.rr-godowns-search-box input::placeholder {
+    color: #94a3b8;
+}
+
+
+.rr-godowns-search-box input:focus {
+    border-color: #3b82f6;
+
+    box-shadow:
+        0 0 0 3px rgba(59, 130, 246, .10);
+}
+
+
+.rr-godowns-search-box button {
+    width: 30px;
+    height: 30px;
+
+    position: absolute;
+
+    top: 4px;
+    right: 4px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    padding: 0;
+
+    border: 0;
+    border-radius: 6px;
+
+    background: transparent;
+
+    color: #94a3b8;
+
+    cursor: pointer;
+}
+
+
+.rr-godowns-search-box button:hover {
+    background: #f1f5f9;
+
+    color: #334155;
+}
+
+
+.rr-godowns-filters {
+    display: flex;
+    align-items: flex-end;
+
+    gap: 8px;
+
+    flex-shrink: 0;
+}
+
+
+.rr-godown-filter {
+    display: flex;
+    flex-direction: column;
+
+    gap: 4px;
+}
+
+
+.rr-godown-filter label {
+    color: #64748b;
+
+    font-size: 12px;
+    font-weight: 700;
+}
+
+
+.rr-godown-filter select {
+    min-width: 135px;
+    height: 38px;
+
+    padding: 0 32px 0 10px;
+
+    border: 1px solid #cbd5e1;
+    border-radius: 7px;
+
+    outline: none;
+
+    background: #ffffff;
+
+    color: #334155;
+
+    font-size: 13px;
+    font-weight: 600;
+}
+
+
+.rr-godown-filter select:focus {
+    border-color: #3b82f6;
+
+    box-shadow:
+        0 0 0 3px rgba(59, 130, 246, .10);
+}
+
+
+/* ==========================================================================
+   GRID STATUS
+   ========================================================================== */
+
+.rr-godowns-grid-status {
+    min-height: 42px;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    gap: 12px;
+
+    padding: 8px 16px;
+
+    border-bottom: 1px solid #e2e8f0;
+
+    background: #f8fafc;
+
+    color: #64748b;
+
+    font-size: 12px;
+}
+
+
+.rr-godowns-grid-status>div {
+    display: flex;
+    align-items: center;
+
+    gap: 5px;
+}
+
+
+.rr-godowns-grid-status strong {
+    color: #334155;
+
+    font-weight: 800;
+}
+
+
+/* ==========================================================================
+   TABLE
+   ========================================================================== */
+
+.rr-godowns-table-wrap {
+    width: 100%;
+
+    overflow-x: auto;
+}
+
+
+.rr-godowns-table {
+    width: 100%;
+    min-width: 1320px;
+
+    border-collapse: collapse;
+}
+
+
+.rr-godowns-table thead th {
+    padding: 11px 12px;
+
+    border-bottom: 1px solid #cbd5e1;
+
+    background: #f8fafc;
+
+    color: #475569;
+
+    font-size: 12px;
+    font-weight: 800;
+
+    letter-spacing: .25px;
+
+    text-align: left;
+    text-transform: uppercase;
+
+    white-space: nowrap;
+}
+
+
+.rr-godowns-table tbody td {
+    padding: 12px;
+
+    border-bottom: 1px solid #edf2f7;
+
+    color: #334155;
+
+    font-size: 13px;
+
+    vertical-align: middle;
+}
+
+
+.rr-godowns-table tbody tr:last-child td {
+    border-bottom: 0;
+}
+
+
+.rr-godowns-table tbody tr {
+    transition:
+        background .12s ease;
+}
+
+
+.rr-godowns-table tbody tr.is-clickable {
+    cursor: pointer;
+}
+
+
+.rr-godowns-table tbody tr.is-clickable:hover {
+    background: #f8fbff;
+}
+
+
+.rr-godowns-table .center {
+    text-align: center;
+}
+
+
+.rr-godowns-table .number {
+    text-align: right;
+}
+
+
+.rr-godowns-table .actions {
+    width: 225px;
+}
+
+
+/* ==========================================================================
+   GODOWN NAME
+   ========================================================================== */
+
+.rr-godown-name-cell {
+    min-width: 190px;
+
+    display: flex;
+    align-items: center;
+
+    gap: 10px;
+}
+
+
+.rr-godown-avatar {
+    width: 38px;
+    height: 38px;
+
+    flex: 0 0 38px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 8px;
+
+    background: #eff6ff;
+
+    color: #2563eb;
+
+    font-size: 12px;
+    font-weight: 900;
+}
+
+
+.rr-godown-name-cell>div:last-child {
+    min-width: 0;
+
+    display: flex;
+    flex-direction: column;
+
+    gap: 2px;
+}
+
+
+.rr-godown-name-cell strong {
+    overflow: hidden;
+
+    color: #0f172a;
+
+    font-size: 13px;
+    font-weight: 800;
+
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+
+.rr-godown-name-cell span {
+    color: #94a3b8;
+
+    font-size: 12px;
+    font-weight: 600;
+}
+
+
+/* ==========================================================================
+   CODE
+   ========================================================================== */
+
+.rr-godown-code {
+    display: inline-flex;
+    align-items: center;
+
+    min-height: 28px;
+
+    padding: 0 8px;
+
+    border: 1px solid #dbeafe;
+    border-radius: 5px;
+
+    background: #eff6ff;
+
+    color: #1d4ed8;
+
+    font-size: 12px;
+    font-weight: 800;
+
+    white-space: nowrap;
+}
+
+
+/* ==========================================================================
+   ADDRESS
+   ========================================================================== */
+
+.rr-godown-address {
+    max-width: 260px;
+
+    overflow: hidden;
+
+    color: #64748b;
+
+    font-size: 13px;
+    line-height: 1.45;
+
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+
+/* ==========================================================================
+   INVENTORY NUMBERS
+   ========================================================================== */
+
+.rr-godowns-table td.number {
+    color: #334155;
+
+    font-variant-numeric: tabular-nums;
+}
+
+
+.rr-godowns-table td.number strong {
+    color: #0f172a;
+
+    font-weight: 800;
+}
+
+
+/* ==========================================================================
+   LOW STOCK
+   ========================================================================== */
+
+.rr-godown-low-stock {
+    min-width: 34px;
+
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    padding: 4px 7px;
+
+    border-radius: 999px;
+
+    font-size: 12px;
+    font-weight: 800;
+}
+
+
+.rr-godown-low-stock.ok {
+    border: 1px solid #bbf7d0;
+
+    background: #f0fdf4;
+
+    color: #15803d;
+}
+
+
+.rr-godown-low-stock.warning {
+    border: 1px solid #fde68a;
+
+    background: #fffbeb;
+
+    color: #b45309;
+}
+
+
+/* ==========================================================================
+   STATUS
+   ========================================================================== */
+
+.rr-godown-status {
+    min-width: 78px;
+
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    gap: 6px;
+
+    padding: 5px 8px;
+
+    border-radius: 999px;
+
+    font-size: 12px;
+    font-weight: 800;
+
+    white-space: nowrap;
+}
+
+
+.rr-godown-status>span {
+    width: 6px;
+    height: 6px;
+
+    border-radius: 50%;
+}
+
+
+.rr-godown-status.active {
+    border: 1px solid #a7f3d0;
+
+    background: #ecfdf5;
+
+    color: #047857;
+}
+
+
+.rr-godown-status.active>span {
+    background: #10b981;
+}
+
+
+.rr-godown-status.inactive {
+    border: 1px solid #e2e8f0;
+
+    background: #f8fafc;
+
+    color: #64748b;
+}
+
+
+.rr-godown-status.inactive>span {
+    background: #94a3b8;
+}
+
+
+/* ==========================================================================
+   ACTIONS
+   ========================================================================== */
+
+.rr-godown-actions {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    gap: 6px;
+}
+
+
+.rr-godown-action-btn {
+    width: 36px;
+    height: 36px;
+
+    flex: 0 0 36px;
+
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    padding: 0;
+
+    border-radius: 7px;
+
+    text-decoration: none;
+
+    cursor: pointer;
+
+    transition:
+        background .14s ease,
+        border-color .14s ease,
+        color .14s ease,
+        transform .12s ease;
+}
+
+
+.rr-godown-action-btn i {
+    font-size: 16px;
+    line-height: 1;
+}
+
+
+.rr-godown-action-btn:hover {
+    transform: translateY(-1px);
+}
+
+
+.rr-godown-action-btn.view {
+    border: 1px solid #cbd5e1;
+
+    background: #ffffff;
+
+    color: #475569;
+}
+
+
+.rr-godown-action-btn.view:hover {
+    border-color: #94a3b8;
+
+    background: #f8fafc;
+
+    color: #0f172a;
+}
+
+
+.rr-godown-action-btn.inventory {
+    border: 1px solid #bbf7d0;
+
+    background: #f0fdf4;
+
+    color: #15803d;
+}
+
+
+.rr-godown-action-btn.inventory:hover {
+    border-color: #86efac;
+
+    background: #dcfce7;
+
+    color: #166534;
+}
+
+
+.rr-godown-action-btn.edit {
+    border: 1px solid #bfdbfe;
+
+    background: #eff6ff;
+
+    color: #2563eb;
+}
+
+
+.rr-godown-action-btn.edit:hover {
+    border-color: #93c5fd;
+
+    background: #dbeafe;
+
+    color: #1d4ed8;
+}
+
+
+.rr-godown-action-btn.activate {
+    border: 1px solid #a7f3d0;
+
+    background: #ecfdf5;
+
+    color: #059669;
+}
+
+
+.rr-godown-action-btn.activate:hover {
+    background: #d1fae5;
+
+    color: #047857;
+}
+
+
+.rr-godown-action-btn.deactivate {
+    border: 1px solid #fde68a;
+
+    background: #fffbeb;
+
+    color: #d97706;
+}
+
+
+.rr-godown-action-btn.deactivate:hover {
+    background: #fef3c7;
+
+    color: #b45309;
+}
+
+
+.rr-godown-action-btn.delete {
+    border: 1px solid #fecaca;
+
+    background: #fff1f2;
+
+    color: #be123c;
+}
+
+
+.rr-godown-action-btn.delete:hover {
+    background: #ffe4e6;
+
+    color: #9f1239;
+}
+
+
+/* ==========================================================================
+   EMPTY
+   ========================================================================== */
+
+.rr-godowns-empty {
+    min-height: 280px;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+
+    padding: 40px 20px;
+
+    text-align: center;
+}
+
+
+.rr-godowns-empty-icon {
+    width: 52px;
+    height: 52px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    margin-bottom: 12px;
+
+    border-radius: 12px;
+
+    background: #f1f5f9;
+
+    color: #64748b;
+}
+
+
+.rr-godowns-empty-icon i {
+    font-size: 22px;
+}
+
+
+.rr-godowns-empty strong {
+    color: #0f172a;
+
+    font-size: 15px;
+    font-weight: 800;
+}
+
+
+.rr-godowns-empty>span {
+    max-width: 440px;
+
+    margin: 6px 0 16px;
+
+    color: #64748b;
+
+    font-size: 13px;
+    line-height: 1.6;
+}
+
+
+/* ==========================================================================
+   PAGINATION
+   ========================================================================== */
+
+.rr-godowns-pagination {
+    min-height: 56px;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    gap: 16px;
+
+    padding: 10px 16px;
+
+    border-top: 1px solid #e2e8f0;
+}
+
+
+.rr-godowns-pagination>div:first-child {
+    display: flex;
+    align-items: center;
+
+    gap: 5px;
+
+    color: #64748b;
+
+    font-size: 12px;
+}
+
+
+.rr-godowns-pagination strong {
+    color: #334155;
+
+    font-weight: 800;
+}
+
+
+.rr-godowns-pagination-links {
+    display: flex;
+    align-items: center;
+
+    gap: 4px;
+}
+
+
+.rr-godown-page-link {
+    min-width: 34px;
+    height: 34px;
+
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    padding: 0 8px;
+
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+
+    background: #ffffff;
+
+    color: #475569;
+
+    font-size: 12px;
+    font-weight: 700;
+
+    text-decoration: none;
+}
+
+
+.rr-godown-page-link:hover {
+    border-color: #bfdbfe;
+
+    background: #eff6ff;
+
+    color: #2563eb;
+}
+
+
+.rr-godown-page-link.active {
+    border-color: #2563eb;
+
+    background: #2563eb;
+
+    color: #ffffff;
+}
+
+
+.rr-godown-page-link.disabled {
+    opacity: .45;
+
+    pointer-events: none;
+}
+
+
+/* ==========================================================================
+   RESPONSIVE
+   ========================================================================== */
+
+@media (max-width: 1100px) {
+
+    .rr-godowns-toolbar {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+
+    .rr-godowns-search {
+        width: 100%;
+    }
+
+
+    .rr-godowns-filters {
+        justify-content: flex-end;
+    }
+}
+
+
+@media (max-width: 767px) {
+
+    .rr-godowns-header {
+        align-items: stretch;
+        flex-direction: column;
+
+        padding: 15px;
+    }
+
+
+    .rr-godowns-header-actions {
+        width: 100%;
+    }
+
+
+    .rr-godowns-header-actions>* {
+        flex: 1;
+    }
+
+
+    .rr-godowns-summary {
+        grid-template-columns: 1fr;
+    }
+
+
+    .rr-godowns-search {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+
+    .rr-godown-search-btn {
+        width: 100%;
+    }
+
+
+    .rr-godowns-filters {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+
+    .rr-godown-filter select {
+        width: 100%;
+    }
+
+
+    .rr-godowns-clear-btn {
+        width: 100%;
+    }
+
+
+    .rr-godowns-grid-status {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+
+    .rr-godowns-pagination {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+
+    .rr-godowns-pagination-links {
+        overflow-x: auto;
+
+        padding-bottom: 3px;
+    }
+}
+
+/* ==========================================================================
+   GODOWN FORM PAGE
+   ========================================================================== */
+
+.rr-godown-form-page {
+    width: 100%;
+    min-width: 0;
+    padding-bottom: 32px;
+}
+
+
+/* ==========================================================================
+   FORM HEADER
+   ========================================================================== */
+
+.rr-godown-form-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+
+    margin-bottom: 14px;
+    padding: 18px 20px;
+
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+
+    background: #ffffff;
+}
+
+
+.rr-godown-form-header-main {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+
+    min-width: 0;
+}
+
+
+.rr-godown-form-back {
+    width: 38px;
+    height: 38px;
+
+    flex: 0 0 38px;
+
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    padding: 0;
+
+    border: 1px solid #cbd5e1;
+    border-radius: 7px;
+
+    background: #ffffff;
+    color: #475569;
+
+    cursor: pointer;
+
+    transition:
+        background .15s ease,
+        border-color .15s ease,
+        color .15s ease;
+}
+
+
+.rr-godown-form-back:hover {
+    border-color: #94a3b8;
+
+    background: #f8fafc;
+    color: #0f172a;
+}
+
+
+.rr-godown-form-header-icon {
+    width: 48px;
+    height: 48px;
+
+    flex: 0 0 48px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 10px;
+
+    background: #eff6ff;
+    color: #2563eb;
+}
+
+
+.rr-godown-form-header-icon i {
+    font-size: 21px;
+}
+
+
+.rr-godown-form-eyebrow {
+    display: block;
+
+    margin-bottom: 3px;
+
+    color: #64748b;
+
+    font-size: 11px;
+    font-weight: 800;
+
+    letter-spacing: .45px;
+    text-transform: uppercase;
+}
+
+
+.rr-godown-form-header h1 {
+    margin: 0;
+
+    color: #0f172a;
+
+    font-size: 23px;
+    font-weight: 800;
+}
+
+
+.rr-godown-form-header p {
+    margin: 4px 0 0;
+
+    color: #64748b;
+
+    font-size: 13px;
+}
+
+
+.rr-godown-form-context {
+    display: flex;
+    align-items: stretch;
+    gap: 8px;
+
+    flex-shrink: 0;
+}
+
+
+.rr-godown-form-context>div {
+    min-width: 145px;
+
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+
+    padding: 9px 12px;
+
+    border: 1px solid #e2e8f0;
+    border-radius: 7px;
+
+    background: #f8fafc;
+}
+
+
+.rr-godown-form-context span {
+    color: #64748b;
+
+    font-size: 10px;
+    font-weight: 800;
+
+    letter-spacing: .3px;
+    text-transform: uppercase;
+}
+
+
+.rr-godown-form-context strong {
+    max-width: 190px;
+
+    overflow: hidden;
+
+    color: #1e293b;
+
+    font-size: 12px;
+    font-weight: 800;
+
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+
+/* ==========================================================================
+   BRANCH NOTE
+   ========================================================================== */
+
+.rr-godown-form-note {
+    display: flex;
+    align-items: flex-start;
+    gap: 11px;
+
+    margin-bottom: 14px;
+    padding: 12px 14px;
+
+    border: 1px solid #bfdbfe;
+    border-radius: 8px;
+
+    background: #eff6ff;
+}
+
+
+.rr-godown-form-note-icon {
+    width: 32px;
+    height: 32px;
+
+    flex: 0 0 32px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 7px;
+
+    background: #dbeafe;
+    color: #2563eb;
+}
+
+
+.rr-godown-form-note>div:last-child {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+
+.rr-godown-form-note strong {
+    color: #1e3a8a;
+
+    font-size: 12px;
+    font-weight: 800;
+}
+
+
+.rr-godown-form-note span {
+    color: #475569;
+
+    font-size: 12px;
+    line-height: 1.5;
+}
+
+
+/* ==========================================================================
+   VALIDATION SUMMARY
+   ========================================================================== */
+
+.rr-godown-validation-summary {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+
+    margin-bottom: 14px;
+    padding: 12px 14px;
+
+    border: 1px solid #fecaca;
+    border-radius: 8px;
+
+    background: #fff1f2;
+}
+
+
+.rr-godown-validation-summary-icon {
+    width: 32px;
+    height: 32px;
+
+    flex: 0 0 32px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 7px;
+
+    background: #ffe4e6;
+    color: #be123c;
+}
+
+
+.rr-godown-validation-summary>div:last-child {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+
+.rr-godown-validation-summary strong {
+    color: #9f1239;
+
+    font-size: 12px;
+    font-weight: 800;
+}
+
+
+.rr-godown-validation-summary span {
+    color: #be123c;
+
+    font-size: 12px;
+}
+
+
+/* ==========================================================================
+   FORM WINDOW
+   ========================================================================== */
+
+.rr-godown-form-window {
+    overflow: hidden;
+
+    border: 1px solid #dbe3ec;
+    border-radius: 10px;
+
+    background: #ffffff;
+
+    box-shadow:
+        0 1px 2px rgba(15, 23, 42, .03);
+}
+
+
+/* ==========================================================================
+   FORM TOOLBAR
+   ========================================================================== */
+
+.rr-godown-form-toolbar {
+    min-height: 58px;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+
+    padding: 10px 16px;
+
+    border-bottom: 1px solid #e2e8f0;
+
+    background: #f8fafc;
+}
+
+
+.rr-godown-form-toolbar-status {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+
+    color: #475569;
+
+    font-size: 12px;
+    font-weight: 800;
+}
+
+
+.rr-godown-form-toolbar-status i {
+    color: #3b82f6;
+
+    font-size: 7px;
+}
+
+
+.rr-godown-form-toolbar-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+
+/* ==========================================================================
+   FORM BUTTONS
+   ========================================================================== */
+
+.rr-godown-form-secondary-btn,
+.rr-godown-form-save-btn {
+    min-height: 38px;
+
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+
+    padding: 0 14px;
+
+    border-radius: 7px;
+
+    font-size: 12px;
+    font-weight: 800;
+
+    cursor: pointer;
+
+    transition:
+        background .15s ease,
+        border-color .15s ease,
+        color .15s ease,
+        box-shadow .15s ease;
+}
+
+
+.rr-godown-form-secondary-btn {
+    border: 1px solid #cbd5e1;
+
+    background: #ffffff;
+    color: #475569;
+}
+
+
+.rr-godown-form-secondary-btn:hover {
+    border-color: #94a3b8;
+
+    background: #f8fafc;
+    color: #0f172a;
+}
+
+
+.rr-godown-form-save-btn {
+    border: 1px solid #2563eb;
+
+    background: #2563eb;
+    color: #ffffff;
+}
+
+
+.rr-godown-form-save-btn:hover:not(:disabled) {
+    border-color: #1d4ed8;
+
+    background: #1d4ed8;
+
+    box-shadow:
+        0 4px 10px rgba(37, 99, 235, .18);
+}
+
+
+.rr-godown-form-save-btn:disabled {
+    opacity: .6;
+    cursor: not-allowed;
+}
+
+
+/* ==========================================================================
+   FORM BODY
+   ========================================================================== */
+
+.rr-godown-form-body {
+    padding: 18px;
+}
+
+
+/* ==========================================================================
+   FORM SECTION
+   ========================================================================== */
+
+.rr-godown-form-section {
+    overflow: hidden;
+
+    border: 1px solid #e2e8f0;
+    border-radius: 9px;
+
+    background: #ffffff;
+}
+
+
+.rr-godown-form-section-head {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+
+    padding: 14px 16px;
+
+    border-bottom: 1px solid #e2e8f0;
+
+    background: #f8fafc;
+}
+
+
+.rr-godown-form-section-icon {
+    width: 34px;
+    height: 34px;
+
+    flex: 0 0 34px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 7px;
+
+    background: #eff6ff;
+    color: #2563eb;
+}
+
+
+.rr-godown-form-section-head h2 {
+    margin: 0;
+
+    color: #0f172a;
+
+    font-size: 14px;
+    font-weight: 800;
+}
+
+
+.rr-godown-form-section-head p {
+    margin: 3px 0 0;
+
+    color: #64748b;
+
+    font-size: 11px;
+    line-height: 1.5;
+}
+
+
+.rr-godown-form-section-body {
+    padding: 18px;
+}
+
+
+/* ==========================================================================
+   GRID
+   ========================================================================== */
+
+.rr-godown-form-grid {
+    display: grid;
+
+    grid-template-columns:
+        repeat(3,
+            minmax(0, 1fr));
+
+    gap: 17px 18px;
+}
+
+
+.rr-godown-form-grid .span-2 {
+    grid-column: span 2;
+}
+
+
+.rr-godown-form-grid .span-3 {
+    grid-column: 1 / -1;
+}
+
+
+/* ==========================================================================
+   FIELD
+   ========================================================================== */
+
+.rr-godown-form-field {
+    min-width: 0;
+
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+
+.rr-godown-form-field>label {
+    color: #334155;
+
+    font-size: 12px;
+    font-weight: 800;
+}
+
+
+.rr-godown-form-field .required {
+    margin-left: 3px;
+
+    color: #dc2626;
+}
+
+
+.rr-godown-form-field input,
+.rr-godown-form-field select,
+.rr-godown-form-field textarea {
+    width: 100%;
+
+    border: 1px solid #cbd5e1;
+    border-radius: 7px;
+
+    outline: none;
+
+    background: #ffffff;
+    color: #0f172a;
+
+    font-size: 13px;
+
+    transition:
+        border-color .15s ease,
+        box-shadow .15s ease,
+        background .15s ease;
+}
+
+
+.rr-godown-form-field input,
+.rr-godown-form-field select {
+    height: 40px;
+
+    padding: 0 11px;
+}
+
+
+.rr-godown-form-field textarea {
+    min-height: 105px;
+
+    padding: 10px 11px;
+
+    line-height: 1.5;
+
+    resize: vertical;
+}
+
+
+.rr-godown-form-field input::placeholder,
+.rr-godown-form-field textarea::placeholder {
+    color: #94a3b8;
+}
+
+
+.rr-godown-form-field input:focus,
+.rr-godown-form-field select:focus,
+.rr-godown-form-field textarea:focus {
+    border-color: #3b82f6;
+
+    box-shadow:
+        0 0 0 3px rgba(59, 130, 246, .10);
+}
+
+
+.rr-godown-form-field.has-error input,
+.rr-godown-form-field.has-error select,
+.rr-godown-form-field.has-error textarea {
+    border-color: #f87171;
+
+    background: #fffafa;
+}
+
+
+.rr-godown-form-field.has-error input:focus,
+.rr-godown-form-field.has-error select:focus,
+.rr-godown-form-field.has-error textarea:focus {
+    border-color: #ef4444;
+
+    box-shadow:
+        0 0 0 3px rgba(239, 68, 68, .09);
+}
+
+
+/* ==========================================================================
+   FIELD HELP
+   ========================================================================== */
+
+.rr-godown-field-help {
+    color: #94a3b8;
+
+    font-size: 11px;
+    line-height: 1.45;
+}
+
+
+.rr-godown-field-help-between {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+}
+
+
+/* ==========================================================================
+   FIELD ERROR
+   ========================================================================== */
+
+.rr-godown-form-field-error {
+    display: flex;
+    align-items: flex-start;
+    gap: 5px;
+
+    color: #dc2626;
+
+    font-size: 11px;
+    font-weight: 600;
+}
+
+
+.rr-godown-form-field-error i {
+    margin-top: 1px;
+}
+
+
+/* ==========================================================================
+   AFTER CREATION INFO
+   ========================================================================== */
+
+.rr-godown-create-info {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+
+    margin-top: 16px;
+    padding: 14px 16px;
+
+    border: 1px solid #d1fae5;
+    border-radius: 9px;
+
+    background: #f0fdf4;
+}
+
+
+.rr-godown-create-info-icon {
+    width: 38px;
+    height: 38px;
+
+    flex: 0 0 38px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 8px;
+
+    background: #dcfce7;
+    color: #15803d;
+}
+
+
+.rr-godown-create-info>div:last-child {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+
+.rr-godown-create-info span {
+    color: #15803d;
+
+    font-size: 10px;
+    font-weight: 900;
+
+    letter-spacing: .35px;
+    text-transform: uppercase;
+}
+
+
+.rr-godown-create-info strong {
+    color: #14532d;
+
+    font-size: 12px;
+    font-weight: 800;
+}
+
+
+.rr-godown-create-info small {
+    margin-top: 2px;
+
+    color: #475569;
+
+    font-size: 11px;
+    line-height: 1.55;
+}
+
+
+/* ==========================================================================
+   FOOTER
+   ========================================================================== */
+
+.rr-godown-form-footer {
+    min-height: 62px;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+
+    padding: 11px 16px;
+
+    border-top: 1px solid #e2e8f0;
+
+    background: #f8fafc;
+}
+
+
+.rr-godown-form-footer-info {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+
+    color: #64748b;
+
+    font-size: 11px;
+    font-weight: 600;
+}
+
+
+.rr-godown-form-footer-info i {
+    color: #059669;
+
+    font-size: 14px;
+}
+
+
+.rr-godown-form-footer-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+
+/* ==========================================================================
+   RESPONSIVE FORM
+   ========================================================================== */
+
+@media (max-width: 1100px) {
+
+    .rr-godown-form-header {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+
+    .rr-godown-form-context {
+        width: 100%;
+    }
+
+
+    .rr-godown-form-context>div {
+        flex: 1;
+    }
+
+
+    .rr-godown-form-grid {
+        grid-template-columns:
+            repeat(2,
+                minmax(0, 1fr));
+    }
+
+
+    .rr-godown-form-grid .span-3 {
+        grid-column: 1 / -1;
+    }
+}
+
+
+@media (max-width: 767px) {
+
+    .rr-godown-form-header {
+        padding: 14px;
+    }
+
+
+    .rr-godown-form-header-main {
+        align-items: flex-start;
+    }
+
+
+    .rr-godown-form-header-icon {
+        display: none;
+    }
+
+
+    .rr-godown-form-context {
+        flex-direction: column;
+    }
+
+
+    .rr-godown-form-context>div {
+        width: 100%;
+    }
+
+
+    .rr-godown-form-toolbar {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+
+    .rr-godown-form-toolbar-actions {
+        width: 100%;
+    }
+
+
+    .rr-godown-form-toolbar-actions>button {
+        flex: 1;
+    }
+
+
+    .rr-godown-form-body {
+        padding: 12px;
+    }
+
+
+    .rr-godown-form-section-body {
+        padding: 14px;
+    }
+
+
+    .rr-godown-form-grid {
+        grid-template-columns: 1fr;
+    }
+
+
+    .rr-godown-form-grid .span-2,
+    .rr-godown-form-grid .span-3 {
+        grid-column: auto;
+    }
+
+
+    .rr-godown-form-footer {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+
+    .rr-godown-form-footer-actions {
+        width: 100%;
+    }
+
+
+    .rr-godown-form-footer-actions>button {
+        flex: 1;
+    }
+}
+
+.rr-godown-form-toolbar-status .is-active {
+    color: #10b981;
+}
+
+.rr-godown-form-toolbar-status .is-inactive {
+    color: #94a3b8;
+}
+
+.rr-godown-edit-info {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+
+    margin-top: 16px;
+    padding: 14px 16px;
+
+    border: 1px solid #bfdbfe;
+    border-radius: 9px;
+
+    background: #f8fbff;
+}
+
+.rr-godown-edit-info-icon {
+    width: 38px;
+    height: 38px;
+
+    flex: 0 0 38px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 8px;
+
+    background: #dbeafe;
+    color: #2563eb;
+}
+
+.rr-godown-edit-info-icon i {
+    font-size: 17px;
+}
+
+.rr-godown-edit-info-content {
+    min-width: 0;
+
+    display: flex;
+    flex-direction: column;
+}
+
+.rr-godown-edit-info-content>span {
+    color: #2563eb;
+
+    font-size: 10px;
+    font-weight: 900;
+
+    letter-spacing: .35px;
+    text-transform: uppercase;
+}
+
+.rr-godown-edit-info-content strong {
+    margin-top: 2px;
+
+    color: #0f172a;
+
+    font-size: 12px;
+    font-weight: 800;
+}
+
+.rr-godown-edit-info-content small {
+    margin-top: 3px;
+
+    color: #64748b;
+
+    font-size: 11px;
+    line-height: 1.5;
+}
+
+/* ==========================================================================
+   GODOWN SHOW PAGE
+   ========================================================================== */
+
+.rr-godown-show-page {
+    width: 100%;
+    min-width: 0;
+    padding-bottom: 32px;
+}
+
+
+/* ==========================================================================
+   SHOW HEADER
+   ========================================================================== */
+
+.rr-godown-show-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    gap: 18px;
+
+    margin-bottom: 16px;
+    padding: 18px 20px;
+
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+
+    background: #ffffff;
+}
+
+
+.rr-godown-show-header-main {
+    min-width: 0;
+
+    display: flex;
+    align-items: center;
+
+    gap: 13px;
+}
+
+
+.rr-godown-show-back {
+    width: 38px;
+    height: 38px;
+
+    flex: 0 0 38px;
+
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    padding: 0;
+
+    border: 1px solid #cbd5e1;
+    border-radius: 7px;
+
+    background: #ffffff;
+
+    color: #475569;
+
+    cursor: pointer;
+
+    transition:
+        background .15s ease,
+        border-color .15s ease,
+        color .15s ease,
+        transform .12s ease;
+}
+
+
+.rr-godown-show-back:hover {
+    border-color: #bfdbfe;
+
+    background: #eff6ff;
+
+    color: #2563eb;
+
+    transform: translateX(-1px);
+}
+
+
+.rr-godown-show-avatar {
+    width: 52px;
+    height: 52px;
+
+    flex: 0 0 52px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 11px;
+
+    background: #eff6ff;
+
+    color: #2563eb;
+
+    font-size: 16px;
+    font-weight: 900;
+}
+
+
+.rr-godown-show-identity {
+    min-width: 0;
+}
+
+
+.rr-godown-show-eyebrow {
+    display: block;
+
+    margin-bottom: 3px;
+
+    color: #64748b;
+
+    font-size: 12px;
+    font-weight: 700;
+
+    letter-spacing: .45px;
+    text-transform: uppercase;
+}
+
+
+.rr-godown-show-title-line {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+
+    gap: 10px;
+}
+
+
+.rr-godown-show-title-line h1 {
+    margin: 0;
+
+    color: #0f172a;
+
+    font-size: 24px;
+    font-weight: 800;
+
+    line-height: 1.2;
+}
+
+
+.rr-godown-show-subline {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+
+    gap: 10px;
+
+    margin-top: 6px;
+}
+
+
+.rr-godown-show-subline>span {
+    display: inline-flex;
+    align-items: center;
+
+    gap: 5px;
+
+    color: #64748b;
+
+    font-size: 12px;
+    font-weight: 600;
+}
+
+
+.rr-godown-show-subline i {
+    color: #94a3b8;
+
+    font-size: 12px;
+}
+
+
+.rr-godown-show-header-actions {
+    display: flex;
+    align-items: center;
+
+    gap: 8px;
+
+    flex-shrink: 0;
+}
+
+
+/* ==========================================================================
+   INVENTORY BUTTON
+   ========================================================================== */
+
+.rr-godown-inventory-btn {
+    min-height: 38px;
+
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    gap: 7px;
+
+    padding: 0 14px;
+
+    border: 1px solid #86efac;
+    border-radius: 7px;
+
+    background: #f0fdf4;
+
+    color: #15803d;
+
+    font-size: 13px;
+    font-weight: 800;
+
+    text-decoration: none;
+
+    transition:
+        border-color .15s ease,
+        background .15s ease,
+        color .15s ease;
+}
+
+
+.rr-godown-inventory-btn:hover {
+    border-color: #4ade80;
+
+    background: #dcfce7;
+
+    color: #166534;
+}
+
+
+/* ==========================================================================
+   SHOW SUMMARY
+   ========================================================================== */
+
+.rr-godown-show-summary {
+    display: grid;
+
+    grid-template-columns:
+        repeat(3,
+            minmax(0, 1fr));
+
+    gap: 11px;
+
+    margin-bottom: 16px;
+}
+
+
+.rr-godown-show-stat {
+    min-width: 0;
+
+    display: flex;
+    align-items: center;
+
+    gap: 11px;
+
+    padding: 14px 15px;
+
+    border: 1px solid #e2e8f0;
+    border-radius: 9px;
+
+    background: #ffffff;
+}
+
+
+.rr-godown-show-stat-icon {
+    width: 40px;
+    height: 40px;
+
+    flex: 0 0 40px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 8px;
+
+    background: #eff6ff;
+
+    color: #2563eb;
+}
+
+
+.rr-godown-show-stat-icon i {
+    font-size: 17px;
+}
+
+
+.rr-godown-show-stat>div:last-child {
+    min-width: 0;
+
+    display: flex;
+    flex-direction: column;
+}
+
+
+.rr-godown-show-stat span {
+    color: #64748b;
+
+    font-size: 12px;
+    font-weight: 600;
+}
+
+
+.rr-godown-show-stat strong {
+    margin-top: 2px;
+
+    overflow: hidden;
+
+    color: #0f172a;
+
+    font-size: 18px;
+    font-weight: 800;
+
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+
+.rr-godown-show-stat.success .rr-godown-show-stat-icon {
+    background: #ecfdf5;
+
+    color: #059669;
+}
+
+
+.rr-godown-show-stat.cost .rr-godown-show-stat-icon {
+    background: #fff7ed;
+
+    color: #ea580c;
+}
+
+
+.rr-godown-show-stat.margin .rr-godown-show-stat-icon {
+    background: #f5f3ff;
+
+    color: #7c3aed;
+}
+
+
+.rr-godown-show-stat.warning .rr-godown-show-stat-icon {
+    background: #fffbeb;
+
+    color: #d97706;
+}
+
+
+.rr-godown-show-stat.muted .rr-godown-show-stat-icon {
+    background: #f1f5f9;
+
+    color: #64748b;
+}
+
+
+/* ==========================================================================
+   SHOW GRID
+   ========================================================================== */
+
+.rr-godown-show-grid {
+    display: grid;
+
+    grid-template-columns:
+        repeat(2,
+            minmax(0, 1fr));
+
+    gap: 14px;
+
+    margin-bottom: 16px;
+}
+
+
+.rr-godown-show-card {
+    overflow: hidden;
+
+    border: 1px solid #e2e8f0;
+    border-radius: 9px;
+
+    background: #ffffff;
+}
+
+
+.rr-godown-show-card-wide {
+    grid-column: span 2;
+}
+
+
+/* ==========================================================================
+   SHOW CARD HEADER
+   ========================================================================== */
+
+.rr-godown-show-card-header {
+    min-height: 48px;
+
+    display: flex;
+    align-items: center;
+
+    gap: 9px;
+
+    padding: 10px 13px;
+
+    border-bottom: 1px solid #e2e8f0;
+
+    background: #f8fafc;
+}
+
+
+.rr-godown-show-card-header>div {
+    width: 32px;
+    height: 32px;
+
+    flex: 0 0 32px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 7px;
+
+    background: #eff6ff;
+
+    color: #2563eb;
+}
+
+
+.rr-godown-show-card-header i {
+    font-size: 14px;
+}
+
+
+.rr-godown-show-card-header strong {
+    color: #0f172a;
+
+    font-size: 13px;
+    font-weight: 800;
+}
+
+
+.rr-godown-show-card-body {
+    padding: 13px 15px;
+}
+
+
+/* ==========================================================================
+   SHOW INFO ROW
+   ========================================================================== */
+
+.rr-godown-show-info-row {
+    min-height: 38px;
+
+    display: grid;
+
+    grid-template-columns:
+        minmax(130px, .8fr) minmax(0, 1.4fr);
+
+    align-items: center;
+
+    gap: 14px;
+
+    padding: 7px 0;
+
+    border-bottom: 1px solid #f1f5f9;
+}
+
+
+.rr-godown-show-info-row:last-child {
+    border-bottom: 0;
+}
+
+
+.rr-godown-show-info-row>span {
+    color: #64748b;
+
+    font-size: 12px;
+    font-weight: 600;
+}
+
+
+.rr-godown-show-info-row>strong {
+    overflow-wrap: anywhere;
+
+    color: #334155;
+
+    font-size: 12px;
+    font-weight: 800;
+
+    text-align: right;
+}
+
+
+/* ==========================================================================
+   ADDRESS
+   ========================================================================== */
+
+.rr-godown-show-description {
+    margin: 0;
+
+    color: #475569;
+
+    font-size: 13px;
+    line-height: 1.7;
+
+    white-space: pre-wrap;
+}
+
+
+.rr-godown-show-empty-text {
+    min-height: 70px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    gap: 7px;
+
+    color: #94a3b8;
+
+    font-size: 12px;
+}
+
+
+.rr-godown-show-empty-text i {
+    font-size: 14px;
+}
+
+
+/* ==========================================================================
+   AUDIT
+   ========================================================================== */
+
+.rr-godown-show-audit-grid {
+    display: grid;
+
+    grid-template-columns:
+        repeat(2,
+            minmax(0, 1fr));
+
+    gap: 0 30px;
+}
+
+
+/* ==========================================================================
+   INVENTORY BANNER
+   ========================================================================== */
+
+.rr-godown-show-inventory-banner {
+    display: flex;
+    align-items: center;
+
+    gap: 14px;
+
+    padding: 16px;
+
+    border: 1px solid #bbf7d0;
+    border-radius: 10px;
+
+    background:
+        linear-gradient(135deg,
+            #f0fdf4,
+            #ffffff);
+}
+
+
+.rr-godown-show-inventory-banner-icon {
+    width: 46px;
+    height: 46px;
+
+    flex: 0 0 46px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 9px;
+
+    background: #dcfce7;
+
+    color: #15803d;
+}
+
+
+.rr-godown-show-inventory-banner-icon i {
+    font-size: 20px;
+}
+
+
+.rr-godown-show-inventory-banner-content {
+    min-width: 0;
+    flex: 1;
+
+    display: flex;
+    flex-direction: column;
+}
+
+
+.rr-godown-show-inventory-banner-content>span {
+    color: #15803d;
+
+    font-size: 12px;
+    font-weight: 800;
+
+    letter-spacing: .35px;
+    text-transform: uppercase;
+}
+
+
+.rr-godown-show-inventory-banner-content strong {
+    margin-top: 2px;
+
+    color: #0f172a;
+
+    font-size: 14px;
+    font-weight: 800;
+}
+
+
+.rr-godown-show-inventory-banner-content small {
+    margin-top: 2px;
+
+    color: #64748b;
+
+    font-size: 12px;
+    line-height: 1.45;
+}
+
+
+.rr-godown-show-inventory-banner-btn {
+    min-height: 38px;
+
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    gap: 7px;
+
+    padding: 0 14px;
+
+    border: 1px solid #16a34a;
+    border-radius: 7px;
+
+    background: #16a34a;
+
+    color: #ffffff;
+
+    font-size: 12px;
+    font-weight: 800;
+
+    text-decoration: none;
+
+    white-space: nowrap;
+
+    transition:
+        background .15s ease,
+        border-color .15s ease,
+        box-shadow .15s ease;
+}
+
+
+.rr-godown-show-inventory-banner-btn:hover {
+    border-color: #15803d;
+
+    background: #15803d;
+
+    color: #ffffff;
+
+    box-shadow:
+        0 4px 10px rgba(22, 163, 74, .16);
+}
+
+
+/* ==========================================================================
+   RESPONSIVE SHOW
+   ========================================================================== */
+
+@media (max-width: 1100px) {
+
+    .rr-godown-show-summary {
+        grid-template-columns:
+            repeat(2,
+                minmax(0, 1fr));
+    }
+}
+
+
+@media (max-width: 900px) {
+
+    .rr-godown-show-header {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+
+    .rr-godown-show-header-actions {
+        justify-content: flex-end;
+    }
+
+
+    .rr-godown-show-inventory-banner {
+        align-items: flex-start;
+        flex-wrap: wrap;
+    }
+
+
+    .rr-godown-show-inventory-banner-btn {
+        margin-left: 60px;
+    }
+}
+
+
+@media (max-width: 767px) {
+
+    .rr-godown-show-header {
+        padding: 15px;
+    }
+
+
+    .rr-godown-show-header-main {
+        align-items: flex-start;
+    }
+
+
+    .rr-godown-show-header-actions {
+        width: 100%;
+
+        flex-direction: column;
+    }
+
+
+    .rr-godown-show-header-actions>* {
+        width: 100%;
+    }
+
+
+    .rr-godown-show-summary {
+        grid-template-columns: 1fr;
+    }
+
+
+    .rr-godown-show-grid {
+        grid-template-columns: 1fr;
+    }
+
+
+    .rr-godown-show-card-wide {
+        grid-column: span 1;
+    }
+
+
+    .rr-godown-show-audit-grid {
+        grid-template-columns: 1fr;
+    }
+
+
+    .rr-godown-show-info-row {
+        grid-template-columns: 1fr;
+
+        gap: 3px;
+    }
+
+
+    .rr-godown-show-info-row>strong {
+        text-align: left;
+    }
+
+
+    .rr-godown-show-inventory-banner {
+        flex-direction: column;
+    }
+
+
+    .rr-godown-show-inventory-banner-btn {
+        width: 100%;
+
+        margin-left: 0;
+    }
+}
+
+/* ==========================================================================
+   GODOWN INVENTORY PAGE
+   ========================================================================== */
+
+.rr-godown-inventory-page {
+    width: 100%;
+    min-width: 0;
+    padding-bottom: 32px;
+}
+
+
+/* ==========================================================================
+   INVENTORY HEADER
+   ========================================================================== */
+
+.rr-godown-inventory-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    gap: 18px;
+
+    margin-bottom: 16px;
+    padding: 18px 20px;
+
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+
+    background: #ffffff;
+}
+
+
+.rr-godown-inventory-header-main {
+    min-width: 0;
+
+    display: flex;
+    align-items: center;
+
+    gap: 13px;
+}
+
+
+.rr-godown-inventory-back {
+    width: 38px;
+    height: 38px;
+
+    flex: 0 0 38px;
+
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    border: 1px solid #cbd5e1;
+    border-radius: 7px;
+
+    background: #ffffff;
+
+    color: #475569;
+
+    text-decoration: none;
+
+    transition:
+        background .15s ease,
+        border-color .15s ease,
+        color .15s ease,
+        transform .12s ease;
+}
+
+
+.rr-godown-inventory-back:hover {
+    border-color: #bfdbfe;
+
+    background: #eff6ff;
+
+    color: #2563eb;
+
+    transform: translateX(-1px);
+}
+
+
+.rr-godown-inventory-header-icon {
+    width: 48px;
+    height: 48px;
+
+    flex: 0 0 48px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 10px;
+
+    background: #f0fdf4;
+
+    color: #15803d;
+}
+
+
+.rr-godown-inventory-header-icon i {
+    font-size: 21px;
+}
+
+
+.rr-godown-inventory-identity {
+    min-width: 0;
+}
+
+
+.rr-godown-inventory-eyebrow {
+    display: block;
+
+    margin-bottom: 3px;
+
+    color: #64748b;
+
+    font-size: 12px;
+    font-weight: 700;
+
+    letter-spacing: .4px;
+    text-transform: uppercase;
+}
+
+
+.rr-godown-inventory-title-line {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+
+    gap: 10px;
+}
+
+
+.rr-godown-inventory-title-line h1 {
+    margin: 0;
+
+    color: #0f172a;
+
+    font-size: 24px;
+    font-weight: 800;
+
+    line-height: 1.2;
+}
+
+
+.rr-godown-inventory-subline {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+
+    gap: 10px;
+
+    margin-top: 6px;
+}
+
+
+.rr-godown-inventory-subline>span {
+    display: inline-flex;
+    align-items: center;
+
+    gap: 5px;
+
+    color: #64748b;
+
+    font-size: 12px;
+    font-weight: 600;
+}
+
+
+.rr-godown-inventory-subline i {
+    color: #94a3b8;
+
+    font-size: 12px;
+}
+
+
+/* ==========================================================================
+   EXPORT BUTTONS
+   ========================================================================== */
+
+.rr-godown-inventory-header-actions {
+    display: flex;
+    align-items: center;
+
+    gap: 7px;
+
+    flex-shrink: 0;
+}
+
+
+.rr-godown-export-btn {
+    min-height: 38px;
+
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    gap: 7px;
+
+    padding: 0 13px;
+
+    border-radius: 7px;
+
+    font-size: 12px;
+    font-weight: 800;
+
+    text-decoration: none;
+
+    cursor: pointer;
+
+    transition:
+        background .15s ease,
+        border-color .15s ease,
+        color .15s ease,
+        box-shadow .15s ease;
+}
+
+
+.rr-godown-export-btn.csv {
+    border: 1px solid #bbf7d0;
+
+    background: #f0fdf4;
+
+    color: #15803d;
+}
+
+
+.rr-godown-export-btn.csv:hover {
+    border-color: #86efac;
+
+    background: #dcfce7;
+
+    color: #166534;
+}
+
+
+.rr-godown-export-btn.pdf {
+    border: 1px solid #fecaca;
+
+    background: #fff1f2;
+
+    color: #be123c;
+}
+
+
+.rr-godown-export-btn.pdf:hover {
+    background: #ffe4e6;
+
+    color: #9f1239;
+}
+
+
+.rr-godown-export-btn.print {
+    border: 1px solid #cbd5e1;
+
+    background: #ffffff;
+
+    color: #334155;
+}
+
+
+.rr-godown-export-btn.print:hover {
+    border-color: #94a3b8;
+
+    background: #f8fafc;
+
+    color: #0f172a;
+}
+
+
+/* ==========================================================================
+   INVENTORY SUMMARY
+   ========================================================================== */
+
+.rr-godown-inventory-summary {
+    display: grid;
+
+    grid-template-columns:
+        repeat(4,
+            minmax(0, 1fr));
+
+    gap: 11px;
+
+    margin-bottom: 16px;
+}
+
+
+.rr-godown-inventory-stat {
+    min-width: 0;
+
+    display: flex;
+    align-items: center;
+
+    gap: 11px;
+
+    padding: 14px 15px;
+
+    border: 1px solid #e2e8f0;
+    border-radius: 9px;
+
+    background: #ffffff;
+}
+
+
+.rr-godown-inventory-stat-icon {
+    width: 40px;
+    height: 40px;
+
+    flex: 0 0 40px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 8px;
+
+    background: #eff6ff;
+
+    color: #2563eb;
+}
+
+
+.rr-godown-inventory-stat-icon i {
+    font-size: 17px;
+}
+
+
+.rr-godown-inventory-stat>div:last-child {
+    min-width: 0;
+
+    display: flex;
+    flex-direction: column;
+}
+
+
+.rr-godown-inventory-stat span {
+    color: #64748b;
+
+    font-size: 12px;
+    font-weight: 600;
+}
+
+
+.rr-godown-inventory-stat strong {
+    margin-top: 2px;
+
+    overflow: hidden;
+
+    color: #0f172a;
+
+    font-size: 17px;
+    font-weight: 800;
+
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+
+.rr-godown-inventory-stat.cost .rr-godown-inventory-stat-icon {
+    background: #fff7ed;
+
+    color: #ea580c;
+}
+
+
+.rr-godown-inventory-stat.selling .rr-godown-inventory-stat-icon {
+    background: #ecfdf5;
+
+    color: #059669;
+}
+
+
+.rr-godown-inventory-stat.margin .rr-godown-inventory-stat-icon {
+    background: #f5f3ff;
+
+    color: #7c3aed;
+}
+
+
+.rr-godown-inventory-stat.warning .rr-godown-inventory-stat-icon {
+    background: #fffbeb;
+
+    color: #d97706;
+}
+
+
+.rr-godown-inventory-stat.danger .rr-godown-inventory-stat-icon {
+    background: #fff1f2;
+
+    color: #be123c;
+}
+
+
+.rr-godown-inventory-stat.muted .rr-godown-inventory-stat-icon {
+    background: #f1f5f9;
+
+    color: #64748b;
+}
+
+
+/* ==========================================================================
+   INVENTORY PANEL
+   ========================================================================== */
+
+.rr-godown-inventory-panel {
+    overflow: hidden;
+
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+
+    background: #ffffff;
+}
+
+
+/* ==========================================================================
+   INVENTORY TOOLBAR
+   ========================================================================== */
+
+.rr-godown-inventory-toolbar {
+    padding: 15px 16px;
+
+    border-bottom: 1px solid #e2e8f0;
+
+    background: #ffffff;
+}
+
+
+.rr-godown-inventory-search {
+    width: min(680px, 100%);
+
+    display: flex;
+    align-items: center;
+
+    gap: 8px;
+
+    margin-bottom: 12px;
+}
+
+
+.rr-godown-inventory-search-box {
+    min-width: 0;
+    flex: 1;
+
+    position: relative;
+}
+
+
+.rr-godown-inventory-search-box>i {
+    position: absolute;
+
+    top: 50%;
+    left: 12px;
+
+    transform: translateY(-50%);
+
+    color: #94a3b8;
+
+    font-size: 14px;
+
+    pointer-events: none;
+}
+
+
+.rr-godown-inventory-search-box input {
+    width: 100%;
+    height: 38px;
+
+    padding: 0 38px 0 36px;
+
+    border: 1px solid #cbd5e1;
+    border-radius: 7px;
+
+    outline: none;
+
+    background: #ffffff;
+
+    color: #0f172a;
+
+    font-size: 13px;
+}
+
+
+.rr-godown-inventory-search-box input::placeholder {
+    color: #94a3b8;
+}
+
+
+.rr-godown-inventory-search-box input:focus {
+    border-color: #3b82f6;
+
+    box-shadow:
+        0 0 0 3px rgba(59, 130, 246, .10);
+}
+
+
+.rr-godown-inventory-search-box button {
+    width: 30px;
+    height: 30px;
+
+    position: absolute;
+
+    top: 4px;
+    right: 4px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    padding: 0;
+
+    border: 0;
+    border-radius: 6px;
+
+    background: transparent;
+
+    color: #94a3b8;
+
+    cursor: pointer;
+}
+
+
+.rr-godown-inventory-search-box button:hover {
+    background: #f1f5f9;
+
+    color: #334155;
+}
+
+
+.rr-godown-inventory-search-btn {
+    min-height: 38px;
+
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    padding: 0 15px;
+
+    border: 1px solid #334155;
+    border-radius: 7px;
+
+    background: #334155;
+
+    color: #ffffff;
+
+    font-size: 12px;
+    font-weight: 800;
+
+    cursor: pointer;
+}
+
+
+.rr-godown-inventory-search-btn:hover {
+    border-color: #1e293b;
+
+    background: #1e293b;
+}
+
+
+/* ==========================================================================
+   INVENTORY FILTERS
+   ========================================================================== */
+
+.rr-godown-inventory-filter-row {
+    display: flex;
+    align-items: flex-end;
+    flex-wrap: wrap;
+
+    gap: 9px;
+}
+
+
+.rr-godown-inventory-filter {
+    display: flex;
+    flex-direction: column;
+
+    gap: 4px;
+}
+
+
+.rr-godown-inventory-filter label {
+    color: #64748b;
+
+    font-size: 12px;
+    font-weight: 700;
+}
+
+
+.rr-godown-inventory-filter select {
+    min-width: 150px;
+    height: 38px;
+
+    padding: 0 32px 0 10px;
+
+    border: 1px solid #cbd5e1;
+    border-radius: 7px;
+
+    outline: none;
+
+    background: #ffffff;
+
+    color: #334155;
+
+    font-size: 12px;
+    font-weight: 600;
+}
+
+
+.rr-godown-inventory-filter select:focus {
+    border-color: #3b82f6;
+
+    box-shadow:
+        0 0 0 3px rgba(59, 130, 246, .10);
+}
+
+
+.rr-godown-inventory-clear {
+    min-height: 38px;
+
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    gap: 7px;
+
+    padding: 0 13px;
+
+    border: 1px solid #e2e8f0;
+    border-radius: 7px;
+
+    background: #ffffff;
+
+    color: #64748b;
+
+    font-size: 12px;
+    font-weight: 800;
+
+    cursor: pointer;
+}
+
+
+.rr-godown-inventory-clear:hover {
+    border-color: #cbd5e1;
+
+    background: #f8fafc;
+
+    color: #334155;
+}
+
+
+/* ==========================================================================
+   GRID STATUS
+   ========================================================================== */
+
+.rr-godown-inventory-grid-status {
+    min-height: 42px;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    gap: 12px;
+
+    padding: 8px 16px;
+
+    border-bottom: 1px solid #e2e8f0;
+
+    background: #f8fafc;
+
+    color: #64748b;
+
+    font-size: 12px;
+}
+
+
+.rr-godown-inventory-grid-status>div {
+    display: flex;
+    align-items: center;
+
+    gap: 5px;
+}
+
+
+.rr-godown-inventory-grid-status strong {
+    color: #334155;
+
+    font-weight: 800;
+}
+
+
+/* ==========================================================================
+   INVENTORY TABLE
+   ========================================================================== */
+
+.rr-godown-inventory-table-wrap {
+    width: 100%;
+
+    overflow-x: auto;
+}
+
+
+.rr-godown-inventory-table {
+    width: 100%;
+    min-width: 1700px;
+
+    border-collapse: collapse;
+}
+
+
+.rr-godown-inventory-table thead th {
+    padding: 11px 10px;
+
+    border-bottom: 1px solid #cbd5e1;
+
+    background: #f8fafc;
+
+    color: #475569;
+
+    font-size: 12px;
+    font-weight: 800;
+
+    letter-spacing: .25px;
+
+    text-align: left;
+    text-transform: uppercase;
+
+    white-space: nowrap;
+}
+
+
+.rr-godown-inventory-table tbody td {
+    padding: 11px 10px;
+
+    border-bottom: 1px solid #edf2f7;
+
+    color: #334155;
+
+    font-size: 12px;
+
+    vertical-align: middle;
+}
+
+
+.rr-godown-inventory-table tbody tr:last-child td {
+    border-bottom: 0;
+}
+
+
+.rr-godown-inventory-table tbody tr {
+    transition:
+        background .12s ease;
+}
+
+
+.rr-godown-inventory-table tbody tr:hover {
+    background: #f8fbff;
+}
+
+
+.rr-godown-inventory-table tbody tr.is-low-stock {
+    background: #fffdf5;
+}
+
+
+.rr-godown-inventory-table tbody tr.is-low-stock:hover {
+    background: #fffbeb;
+}
+
+
+.rr-godown-inventory-table tbody tr.is-out-of-stock {
+    background: #fffafa;
+}
+
+
+.rr-godown-inventory-table tbody tr.is-out-of-stock:hover {
+    background: #fff1f2;
+}
+
+
+.rr-godown-inventory-table .number {
+    text-align: right;
+
+    font-variant-numeric: tabular-nums;
+}
+
+
+.rr-godown-inventory-table .center {
+    text-align: center;
+}
+
+
+/* ==========================================================================
+   PRODUCT CELL
+   ========================================================================== */
+
+.rr-godown-product-cell {
+    min-width: 220px;
+
+    display: flex;
+    align-items: center;
+
+    gap: 9px;
+}
+
+
+.rr-godown-product-avatar {
+    width: 36px;
+    height: 36px;
+
+    flex: 0 0 36px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 8px;
+
+    background: #eff6ff;
+
+    color: #2563eb;
+
+    font-size: 11px;
+    font-weight: 900;
+}
+
+
+.rr-godown-product-cell>div:last-child {
+    min-width: 0;
+
+    display: flex;
+    flex-direction: column;
+
+    gap: 2px;
+}
+
+
+.rr-godown-product-cell strong {
+    max-width: 260px;
+
+    overflow: hidden;
+
+    color: #0f172a;
+
+    font-size: 12px;
+    font-weight: 800;
+
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+
+.rr-godown-product-cell span {
+    max-width: 260px;
+
+    overflow: hidden;
+
+    color: #94a3b8;
+
+    font-size: 11px;
+    font-weight: 600;
+
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+
+/* ==========================================================================
+   UNIT BADGE
+   ========================================================================== */
+
+.rr-godown-product-unit {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    min-width: 40px;
+
+    padding: 4px 7px;
+
+    border: 1px solid #dbeafe;
+    border-radius: 5px;
+
+    background: #eff6ff;
+
+    color: #1d4ed8;
+
+    font-size: 11px;
+    font-weight: 800;
+}
+
+
+/* ==========================================================================
+   STOCK VALUES
+   ========================================================================== */
+
+.rr-godown-inventory-table .stock-low {
+    color: #b45309;
+}
+
+
+.rr-godown-inventory-table .stock-zero {
+    color: #be123c;
+}
+
+
+/* ==========================================================================
+   MARGIN
+   ========================================================================== */
+
+.rr-godown-margin {
+    font-weight: 800;
+}
+
+
+.rr-godown-margin.positive {
+    color: #15803d;
+}
+
+
+.rr-godown-margin.negative {
+    color: #be123c;
+}
+
+
+/* ==========================================================================
+   STOCK BADGES
+   ========================================================================== */
+
+.rr-godown-stock-badge {
+    min-width: 82px;
+
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    gap: 5px;
+
+    padding: 5px 8px;
+
+    border-radius: 999px;
+
+    font-size: 11px;
+    font-weight: 800;
+
+    white-space: nowrap;
+}
+
+
+.rr-godown-stock-badge.good {
+    border: 1px solid #bbf7d0;
+
+    background: #f0fdf4;
+
+    color: #15803d;
+}
+
+
+.rr-godown-stock-badge.low {
+    border: 1px solid #fde68a;
+
+    background: #fffbeb;
+
+    color: #b45309;
+}
+
+
+.rr-godown-stock-badge.out {
+    border: 1px solid #fecaca;
+
+    background: #fff1f2;
+
+    color: #be123c;
+}
+
+
+/* ==========================================================================
+   PRODUCT STATUS
+   ========================================================================== */
+
+.rr-godown-product-status {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    min-width: 68px;
+
+    padding: 5px 8px;
+
+    border-radius: 999px;
+
+    font-size: 11px;
+    font-weight: 800;
+}
+
+
+.rr-godown-product-status.active {
+    border: 1px solid #bbf7d0;
+
+    background: #f0fdf4;
+
+    color: #15803d;
+}
+
+
+.rr-godown-product-status.inactive {
+    border: 1px solid #e2e8f0;
+
+    background: #f8fafc;
+
+    color: #64748b;
+}
+
+
+/* ==========================================================================
+   EMPTY INVENTORY
+   ========================================================================== */
+
+.rr-godown-inventory-empty {
+    min-height: 280px;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+
+    padding: 40px 20px;
+
+    text-align: center;
+}
+
+
+.rr-godown-inventory-empty>div {
+    width: 54px;
+    height: 54px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    margin-bottom: 12px;
+
+    border-radius: 12px;
+
+    background: #f1f5f9;
+
+    color: #64748b;
+}
+
+
+.rr-godown-inventory-empty>div i {
+    font-size: 22px;
+}
+
+
+.rr-godown-inventory-empty strong {
+    color: #0f172a;
+
+    font-size: 14px;
+    font-weight: 800;
+}
+
+
+.rr-godown-inventory-empty>span {
+    max-width: 440px;
+
+    margin-top: 5px;
+
+    color: #64748b;
+
+    font-size: 12px;
+    line-height: 1.5;
+}
+
+
+/* ==========================================================================
+   INVENTORY PAGINATION
+   ========================================================================== */
+
+.rr-godown-inventory-pagination {
+    min-height: 56px;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    gap: 16px;
+
+    padding: 10px 16px;
+
+    border-top: 1px solid #e2e8f0;
+}
+
+
+.rr-godown-inventory-pagination>div:first-child {
+    display: flex;
+    align-items: center;
+
+    gap: 5px;
+
+    color: #64748b;
+
+    font-size: 12px;
+}
+
+
+.rr-godown-inventory-pagination strong {
+    color: #334155;
+
+    font-weight: 800;
+}
+
+
+.rr-godown-inventory-pagination-links {
+    display: flex;
+    align-items: center;
+
+    gap: 4px;
+}
+
+
+.rr-godown-inventory-page-link {
+    min-width: 34px;
+    height: 34px;
+
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    padding: 0 8px;
+
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+
+    background: #ffffff;
+
+    color: #475569;
+
+    font-size: 12px;
+    font-weight: 700;
+
+    text-decoration: none;
+}
+
+
+.rr-godown-inventory-page-link:hover {
+    border-color: #bfdbfe;
+
+    background: #eff6ff;
+
+    color: #2563eb;
+}
+
+
+.rr-godown-inventory-page-link.active {
+    border-color: #2563eb;
+
+    background: #2563eb;
+
+    color: #ffffff;
+}
+
+
+.rr-godown-inventory-page-link.disabled {
+    opacity: .45;
+
+    pointer-events: none;
+}
+
+
+/* ==========================================================================
+   RESPONSIVE INVENTORY
+   ========================================================================== */
+
+@media (max-width: 1250px) {
+
+    .rr-godown-inventory-summary {
+        grid-template-columns:
+            repeat(3,
+                minmax(0, 1fr));
+    }
+}
+
+
+@media (max-width: 1000px) {
+
+    .rr-godown-inventory-header {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+
+    .rr-godown-inventory-header-actions {
+        justify-content: flex-end;
+    }
+
+
+    .rr-godown-inventory-summary {
+        grid-template-columns:
+            repeat(2,
+                minmax(0, 1fr));
+    }
+}
+
+
+@media (max-width: 767px) {
+
+    .rr-godown-inventory-header {
+        padding: 15px;
+    }
+
+
+    .rr-godown-inventory-header-main {
+        align-items: flex-start;
+    }
+
+
+    .rr-godown-inventory-header-icon {
+        display: none;
+    }
+
+
+    .rr-godown-inventory-header-actions {
+        width: 100%;
+
+        flex-direction: column;
+    }
+
+
+    .rr-godown-inventory-header-actions>* {
+        width: 100%;
+    }
+
+
+    .rr-godown-inventory-summary {
+        grid-template-columns: 1fr;
+    }
+
+
+    .rr-godown-inventory-search {
+        width: 100%;
+
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+
+    .rr-godown-inventory-search-btn {
+        width: 100%;
+    }
+
+
+    .rr-godown-inventory-filter-row {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+
+    .rr-godown-inventory-filter {
+        width: 100%;
+    }
+
+
+    .rr-godown-inventory-filter select {
+        width: 100%;
+    }
+
+
+    .rr-godown-inventory-clear {
+        width: 100%;
+    }
+
+
+    .rr-godown-inventory-grid-status {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+
+    .rr-godown-inventory-pagination {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+
+    .rr-godown-inventory-pagination-links {
+        overflow-x: auto;
+
+        padding-bottom: 3px;
+    }
+}
