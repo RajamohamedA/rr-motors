@@ -8,32 +8,147 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::create('units', function (Blueprint $table) {
+        Schema::create(
+            'units',
+            function (Blueprint $table) {
 
-            $table->id();
+                $table->id();
 
-            $table->foreignId('company_id')
-                  ->constrained()
-                  ->cascadeOnDelete();
 
-            $table->string('unit_name',100);
+                /*
+                |--------------------------------------------------------------------------
+                | Company
+                |--------------------------------------------------------------------------
+                */
 
-            $table->string('short_name',20);
+                $table->foreignId(
+                    'company_id'
+                )
+                    ->constrained('companies')
+                    ->cascadeOnDelete();
 
-            $table->text('description')->nullable();
 
-            $table->boolean('status')->default(true);
+                /*
+                |--------------------------------------------------------------------------
+                | Store / Branch
+                |--------------------------------------------------------------------------
+                */
 
-            $table->timestamps();
+                $table->foreignId(
+                    'store_id'
+                )
+                    ->constrained('stores')
+                    ->cascadeOnDelete();
 
-            $table->unique(['company_id','unit_name']);
-            $table->unique(['company_id','short_name']);
 
-        });
+                /*
+                |--------------------------------------------------------------------------
+                | Unit Details
+                |--------------------------------------------------------------------------
+                */
+
+                $table->string(
+                    'unit_name',
+                    100
+                );
+
+
+                $table->string(
+                    'short_name',
+                    20
+                );
+
+
+                $table->text(
+                    'description'
+                )
+                    ->nullable();
+
+
+                /*
+                |--------------------------------------------------------------------------
+                | System Unit
+                |--------------------------------------------------------------------------
+                |
+                | Default units such as Nos, Pcs, Kg, Ltr, Mtr etc.
+                | will have this flag enabled.
+                |
+                */
+
+                $table->boolean(
+                    'is_system_unit'
+                )
+                    ->default(false);
+
+
+                /*
+                |--------------------------------------------------------------------------
+                | Status
+                |--------------------------------------------------------------------------
+                */
+
+                $table->boolean(
+                    'status'
+                )
+                    ->default(true);
+
+
+                $table->timestamps();
+
+
+                /*
+                |--------------------------------------------------------------------------
+                | Branch Scoped Unit Name
+                |--------------------------------------------------------------------------
+                */
+
+                $table->unique(
+                    [
+                        'store_id',
+                        'unit_name',
+                    ],
+                    'units_store_id_unit_name_unique'
+                );
+
+
+                /*
+                |--------------------------------------------------------------------------
+                | Branch Scoped Short Name
+                |--------------------------------------------------------------------------
+                */
+
+                $table->unique(
+                    [
+                        'store_id',
+                        'short_name',
+                    ],
+                    'units_store_id_short_name_unique'
+                );
+
+
+                /*
+                |--------------------------------------------------------------------------
+                | Business Context Index
+                |--------------------------------------------------------------------------
+                */
+
+                $table->index(
+                    [
+                        'company_id',
+                        'store_id',
+                        'status',
+                    ],
+                    'units_company_store_status_index'
+                );
+            }
+        );
     }
+
 
     public function down(): void
     {
-        Schema::dropIfExists('units');
+        Schema::dropIfExists(
+            'units'
+        );
     }
 };

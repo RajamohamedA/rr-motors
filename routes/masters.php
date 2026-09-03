@@ -499,6 +499,22 @@ Route::resource(
 |--------------------------------------------------------------------------
 */
 
+Route::patch(
+    '/units/{unit}/toggle-status',
+    [
+        UnitController::class,
+        'toggleStatus',
+    ]
+)->name(
+    'units.toggle-status'
+);
+
+
+Route::resource(
+    'units',
+    UnitController::class
+);
+
 Route::resource(
     'units',
     UnitController::class

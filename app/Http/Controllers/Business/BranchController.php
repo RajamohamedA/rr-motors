@@ -8,6 +8,7 @@ use App\Models\Store;
 use App\Models\User;
 use App\Notifications\BranchApprovalRequested;
 use App\Support\AppResponse;
+use App\Services\UnitProvisioningService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -277,7 +278,8 @@ class BranchController extends Controller
     */
 
     public function store(
-        Request $request
+        Request $request,
+        UnitProvisioningService $unitProvisioningService
     ): RedirectResponse {
 
         $user =
@@ -588,6 +590,22 @@ class BranchController extends Controller
                     ]);
                 }
             );
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Provision Default Units
+        |--------------------------------------------------------------------------
+        |
+        | Every newly created branch receives the standard system units
+        | automatically. updateOrCreate() inside the service keeps this safe
+        | if provisioning is ever triggered again for the same branch.
+        |
+        */
+
+        $unitProvisioningService->provision(
+            $store
+        );
 
 
         /*

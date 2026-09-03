@@ -7,6 +7,7 @@ use App\Models\Company;
 use App\Models\Store;
 use App\Services\ActivityLogger;
 use App\Services\SuperAdminNotificationService;
+use App\Services\UnitProvisioningService;
 use App\Support\AppResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -148,7 +149,8 @@ class BranchController extends Controller
 
     public function store(
         Request $request,
-        Company $company
+        Company $company,
+        UnitProvisioningService $unitProvisioningService
     ) {
 
         /*
@@ -248,7 +250,8 @@ class BranchController extends Controller
             DB::transaction(
                 function () use (
                     $company,
-                    $validated
+                    $validated,
+                    $unitProvisioningService
                 ) {
 
                     /*
@@ -351,20 +354,39 @@ class BranchController extends Controller
                     |--------------------------------------------------------------------------
                     */
 
-                    return Store::create([
+                    $store =
+                        Store::create([
 
-                        ...$validated,
+                            ...$validated,
 
-                        'company_id' =>
-                        $lockedCompany->id,
+                            'company_id' =>
+                            $lockedCompany->id,
 
-                        'branch_number' =>
-                        $nextBranchNumber,
+                            'branch_number' =>
+                            $nextBranchNumber,
 
-                        'store_code' =>
-                        $storeCode,
+                            'store_code' =>
+                            $storeCode,
 
-                    ]);
+                        ]);
+
+
+                    /*
+                    |--------------------------------------------------------------------------
+                    | Provision Default Units
+                    |--------------------------------------------------------------------------
+                    |
+                    | This runs inside the same transaction. If default-unit
+                    | provisioning fails, branch creation is rolled back too.
+                    |
+                    */
+
+                    $unitProvisioningService->provision(
+                        $store
+                    );
+
+
+                    return $store;
                 }
             );
 
