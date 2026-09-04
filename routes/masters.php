@@ -527,6 +527,17 @@ Route::resource(
 |--------------------------------------------------------------------------
 */
 
+Route::patch(
+    '/products/{product}/toggle-status',
+    [
+        ProductController::class,
+        'toggleStatus',
+    ]
+)->name(
+    'products.toggle-status'
+);
+
+
 Route::resource(
     'products',
     ProductController::class
