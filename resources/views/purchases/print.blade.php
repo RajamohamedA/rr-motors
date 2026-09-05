@@ -1,583 +1,985 @@
-@extends('layouts.app')
+<!DOCTYPE html>
+<html lang="en">
 
-@section('title', 'Purchase Print')
+<head>
+    <meta charset="UTF-8">
 
-@section('content')
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0">
 
-<div class="container-fluid">
+    <title>
+        Purchase {{ $purchase->purchase_no }}
+    </title>
 
-    <!-- Print / Close Buttons -->
-    <div class="d-flex justify-content-end gap-2 mb-3 no-print">
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+
+            padding: 20px;
+
+            background: #ffffff;
+
+            color: #111827;
+
+            font-family:
+                Arial,
+                Helvetica,
+                sans-serif;
+
+            font-size: 12px;
+        }
+
+        .print-page {
+            max-width: 1050px;
+
+            margin: 0 auto;
+        }
+
+        .print-header {
+            display: flex;
+
+            align-items: flex-start;
+
+            justify-content: space-between;
+
+            gap: 20px;
+
+            padding-bottom: 14px;
+
+            border-bottom: 2px solid #111827;
+        }
+
+        .company-block h1 {
+            margin: 0;
+
+            font-size: 22px;
+
+            font-weight: 800;
+        }
+
+        .company-block p {
+            margin: 4px 0 0;
+
+            color: #4b5563;
+
+            font-size: 12px;
+
+            line-height: 1.45;
+        }
+
+        .document-title {
+            text-align: right;
+        }
+
+        .document-title h2 {
+            margin: 0;
+
+            font-size: 22px;
+
+            font-weight: 800;
+        }
+
+        .document-title span {
+            display: block;
+
+            margin-top: 4px;
+
+            color: #4b5563;
+
+            font-size: 12px;
+        }
+
+        .info-grid {
+            display: grid;
+
+            grid-template-columns:
+                repeat(2, minmax(0, 1fr));
+
+            gap: 12px;
+
+            margin-top: 14px;
+        }
+
+        .info-box {
+            border: 1px solid #d1d5db;
+
+            border-radius: 6px;
+
+            overflow: hidden;
+        }
+
+        .info-box-title {
+            padding: 7px 9px;
+
+            border-bottom: 1px solid #d1d5db;
+
+            background: #f3f4f6;
+
+            font-size: 12px;
+
+            font-weight: 700;
+
+            text-transform: uppercase;
+        }
+
+        .info-box-body {
+            padding: 9px;
+        }
+
+        .info-row {
+            display: flex;
+
+            justify-content: space-between;
+
+            gap: 12px;
+
+            padding: 3px 0;
+        }
+
+        .info-row span {
+            color: #6b7280;
+        }
+
+        .info-row strong {
+            text-align: right;
+
+            font-weight: 700;
+        }
+
+        .tax-badge {
+            display: inline-block;
+
+            padding: 3px 7px;
+
+            border-radius: 999px;
+
+            background: #f3f4f6;
+
+            font-size: 11px;
+
+            font-weight: 700;
+        }
+
+        .tax-badge.gst {
+            background: #dcfce7;
+
+            color: #166534;
+        }
+
+        .tax-badge.non-gst {
+            background: #e5e7eb;
+
+            color: #4b5563;
+        }
+
+        .items-table {
+            width: 100%;
+
+            margin-top: 14px;
+
+            border-collapse: collapse;
+        }
+
+        .items-table th {
+            padding: 7px 6px;
+
+            border: 1px solid #9ca3af;
+
+            background: #e5e7eb;
+
+            font-size: 10px;
+
+            font-weight: 700;
+
+            text-transform: uppercase;
+        }
+
+        .items-table td {
+            padding: 7px 6px;
+
+            border: 1px solid #d1d5db;
+
+            vertical-align: top;
+        }
+
+        .items-table .number {
+            text-align: right;
+
+            white-space: nowrap;
+        }
+
+        .items-table .center {
+            text-align: center;
+        }
+
+        .product-name {
+            font-weight: 700;
+        }
+
+        .product-meta {
+            margin-top: 2px;
+
+            color: #6b7280;
+
+            font-size: 10px;
+        }
+
+        .location {
+            font-weight: 700;
+        }
+
+        .location.shop {
+            color: #1d4ed8;
+        }
+
+        .location.godown {
+            color: #6d28d9;
+        }
+
+        .summary-section {
+            display: flex;
+
+            justify-content: flex-end;
+
+            margin-top: 14px;
+        }
+
+        .summary-table {
+            width: 360px;
+
+            border-collapse: collapse;
+        }
+
+        .summary-table td {
+            padding: 6px 8px;
+
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .summary-table td:first-child {
+            color: #4b5563;
+        }
+
+        .summary-table td:last-child {
+            text-align: right;
+
+            font-weight: 700;
+        }
+
+        .summary-table .grand-total td {
+            border-top: 2px solid #111827;
+
+            border-bottom: 2px solid #111827;
+
+            background: #f3f4f6;
+
+            font-size: 14px;
+
+            font-weight: 800;
+        }
+
+        .summary-table .balance td {
+            font-size: 13px;
+
+            font-weight: 800;
+        }
+
+        .remarks {
+            margin-top: 14px;
+
+            padding: 10px;
+
+            border: 1px solid #d1d5db;
+
+            border-radius: 6px;
+        }
+
+        .remarks strong {
+            display: block;
+
+            margin-bottom: 4px;
+        }
+
+        .remarks p {
+            margin: 0;
+
+            color: #4b5563;
+
+            line-height: 1.5;
+        }
+
+        .footer {
+            display: flex;
+
+            justify-content: space-between;
+
+            gap: 20px;
+
+            margin-top: 42px;
+        }
+
+        .signature {
+            min-width: 180px;
+
+            padding-top: 8px;
+
+            border-top: 1px solid #111827;
+
+            text-align: center;
+
+            font-size: 11px;
+
+            font-weight: 700;
+        }
+
+        .print-actions {
+            display: flex;
+
+            justify-content: flex-end;
+
+            gap: 8px;
+
+            max-width: 1050px;
+
+            margin: 0 auto 12px;
+        }
+
+        .print-actions button {
+            min-height: 36px;
+
+            padding: 0 14px;
+
+            border: 1px solid #9ca3af;
+
+            border-radius: 5px;
+
+            background: #ffffff;
+
+            color: #111827;
+
+            font-size: 12px;
+
+            font-weight: 700;
+
+            cursor: pointer;
+        }
+
+        .print-actions .primary {
+            border-color: #2563eb;
+
+            background: #2563eb;
+
+            color: #ffffff;
+        }
+
+        @media print {
+            body {
+                padding: 0;
+            }
+
+            .print-actions {
+                display: none;
+            }
+
+            .print-page {
+                max-width: none;
+            }
+
+            @page {
+                size: A4 landscape;
+
+                margin: 10mm;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="print-actions">
 
         <button
             type="button"
-            class="btn btn-primary"
-            onclick="window.print()">
-
-            <i class="fas fa-print"></i>
-            Print
-
+            onclick="window.close()">
+            Close
         </button>
 
         <button
             type="button"
-            class="btn btn-secondary"
-            onclick="window.close()">
-
-            <i class="fas fa-times"></i>
-            Close
-
+            class="primary"
+            onclick="window.print()">
+            Print
         </button>
 
     </div>
 
 
-    <!-- Purchase Document -->
-    <div class="card">
+    <div class="print-page">
 
-        <!-- Header -->
-        <div class="card-header text-center">
+        {{-- =========================================================
+             HEADER
+             ========================================================= --}}
 
-            <h3 class="mb-1">
-                PURCHASE
-            </h3>
+        <div class="print-header">
 
-            <h5 class="mb-0">
-                {{ $purchase->purchase_no }}
-            </h5>
+            <div class="company-block">
+
+                <h1>
+                    {{ $purchase->company?->company_name ?? 'Company' }}
+                </h1>
+
+                <p>
+                    {{ $purchase->store?->store_name ?? 'Branch' }}
+                </p>
+
+                @if($purchase->company?->address)
+                <p>
+                    {{ $purchase->company->address }}
+                </p>
+                @endif
+
+                @if($purchase->company?->city || $purchase->company?->state)
+                <p>
+                    {{ $purchase->company?->city }}
+
+                    @if($purchase->company?->city && $purchase->company?->state)
+                    ,
+                    @endif
+
+                    {{ $purchase->company?->state }}
+                </p>
+                @endif
+
+                @if($purchase->company?->gst_number)
+                <p>
+                    GSTIN:
+                    <strong>
+                        {{ $purchase->company->gst_number }}
+                    </strong>
+                </p>
+                @endif
+
+            </div>
+
+
+            <div class="document-title">
+
+                <h2>
+                    PURCHASE
+                </h2>
+
+                <span>
+                    {{ $purchase->purchase_no }}
+                </span>
+
+                <span>
+                    {{ optional($purchase->purchase_date)->format('d-m-Y') }}
+                </span>
+
+            </div>
 
         </div>
 
 
-        <div class="card-body">
+        {{-- =========================================================
+             PURCHASE / SUPPLIER INFO
+             ========================================================= --}}
 
-            <!-- Company / Purchase Information -->
-            <div class="row mb-3">
+        <div class="info-grid">
 
-                <!-- Company -->
-                <div class="col-md-4">
+            <div class="info-box">
 
-                    <h6 class="fw-bold">
-                        Company
-                    </h6>
-
-                    <div>
-                        {{ $purchase->company->company_name ?? '-' }}
-                    </div>
-
+                <div class="info-box-title">
+                    Purchase Information
                 </div>
 
+                <div class="info-box-body">
 
-                <!-- Store -->
-                <div class="col-md-4">
+                    <div class="info-row">
 
-                    <h6 class="fw-bold">
-                        Store
-                    </h6>
-
-                    <div>
-                        {{ $purchase->store->store_name ?? '-' }}
-                    </div>
-
-                </div>
-
-
-                <!-- Purchase Date -->
-                <div class="col-md-4">
-
-                    <h6 class="fw-bold">
-                        Purchase Date
-                    </h6>
-
-                    <div>
-
-                        {{ $purchase->purchase_date
-                            ? date(
-                                'd-m-Y',
-                                strtotime($purchase->purchase_date)
-                            )
-                            : '-'
-                        }}
-
-                    </div>
-
-                </div>
-
-            </div>
-
-
-            <hr>
-
-
-            <!-- Supplier / Invoice -->
-            <div class="row mb-4">
-
-                <!-- Supplier -->
-                <div class="col-md-4">
-
-                    <h6 class="fw-bold">
-                        Supplier
-                    </h6>
-
-                    <div>
-                        {{ $purchase->supplier->supplier_name ?? '-' }}
-                    </div>
-
-                    @if($purchase->supplier)
-
-                    @if($purchase->supplier->mobile)
-
-                    <div>
-                        Mobile:
-                        {{ $purchase->supplier->mobile }}
-                    </div>
-
-                    @endif
-
-                    @if($purchase->supplier->gst_no)
-
-                    <div>
-                        GST No:
-                        {{ $purchase->supplier->gst_no }}
-                    </div>
-
-                    @endif
-
-                    @endif
-
-                </div>
-
-
-                <!-- Invoice No -->
-                <div class="col-md-4">
-
-                    <h6 class="fw-bold">
-                        Invoice No
-                    </h6>
-
-                    <div>
-                        {{ $purchase->invoice_no ?: '-' }}
-                    </div>
-
-                </div>
-
-
-                <!-- Invoice Date -->
-                <div class="col-md-4">
-
-                    <h6 class="fw-bold">
-                        Invoice Date
-                    </h6>
-
-                    <div>
-
-                        {{ $purchase->invoice_date
-                            ? date(
-                                'd-m-Y',
-                                strtotime($purchase->invoice_date)
-                            )
-                            : '-'
-                        }}
-
-                    </div>
-
-                </div>
-
-            </div>
-
-
-            <!-- Purchase Items -->
-            <div class="table-responsive">
-
-                <table class="table table-bordered">
-
-                    <thead>
-
-                        <tr>
-
-                            <th width="40">
-                                #
-                            </th>
-
-                            <th>
-                                Code
-                            </th>
-
-                            <th>
-                                Product
-                            </th>
-
-                            <th>
-                                Godown
-                            </th>
-
-                            <th class="text-end">
-                                Qty
-                            </th>
-
-                            <th class="text-end">
-                                Rate
-                            </th>
-
-                            <th class="text-end">
-                                GST %
-                            </th>
-
-                            <th class="text-end">
-                                GST Amt
-                            </th>
-
-                            <th class="text-end">
-                                Total
-                            </th>
-
-                        </tr>
-
-                    </thead>
-
-
-                    <tbody>
-
-                        @forelse($purchase->items as $item)
-
-                        <tr>
-
-                            <!-- # -->
-                            <td>
-                                {{ $loop->iteration }}
-                            </td>
-
-
-                            <!-- Code -->
-                            <td>
-                                {{ $item->product->product_code ?? '-' }}
-                            </td>
-
-
-                            <!-- Product -->
-                            <td>
-
-                                {{ $item->product->product_name ?? '-' }}
-
-                            </td>
-
-
-                            <!-- Godown -->
-                            <td>
-
-                                @if($item->godown)
-
-                                {{ $item->godown->godown_name }}
-
-                                @else
-
-                                Shop / No Godown
-
-                                @endif
-
-                            </td>
-
-
-                            <!-- Qty -->
-                            <td class="text-end">
-
-                                {{ number_format(
-                                        $item->quantity,
-                                        2
-                                    ) }}
-
-                            </td>
-
-
-                            <!-- Rate -->
-                            <td class="text-end">
-
-                                {{ number_format(
-                                        $item->purchase_price,
-                                        2
-                                    ) }}
-
-                            </td>
-
-
-                            <!-- GST % -->
-                            <td class="text-end">
-
-                                {{ number_format(
-                                        $item->gst_percent,
-                                        2
-                                    ) }}
-
-                            </td>
-
-
-                            <!-- GST Amount -->
-                            <td class="text-end">
-
-                                {{ number_format(
-                                        $item->gst_amount,
-                                        2
-                                    ) }}
-
-                            </td>
-
-
-                            <!-- Total -->
-                            <td class="text-end">
-
-                                {{ number_format(
-                                        $item->total_amount,
-                                        2
-                                    ) }}
-
-                            </td>
-
-                        </tr>
-
-                        @empty
-
-                        <tr>
-
-                            <td
-                                colspan="9"
-                                class="text-center">
-
-                                No purchase items found.
-
-                            </td>
-
-                        </tr>
-
-                        @endforelse
-
-                    </tbody>
-
-                </table>
-
-            </div>
-
-
-            <!-- Totals -->
-            <div class="row mt-3">
-
-                <div class="col-md-7">
-
-                    @if($purchase->remarks)
-
-                    <div>
+                        <span>
+                            Purchase No.
+                        </span>
 
                         <strong>
-                            Remarks:
+                            {{ $purchase->purchase_no }}
                         </strong>
 
-                        {{ $purchase->remarks }}
+                    </div>
+
+
+                    <div class="info-row">
+
+                        <span>
+                            Purchase Date
+                        </span>
+
+                        <strong>
+                            {{ optional($purchase->purchase_date)->format('d-m-Y') }}
+                        </strong>
 
                     </div>
+
+
+                    <div class="info-row">
+
+                        <span>
+                            Purchase Type
+                        </span>
+
+                        <strong>
+
+                            @if($purchase->tax_type === 'gst')
+
+                            <span class="tax-badge gst">
+                                GST Purchase
+                            </span>
+
+                            @else
+
+                            <span class="tax-badge non-gst">
+                                Without GST
+                            </span>
+
+                            @endif
+
+                        </strong>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <div class="info-box">
+
+                <div class="info-box-title">
+                    Supplier
+                </div>
+
+
+                <div class="info-box-body">
+
+                    <div class="info-row">
+
+                        <span>
+                            Supplier
+                        </span>
+
+                        <strong>
+                            {{ $purchase->supplier?->supplier_name ?? '-' }}
+                        </strong>
+
+                    </div>
+
+
+                    <div class="info-row">
+
+                        <span>
+                            Supplier Invoice
+                        </span>
+
+                        <strong>
+                            {{ $purchase->invoice_no ?: '-' }}
+                        </strong>
+
+                    </div>
+
+
+                    <div class="info-row">
+
+                        <span>
+                            Invoice Date
+                        </span>
+
+                        <strong>
+
+                            @if($purchase->invoice_date)
+
+                            {{ optional($purchase->invoice_date)->format('d-m-Y') }}
+
+                            @else
+
+                            -
+
+                            @endif
+
+                        </strong>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        {{-- =========================================================
+             ITEMS
+             ========================================================= --}}
+
+        <table class="items-table">
+
+            <thead>
+
+                <tr>
+
+                    <th>
+                        #
+                    </th>
+
+                    <th>
+                        Product
+                    </th>
+
+                    <th>
+                        Location
+                    </th>
+
+                    <th>
+                        Qty
+                    </th>
+
+                    <th>
+                        Free
+                    </th>
+
+                    <th>
+                        Stock Qty
+                    </th>
+
+                    <th>
+                        Rate
+                    </th>
+
+                    <th>
+                        Discount
+                    </th>
+
+                    <th>
+                        Taxable
+                    </th>
+
+                    @if($purchase->tax_type === 'gst')
+
+                    <th>
+                        GST %
+                    </th>
+
+                    <th>
+                        GST Amt
+                    </th>
 
                     @endif
 
-                </div>
+                    <th>
+                        Total
+                    </th>
+
+                </tr>
+
+            </thead>
 
 
-                <div class="col-md-5">
+            <tbody>
 
-                    <table class="table table-bordered">
+                @forelse($purchase->items as $index => $item)
 
-                        <tr>
+                <tr>
 
-                            <th>
-                                Sub Total
-                            </th>
+                    <td class="center">
+                        {{ $index + 1 }}
+                    </td>
 
-                            <td class="text-end">
 
-                                {{ number_format(
-                                    $purchase->sub_total ?? 0,
+                    <td>
+
+                        <div class="product-name">
+                            {{ $item->product?->product_name ?? '-' }}
+                        </div>
+
+
+                        <div class="product-meta">
+
+                            {{ $item->product?->product_code }}
+
+                            @if($item->product?->part_number)
+
+                            • Part:
+                            {{ $item->product->part_number }}
+
+                            @endif
+
+                            @if($item->product?->unit)
+
+                            •
+                            {{
+                                        $item->product->unit->short_name
+                                        ??
+                                        $item->product->unit->unit_name
+                                    }}
+
+                            @endif
+
+                        </div>
+
+                    </td>
+
+
+                    <td>
+
+                        @if($item->godown)
+
+                        <span class="location godown">
+                            {{ $item->godown->godown_name }}
+                        </span>
+
+                        @else
+
+                        <span class="location shop">
+                            Shop
+                        </span>
+
+                        @endif
+
+                    </td>
+
+
+                    <td class="number">
+                        {{ number_format((float) $item->quantity, 2) }}
+                    </td>
+
+
+                    <td class="number">
+                        {{ number_format((float) $item->free_quantity, 2) }}
+                    </td>
+
+
+                    <td class="number">
+                        {{
+                                number_format(
+                                    (float) $item->quantity
+                                    +
+                                    (float) $item->free_quantity,
                                     2
-                                ) }}
-
-                            </td>
-
-                        </tr>
+                                )
+                            }}
+                    </td>
 
 
-                        <tr>
-
-                            <th>
-                                GST Total
-                            </th>
-
-                            <td class="text-end">
-
-                                {{ number_format(
-                                    $purchase->gst_total ?? 0,
-                                    2
-                                ) }}
-
-                            </td>
-
-                        </tr>
+                    <td class="number">
+                        ₹{{ number_format((float) $item->purchase_price, 2) }}
+                    </td>
 
 
-                        <tr>
+                    <td class="number">
+                        ₹{{ number_format((float) $item->discount, 2) }}
+                    </td>
 
-                            <th>
-                                Grand Total
-                            </th>
 
-                            <th class="text-end">
+                    <td class="number">
+                        ₹{{ number_format((float) $item->taxable_amount, 2) }}
+                    </td>
 
-                                {{ number_format(
-                                    $purchase->grand_total ?? 0,
-                                    2
-                                ) }}
 
-                            </th>
+                    @if($purchase->tax_type === 'gst')
 
-                        </tr>
+                    <td class="number">
+                        {{ number_format((float) $item->gst_percent, 2) }}%
+                    </td>
 
-                    </table>
 
-                </div>
+                    <td class="number">
+                        ₹{{ number_format((float) $item->gst_amount, 2) }}
+                    </td>
 
+                    @endif
+
+
+                    <td class="number">
+                        ₹{{ number_format((float) $item->line_total, 2) }}
+                    </td>
+
+                </tr>
+
+                @empty
+
+                <tr>
+
+                    <td
+                        colspan="{{ $purchase->tax_type === 'gst' ? 12 : 10 }}"
+                        class="center">
+                        No purchase items.
+                    </td>
+
+                </tr>
+
+                @endforelse
+
+            </tbody>
+
+        </table>
+
+
+        {{-- =========================================================
+             SUMMARY
+             ========================================================= --}}
+
+        <div class="summary-section">
+
+            <table class="summary-table">
+
+                <tr>
+
+                    <td>
+                        Subtotal
+                    </td>
+
+                    <td>
+                        ₹{{ number_format((float) $purchase->subtotal, 2) }}
+                    </td>
+
+                </tr>
+
+
+                <tr>
+
+                    <td>
+                        Discount
+                    </td>
+
+                    <td>
+                        - ₹{{ number_format((float) $purchase->discount, 2) }}
+                    </td>
+
+                </tr>
+
+
+                @if($purchase->tax_type === 'gst')
+
+                <tr>
+
+                    <td>
+                        GST
+                    </td>
+
+                    <td>
+                        ₹{{ number_format((float) $purchase->tax_amount, 2) }}
+                    </td>
+
+                </tr>
+
+                @endif
+
+
+                <tr>
+
+                    <td>
+                        Other Charges
+                    </td>
+
+                    <td>
+                        ₹{{ number_format((float) $purchase->other_charges, 2) }}
+                    </td>
+
+                </tr>
+
+
+                <tr class="grand-total">
+
+                    <td>
+                        Grand Total
+                    </td>
+
+                    <td>
+                        ₹{{ number_format((float) $purchase->grand_total, 2) }}
+                    </td>
+
+                </tr>
+
+
+                <tr>
+
+                    <td>
+                        Paid Amount
+                    </td>
+
+                    <td>
+                        ₹{{ number_format((float) $purchase->paid_amount, 2) }}
+                    </td>
+
+                </tr>
+
+
+                <tr class="balance">
+
+                    <td>
+                        Balance
+                    </td>
+
+                    <td>
+                        ₹{{ number_format((float) $purchase->balance_amount, 2) }}
+                    </td>
+
+                </tr>
+
+            </table>
+
+        </div>
+
+
+        {{-- =========================================================
+             REMARKS
+             ========================================================= --}}
+
+        @if($purchase->remarks)
+
+        <div class="remarks">
+
+            <strong>
+                Remarks
+            </strong>
+
+            <p>
+                {{ $purchase->remarks }}
+            </p>
+
+        </div>
+
+        @endif
+
+
+        {{-- =========================================================
+             SIGNATURE
+             ========================================================= --}}
+
+        <div class="footer">
+
+            <div class="signature">
+                Prepared By
             </div>
 
 
-            <!-- Signature -->
-            <div class="row mt-5">
-
-                <div class="col-6">
-
-                    <div class="text-center">
-
-                        <br>
-                        <br>
-
-                        __________________________
-
-                        <br>
-
-                        Supplier Signature
-
-                    </div>
-
-                </div>
-
-
-                <div class="col-6">
-
-                    <div class="text-center">
-
-                        <br>
-                        <br>
-
-                        __________________________
-
-                        <br>
-
-                        Authorized Signature
-
-                    </div>
-
-                </div>
-
+            <div class="signature">
+                Checked By
             </div>
 
 
-            <!-- Footer -->
-            <div class="text-center mt-4">
-
-                <small class="text-muted">
-
-                    Purchase No:
-                    {{ $purchase->purchase_no }}
-
-                </small>
-
+            <div class="signature">
+                Authorized Signature
             </div>
 
         </div>
 
     </div>
 
-</div>
+</body>
 
-
-<style>
-    body {
-        background: #fff !important;
-    }
-
-
-    @media print {
-
-        @page {
-            size: A4;
-            margin: 10mm;
-        }
-
-
-        .no-print {
-            display: none !important;
-        }
-
-
-        .navbar,
-        .sidebar,
-        .main-sidebar,
-        .app-sidebar,
-        footer {
-            display: none !important;
-        }
-
-
-        .container-fluid {
-            width: 100% !important;
-            max-width: 100% !important;
-            margin: 0 !important;
-            padding: 0 !important;
-        }
-
-
-        .card {
-            border: none !important;
-            box-shadow: none !important;
-        }
-
-
-        .card-header {
-            background: transparent !important;
-            color: #000 !important;
-            border-bottom: 2px solid #000 !important;
-        }
-
-
-        .table {
-            width: 100% !important;
-            border-collapse: collapse !important;
-        }
-
-
-        .table th,
-        .table td {
-            border: 1px solid #000 !important;
-            padding: 5px !important;
-        }
-
-
-        .table thead th {
-            background: #eee !important;
-            color: #000 !important;
-            -webkit-print-color-adjust: exact;
-            print-color-adjust: exact;
-        }
-
-
-        tr {
-            page-break-inside: avoid;
-        }
-
-    }
-</style>
-
-@endsection
+</html>

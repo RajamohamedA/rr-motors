@@ -986,11 +986,13 @@ class ProductController extends Controller implements HasMiddleware
             );
 
 
+
         $this->validateMasters(
             $validated,
             $companyId,
             $storeId
         );
+
 
 
         /*
@@ -1930,35 +1932,43 @@ class ProductController extends Controller implements HasMiddleware
     ): void {
 
         /*
-        |--------------------------------------------------------------------------
-        | Category
-        |--------------------------------------------------------------------------
-        */
+    |--------------------------------------------------------------------------
+    | Category
+    |--------------------------------------------------------------------------
+    */
 
-        Category::query()
-
+        $categoryExists =
+            Category::query()
             ->where(
                 'company_id',
                 $companyId
             )
-
             ->where(
                 'store_id',
                 $storeId
             )
-
             ->whereKey(
                 $data['category_id']
             )
+            ->exists();
 
-            ->firstOrFail();
+
+        if (
+            !$categoryExists
+        ) {
+
+            throw \Illuminate\Validation\ValidationException::withMessages([
+                'category_id' =>
+                'The selected category does not belong to the active branch.',
+            ]);
+        }
 
 
         /*
-        |--------------------------------------------------------------------------
-        | Brand
-        |--------------------------------------------------------------------------
-        */
+    |--------------------------------------------------------------------------
+    | Brand
+    |--------------------------------------------------------------------------
+    */
 
         if (
             filled(
@@ -1967,56 +1977,72 @@ class ProductController extends Controller implements HasMiddleware
             )
         ) {
 
-            Brand::query()
-
+            $brandExists =
+                Brand::query()
                 ->where(
                     'company_id',
                     $companyId
                 )
-
                 ->where(
                     'store_id',
                     $storeId
                 )
-
                 ->whereKey(
                     $data['brand_id']
                 )
+                ->exists();
 
-                ->firstOrFail();
+
+            if (
+                !$brandExists
+            ) {
+
+                throw \Illuminate\Validation\ValidationException::withMessages([
+                    'brand_id' =>
+                    'The selected brand does not belong to the active branch.',
+                ]);
+            }
         }
 
 
         /*
-        |--------------------------------------------------------------------------
-        | Unit
-        |--------------------------------------------------------------------------
-        */
+    |--------------------------------------------------------------------------
+    | Unit
+    |--------------------------------------------------------------------------
+    */
 
-        Unit::query()
-
+        $unitExists =
+            Unit::query()
             ->where(
                 'company_id',
                 $companyId
             )
-
             ->where(
                 'store_id',
                 $storeId
             )
-
             ->whereKey(
                 $data['unit_id']
             )
+            ->exists();
 
-            ->firstOrFail();
+
+        if (
+            !$unitExists
+        ) {
+
+            throw \Illuminate\Validation\ValidationException::withMessages([
+                'unit_id' =>
+                'The selected unit does not belong to the active branch.',
+            ]);
+        }
 
 
         /*
-        |--------------------------------------------------------------------------
-        | Supplier
-        |--------------------------------------------------------------------------
-        */
+    |--------------------------------------------------------------------------
+    | Supplier
+    |--------------------------------------------------------------------------
+    */
 
         if (
             filled(
@@ -2025,29 +2051,41 @@ class ProductController extends Controller implements HasMiddleware
             )
         ) {
 
-            Supplier::query()
-
+            $supplierExists =
+                Supplier::query()
                 ->where(
                     'company_id',
                     $companyId
                 )
-
                 ->whereKey(
                     $data['supplier_id']
                 )
-
                 ->whereHas(
                     'stores',
-                    fn(
+                    function (
                         Builder $query
-                    ) =>
-                    $query->where(
-                        'stores.id',
+                    ) use (
                         $storeId
-                    )
-                )
+                    ) {
 
-                ->firstOrFail();
+                        $query->where(
+                            'stores.id',
+                            $storeId
+                        );
+                    }
+                )
+                ->exists();
+
+
+            if (
+                !$supplierExists
+            ) {
+
+                throw \Illuminate\Validation\ValidationException::withMessages([
+                    'supplier_id' =>
+                    'The selected supplier is not available for the active branch.',
+                ]);
+            }
         }
     }
 

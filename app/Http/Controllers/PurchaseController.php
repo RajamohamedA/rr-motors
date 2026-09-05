@@ -2,469 +2,2193 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Support\Facades\DB;
-use Illuminate\Http\Request;
-use App\Http\Requests\PurchaseRequest;
+use App\Models\Company;
+use App\Models\Godown;
+use App\Models\Product;
 use App\Models\Purchase;
 use App\Models\PurchaseItem;
-use App\Models\Product;
-use App\Models\Company;
+use App\Models\PurchaseReturn;
 use App\Models\Store;
 use App\Models\Supplier;
 use App\Services\StockService;
-use App\Models\StockLedger;
-use App\Models\PurchaseReturn;
-use App\Models\Godown;
+use App\Support\AppResponse;
+
+use Illuminate\Http\Request;
 use Illuminate\Routing\Controllers\HasMiddleware;
 use Illuminate\Routing\Controllers\Middleware;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Validation\Rule;
+use Illuminate\Validation\ValidationException;
+use Barryvdh\DomPDF\Facade\Pdf;
+
+use Inertia\Inertia;
+use Inertia\Response;
 
 
 class PurchaseController extends Controller implements HasMiddleware
 {
+    /*
+    |--------------------------------------------------------------------------
+    | Stock Service
+    |--------------------------------------------------------------------------
+    */
 
-    protected $stockService;
+    protected StockService $stockService;
 
-    public function __construct(StockService $stockService)
-    {
-        $this->stockService = $stockService;
+
+    public function __construct(
+        StockService $stockService
+    ) {
+        $this->stockService =
+            $stockService;
     }
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Middleware
+    |--------------------------------------------------------------------------
+    */
 
     public static function middleware(): array
     {
         return [
-            new Middleware('permission:purchase.view', only: ['index', 'show', 'search', 'print']),
-            new Middleware('permission:purchase.create', only: ['create', 'store']),
-            new Middleware('permission:purchase.edit', only: ['edit', 'update']),
-            new Middleware('permission:purchase.delete', only: ['destroy']),
+
+            new Middleware(
+                'permission:purchase.view',
+                only: [
+                    'index',
+                    'show',
+                    'print',
+                    'pdf',
+                ]
+            ),
+
+            new Middleware(
+                'permission:purchase.create',
+                only: [
+                    'create',
+                    'store',
+                ]
+            ),
+
+            new Middleware(
+                'permission:purchase.edit',
+                only: [
+                    'edit',
+                    'update',
+                ]
+            ),
+
+            new Middleware(
+                'permission:purchase.delete',
+                only: [
+                    'destroy',
+                ]
+            ),
         ];
     }
 
-    public function index()
-    {
-        $purchases = Purchase::with([
-            'company',
-            'store',
-            'supplier'
-        ])
-            ->latest()
-            ->paginate(15);
 
-        return view('purchases.index', compact('purchases'));
-    }
+    /*
+    |--------------------------------------------------------------------------
+    | INDEX
+    |--------------------------------------------------------------------------
+    */
 
-    public function create()
-    {
-        $purchaseNo = 'PUR' . str_pad((Purchase::max('id') ?? 0) + 1, 6, '0', STR_PAD_LEFT);
+    public function index(
+        Request $request
+    ): Response {
 
-        $companies = Company::where('status', 1)->get();
-        $stores = [];
-        $suppliers = [];
+        [
+            $companyId,
+            $storeId,
+        ] = $this->context(
+            $request
+        );
 
-        return view('purchases.create', compact(
-            'purchaseNo',
-            'companies',
-            'stores',
-            'suppliers'
-        ));
-    }
 
-    public function search(Request $request)
-    {
-        $search = $request->search;
+        $search =
+            trim(
+                (string) $request->input(
+                    'search',
+                    ''
+                )
+            );
 
-        $products = Product::where('status', 1)
-            ->where(function ($q) use ($search) {
 
-                $q->where('product_code', 'like', "%{$search}%")
-                    ->orWhere('barcode', 'like', "%{$search}%")
-                    ->orWhere('product_name', 'like', "%{$search}%")
-                    ->orWhere('part_number', 'like', "%{$search}%");
-            })
-            ->select(
-                'id',
-                'product_code',
-                'product_name',
-                'purchase_price',
-                'gst_percent',
-                'current_stock'
+        $supplierId =
+            $request->input(
+                'supplier_id'
+            );
+
+
+        $taxType =
+            $request->input(
+                'tax_type'
+            );
+
+
+        $status =
+            $request->input(
+                'status'
+            );
+
+
+        $dateFrom =
+            $request->input(
+                'date_from'
+            );
+
+
+        $dateTo =
+            $request->input(
+                'date_to'
+            );
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Base Query
+        |--------------------------------------------------------------------------
+        */
+
+        $query =
+            Purchase::query()
+            ->with([
+                'supplier:id,supplier_name',
+                'store:id,store_name',
+            ])
+            ->where(
+                'company_id',
+                $companyId
             )
-            ->limit(10)
-            ->get();
+            ->where(
+                'store_id',
+                $storeId
+            );
 
-        return response()->json($products);
-    }
-
-    public function store(Request $request)
-    {
-    /*
-    |--------------------------------------------------------------------------
-    | Validate Basic Data
-    |--------------------------------------------------------------------------
-    */
-
-        $request->validate([
-
-            'company_id'  => 'required|exists:companies,id',
-            'store_id'    => 'required|exists:stores,id',
-            'supplier_id' => 'required|exists:suppliers,id',
-
-            'purchase_no'   => 'required|string|max:255',
-            'purchase_date' => 'required|date',
-
-            'invoice_no'   => 'nullable|string|max:255',
-            'invoice_date' => 'nullable|date',
-
-            'grand_total' => 'required|numeric|min:0',
-
-            'product_id'   => 'required|array|min:1',
-            'product_id.*' => 'required|exists:products,id',
-
-            'qty'   => 'required|array|min:1',
-            'qty.*' => 'required|numeric|min:0.01',
-
-            'price'   => 'required|array|min:1',
-            'price.*' => 'required|numeric|min:0',
-
-            'gst'   => 'required|array',
-            'gst.*' => 'nullable|numeric|min:0',
 
         /*
         |--------------------------------------------------------------------------
-        | Godown Per Product
+        | Search
         |--------------------------------------------------------------------------
         */
 
-            'godown_id'   => 'nullable|array',
-            'godown_id.*' => 'nullable|exists:godowns,id',
+        if (
+            $search !== ''
+        ) {
 
-            'remarks' => 'nullable|string|max:1000',
-        ]);
+            $query->where(
+                function ($q) use ($search) {
 
+                    $q
+                        ->where(
+                            'purchase_no',
+                            'like',
+                            "%{$search}%"
+                        )
+                        ->orWhere(
+                            'invoice_no',
+                            'like',
+                            "%{$search}%"
+                        )
+                        ->orWhereHas(
+                            'supplier',
+                            function ($supplierQuery) use ($search) {
 
-    /*
-    |--------------------------------------------------------------------------
-    | Validate Store Belongs To Company
-    |--------------------------------------------------------------------------
-    */
-
-        $store = Store::where('id', $request->store_id)
-            ->where('company_id', $request->company_id)
-            ->where('status', 1)
-            ->first();
-
-        if (!$store) {
-
-            return back()
-                ->withInput()
-                ->withErrors([
-                    'store_id' => 'Selected store does not belong to the selected company.',
-                ]);
+                                $supplierQuery->where(
+                                    'supplier_name',
+                                    'like',
+                                    "%{$search}%"
+                                );
+                            }
+                        );
+                }
+            );
         }
 
-
-    /*
-    |--------------------------------------------------------------------------
-    | Validate Supplier Belongs To Company
-    |--------------------------------------------------------------------------
-    */
-
-        $supplier = Supplier::where('id', $request->supplier_id)
-            ->where('company_id', $request->company_id)
-            ->where('status', 1)
-            ->first();
-
-        if (!$supplier) {
-
-            return back()
-                ->withInput()
-                ->withErrors([
-                    'supplier_id' => 'Selected supplier does not belong to the selected company.',
-                ]);
-        }
-
-
-    /*
-    |--------------------------------------------------------------------------
-    | Start Database Transaction
-    |--------------------------------------------------------------------------
-    */
-
-        DB::beginTransaction();
-
-        try {
 
         /*
         |--------------------------------------------------------------------------
-        | Create Purchase Header
+        | Supplier Filter
         |--------------------------------------------------------------------------
         */
 
-            $purchase = Purchase::create([
+        if (
+            !empty($supplierId)
+        ) {
 
-                'company_id'     => $request->company_id,
+            $query->where(
+                'supplier_id',
+                $supplierId
+            );
+        }
 
-                'store_id'       => $request->store_id,
 
-                'supplier_id'    => $request->supplier_id,
+        /*
+        |--------------------------------------------------------------------------
+        | Tax Type
+        |--------------------------------------------------------------------------
+        */
 
-                'purchase_no'    => $request->purchase_no,
+        if (
+            in_array(
+                $taxType,
+                [
+                    'gst',
+                    'non_gst',
+                ],
+                true
+            )
+        ) {
 
-                'purchase_date'  => $request->purchase_date,
+            $query->where(
+                'tax_type',
+                $taxType
+            );
+        }
 
-                'invoice_no'     => $request->invoice_no,
 
-                'invoice_date'   => $request->invoice_date,
+        /*
+        |--------------------------------------------------------------------------
+        | Status
+        |--------------------------------------------------------------------------
+        */
 
-                'subtotal'       => $request->grand_total,
+        if (
+            $status !== null
+            &&
+            $status !== ''
+        ) {
 
-                'discount'       => 0,
+            $query->where(
+                'status',
+                (bool) $status
+            );
+        }
 
-                'tax_amount'     => 0,
 
-                'other_charges'  => 0,
+        /*
+        |--------------------------------------------------------------------------
+        | Date Range
+        |--------------------------------------------------------------------------
+        */
 
-                'grand_total'    => $request->grand_total,
+        if (
+            !empty($dateFrom)
+        ) {
 
-                'paid_amount'    => 0,
+            $query->whereDate(
+                'purchase_date',
+                '>=',
+                $dateFrom
+            );
+        }
 
-                'balance_amount' => $request->grand_total,
 
-                'remarks'        => $request->remarks,
+        if (
+            !empty($dateTo)
+        ) {
 
-                'status'         => 1,
+            $query->whereDate(
+                'purchase_date',
+                '<=',
+                $dateTo
+            );
+        }
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Pagination
+        |--------------------------------------------------------------------------
+        */
+
+        $purchases =
+            $query
+            ->orderByDesc(
+                'purchase_date'
+            )
+            ->orderByDesc(
+                'id'
+            )
+            ->paginate(
+                15
+            )
+            ->withQueryString();
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Summary
+        |--------------------------------------------------------------------------
+        */
+
+        $summaryQuery =
+            Purchase::query()
+            ->where(
+                'company_id',
+                $companyId
+            )
+            ->where(
+                'store_id',
+                $storeId
+            );
+
+
+        $summary = [
+
+            'total' => (clone $summaryQuery)
+                ->count(),
+
+            'active' => (clone $summaryQuery)
+                ->where(
+                    'status',
+                    true
+                )
+                ->count(),
+
+            'gst' => (clone $summaryQuery)
+                ->where(
+                    'tax_type',
+                    'gst'
+                )
+                ->count(),
+
+            'non_gst' => (clone $summaryQuery)
+                ->where(
+                    'tax_type',
+                    'non_gst'
+                )
+                ->count(),
+
+            'purchase_value' =>
+            round(
+                (float)
+                (clone $summaryQuery)
+                    ->sum(
+                        'grand_total'
+                    ),
+                2
+            ),
+
+            'balance' =>
+            round(
+                (float)
+                (clone $summaryQuery)
+                    ->sum(
+                        'balance_amount'
+                    ),
+                2
+            ),
+        ];
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Suppliers Filter List
+        |--------------------------------------------------------------------------
+        */
+
+        $suppliers =
+            Supplier::query()
+            ->where(
+                'company_id',
+                $companyId
+            )
+            ->where(
+                'status',
+                true
+            )
+            ->whereHas(
+                'stores',
+                function ($query) use (
+                    $storeId
+                ) {
+
+                    $query->where(
+                        'stores.id',
+                        $storeId
+                    );
+                }
+            )
+            ->orderBy(
+                'supplier_name'
+            )
+            ->get([
+                'id',
+                'supplier_name',
             ]);
 
 
         /*
         |--------------------------------------------------------------------------
-        | Create Purchase Items + Stock Ledger
+        | Inertia
         |--------------------------------------------------------------------------
         */
 
-            foreach ($request->product_id as $key => $productId) {
+        return Inertia::render(
+            'Purchases/Index',
+            [
+                'purchases' =>
+                $purchases,
 
-                $product = Product::findOrFail($productId);
+                'suppliers' =>
+                $suppliers,
 
-                $qty = (float) $request->qty[$key];
+                'summary' =>
+                $summary,
 
-                $price = (float) $request->price[$key];
+                'filters' => [
 
-                $gst = (float) ($request->gst[$key] ?? 0);
+                    'search' =>
+                    $search,
+
+                    'supplier_id' =>
+                    $supplierId,
+
+                    'tax_type' =>
+                    $taxType,
+
+                    'status' =>
+                    $status,
+
+                    'date_from' =>
+                    $dateFrom,
+
+                    'date_to' =>
+                    $dateTo,
+                ],
+            ]
+        );
+    }
 
 
-            /*
-            |--------------------------------------------------------------------------
-            | Get Godown For This Product
-            |--------------------------------------------------------------------------
-            */
+    /*
+    |--------------------------------------------------------------------------
+    | CREATE
+    |--------------------------------------------------------------------------
+    */
 
-                $godownId = null;
+    public function create(
+        Request $request
+    ): Response {
 
-                if (
-                    isset($request->godown_id[$key]) &&
-                    $request->godown_id[$key] !== ''
+        [
+            $companyId,
+            $storeId,
+        ] = $this->context(
+            $request
+        );
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Purchase Number
+        |--------------------------------------------------------------------------
+        */
+
+        $purchaseNo =
+            $this->previewPurchaseNumber(
+                $storeId
+            );
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Suppliers
+        |--------------------------------------------------------------------------
+        */
+
+        $suppliers =
+            Supplier::query()
+            ->where(
+                'company_id',
+                $companyId
+            )
+            ->where(
+                'status',
+                true
+            )
+            ->whereHas(
+                'stores',
+                function ($query) use (
+                    $storeId
                 ) {
 
-                    $godownId = (int) $request->godown_id[$key];
-
-
-                /*
-                |--------------------------------------------------------------------------
-                | Validate Godown Belongs To Company + Store
-                |--------------------------------------------------------------------------
-                */
-
-                    $godown = Godown::where('id', $godownId)
-                        ->where('company_id', $request->company_id)
-                        ->where('store_id', $request->store_id)
-                        ->where('status', 1)
-                        ->first();
-
-                    if (!$godown) {
-
-                        throw new \Exception(
-                            'Godown selected for product "' .
-                                $product->product_name .
-                                '" does not belong to the selected store.'
-                        );
-                    }
+                    $query->where(
+                        'stores.id',
+                        $storeId
+                    );
                 }
+            )
+            ->orderBy(
+                'supplier_name'
+            )
+            ->get([
+                'id',
+                'supplier_name',
+            ]);
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Godowns
+        |--------------------------------------------------------------------------
+        */
+
+        $godowns =
+            Godown::query()
+            ->where(
+                'company_id',
+                $companyId
+            )
+            ->where(
+                'store_id',
+                $storeId
+            )
+            ->where(
+                'status',
+                true
+            )
+            ->orderBy(
+                'godown_name'
+            )
+            ->get([
+                'id',
+                'godown_name',
+                'godown_code',
+            ]);
+
+
+        return Inertia::render(
+            'Purchases/Create',
+            [
+                'purchaseNo' =>
+                $purchaseNo,
+
+                'suppliers' =>
+                $suppliers,
+
+                'godowns' =>
+                $godowns,
+
+                'taxTypes' => [
+                    [
+                        'value' =>
+                        'gst',
+
+                        'label' =>
+                        'GST Purchase',
+                    ],
+                    [
+                        'value' =>
+                        'non_gst',
+
+                        'label' =>
+                        'Without GST',
+                    ],
+                ],
+            ]
+        );
+    }
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | PRODUCT SEARCH
+    |--------------------------------------------------------------------------
+    */
+
+    public function search(
+        Request $request
+    ) {
+
+        $this->authorizePurchaseLookup(
+            $request
+        );
+
+
+        [
+            $companyId,
+            $storeId,
+        ] = $this->context(
+            $request
+        );
+
+
+        $search =
+            trim(
+                (string) $request->input(
+                    'search',
+                    ''
+                )
+            );
+
+
+        if (
+            mb_strlen(
+                $search
+            ) < 1
+        ) {
+
+            return response()->json(
+                []
+            );
+        }
+
+
+        $products =
+            Product::query()
+            ->with([
+                'unit:id,unit_name,short_name',
+                'brand:id,brand_name',
+                'category:id,name',
+            ])
+            ->where(
+                'company_id',
+                $companyId
+            )
+            ->where(
+                'store_id',
+                $storeId
+            )
+            ->where(
+                'status',
+                true
+            )
+            ->where(
+                function ($query) use ($search) {
+
+                    $query
+                        ->where(
+                            'product_code',
+                            'like',
+                            "%{$search}%"
+                        )
+                        ->orWhere(
+                            'barcode',
+                            'like',
+                            "%{$search}%"
+                        )
+                        ->orWhere(
+                            'product_name',
+                            'like',
+                            "%{$search}%"
+                        )
+                        ->orWhere(
+                            'part_number',
+                            'like',
+                            "%{$search}%"
+                        )
+                        ->orWhere(
+                            'manufacturer',
+                            'like',
+                            "%{$search}%"
+                        );
+                }
+            )
+            ->orderBy(
+                'product_name'
+            )
+            ->limit(
+                20
+            )
+            ->get([
+                'id',
+                'category_id',
+                'brand_id',
+                'unit_id',
+
+                'product_code',
+                'barcode',
+                'product_name',
+                'part_number',
+
+                'purchase_price',
+                'mrp',
+
+                'gst_percent',
+
+                'current_stock',
+            ]);
+
+
+        return response()->json(
+            $products
+        );
+    }
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | STORE
+    |--------------------------------------------------------------------------
+    */
+
+    public function store(
+        Request $request
+    ) {
+
+        [
+            $companyId,
+            $storeId,
+        ] = $this->context(
+            $request
+        );
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Validate
+        |--------------------------------------------------------------------------
+        */
+
+        $validated =
+            $this->validatePurchaseRequest(
+                $request
+            );
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Validate Supplier
+        |--------------------------------------------------------------------------
+        */
+
+        $supplier =
+            $this->validateSupplier(
+                (int) $validated['supplier_id'],
+                $companyId,
+                $storeId
+            );
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Duplicate Supplier Invoice
+        |--------------------------------------------------------------------------
+        */
+
+        $this->validateDuplicateInvoice(
+            $companyId,
+            $storeId,
+            $supplier->id,
+            $validated['invoice_no'] ?? null
+        );
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | DB Transaction
+        |--------------------------------------------------------------------------
+        */
+
+        DB::beginTransaction();
+
+
+        try {
+
+            /*
+            |--------------------------------------------------------------------------
+            | Generate Purchase Number
+            |--------------------------------------------------------------------------
+            */
+
+            $purchaseNo =
+                $this->generatePurchaseNumber(
+                    $storeId
+                );
 
 
             /*
             |--------------------------------------------------------------------------
-            | GST Amount
+            | Validate + Calculate Items
             |--------------------------------------------------------------------------
             */
 
-                $subtotal = $qty * $price;
-
-                $gstAmount = $subtotal * $gst / 100;
-
-                $lineTotal = $subtotal + $gstAmount;
+            $calculated =
+                $this->calculateItems(
+                    $validated['items'],
+                    $validated['tax_type'],
+                    $companyId,
+                    $storeId
+                );
 
 
             /*
             |--------------------------------------------------------------------------
-            | Create Purchase Item
+            | Header Totals
             |--------------------------------------------------------------------------
             */
 
-                PurchaseItem::create([
+            $subtotal =
+                $calculated['subtotal'];
 
-                    'purchase_id'    => $purchase->id,
 
-                    'product_id'     => $product->id,
+            $discount =
+                $calculated['discount'];
 
-                    'godown_id'      => $godownId,
 
-                    'quantity'       => $qty,
+            $taxAmount =
+                $calculated['tax_amount'];
 
-                    'free_quantity'  => 0,
 
-                    'purchase_price' => $price,
+            $otherCharges =
+                round(
+                    (float)
+                    (
+                        $validated['other_charges']
+                        ?? 0
+                    ),
+                    2
+                );
 
-                    'discount'       => 0,
 
-                    'gst_percent'    => $gst,
+            $grandTotal =
+                round(
+                    $calculated['line_total']
+                        +
+                        $otherCharges,
+                    2
+                );
 
-                    'gst_amount'     => $gstAmount,
 
-                    'line_total'     => $lineTotal,
+            $paidAmount =
+                round(
+                    (float)
+                    (
+                        $validated['paid_amount']
+                        ?? 0
+                    ),
+                    2
+                );
+
+
+            if (
+                $paidAmount >
+                $grandTotal
+            ) {
+
+                throw ValidationException::withMessages([
+                    'paid_amount' =>
+                    'Paid amount cannot be greater than the purchase total.',
+                ]);
+            }
+
+
+            $balanceAmount =
+                round(
+                    $grandTotal
+                        -
+                        $paidAmount,
+                    2
+                );
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | Create Purchase
+            |--------------------------------------------------------------------------
+            */
+
+            $purchase =
+                Purchase::create([
+
+                    'company_id' =>
+                    $companyId,
+
+                    'store_id' =>
+                    $storeId,
+
+                    'supplier_id' =>
+                    $supplier->id,
+
+                    'purchase_no' =>
+                    $purchaseNo,
+
+                    'purchase_date' =>
+                    $validated['purchase_date'],
+
+                    'invoice_no' =>
+                    $this->nullableString(
+                        $validated['invoice_no']
+                            ?? null
+                    ),
+
+                    'invoice_date' =>
+                    $validated['invoice_date']
+                        ?? null,
+
+                    'tax_type' =>
+                    $validated['tax_type'],
+
+                    'subtotal' =>
+                    $subtotal,
+
+                    'discount' =>
+                    $discount,
+
+                    'tax_amount' =>
+                    $taxAmount,
+
+                    'other_charges' =>
+                    $otherCharges,
+
+                    'grand_total' =>
+                    $grandTotal,
+
+                    'paid_amount' =>
+                    $paidAmount,
+
+                    'balance_amount' =>
+                    $balanceAmount,
+
+                    'remarks' =>
+                    $this->nullableString(
+                        $validated['remarks']
+                            ?? null
+                    ),
+
+                    'status' =>
+                    true,
                 ]);
 
 
             /*
             |--------------------------------------------------------------------------
-            | Increase Stock
+            | Create Items + Stock
             |--------------------------------------------------------------------------
             */
 
-                $this->stockService->increaseStock(
+            foreach (
+                $calculated['items']
+                as $item
+            ) {
 
-                    $product,
+                PurchaseItem::create([
 
-                    $qty,
-
-                    'Purchase',
-
-                    $purchase->company_id,
-
-                    $purchase->store_id,
-
-                    $godownId,
-
+                    'purchase_id' =>
                     $purchase->id,
 
-                    $purchase->purchase_no,
+                    'product_id' =>
+                    $item['product']->id,
 
-                    $price,
+                    'godown_id' =>
+                    $item['godown_id'],
 
-                    $request->remarks ?? ''
-                );
+                    'quantity' =>
+                    $item['quantity'],
+
+                    'free_quantity' =>
+                    $item['free_quantity'],
+
+                    'purchase_price' =>
+                    $item['purchase_price'],
+
+                    'discount' =>
+                    $item['discount'],
+
+                    'taxable_amount' =>
+                    $item['taxable_amount'],
+
+                    'gst_percent' =>
+                    $item['gst_percent'],
+
+                    'gst_amount' =>
+                    $item['gst_amount'],
+
+                    'line_total' =>
+                    $item['line_total'],
+                ]);
+
+
+                /*
+                |--------------------------------------------------------------------------
+                | Physical Stock
+                |--------------------------------------------------------------------------
+                |
+                | Qty + Free Qty both enter stock.
+                |
+                */
+
+                $stockQty =
+                    round(
+                        $item['quantity']
+                            +
+                            $item['free_quantity'],
+                        2
+                    );
+
+
+                $this->stockService
+                    ->increaseStock(
+
+                        $item['product'],
+
+                        $stockQty,
+
+                        'Purchase',
+
+                        $companyId,
+
+                        $storeId,
+
+                        $item['godown_id'],
+
+                        $purchase->id,
+
+                        $purchase->purchase_no,
+
+                        $item['purchase_price'],
+
+                        'Purchase received'
+                    );
             }
 
-
-        /*
-        |--------------------------------------------------------------------------
-        | Commit
-        |--------------------------------------------------------------------------
-        */
 
             DB::commit();
 
 
-            return redirect()
-                ->route('purchases.index')
-                ->with(
-                    'success',
-                    'Purchase saved successfully.'
-                );
-        } catch (\Exception $e) {
+            return AppResponse::successRoute(
+                'purchases.index',
+                'Purchase created successfully.'
+            );
+        } catch (
+            ValidationException $e
+        ) {
 
             DB::rollBack();
 
-            return back()
-                ->withInput()
-                ->with(
-                    'error',
-                    $e->getMessage()
-                );
+            throw $e;
+        } catch (
+            \Throwable $e
+        ) {
+
+            DB::rollBack();
+
+
+            Log::error(
+                'Purchase creation failed',
+                [
+                    'company_id' =>
+                    $companyId,
+
+                    'store_id' =>
+                    $storeId,
+
+                    'error' =>
+                    $e->getMessage(),
+                ]
+            );
+
+
+            return AppResponse::error(
+                $e->getMessage(),
+                true
+            );
         }
     }
 
-    public function show($id)
-    {
-        $purchase = Purchase::with([
+
+    /*
+    |--------------------------------------------------------------------------
+    | SHOW
+    |--------------------------------------------------------------------------
+    */
+
+    public function show(
+        Request $request,
+        Purchase $purchase
+    ): Response {
+
+        [
+            $companyId,
+            $storeId,
+        ] = $this->context(
+            $request
+        );
+
+
+        $this->ensurePurchaseContext(
+            $purchase,
+            $companyId,
+            $storeId
+        );
+
+
+        $purchase->load([
             'supplier',
             'store',
             'company',
-            'items.product',
+
             'items.product.unit',
-            'items.godown'
-        ])->findOrFail($id);
+            'items.product.category',
+            'items.product.brand',
 
-        return view('purchases.show', compact('purchase'));
+            'items.godown',
+        ]);
+
+
+        return Inertia::render(
+            'Purchases/Show',
+            [
+                'purchase' =>
+                $purchase,
+            ]
+        );
     }
 
-    public function edit(Purchase $purchase)
-    {
+
+    /*
+    |--------------------------------------------------------------------------
+    | EDIT
+    |--------------------------------------------------------------------------
+    */
+
+    public function edit(
+        Request $request,
+        Purchase $purchase
+    ): Response {
+
+        [
+            $companyId,
+            $storeId,
+        ] = $this->context(
+            $request
+        );
+
+
+        $this->ensurePurchaseContext(
+            $purchase,
+            $companyId,
+            $storeId
+        );
+
+
         $purchase->load([
-            'items.product',
+            'supplier',
+            'items.product.unit',
+            'items.product.category',
+            'items.product.brand',
+            'items.godown',
         ]);
 
-        $company = Company::all();
 
-        $stores = Store::where('company_id', $purchase->company_id)
-            ->where('status', 1)
-            ->get();
-
-        $suppliers = Supplier::where('company_id', $purchase->company_id)
-            ->where('status', 1)
-            ->get();
-
-        $godowns = Godown::where('store_id', $purchase->store_id)
-            ->where('status', 1)
-            ->get();
-
-        return view('purchases.edit', [
-            'purchase'  => $purchase,
-            'companies'   => $company,
-            'stores'    => $stores,
-            'suppliers' => $suppliers,
-            'godowns'   => $godowns,
-        ]);
-    }
-
-    public function update(Request $request, Purchase $purchase)
-    {
         /*
         |--------------------------------------------------------------------------
-        | 1. Validate Request
+        | Suppliers
         |--------------------------------------------------------------------------
         */
 
-        $request->validate([
+        $suppliers =
+            Supplier::query()
+            ->where(
+                'company_id',
+                $companyId
+            )
+            ->where(
+                'status',
+                true
+            )
+            ->whereHas(
+                'stores',
+                function ($query) use (
+                    $storeId
+                ) {
 
-            'company_id' => [
-                'required',
-                'exists:companies,id',
-            ],
+                    $query->where(
+                        'stores.id',
+                        $storeId
+                    );
+                }
+            )
+            ->orderBy(
+                'supplier_name'
+            )
+            ->get([
+                'id',
+                'supplier_name',
+            ]);
 
-            'store_id' => [
-                'required',
-                'exists:stores,id',
-            ],
+
+        /*
+        |--------------------------------------------------------------------------
+        | Godowns
+        |--------------------------------------------------------------------------
+        */
+
+        $godowns =
+            Godown::query()
+            ->where(
+                'company_id',
+                $companyId
+            )
+            ->where(
+                'store_id',
+                $storeId
+            )
+            ->where(
+                'status',
+                true
+            )
+            ->orderBy(
+                'godown_name'
+            )
+            ->get([
+                'id',
+                'godown_name',
+                'godown_code',
+            ]);
+
+
+        return Inertia::render(
+            'Purchases/Edit',
+            [
+                'purchase' =>
+                $purchase,
+
+                'suppliers' =>
+                $suppliers,
+
+                'godowns' =>
+                $godowns,
+
+                'taxTypes' => [
+                    [
+                        'value' =>
+                        'gst',
+
+                        'label' =>
+                        'GST Purchase',
+                    ],
+                    [
+                        'value' =>
+                        'non_gst',
+
+                        'label' =>
+                        'Without GST',
+                    ],
+                ],
+            ]
+        );
+    }
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | UPDATE
+    |--------------------------------------------------------------------------
+    */
+
+    public function update(
+        Request $request,
+        Purchase $purchase
+    ) {
+
+        [
+            $companyId,
+            $storeId,
+        ] = $this->context(
+            $request
+        );
+
+
+        $this->ensurePurchaseContext(
+            $purchase,
+            $companyId,
+            $storeId
+        );
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Purchase Return Protection
+        |--------------------------------------------------------------------------
+        |
+        | Editing a purchase after returns exist can make return quantities
+        | inconsistent with the original purchase.
+        |
+        */
+
+        if (
+            PurchaseReturn::where(
+                'purchase_id',
+                $purchase->id
+            )->exists()
+        ) {
+
+            return AppResponse::error(
+                'This purchase cannot be edited because a purchase return already exists.'
+            );
+        }
+
+
+        $validated =
+            $this->validatePurchaseRequest(
+                $request
+            );
+
+
+        $supplier =
+            $this->validateSupplier(
+                (int) $validated['supplier_id'],
+                $companyId,
+                $storeId
+            );
+
+
+        $this->validateDuplicateInvoice(
+            $companyId,
+            $storeId,
+            $supplier->id,
+            $validated['invoice_no'] ?? null,
+            $purchase->id
+        );
+
+
+        DB::beginTransaction();
+
+
+        try {
+
+            /*
+            |--------------------------------------------------------------------------
+            | Load Old Items
+            |--------------------------------------------------------------------------
+            */
+
+            $purchase->load([
+                'items.product',
+            ]);
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | Reverse Old Physical Stock
+            |--------------------------------------------------------------------------
+            */
+
+            foreach (
+                $purchase->items
+                as $oldItem
+            ) {
+
+                $product =
+                    $oldItem->product;
+
+
+                if (
+                    !$product
+                ) {
+
+                    throw new \RuntimeException(
+                        'A product from the existing purchase no longer exists.'
+                    );
+                }
+
+
+                $oldStockQty =
+                    round(
+                        (float) $oldItem->quantity
+                            +
+                            (float) $oldItem->free_quantity,
+                        2
+                    );
+
+
+                if (
+                    $oldStockQty <= 0
+                ) {
+                    continue;
+                }
+
+
+                $this->stockService
+                    ->decreaseStock(
+
+                        $product,
+
+                        $oldStockQty,
+
+                        'Purchase Reverse',
+
+                        $companyId,
+
+                        $storeId,
+
+                        $oldItem->godown_id,
+
+                        $purchase->id,
+
+                        $purchase->purchase_no,
+
+                        (float) $oldItem->purchase_price,
+
+                        'Purchase edited - reverse previous stock'
+                    );
+            }
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | Calculate New Items
+            |--------------------------------------------------------------------------
+            */
+
+            $calculated =
+                $this->calculateItems(
+                    $validated['items'],
+                    $validated['tax_type'],
+                    $companyId,
+                    $storeId
+                );
+
+
+            $subtotal =
+                $calculated['subtotal'];
+
+
+            $discount =
+                $calculated['discount'];
+
+
+            $taxAmount =
+                $calculated['tax_amount'];
+
+
+            $otherCharges =
+                round(
+                    (float)
+                    (
+                        $validated['other_charges']
+                        ?? 0
+                    ),
+                    2
+                );
+
+
+            $grandTotal =
+                round(
+                    $calculated['line_total']
+                        +
+                        $otherCharges,
+                    2
+                );
+
+
+            $paidAmount =
+                round(
+                    (float)
+                    (
+                        $validated['paid_amount']
+                        ?? 0
+                    ),
+                    2
+                );
+
+
+            if (
+                $paidAmount >
+                $grandTotal
+            ) {
+
+                throw ValidationException::withMessages([
+                    'paid_amount' =>
+                    'Paid amount cannot be greater than the purchase total.',
+                ]);
+            }
+
+
+            $balanceAmount =
+                round(
+                    $grandTotal
+                        -
+                        $paidAmount,
+                    2
+                );
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | Update Header
+            |--------------------------------------------------------------------------
+            */
+
+            $purchase->update([
+
+                'supplier_id' =>
+                $supplier->id,
+
+                'purchase_date' =>
+                $validated['purchase_date'],
+
+                'invoice_no' =>
+                $this->nullableString(
+                    $validated['invoice_no']
+                        ?? null
+                ),
+
+                'invoice_date' =>
+                $validated['invoice_date']
+                    ?? null,
+
+                'tax_type' =>
+                $validated['tax_type'],
+
+                'subtotal' =>
+                $subtotal,
+
+                'discount' =>
+                $discount,
+
+                'tax_amount' =>
+                $taxAmount,
+
+                'other_charges' =>
+                $otherCharges,
+
+                'grand_total' =>
+                $grandTotal,
+
+                'paid_amount' =>
+                $paidAmount,
+
+                'balance_amount' =>
+                $balanceAmount,
+
+                'remarks' =>
+                $this->nullableString(
+                    $validated['remarks']
+                        ?? null
+                ),
+            ]);
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | Replace Purchase Items
+            |--------------------------------------------------------------------------
+            */
+
+            $purchase
+                ->items()
+                ->delete();
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | Create New Items + Repost Stock
+            |--------------------------------------------------------------------------
+            */
+
+            foreach (
+                $calculated['items']
+                as $item
+            ) {
+
+                PurchaseItem::create([
+
+                    'purchase_id' =>
+                    $purchase->id,
+
+                    'product_id' =>
+                    $item['product']->id,
+
+                    'godown_id' =>
+                    $item['godown_id'],
+
+                    'quantity' =>
+                    $item['quantity'],
+
+                    'free_quantity' =>
+                    $item['free_quantity'],
+
+                    'purchase_price' =>
+                    $item['purchase_price'],
+
+                    'discount' =>
+                    $item['discount'],
+
+                    'taxable_amount' =>
+                    $item['taxable_amount'],
+
+                    'gst_percent' =>
+                    $item['gst_percent'],
+
+                    'gst_amount' =>
+                    $item['gst_amount'],
+
+                    'line_total' =>
+                    $item['line_total'],
+                ]);
+
+
+                $stockQty =
+                    round(
+                        $item['quantity']
+                            +
+                            $item['free_quantity'],
+                        2
+                    );
+
+
+                $this->stockService
+                    ->increaseStock(
+
+                        $item['product'],
+
+                        $stockQty,
+
+                        'Purchase',
+
+                        $companyId,
+
+                        $storeId,
+
+                        $item['godown_id'],
+
+                        $purchase->id,
+
+                        $purchase->purchase_no,
+
+                        $item['purchase_price'],
+
+                        'Purchase updated - new stock'
+                    );
+            }
+
+
+            DB::commit();
+
+
+            return AppResponse::successRoute(
+                'purchases.index',
+                'Purchase updated successfully.'
+            );
+        } catch (
+            ValidationException $e
+        ) {
+
+            DB::rollBack();
+
+            throw $e;
+        } catch (
+            \Throwable $e
+        ) {
+
+            DB::rollBack();
+
+
+            Log::error(
+                'Purchase update failed',
+                [
+                    'purchase_id' =>
+                    $purchase->id,
+
+                    'error' =>
+                    $e->getMessage(),
+                ]
+            );
+
+
+            return AppResponse::error(
+                $e->getMessage(),
+                true
+            );
+        }
+    }
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | DESTROY
+    |--------------------------------------------------------------------------
+    */
+
+    public function destroy(
+        Request $request,
+        Purchase $purchase
+    ) {
+
+        [
+            $companyId,
+            $storeId,
+        ] = $this->context(
+            $request
+        );
+
+
+        $this->ensurePurchaseContext(
+            $purchase,
+            $companyId,
+            $storeId
+        );
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Purchase Return Protection
+        |--------------------------------------------------------------------------
+        */
+
+        if (
+            PurchaseReturn::where(
+                'purchase_id',
+                $purchase->id
+            )->exists()
+        ) {
+
+            return AppResponse::error(
+                'This purchase cannot be deleted because a purchase return exists.'
+            );
+        }
+
+
+        DB::beginTransaction();
+
+
+        try {
+
+            $purchase->load([
+                'items.product',
+            ]);
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | Reverse Stock
+            |--------------------------------------------------------------------------
+            */
+
+            foreach (
+                $purchase->items
+                as $item
+            ) {
+
+                $product =
+                    $item->product;
+
+
+                if (
+                    !$product
+                ) {
+
+                    throw new \RuntimeException(
+                        'A product from this purchase no longer exists.'
+                    );
+                }
+
+
+                $stockQty =
+                    round(
+                        (float) $item->quantity
+                            +
+                            (float) $item->free_quantity,
+                        2
+                    );
+
+
+                if (
+                    $stockQty <= 0
+                ) {
+                    continue;
+                }
+
+
+                $this->stockService
+                    ->decreaseStock(
+
+                        $product,
+
+                        $stockQty,
+
+                        'Purchase Reverse',
+
+                        $companyId,
+
+                        $storeId,
+
+                        $item->godown_id,
+
+                        $purchase->id,
+
+                        $purchase->purchase_no,
+
+                        (float) $item->purchase_price,
+
+                        'Purchase deleted - reverse stock'
+                    );
+            }
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | Delete
+            |--------------------------------------------------------------------------
+            */
+
+            $purchase
+                ->items()
+                ->delete();
+
+
+            $purchase->delete();
+
+
+            DB::commit();
+
+
+            return AppResponse::successRoute(
+                'purchases.index',
+                'Purchase deleted successfully.'
+            );
+        } catch (
+            \Throwable $e
+        ) {
+
+            DB::rollBack();
+
+
+            Log::error(
+                'Purchase deletion failed',
+                [
+                    'purchase_id' =>
+                    $purchase->id,
+
+                    'error' =>
+                    $e->getMessage(),
+                ]
+            );
+
+
+            return AppResponse::error(
+                $e->getMessage()
+            );
+        }
+    }
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | PRINT
+    |--------------------------------------------------------------------------
+    */
+
+    public function print(
+        Request $request,
+        Purchase $purchase
+    ) {
+
+        [
+            $companyId,
+            $storeId,
+        ] = $this->context(
+            $request
+        );
+
+
+        $this->ensurePurchaseContext(
+            $purchase,
+            $companyId,
+            $storeId
+        );
+
+
+        $purchase->load([
+            'company',
+            'store',
+            'supplier',
+            'items.product.unit',
+            'items.godown',
+        ]);
+
+
+        return view(
+            'purchases.print',
+            compact(
+                'purchase'
+            )
+        );
+    }
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | GET GODOWNS
+    |--------------------------------------------------------------------------
+    */
+
+    public function getGodowns(
+        Request $request,
+        Store $store
+    ) {
+
+        $this->authorizePurchaseLookup(
+            $request
+        );
+
+
+        [
+            $companyId,
+            $storeId,
+        ] = $this->context(
+            $request
+        );
+
+
+        abort_unless(
+            (int) $store->id ===
+                $storeId
+                &&
+                (int) $store->company_id ===
+                $companyId,
+            403
+        );
+
+
+        $godowns =
+            Godown::query()
+            ->where(
+                'company_id',
+                $companyId
+            )
+            ->where(
+                'store_id',
+                $storeId
+            )
+            ->where(
+                'status',
+                true
+            )
+            ->orderBy(
+                'godown_name'
+            )
+            ->get([
+                'id',
+                'godown_name',
+                'godown_code',
+            ]);
+
+
+        return response()->json(
+            $godowns
+        );
+    }
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | GET SUPPLIERS
+    |--------------------------------------------------------------------------
+    |
+    | Retained for compatibility with your existing route.
+    |
+    */
+
+    public function getSuppliers(
+        Request $request,
+        Company $company
+    ) {
+
+        $this->authorizePurchaseLookup(
+            $request
+        );
+
+
+        [
+            $companyId,
+            $storeId,
+        ] = $this->context(
+            $request
+        );
+
+
+        abort_unless(
+            (int) $company->id ===
+                $companyId,
+            403
+        );
+
+
+        $suppliers =
+            Supplier::query()
+            ->where(
+                'company_id',
+                $companyId
+            )
+            ->where(
+                'status',
+                true
+            )
+            ->whereHas(
+                'stores',
+                function ($query) use (
+                    $storeId
+                ) {
+
+                    $query->where(
+                        'stores.id',
+                        $storeId
+                    );
+                }
+            )
+            ->orderBy(
+                'supplier_name'
+            )
+            ->get([
+                'id',
+                'supplier_name',
+            ]);
+
+
+        return response()->json(
+            $suppliers
+        );
+    }
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | GET STORES
+    |--------------------------------------------------------------------------
+    |
+    | Business screens no longer select arbitrary branches.
+    | We return only the currently active branch.
+    |
+    */
+
+    public function getStores(
+        Request $request,
+        $companyId
+    ) {
+
+        $this->authorizePurchaseLookup(
+            $request
+        );
+
+
+        [
+            $activeCompanyId,
+            $storeId,
+        ] = $this->context(
+            $request
+        );
+
+
+        abort_unless(
+            (int) $companyId ===
+                $activeCompanyId,
+            403
+        );
+
+
+        $stores =
+            Store::query()
+            ->where(
+                'id',
+                $storeId
+            )
+            ->where(
+                'company_id',
+                $activeCompanyId
+            )
+            ->where(
+                'status',
+                true
+            )
+            ->get([
+                'id',
+                'store_name',
+                'store_code',
+            ]);
+
+
+        return response()->json(
+            $stores
+        );
+    }
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | AUTHORIZE PURCHASE LOOKUP
+    |--------------------------------------------------------------------------
+    |
+    | Search and lookup endpoints are shared by create/edit/view workflows.
+    |
+    */
+
+    private function authorizePurchaseLookup(
+        Request $request
+    ): void {
+
+        $user =
+            $request->user();
+
+
+        abort_unless(
+            $user
+                &&
+                (
+                    $user->can(
+                        'purchase.view'
+                    )
+                    ||
+                    $user->can(
+                        'purchase.create'
+                    )
+                    ||
+                    $user->can(
+                        'purchase.edit'
+                    )
+                ),
+            403
+        );
+    }
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | VALIDATE PURCHASE REQUEST
+    |--------------------------------------------------------------------------
+    |
+    | New React form format:
+    |
+    | items: [
+    |   {
+    |       product_id: 1,
+    |       godown_id: null,
+    |       quantity: 10,
+    |       free_quantity: 2,
+    |       purchase_price: 100,
+    |       discount: 50,
+    |       gst_percent: 18
+    |   }
+    | ]
+    |
+    */
+
+    private function validatePurchaseRequest(
+        Request $request
+    ): array {
+
+        return $request->validate([
 
             'supplier_id' => [
                 'required',
+                'integer',
                 'exists:suppliers,id',
             ],
+
 
             'purchase_date' => [
                 'required',
                 'date',
             ],
+
 
             'invoice_no' => [
                 'nullable',
@@ -472,674 +2196,1004 @@ class PurchaseController extends Controller implements HasMiddleware
                 'max:255',
             ],
 
+
             'invoice_date' => [
                 'nullable',
                 'date',
             ],
 
-            'grand_total' => [
+
+            'tax_type' => [
                 'required',
-                'numeric',
-                'min:0',
+                Rule::in([
+                    'gst',
+                    'non_gst',
+                ]),
             ],
 
-            'product_id' => [
-                'required',
-                'array',
-                'min:1',
-            ],
 
-            'product_id.*' => [
-                'required',
-                'exists:products,id',
-            ],
-
-            'qty' => [
-                'required',
-                'array',
-                'min:1',
-            ],
-
-            'qty.*' => [
-                'required',
-                'numeric',
-                'min:0.01',
-            ],
-
-            'price' => [
-                'required',
-                'array',
-                'min:1',
-            ],
-
-            'price.*' => [
-                'required',
-                'numeric',
-                'min:0',
-            ],
-
-            'gst' => [
-                'required',
-                'array',
-            ],
-
-            'gst.*' => [
+            'other_charges' => [
                 'nullable',
                 'numeric',
                 'min:0',
             ],
 
-            /*
-            |--------------------------------------------------------------------------
-            | Godown is optional for each item
-            |--------------------------------------------------------------------------
-            */
 
-            'godown_id' => [
+            'paid_amount' => [
                 'nullable',
-                'array',
+                'numeric',
+                'min:0',
             ],
 
-            'godown_id.*' => [
-                'nullable',
-                'exists:godowns,id',
-            ],
 
             'remarks' => [
                 'nullable',
                 'string',
-                'max:1000',
+                'max:2000',
+            ],
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | Items
+            |--------------------------------------------------------------------------
+            */
+
+            'items' => [
+                'required',
+                'array',
+                'min:1',
+            ],
+
+
+            'items.*.product_id' => [
+                'required',
+                'integer',
+                'exists:products,id',
+            ],
+
+
+            'items.*.godown_id' => [
+                'nullable',
+                'integer',
+                'exists:godowns,id',
+            ],
+
+
+            'items.*.quantity' => [
+                'required',
+                'numeric',
+                'gt:0',
+            ],
+
+
+            'items.*.free_quantity' => [
+                'nullable',
+                'numeric',
+                'min:0',
+            ],
+
+
+            'items.*.purchase_price' => [
+                'required',
+                'numeric',
+                'min:0',
+            ],
+
+
+            'items.*.discount' => [
+                'nullable',
+                'numeric',
+                'min:0',
+            ],
+
+
+            'items.*.gst_percent' => [
+                'nullable',
+                'numeric',
+                'min:0',
+                'max:100',
             ],
         ]);
+    }
 
 
-        /*
-        |--------------------------------------------------------------------------
-        | 2. Validate Store
-        |--------------------------------------------------------------------------
-        */
+    /*
+    |--------------------------------------------------------------------------
+    | CALCULATE ITEMS
+    |--------------------------------------------------------------------------
+    */
 
-        $store = Store::where('id', $request->store_id)
-            ->where('company_id', $request->company_id)
-            ->where('status', 1)
-            ->first();
+    private function calculateItems(
+        array $items,
+        string $taxType,
+        int $companyId,
+        int $storeId
+    ): array {
 
-        if (!$store) {
-
-            return back()
-                ->withInput()
-                ->withErrors([
-                    'store_id' => 'Selected store does not belong to the selected company.',
-                ]);
-        }
+        $calculatedItems =
+            [];
 
 
-        /*
-        |--------------------------------------------------------------------------
-        | 3. Validate Supplier
-        |--------------------------------------------------------------------------
-        */
-
-        $supplier = Supplier::where('id', $request->supplier_id)
-            ->where('company_id', $request->company_id)
-            ->where('status', 1)
-            ->first();
-
-        if (!$supplier) {
-
-            return back()
-                ->withInput()
-                ->withErrors([
-                    'supplier_id' => 'Selected supplier does not belong to the selected company.',
-                ]);
-        }
+        $subtotal =
+            0;
 
 
-        /*
-        |--------------------------------------------------------------------------
-        | 4. Validate Godowns
-        |--------------------------------------------------------------------------
-        |
-        | Each purchase item can have its own godown.
-        |
-        | Example:
-        |
-        | Product A → Shop
-        | Product B → Godown 1
-        | Product C → Godown 2
-        |
-        */
+        $totalDiscount =
+            0;
 
-        foreach ($request->product_id as $key => $productId) {
 
-            $godownId = $request->godown_id[$key] ?? null;
+        $totalTax =
+            0;
+
+
+        $totalLineAmount =
+            0;
+
+
+        foreach (
+            $items
+            as $index => $item
+        ) {
 
             /*
             |--------------------------------------------------------------------------
-            | No godown = direct shop/store stock
+            | Product Branch Isolation
             |--------------------------------------------------------------------------
             */
 
-            if (empty($godownId)) {
-                continue;
+            $product =
+                Product::query()
+                ->where(
+                    'id',
+                    $item['product_id']
+                )
+                ->where(
+                    'company_id',
+                    $companyId
+                )
+                ->where(
+                    'store_id',
+                    $storeId
+                )
+                ->where(
+                    'status',
+                    true
+                )
+                ->first();
+
+
+            if (
+                !$product
+            ) {
+
+                throw ValidationException::withMessages([
+                    "items.{$index}.product_id" =>
+                    'Selected product does not belong to the active branch or is inactive.',
+                ]);
             }
 
 
-            $godownExists = Godown::where('id', $godownId)
-                ->where('company_id', $request->company_id)
-                ->where('store_id', $request->store_id)
-                ->where('status', 1)
-                ->exists();
+            /*
+            |--------------------------------------------------------------------------
+            | Location
+            |--------------------------------------------------------------------------
+            */
+
+            $godownId =
+                !empty($item['godown_id'])
+                ? (int) $item['godown_id']
+                : null;
 
 
-            if (!$godownExists) {
+            if (
+                $godownId !== null
+            ) {
 
-                return back()
-                    ->withInput()
-                    ->withErrors([
-                        "godown_id.$key" =>
-                        'Selected godown does not belong to the selected store.',
+                $godownExists =
+                    Godown::query()
+                    ->where(
+                        'id',
+                        $godownId
+                    )
+                    ->where(
+                        'company_id',
+                        $companyId
+                    )
+                    ->where(
+                        'store_id',
+                        $storeId
+                    )
+                    ->where(
+                        'status',
+                        true
+                    )
+                    ->exists();
+
+
+                if (
+                    !$godownExists
+                ) {
+
+                    throw ValidationException::withMessages([
+                        "items.{$index}.godown_id" =>
+                        'Selected godown does not belong to the active branch.',
                     ]);
+                }
             }
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | Quantities
+            |--------------------------------------------------------------------------
+            */
+
+            $quantity =
+                round(
+                    (float)
+                    $item['quantity'],
+                    2
+                );
+
+
+            $freeQuantity =
+                round(
+                    (float)
+                    (
+                        $item['free_quantity']
+                        ?? 0
+                    ),
+                    2
+                );
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | Price
+            |--------------------------------------------------------------------------
+            */
+
+            $purchasePrice =
+                round(
+                    (float)
+                    $item['purchase_price'],
+                    2
+                );
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | Gross
+            |--------------------------------------------------------------------------
+            |
+            | Free quantity has no purchase cost.
+            |
+            */
+
+            $grossAmount =
+                round(
+                    $quantity
+                        *
+                        $purchasePrice,
+                    2
+                );
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | Discount
+            |--------------------------------------------------------------------------
+            |
+            | Discount is stored as line discount amount.
+            |
+            */
+
+            $discount =
+                round(
+                    (float)
+                    (
+                        $item['discount']
+                        ?? 0
+                    ),
+                    2
+                );
+
+
+            if (
+                $discount >
+                $grossAmount
+            ) {
+
+                throw ValidationException::withMessages([
+                    "items.{$index}.discount" =>
+                    'Line discount cannot exceed the gross line amount.',
+                ]);
+            }
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | Taxable
+            |--------------------------------------------------------------------------
+            */
+
+            $taxableAmount =
+                round(
+                    max(
+                        0,
+                        $grossAmount
+                            -
+                            $discount
+                    ),
+                    2
+                );
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | GST
+            |--------------------------------------------------------------------------
+            */
+
+            $gstPercent =
+                $taxType ===
+                'gst'
+                ? round(
+                    (float)
+                    (
+                        $item['gst_percent']
+                        ?? $product->gst_percent
+                        ?? 0
+                    ),
+                    2
+                )
+                : 0;
+
+
+            $gstAmount =
+                $taxType ===
+                'gst'
+                ? round(
+                    $taxableAmount
+                        *
+                        $gstPercent
+                        /
+                        100,
+                    2
+                )
+                : 0;
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | Line Total
+            |--------------------------------------------------------------------------
+            */
+
+            $lineTotal =
+                round(
+                    $taxableAmount
+                        +
+                        $gstAmount,
+                    2
+                );
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | Accumulate
+            |--------------------------------------------------------------------------
+            */
+
+            $subtotal +=
+                $grossAmount;
+
+
+            $totalDiscount +=
+                $discount;
+
+
+            $totalTax +=
+                $gstAmount;
+
+
+            $totalLineAmount +=
+                $lineTotal;
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | Item
+            |--------------------------------------------------------------------------
+            */
+
+            $calculatedItems[] = [
+
+                'product' =>
+                $product,
+
+                'godown_id' =>
+                $godownId,
+
+                'quantity' =>
+                $quantity,
+
+                'free_quantity' =>
+                $freeQuantity,
+
+                'purchase_price' =>
+                $purchasePrice,
+
+                'discount' =>
+                $discount,
+
+                'taxable_amount' =>
+                $taxableAmount,
+
+                'gst_percent' =>
+                $gstPercent,
+
+                'gst_amount' =>
+                $gstAmount,
+
+                'line_total' =>
+                $lineTotal,
+            ];
         }
+
+
+        return [
+
+            'items' =>
+            $calculatedItems,
+
+            'subtotal' =>
+            round(
+                $subtotal,
+                2
+            ),
+
+            'discount' =>
+            round(
+                $totalDiscount,
+                2
+            ),
+
+            'tax_amount' =>
+            round(
+                $totalTax,
+                2
+            ),
+
+            'line_total' =>
+            round(
+                $totalLineAmount,
+                2
+            ),
+        ];
+    }
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | VALIDATE SUPPLIER
+    |--------------------------------------------------------------------------
+    */
+
+    private function validateSupplier(
+        int $supplierId,
+        int $companyId,
+        int $storeId
+    ): Supplier {
+
+        $supplier =
+            Supplier::query()
+            ->where(
+                'id',
+                $supplierId
+            )
+            ->where(
+                'company_id',
+                $companyId
+            )
+            ->where(
+                'status',
+                true
+            )
+            ->whereHas(
+                'stores',
+                function ($query) use (
+                    $storeId
+                ) {
+
+                    $query->where(
+                        'stores.id',
+                        $storeId
+                    );
+                }
+            )
+            ->first();
+
+
+        if (
+            !$supplier
+        ) {
+
+            throw ValidationException::withMessages([
+                'supplier_id' =>
+                'Selected supplier is not available for the active branch.',
+            ]);
+        }
+
+
+        return $supplier;
+    }
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | DUPLICATE SUPPLIER INVOICE
+    |--------------------------------------------------------------------------
+    */
+
+    private function validateDuplicateInvoice(
+        int $companyId,
+        int $storeId,
+        int $supplierId,
+        ?string $invoiceNo,
+        ?int $ignorePurchaseId = null
+    ): void {
+
+        $invoiceNo =
+            $this->nullableString(
+                $invoiceNo
+            );
+
+
+        if (
+            $invoiceNo === null
+        ) {
+            return;
+        }
+
+
+        $query =
+            Purchase::query()
+            ->where(
+                'company_id',
+                $companyId
+            )
+            ->where(
+                'store_id',
+                $storeId
+            )
+            ->where(
+                'supplier_id',
+                $supplierId
+            )
+            ->where(
+                'invoice_no',
+                $invoiceNo
+            );
+
+
+        if (
+            $ignorePurchaseId !== null
+        ) {
+
+            $query->where(
+                'id',
+                '!=',
+                $ignorePurchaseId
+            );
+        }
+
+
+        if (
+            $query->exists()
+        ) {
+
+            throw ValidationException::withMessages([
+                'invoice_no' =>
+                'This supplier invoice number already exists in the active branch.',
+            ]);
+        }
+    }
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | CONTEXT
+    |--------------------------------------------------------------------------
+    |
+    | Browser NEVER decides company_id/store_id.
+    |
+    | Business context comes from the authenticated branch session.
+    |
+    */
+
+    private function context(
+        Request $request
+    ): array {
+
+        $user =
+            $request->user();
+
+
+        abort_unless(
+            $user,
+            401
+        );
+
+
+        $companyId =
+            (int)
+            session(
+                'active_company_id'
+            );
+
+
+        $storeId =
+            (int)
+            session(
+                'active_store_id'
+            );
+
+
+        abort_unless(
+            $companyId > 0
+                &&
+                $storeId > 0,
+            403,
+            'No active business branch selected.'
+        );
 
 
         /*
         |--------------------------------------------------------------------------
-        | 5. Start Database Transaction
+        | Company
         |--------------------------------------------------------------------------
         */
 
-        DB::beginTransaction();
+        $company =
+            Company::query()
+            ->where(
+                'id',
+                $companyId
+            )
+            ->where(
+                'status',
+                true
+            )
+            ->first();
 
 
-        try {
-
-            /*
-            |--------------------------------------------------------------------------
-            | 6. Load Existing Purchase Items
-            |--------------------------------------------------------------------------
-            |
-            | IMPORTANT:
-            | We need the old godown_id before deleting the items.
-            |
-            */
-
-            $purchase->load('items');
+        abort_unless(
+            $company,
+            403,
+            'The active company is unavailable.'
+        );
 
 
-            /*
-            |--------------------------------------------------------------------------
-            | 7. Reverse OLD Stock
-            |--------------------------------------------------------------------------
-            |
-            | We DO NOT delete the old stock ledger.
-            |
-            | Instead we create:
-            |
-            | Purchase Reverse
-            |
-            | This keeps the stock history/audit trail.
-            |
-            */
+        /*
+        |--------------------------------------------------------------------------
+        | Store
+        |--------------------------------------------------------------------------
+        */
 
-            foreach ($purchase->items as $oldItem) {
-
-                $product = Product::find($oldItem->product_id);
-
-
-                if (!$product) {
-                    continue;
-                }
+        $store =
+            Store::query()
+            ->where(
+                'id',
+                $storeId
+            )
+            ->where(
+                'company_id',
+                $companyId
+            )
+            ->where(
+                'status',
+                true
+            )
+            ->first();
 
 
-                $oldGodownId = $oldItem->godown_id;
+        abort_unless(
+            $store,
+            403,
+            'The active branch is unavailable.'
+        );
 
 
-                /*
-                |--------------------------------------------------------------------------
-                | Reverse Previous Purchase Stock
-                |--------------------------------------------------------------------------
-                */
+        /*
+        |--------------------------------------------------------------------------
+        | Normal User Company Protection
+        |--------------------------------------------------------------------------
+        */
 
-                $this->stockService->decreaseStock(
+        if (
+            !$user->is_super_user
+            &&
+            (int) $user->company_id !==
+            $companyId
+        ) {
 
-                    $product,
-
-                    (float) $oldItem->quantity,
-
-                    'Purchase Reverse',
-
-                    $purchase->company_id,
-
-                    $purchase->store_id,
-
-                    $oldGodownId,
-
-                    $purchase->id,
-
-                    $purchase->purchase_no,
-
-                    (float) $oldItem->purchase_price,
-
-                    'Purchase Updated - Reverse Old Stock'
-
-                );
-            }
+            abort(
+                403,
+                'You cannot access this company.'
+            );
+        }
 
 
-            /*
-            |--------------------------------------------------------------------------
-            | 8. Delete OLD Purchase Items
-            |--------------------------------------------------------------------------
-            |
-            | We delete purchase item records.
-            |
-            | We DO NOT delete stock ledger records.
-            |
-            */
-
-            $purchase->items()->delete();
+        return [
+            $companyId,
+            $storeId,
+            $company,
+            $store,
+        ];
+    }
 
 
-            /*
-            |--------------------------------------------------------------------------
-            | 9. Update Purchase Header
-            |--------------------------------------------------------------------------
-            */
+    /*
+    |--------------------------------------------------------------------------
+    | PURCHASE CONTEXT
+    |--------------------------------------------------------------------------
+    */
 
-            $purchase->update([
+    private function ensurePurchaseContext(
+        Purchase $purchase,
+        int $companyId,
+        int $storeId
+    ): void {
 
-                'company_id' => $request->company_id,
+        abort_unless(
+            (int) $purchase->company_id ===
+                $companyId
+                &&
+                (int) $purchase->store_id ===
+                $storeId,
+            404
+        );
+    }
 
-                'store_id' => $request->store_id,
 
-                'supplier_id' => $request->supplier_id,
+    /*
+    |--------------------------------------------------------------------------
+    | PREVIEW PURCHASE NUMBER
+    |--------------------------------------------------------------------------
+    */
 
-                'purchase_date' => $request->purchase_date,
+    private function previewPurchaseNumber(
+        int $storeId
+    ): string {
 
-                'invoice_no' => $request->invoice_no,
-
-                'invoice_date' => $request->invoice_date,
-
-                /*
-                |--------------------------------------------------------------------------
-                | Financial Values
-                |--------------------------------------------------------------------------
-                */
-
-                'subtotal' => $request->grand_total,
-
-                'discount' => 0,
-
-                'tax_amount' => 0,
-
-                'other_charges' => 0,
-
-                'grand_total' => $request->grand_total,
-
-                'paid_amount' => 0,
-
-                'balance_amount' => $request->grand_total,
-
-                'remarks' => $request->remarks,
-
+        $lastPurchase =
+            Purchase::query()
+            ->where(
+                'store_id',
+                $storeId
+            )
+            ->orderByDesc(
+                'id'
+            )
+            ->first([
+                'purchase_no',
             ]);
 
 
-            /*
-            |--------------------------------------------------------------------------
-            | 10. Create NEW Purchase Items
-            |--------------------------------------------------------------------------
-            */
-
-            foreach ($request->product_id as $key => $productId) {
-
-                $product = Product::findOrFail($productId);
+        $next =
+            $this->extractPurchaseSequence(
+                $lastPurchase?->purchase_no
+            )
+            +
+            1;
 
 
-                /*
-                |--------------------------------------------------------------------------
-                | Values
-                |--------------------------------------------------------------------------
-                */
-
-                $qty = (float) $request->qty[$key];
-
-                $price = (float) $request->price[$key];
-
-                $gstPercent = (float) ($request->gst[$key] ?? 0);
-
-                $godownId = $request->godown_id[$key] ?? null;
-
-
-                /*
-                |--------------------------------------------------------------------------
-                | Calculate Amounts
-                |--------------------------------------------------------------------------
-                */
-
-                $discount = 0;
-
-                $subtotal = $qty * $price;
-
-                $gstAmount =
-                    ($subtotal - $discount)
-                    * $gstPercent
-                    / 100;
-
-                $lineTotal =
-                    ($subtotal - $discount)
-                    + $gstAmount;
-
-
-                /*
-                |--------------------------------------------------------------------------
-                | Create Purchase Item
-                |--------------------------------------------------------------------------
-                */
-
-                PurchaseItem::create([
-
-                    'purchase_id' => $purchase->id,
-
-                    'product_id' => $product->id,
-
-                    'godown_id' => $godownId,
-
-                    'quantity' => $qty,
-
-                    'free_quantity' => 0,
-
-                    'purchase_price' => $price,
-
-                    'discount' => $discount,
-
-                    'gst_percent' => $gstPercent,
-
-                    'gst_amount' => $gstAmount,
-
-                    'line_total' => $lineTotal,
-
-                ]);
-
-
-                /*
-                |--------------------------------------------------------------------------
-                | Increase NEW Stock
-                |--------------------------------------------------------------------------
-                */
-
-                $this->stockService->increaseStock(
-
-                    $product,
-
-                    $qty,
-
-                    'Purchase',
-
-                    $purchase->company_id,
-
-                    $purchase->store_id,
-
-                    $godownId,
-
-                    $purchase->id,
-
-                    $purchase->purchase_no,
-
-                    $price,
-
-                    'Purchase Updated'
-
-                );
-            }
-
-
-            /*
-            |--------------------------------------------------------------------------
-            | 11. Commit Transaction
-            |--------------------------------------------------------------------------
-            */
-
-            DB::commit();
-
-
-            /*
-            |--------------------------------------------------------------------------
-            | 12. Success
-            |--------------------------------------------------------------------------
-            */
-
-            return redirect()
-                ->route('purchases.index')
-                ->with(
-                    'success',
-                    'Purchase updated successfully.'
-                );
-        } catch (\Exception $e) {
-
-
-            /*
-            |--------------------------------------------------------------------------
-            | Rollback
-            |--------------------------------------------------------------------------
-            */
-
-            DB::rollBack();
-
-
-            return back()
-                ->withInput()
-                ->with(
-                    'error',
-                    $e->getMessage()
-                );
-        }
+        return 'PUR'
+            .
+            str_pad(
+                (string) $next,
+                6,
+                '0',
+                STR_PAD_LEFT
+            );
     }
 
-    public function destroy(Purchase $purchase)
-    {
-        DB::beginTransaction();
 
-        try {
+    /*
+    |--------------------------------------------------------------------------
+    | GENERATE PURCHASE NUMBER
+    |--------------------------------------------------------------------------
+    */
 
-            /*
-            |--------------------------------------------------------------------------
-            | 1. Check Purchase Return
-            |--------------------------------------------------------------------------
-            */
+    private function generatePurchaseNumber(
+        int $storeId
+    ): string {
 
-            if (PurchaseReturn::where('purchase_id', $purchase->id)->exists()) {
+        /*
+        |--------------------------------------------------------------------------
+        | Lock the branch's latest purchase while generating the next number.
+        |--------------------------------------------------------------------------
+        */
 
-                DB::rollBack();
-
-                return redirect()
-                    ->route('purchases.index')
-                    ->with(
-                        'error',
-                        'Cannot delete this purchase because a Purchase Return already exists.'
-                    );
-            }
-
-
-            /*
-            |--------------------------------------------------------------------------
-            | 2. Load Purchase Items
-            |--------------------------------------------------------------------------
-            */
-
-            $purchase->load('items');
+        $lastPurchase =
+            Purchase::query()
+            ->where(
+                'store_id',
+                $storeId
+            )
+            ->orderByDesc(
+                'id'
+            )
+            ->lockForUpdate()
+            ->first([
+                'purchase_no',
+            ]);
 
 
-            /*
-            |--------------------------------------------------------------------------
-            | 3. Reverse Stock
-            |--------------------------------------------------------------------------
-            |
-            | Each item may belong to a different godown.
-            |
-            */
-
-            foreach ($purchase->items as $item) {
-
-                $product = Product::find($item->product_id);
-
-                if (!$product) {
-                    continue;
-                }
+        $next =
+            $this->extractPurchaseSequence(
+                $lastPurchase?->purchase_no
+            )
+            +
+            1;
 
 
-                /*
-                |--------------------------------------------------------------------------
-                | Get Item Godown
-                |--------------------------------------------------------------------------
-                */
-
-                $godownId = $item->godown_id;
-
-
-                /*
-                |--------------------------------------------------------------------------
-                | Reverse Purchased Quantity
-                |--------------------------------------------------------------------------
-                */
-
-                $this->stockService->decreaseStock(
-
-                    $product,
-
-                    (float) $item->quantity,
-
-                    'Purchase Reverse',
-
-                    $purchase->company_id,
-
-                    $purchase->store_id,
-
-                    $godownId,
-
-                    $purchase->id,
-
-                    $purchase->purchase_no,
-
-                    (float) $item->purchase_price,
-
-                    'Purchase Deleted - Reverse Stock'
-
-                );
-            }
-
-
-            /*
-            |--------------------------------------------------------------------------
-            | 4. Delete Purchase Items
-            |--------------------------------------------------------------------------
-            */
-
-            $purchase->items()->delete();
-
-
-            /*
-            |--------------------------------------------------------------------------
-            | 5. Delete Purchase
-            |--------------------------------------------------------------------------
-            */
-
-            $purchase->delete();
-
-
-            /*
-            |--------------------------------------------------------------------------
-            | 6. Commit
-            |--------------------------------------------------------------------------
-            */
-
-            DB::commit();
-
-
-            /*
-            |--------------------------------------------------------------------------
-            | 7. Success
-            |--------------------------------------------------------------------------
-            */
-
-            return redirect()
-                ->route('purchases.index')
-                ->with(
-                    'success',
-                    'Purchase deleted successfully.'
-                );
-        } catch (\Exception $e) {
-
-            /*
-            |--------------------------------------------------------------------------
-            | Rollback
-            |--------------------------------------------------------------------------
-            */
-
-            DB::rollBack();
-
-
-            return back()
-                ->with(
-                    'error',
-                    $e->getMessage()
-                );
-        }
+        return 'PUR'
+            .
+            str_pad(
+                (string) $next,
+                6,
+                '0',
+                STR_PAD_LEFT
+            );
     }
 
-    public function print(Purchase $purchase)
-    {
+
+    /*
+    |--------------------------------------------------------------------------
+    | EXTRACT NUMBER
+    |--------------------------------------------------------------------------
+    */
+
+    private function extractPurchaseSequence(
+        ?string $purchaseNo
+    ): int {
+
+        if (
+            !$purchaseNo
+        ) {
+            return 0;
+        }
+
+
+        if (
+            preg_match(
+                '/(\d+)$/',
+                $purchaseNo,
+                $matches
+            )
+        ) {
+
+            return (int) $matches[1];
+        }
+
+
+        return 0;
+    }
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Nullable String
+    |--------------------------------------------------------------------------
+    */
+
+    private function nullableString(
+        mixed $value
+    ): ?string {
+
+        if (
+            $value === null
+        ) {
+            return null;
+        }
+
+
+        $value =
+            trim(
+                (string) $value
+            );
+
+
+        return $value !== ''
+            ? $value
+            : null;
+    }
+
+    public function pdf(
+        Request $request,
+        Purchase $purchase
+    ) {
+
+        /*
+        |--------------------------------------------------------------------------
+        | Business Context
+        |--------------------------------------------------------------------------
+        */
+
+        [
+            $companyId,
+            $storeId,
+        ] = $this->context(
+            $request
+        );
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Purchase Isolation
+        |--------------------------------------------------------------------------
+        */
+
+        $this->ensurePurchaseContext(
+            $purchase,
+            $companyId,
+            $storeId
+        );
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Load Purchase Data
+        |--------------------------------------------------------------------------
+        */
+
         $purchase->load([
             'company',
             'store',
             'supplier',
-            'items.product'
+            'items.product.unit',
+            'items.godown',
         ]);
 
-        return view('purchases.print', compact('purchase'));
+
+        /*
+        |--------------------------------------------------------------------------
+        | Generate PDF
+        |--------------------------------------------------------------------------
+        */
+
+        $pdf =
+            Pdf::loadView(
+                'purchases.pdf',
+                compact(
+                    'purchase'
+                )
+            )
+            ->setPaper(
+                'a4',
+                'landscape'
+            );
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Download
+        |--------------------------------------------------------------------------
+        */
+
+        $filename =
+            'purchase-'
+            .
+            $purchase->purchase_no
+            .
+            '.pdf';
+
+
+        return $pdf->download(
+            $filename
+        );
     }
-
-    public function getStores($companyId)
-    {
-        $stores = Store::where('company_id', $companyId)
-            ->where('status', 1)
-            ->orderBy('store_name')
-            ->get([
-                'id',
-                'store_name',
-            ]);
-
-        return response()->json($stores);
-    }
-
-    public function getGodowns(Store $store)
-    {
-        $godowns = Godown::where('company_id', $store->company_id)
-            ->where('store_id', $store->id)
-            ->where('status', 1)
-            ->orderBy('godown_name')
-            ->get([
-                'id',
-                'godown_name',
-            ]);
-
-        return response()->json($godowns);
-    }
-
-    public function getSuppliers(Company $company)
-    {
-        $suppliers = Supplier::where('company_id', $company->id)
-            ->where('status', 1)
-            ->orderBy('supplier_name')
-            ->get([
-                'id',
-                'supplier_name',
-            ]);
-
-        return response()->json($suppliers);
-    }
-
-    
 }
