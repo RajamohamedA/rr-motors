@@ -1,0 +1,3852 @@
+/* ==========================================================================
+   PURCHASE RETURN MODULE
+   Professional Windows Application Style
+   ========================================================================== */
+
+
+/* ==========================================================================
+   PAGE
+   ========================================================================== */
+
+.rr-pr-page {
+    width: 100%;
+    min-width: 0;
+}
+
+
+/* ==========================================================================
+   HEADER
+   ========================================================================== */
+
+.rr-pr-header {
+    margin-bottom: 12px;
+
+    padding: 14px 16px;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    gap: 16px;
+
+    border: 1px solid #d8e0ea;
+    border-radius: 10px;
+
+    background:
+        linear-gradient(180deg,
+            #ffffff 0%,
+            #f8fafc 100%);
+
+    box-shadow:
+        0 2px 8px rgba(15, 23, 42, 0.04);
+}
+
+
+.rr-pr-header-main {
+    min-width: 0;
+
+    display: flex;
+    align-items: center;
+
+    gap: 12px;
+}
+
+
+/* --------------------------------------------------------------------------
+   Back Button
+   -------------------------------------------------------------------------- */
+
+.rr-pr-back-btn {
+    width: 38px;
+    height: 38px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    flex-shrink: 0;
+
+    border: 1px solid #cbd5e1;
+    border-radius: 7px;
+
+    background: #ffffff;
+
+    color: #475569;
+
+    font-size: 14px;
+
+    text-decoration: none;
+
+    transition:
+        background 0.15s ease,
+        color 0.15s ease,
+        border-color 0.15s ease,
+        transform 0.15s ease;
+}
+
+
+.rr-pr-back-btn:hover {
+    border-color: #93c5fd;
+
+    background: #eff6ff;
+
+    color: #2563eb;
+
+    transform: translateX(-1px);
+}
+
+
+/* --------------------------------------------------------------------------
+   Header Icon
+   -------------------------------------------------------------------------- */
+
+.rr-pr-header-icon {
+    width: 46px;
+    height: 46px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    flex-shrink: 0;
+
+    border: 1px solid #fecaca;
+    border-radius: 9px;
+
+    background: #fff1f2;
+
+    color: #dc2626;
+
+    font-size: 19px;
+}
+
+
+/* --------------------------------------------------------------------------
+   Header Content
+   -------------------------------------------------------------------------- */
+
+.rr-pr-header-content {
+    min-width: 0;
+}
+
+
+.rr-pr-eyebrow {
+    display: block;
+
+    margin-bottom: 2px;
+
+    color: #64748b;
+
+    font-size: 12px;
+    font-weight: 700;
+
+    text-transform: uppercase;
+
+    letter-spacing: 0.35px;
+}
+
+
+.rr-pr-header-content h1 {
+    margin: 0;
+
+    color: #0f172a;
+
+    font-size: 23px;
+    font-weight: 850;
+
+    line-height: 1.25;
+}
+
+
+.rr-pr-header-meta {
+    margin-top: 6px;
+
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+
+    gap: 7px 14px;
+}
+
+
+.rr-pr-header-meta span {
+    display: inline-flex;
+    align-items: center;
+
+    gap: 5px;
+
+    color: #64748b;
+
+    font-size: 12px;
+    font-weight: 600;
+}
+
+
+.rr-pr-header-meta i {
+    color: #2563eb;
+
+    font-size: 12px;
+}
+
+
+/* --------------------------------------------------------------------------
+   Header Actions
+   -------------------------------------------------------------------------- */
+
+.rr-pr-header-actions {
+    display: flex;
+    align-items: center;
+
+    gap: 8px;
+
+    flex-shrink: 0;
+}
+
+
+/* ==========================================================================
+   BUTTONS
+   ========================================================================== */
+
+.rr-pr-primary-btn {
+    min-height: 38px;
+
+    padding: 0 13px;
+
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    gap: 7px;
+
+    border: 1px solid #2563eb;
+    border-radius: 6px;
+
+    background: #2563eb;
+
+    color: #ffffff;
+
+    font-size: 12px;
+    font-weight: 750;
+
+    text-decoration: none;
+
+    cursor: pointer;
+
+    transition:
+        background 0.15s ease,
+        border-color 0.15s ease,
+        transform 0.15s ease,
+        box-shadow 0.15s ease;
+}
+
+
+.rr-pr-primary-btn:hover {
+    border-color: #1d4ed8;
+
+    background: #1d4ed8;
+
+    color: #ffffff;
+
+    transform: translateY(-1px);
+
+    box-shadow:
+        0 5px 14px rgba(37, 99, 235, 0.18);
+}
+
+
+.rr-pr-secondary-btn {
+    min-height: 38px;
+
+    padding: 0 12px;
+
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    gap: 6px;
+
+    border: 1px solid #cbd5e1;
+    border-radius: 6px;
+
+    background: #ffffff;
+
+    color: #475569;
+
+    font-size: 12px;
+    font-weight: 700;
+
+    text-decoration: none;
+
+    cursor: pointer;
+}
+
+
+.rr-pr-secondary-btn:hover {
+    border-color: #93c5fd;
+
+    background: #eff6ff;
+
+    color: #2563eb;
+}
+
+
+/* ==========================================================================
+   SUMMARY
+   ========================================================================== */
+
+.rr-pr-summary {
+    margin-bottom: 12px;
+
+    display: grid;
+
+    grid-template-columns:
+        repeat(3,
+            minmax(0, 1fr));
+
+    gap: 10px;
+}
+
+
+.rr-pr-stat {
+    position: relative;
+
+    min-width: 0;
+    min-height: 84px;
+
+    padding: 13px 14px;
+
+    display: flex;
+    align-items: center;
+
+    gap: 11px;
+
+    overflow: hidden;
+
+    border: 1px solid #dbe3ec;
+    border-radius: 9px;
+
+    background: #ffffff;
+
+    box-shadow:
+        0 2px 7px rgba(15, 23, 42, 0.035);
+
+    transition:
+        transform 0.14s ease,
+        box-shadow 0.14s ease;
+}
+
+
+.rr-pr-stat:hover {
+    transform: translateY(-1px);
+
+    box-shadow:
+        0 7px 18px rgba(15, 23, 42, 0.07);
+}
+
+
+.rr-pr-stat::before {
+    position: absolute;
+
+    top: 0;
+    left: 0;
+
+    width: 3px;
+    height: 100%;
+
+    content: "";
+
+    background: #64748b;
+}
+
+
+.rr-pr-stat.primary::before {
+    background: #2563eb;
+}
+
+
+.rr-pr-stat.warning::before {
+    background: #d97706;
+}
+
+
+.rr-pr-stat.success::before {
+    background: #16a34a;
+}
+
+
+.rr-pr-stat.info::before {
+    background: #0891b2;
+}
+
+
+.rr-pr-stat.neutral::before {
+    background: #64748b;
+}
+
+
+/* --------------------------------------------------------------------------
+   Summary Icon
+   -------------------------------------------------------------------------- */
+
+.rr-pr-stat-icon {
+    width: 42px;
+    height: 42px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    flex: 0 0 42px;
+
+    border-radius: 8px;
+
+    background: #f1f5f9;
+
+    color: #475569;
+
+    font-size: 17px;
+}
+
+
+.rr-pr-stat.primary .rr-pr-stat-icon {
+    background: #eff6ff;
+
+    color: #2563eb;
+}
+
+
+.rr-pr-stat.warning .rr-pr-stat-icon {
+    background: #fffbeb;
+
+    color: #d97706;
+}
+
+
+.rr-pr-stat.success .rr-pr-stat-icon {
+    background: #f0fdf4;
+
+    color: #16a34a;
+}
+
+
+.rr-pr-stat.info .rr-pr-stat-icon {
+    background: #ecfeff;
+
+    color: #0891b2;
+}
+
+
+/* --------------------------------------------------------------------------
+   Summary Text
+   -------------------------------------------------------------------------- */
+
+.rr-pr-stat>div:last-child {
+    min-width: 0;
+}
+
+
+.rr-pr-stat span {
+    display: block;
+
+    color: #64748b;
+
+    font-size: 12px;
+    font-weight: 650;
+}
+
+
+.rr-pr-stat strong {
+    display: block;
+
+    margin-top: 3px;
+
+    overflow: hidden;
+
+    color: #0f172a;
+
+    font-size: 19px;
+    font-weight: 850;
+
+    line-height: 1.2;
+
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+
+/* ==========================================================================
+   FILTER WINDOW
+   ========================================================================== */
+
+.rr-pr-filter-window {
+    margin-bottom: 12px;
+
+    overflow: visible;
+
+    border: 1px solid #d8e0ea;
+    border-radius: 9px;
+
+    background: #ffffff;
+
+    box-shadow:
+        0 2px 7px rgba(15, 23, 42, 0.035);
+}
+
+
+/* --------------------------------------------------------------------------
+   Filter Header
+   -------------------------------------------------------------------------- */
+
+.rr-pr-filter-header {
+    min-height: 42px;
+
+    padding: 0 13px;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    gap: 12px;
+
+    border-bottom: 1px solid #e2e8f0;
+
+    background:
+        linear-gradient(180deg,
+            #fbfcfe,
+            #f3f6fa);
+}
+
+
+.rr-pr-filter-header>div {
+    display: flex;
+    align-items: center;
+
+    gap: 7px;
+}
+
+
+.rr-pr-filter-header>div i {
+    color: #2563eb;
+
+    font-size: 13px;
+}
+
+
+.rr-pr-filter-header strong {
+    color: #1e293b;
+
+    font-size: 12px;
+    font-weight: 850;
+
+    text-transform: uppercase;
+
+    letter-spacing: 0.2px;
+}
+
+
+.rr-pr-filter-header>span {
+    min-height: 25px;
+
+    padding: 0 9px;
+
+    display: inline-flex;
+    align-items: center;
+
+    border: 1px solid #dbeafe;
+    border-radius: 999px;
+
+    background: #eff6ff;
+
+    color: #1d4ed8;
+
+    font-size: 12px;
+    font-weight: 700;
+}
+
+
+/* --------------------------------------------------------------------------
+   Filter Body
+   -------------------------------------------------------------------------- */
+
+.rr-pr-filter-body {
+    padding: 12px;
+
+    display: grid;
+
+    grid-template-columns:
+        minmax(280px, 1.7fr) minmax(190px, 1fr) minmax(165px, 0.85fr) minmax(165px, 0.85fr) auto;
+
+    align-items: end;
+
+    gap: 9px;
+}
+
+
+/* --------------------------------------------------------------------------
+   Filter Field
+   -------------------------------------------------------------------------- */
+
+.rr-pr-filter {
+    min-width: 0;
+}
+
+
+.rr-pr-filter label {
+    display: block;
+
+    margin-bottom: 5px;
+
+    color: #475569;
+
+    font-size: 12px;
+    font-weight: 750;
+}
+
+
+.rr-pr-filter select {
+    width: 100%;
+    height: 38px;
+
+    padding: 0 9px;
+
+    border: 1px solid #aab6c5;
+    border-radius: 6px;
+
+    outline: 0;
+
+    background: #ffffff;
+
+    color: #0f172a;
+
+    font-size: 12px;
+
+    transition:
+        border-color 0.13s ease,
+        box-shadow 0.13s ease;
+}
+
+
+.rr-pr-filter select:focus {
+    border-color: #3b82f6;
+
+    box-shadow:
+        0 0 0 3px rgba(59, 130, 246, 0.09);
+}
+
+
+/* ==========================================================================
+   SEARCH BOX
+   ========================================================================== */
+
+.rr-pr-search-box {
+    position: relative;
+
+    min-width: 0;
+}
+
+
+.rr-pr-search-box>i {
+    position: absolute;
+
+    top: 50%;
+    left: 11px;
+
+    z-index: 1;
+
+    transform: translateY(-50%);
+
+    color: #94a3b8;
+
+    font-size: 12px;
+
+    pointer-events: none;
+}
+
+
+.rr-pr-search-box input {
+    width: 100%;
+    height: 38px;
+
+    padding:
+        0 38px 0 34px;
+
+    border: 1px solid #aab6c5;
+    border-radius: 6px;
+
+    outline: 0;
+
+    background: #ffffff;
+
+    color: #0f172a;
+
+    font-size: 12px;
+
+    transition:
+        border-color 0.13s ease,
+        box-shadow 0.13s ease;
+}
+
+
+.rr-pr-search-box input:focus {
+    border-color: #3b82f6;
+
+    box-shadow:
+        0 0 0 3px rgba(59, 130, 246, 0.09);
+}
+
+
+.rr-pr-search-box input::placeholder {
+    color: #94a3b8;
+}
+
+
+.rr-pr-search-box input[type="search"]::-webkit-search-cancel-button {
+    display: none;
+}
+
+
+/* --------------------------------------------------------------------------
+   Search Clear
+   -------------------------------------------------------------------------- */
+
+.rr-pr-search-box>button {
+    position: absolute;
+
+    top: 50%;
+    right: 6px;
+
+    width: 27px;
+    height: 27px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    transform: translateY(-50%);
+
+    border: 0;
+    border-radius: 5px;
+
+    background: #f1f5f9;
+
+    color: #64748b;
+
+    font-size: 10px;
+
+    cursor: pointer;
+}
+
+
+.rr-pr-search-box>button:hover {
+    background: #fee2e2;
+
+    color: #dc2626;
+}
+
+
+/* ==========================================================================
+   DATE PICKER
+   ========================================================================== */
+
+.rr-pr-date-picker {
+    position: relative;
+
+    width: 100%;
+    height: 38px;
+
+    display: flex;
+    align-items: stretch;
+
+    overflow: hidden;
+
+    border: 1px solid #aab6c5;
+    border-radius: 6px;
+
+    background: #ffffff;
+
+    transition:
+        border-color 0.13s ease,
+        box-shadow 0.13s ease,
+        background 0.13s ease;
+}
+
+
+.rr-pr-date-picker:hover {
+    border-color: #8797aa;
+}
+
+
+.rr-pr-date-picker:focus-within {
+    border-color: #3b82f6;
+
+    box-shadow:
+        0 0 0 3px rgba(59, 130, 246, 0.09);
+}
+
+
+.rr-pr-date-picker.has-value {
+    border-color: #93c5fd;
+
+    background: #f8fbff;
+}
+
+
+/* --------------------------------------------------------------------------
+   Calendar Left Button
+   -------------------------------------------------------------------------- */
+
+.rr-pr-date-leading-icon {
+    width: 37px;
+
+    flex: 0 0 37px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    padding: 0;
+
+    border: 0;
+    border-right: 1px solid #dbe3ec;
+
+    background:
+        linear-gradient(180deg,
+            #f8fafc,
+            #eef2f7);
+
+    color: #475569;
+
+    font-size: 13px;
+
+    cursor: pointer;
+}
+
+
+.rr-pr-date-leading-icon:hover {
+    background: #eff6ff;
+
+    color: #2563eb;
+}
+
+
+.rr-pr-date-picker:focus-within .rr-pr-date-leading-icon {
+    background: #eff6ff;
+
+    color: #2563eb;
+}
+
+
+/* --------------------------------------------------------------------------
+   Date Input
+   -------------------------------------------------------------------------- */
+
+.rr-pr-date-picker input {
+    width: 100%;
+    min-width: 0;
+    height: 36px;
+
+    padding: 0 8px;
+
+    border: 0;
+    outline: 0;
+
+    background: transparent;
+
+    color: #0f172a;
+
+    font-size: 12px;
+    font-weight: 600;
+
+    cursor: pointer;
+
+    box-shadow: none;
+}
+
+
+.rr-pr-date-picker input:focus {
+    outline: 0;
+
+    box-shadow: none;
+}
+
+
+.rr-pr-date-picker input::-webkit-calendar-picker-indicator {
+    display: none;
+
+    opacity: 0;
+}
+
+
+/* --------------------------------------------------------------------------
+   Date Right Button
+   -------------------------------------------------------------------------- */
+
+.rr-pr-date-icon,
+.rr-pr-date-clear {
+    width: 32px;
+
+    flex: 0 0 32px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    padding: 0;
+
+    border: 0;
+    border-left: 1px solid #e2e8f0;
+
+    background: #ffffff;
+
+    color: #64748b;
+
+    font-size: 10px;
+
+    cursor: pointer;
+}
+
+
+.rr-pr-date-icon:hover {
+    background: #eff6ff;
+
+    color: #2563eb;
+}
+
+
+.rr-pr-date-clear:hover {
+    background: #fff1f2;
+
+    color: #dc2626;
+}
+
+
+/* ==========================================================================
+   CLEAR FILTER BUTTON
+   ========================================================================== */
+
+.rr-pr-clear-btn {
+    min-width: 88px;
+    height: 38px;
+
+    padding: 0 11px;
+
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    gap: 6px;
+
+    border: 1px solid #cbd5e1;
+    border-radius: 6px;
+
+    background: #ffffff;
+
+    color: #475569;
+
+    font-size: 12px;
+    font-weight: 750;
+
+    cursor: pointer;
+
+    transition:
+        background 0.13s ease,
+        border-color 0.13s ease,
+        color 0.13s ease;
+}
+
+
+.rr-pr-clear-btn:hover:not(:disabled) {
+    border-color: #fca5a5;
+
+    background: #fff1f2;
+
+    color: #dc2626;
+}
+
+
+.rr-pr-clear-btn:disabled {
+    opacity: 0.48;
+
+    cursor: not-allowed;
+}
+
+
+/* ==========================================================================
+   GRID WINDOW
+   ========================================================================== */
+
+.rr-pr-grid-window {
+    overflow: hidden;
+
+    border: 1px solid #d8e0ea;
+    border-radius: 9px;
+
+    background: #ffffff;
+
+    box-shadow:
+        0 2px 7px rgba(15, 23, 42, 0.035);
+}
+
+
+/* --------------------------------------------------------------------------
+   Grid Toolbar
+   -------------------------------------------------------------------------- */
+
+.rr-pr-grid-toolbar {
+    min-height: 50px;
+
+    padding: 0 13px;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    gap: 12px;
+
+    border-bottom: 1px solid #e2e8f0;
+
+    background: #fbfcfe;
+}
+
+
+.rr-pr-grid-title {
+    display: flex;
+    align-items: center;
+
+    gap: 9px;
+}
+
+
+.rr-pr-grid-title>i {
+    width: 31px;
+    height: 31px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 6px;
+
+    background: #fff1f2;
+
+    color: #dc2626;
+
+    font-size: 13px;
+}
+
+
+.rr-pr-grid-title strong {
+    display: block;
+
+    color: #0f172a;
+
+    font-size: 12px;
+    font-weight: 850;
+}
+
+
+.rr-pr-grid-title span {
+    display: block;
+
+    margin-top: 1px;
+
+    color: #64748b;
+
+    font-size: 12px;
+}
+
+
+.rr-pr-grid-count {
+    color: #64748b;
+
+    font-size: 12px;
+}
+
+
+.rr-pr-grid-count strong {
+    color: #0f172a;
+}
+
+
+/* ==========================================================================
+   TABLE
+   ========================================================================== */
+
+.rr-pr-table-wrap {
+    width: 100%;
+
+    overflow-x: auto;
+}
+
+
+.rr-pr-table {
+    width: 100%;
+    min-width: 1060px;
+
+    border-collapse: collapse;
+}
+
+
+/* --------------------------------------------------------------------------
+   Table Head
+   -------------------------------------------------------------------------- */
+
+.rr-pr-table thead th {
+    padding: 9px 8px;
+
+    border-right: 1px solid #cdd6e1;
+    border-bottom: 1px solid #aab5c3;
+
+    background:
+        linear-gradient(180deg,
+            #edf2f7,
+            #e3e9f0);
+
+    color: #334155;
+
+    font-size: 11px;
+    font-weight: 850;
+
+    text-align: left;
+
+    text-transform: uppercase;
+
+    white-space: nowrap;
+}
+
+
+.rr-pr-table thead th:last-child {
+    border-right: 0;
+}
+
+
+/* --------------------------------------------------------------------------
+   Table Body
+   -------------------------------------------------------------------------- */
+
+.rr-pr-table tbody td {
+    padding: 8px;
+
+    border-right: 1px solid #edf1f5;
+    border-bottom: 1px solid #e7ebf0;
+
+    color: #334155;
+
+    font-size: 12px;
+
+    vertical-align: middle;
+}
+
+
+.rr-pr-table tbody td:last-child {
+    border-right: 0;
+}
+
+
+.rr-pr-row {
+    cursor: pointer;
+}
+
+
+.rr-pr-row.row-even td {
+    background: #ffffff;
+}
+
+
+.rr-pr-row.row-odd td {
+    background: #fafcff;
+}
+
+
+.rr-pr-row:hover td {
+    background: #fff7f7 !important;
+}
+
+
+/* ==========================================================================
+   TABLE CONTENT
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   Return Identity
+   -------------------------------------------------------------------------- */
+
+.rr-pr-identity {
+    min-width: 160px;
+
+    display: flex;
+    align-items: center;
+
+    gap: 9px;
+}
+
+
+.rr-pr-avatar {
+    width: 34px;
+    height: 34px;
+
+    flex: 0 0 34px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border: 1px solid #fecaca;
+    border-radius: 6px;
+
+    background: #fff1f2;
+
+    color: #dc2626;
+
+    font-size: 13px;
+}
+
+
+.rr-pr-identity strong {
+    display: block;
+
+    color: #0f172a;
+
+    font-size: 12px;
+    font-weight: 800;
+}
+
+
+.rr-pr-identity span {
+    display: block;
+
+    margin-top: 2px;
+
+    color: #64748b;
+
+    font-size: 11px;
+}
+
+
+/* --------------------------------------------------------------------------
+   Purchase Reference
+   -------------------------------------------------------------------------- */
+
+.rr-pr-purchase-ref strong {
+    display: block;
+
+    color: #1d4ed8;
+
+    font-size: 12px;
+    font-weight: 800;
+}
+
+
+.rr-pr-purchase-ref span {
+    display: block;
+
+    margin-top: 2px;
+
+    color: #64748b;
+
+    font-size: 11px;
+}
+
+
+/* --------------------------------------------------------------------------
+   Supplier
+   -------------------------------------------------------------------------- */
+
+.rr-pr-supplier {
+    display: flex;
+    align-items: center;
+
+    gap: 6px;
+}
+
+
+.rr-pr-supplier i {
+    color: #64748b;
+
+    font-size: 12px;
+}
+
+
+.rr-pr-supplier strong {
+    color: #334155;
+
+    font-size: 12px;
+    font-weight: 700;
+}
+
+
+/* --------------------------------------------------------------------------
+   Date
+   -------------------------------------------------------------------------- */
+
+.rr-pr-date-cell {
+    display: inline-flex;
+    align-items: center;
+
+    gap: 6px;
+
+    color: #475569;
+
+    font-size: 12px;
+}
+
+
+.rr-pr-date-cell i {
+    color: #2563eb;
+
+    font-size: 11px;
+}
+
+
+/* --------------------------------------------------------------------------
+   Money
+   -------------------------------------------------------------------------- */
+
+.rr-pr-table .number {
+    text-align: right;
+
+    white-space: nowrap;
+}
+
+
+.rr-pr-money {
+    color: #475569 !important;
+
+    font-weight: 650;
+}
+
+
+.rr-pr-total {
+    color: #b91c1c !important;
+
+    font-weight: 850;
+}
+
+
+.rr-pr-table .center {
+    text-align: center;
+}
+
+
+/* ==========================================================================
+   ACTION BUTTONS
+   ========================================================================== */
+
+.rr-pr-actions {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    gap: 5px;
+}
+
+
+.rr-pr-action-btn {
+    width: 30px;
+    height: 30px;
+
+    padding: 0;
+
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 5px;
+
+    font-size: 12px;
+
+    text-decoration: none;
+
+    cursor: pointer;
+
+    transition:
+        transform 0.12s ease,
+        background 0.12s ease,
+        border-color 0.12s ease,
+        color 0.12s ease;
+}
+
+
+.rr-pr-action-btn:hover {
+    transform: translateY(-1px);
+}
+
+
+/* View */
+
+.rr-pr-action-btn.view {
+    border: 1px solid #bfdbfe;
+
+    background: #eff6ff;
+
+    color: #2563eb;
+}
+
+
+.rr-pr-action-btn.view:hover {
+    border-color: #60a5fa;
+
+    background: #dbeafe;
+
+    color: #1d4ed8;
+}
+
+
+/* Edit */
+
+.rr-pr-action-btn.edit {
+    border: 1px solid #fde68a;
+
+    background: #fffbeb;
+
+    color: #b45309;
+}
+
+
+.rr-pr-action-btn.edit:hover {
+    border-color: #fbbf24;
+
+    background: #fef3c7;
+
+    color: #92400e;
+}
+
+
+/* Print */
+
+.rr-pr-action-btn.print {
+    border: 1px solid #bbf7d0;
+
+    background: #f0fdf4;
+
+    color: #15803d;
+}
+
+
+.rr-pr-action-btn.print:hover {
+    border-color: #86efac;
+
+    background: #dcfce7;
+
+    color: #166534;
+}
+
+
+/* Delete */
+
+.rr-pr-action-btn.delete {
+    border: 1px solid #fecaca;
+
+    background: #fff1f2;
+
+    color: #dc2626;
+}
+
+
+.rr-pr-action-btn.delete:hover {
+    border-color: #fca5a5;
+
+    background: #fee2e2;
+
+    color: #b91c1c;
+}
+
+
+/* ==========================================================================
+   EMPTY STATE
+   ========================================================================== */
+
+.rr-pr-empty {
+    min-height: 250px;
+
+    padding: 32px;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+
+    text-align: center;
+}
+
+
+.rr-pr-empty>div {
+    width: 52px;
+    height: 52px;
+
+    margin-bottom: 11px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border: 1px solid #fecaca;
+    border-radius: 50%;
+
+    background: #fff1f2;
+
+    color: #dc2626;
+
+    font-size: 19px;
+}
+
+
+.rr-pr-empty strong {
+    color: #1e293b;
+
+    font-size: 14px;
+    font-weight: 800;
+}
+
+
+.rr-pr-empty>span {
+    max-width: 430px;
+
+    margin-top: 4px;
+    margin-bottom: 13px;
+
+    color: #64748b;
+
+    font-size: 12px;
+
+    line-height: 1.55;
+}
+
+
+/* ==========================================================================
+   PAGINATION
+   ========================================================================== */
+
+.rr-pr-pagination {
+    min-height: 52px;
+
+    padding: 8px 12px;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    gap: 12px;
+
+    border-top: 1px solid #e2e8f0;
+
+    background: #f8fafc;
+
+    color: #64748b;
+
+    font-size: 12px;
+}
+
+
+.rr-pr-pagination strong {
+    color: #0f172a;
+}
+
+
+.rr-pr-pagination-buttons {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+
+    gap: 4px;
+}
+
+
+.rr-pr-page-btn {
+    min-width: 30px;
+    height: 30px;
+
+    padding: 0 8px;
+
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    border: 1px solid #cbd5e1;
+    border-radius: 5px;
+
+    background: #ffffff;
+
+    color: #475569;
+
+    font-size: 11px;
+    font-weight: 700;
+
+    cursor: pointer;
+}
+
+
+.rr-pr-page-btn:hover:not(:disabled):not(.active) {
+    border-color: #93c5fd;
+
+    background: #eff6ff;
+
+    color: #2563eb;
+}
+
+
+.rr-pr-page-btn.active {
+    border-color: #2563eb;
+
+    background: #2563eb;
+
+    color: #ffffff;
+}
+
+
+.rr-pr-page-btn:disabled {
+    opacity: 0.42;
+
+    cursor: not-allowed;
+}
+
+
+/* ==========================================================================
+   RESPONSIVE
+   ========================================================================== */
+
+@media (max-width: 1200px) {
+
+    .rr-pr-filter-body {
+        grid-template-columns:
+            repeat(2,
+                minmax(0, 1fr));
+    }
+
+
+    .rr-pr-search-box {
+        grid-column:
+            1 / -1;
+    }
+
+
+    .rr-pr-summary {
+        grid-template-columns:
+            repeat(3,
+                minmax(0, 1fr));
+    }
+}
+
+
+@media (max-width: 800px) {
+
+    .rr-pr-header {
+        align-items: flex-start;
+
+        flex-direction: column;
+    }
+
+
+    .rr-pr-header-actions {
+        width: 100%;
+    }
+
+
+    .rr-pr-header-actions .rr-pr-primary-btn {
+        width: 100%;
+    }
+
+
+    .rr-pr-summary {
+        grid-template-columns:
+            1fr;
+    }
+
+
+    .rr-pr-filter-body {
+        grid-template-columns:
+            1fr;
+    }
+
+
+    .rr-pr-search-box {
+        grid-column: auto;
+    }
+
+
+    .rr-pr-grid-toolbar {
+        align-items: flex-start;
+
+        flex-direction: column;
+
+        padding-top: 9px;
+        padding-bottom: 9px;
+    }
+
+
+    .rr-pr-pagination {
+        align-items: flex-start;
+
+        flex-direction: column;
+    }
+}
+
+
+@media (max-width: 560px) {
+
+    .rr-pr-header {
+        padding: 11px;
+    }
+
+
+    .rr-pr-header-main {
+        align-items: flex-start;
+    }
+
+
+    .rr-pr-header-icon {
+        display: none;
+    }
+
+
+    .rr-pr-header-content h1 {
+        font-size: 20px;
+    }
+
+
+    .rr-pr-clear-btn {
+        width: 100%;
+    }
+
+
+    .rr-pr-pagination-buttons {
+        width: 100%;
+
+        overflow-x: auto;
+
+        flex-wrap: nowrap;
+    }
+}
+
+
+/* ==========================================================================
+   PURCHASE RETURN CREATE PAGE
+   ========================================================================== */
+
+
+/* ==========================================================================
+   ENTRY WINDOWS
+   ========================================================================== */
+
+.rr-pr-entry-window {
+    margin-bottom: 12px;
+
+    overflow: hidden;
+
+    border: 1px solid #d8e0ea;
+    border-radius: 9px;
+
+    background: #ffffff;
+
+    box-shadow:
+        0 2px 7px rgba(15, 23, 42, 0.035);
+}
+
+
+.rr-pr-search-window {
+    overflow: visible;
+}
+
+
+.rr-pr-entry-title {
+    min-height: 42px;
+
+    padding: 0 13px;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    gap: 10px;
+
+    border-bottom: 1px solid #e2e8f0;
+
+    background:
+        linear-gradient(180deg,
+            #fbfcfe,
+            #f3f6fa);
+}
+
+
+.rr-pr-entry-title>div {
+    display: flex;
+    align-items: center;
+
+    gap: 8px;
+}
+
+
+.rr-pr-entry-title i {
+    color: #2563eb;
+
+    font-size: 13px;
+}
+
+
+.rr-pr-entry-title strong {
+    color: #1e293b;
+
+    font-size: 12px;
+    font-weight: 850;
+
+    text-transform: uppercase;
+
+    letter-spacing: 0.2px;
+}
+
+
+.rr-pr-entry-body {
+    padding: 12px;
+}
+
+
+/* ==========================================================================
+   PURCHASE SEARCH
+   ========================================================================== */
+
+.rr-pr-purchase-search {
+    position: relative;
+
+    z-index: 100;
+}
+
+
+/* --------------------------------------------------------------------------
+   Search Box
+   -------------------------------------------------------------------------- */
+
+.rr-pr-purchase-search-box {
+    position: relative;
+
+    min-height: 44px;
+
+    display: flex;
+    align-items: center;
+
+    border: 1px solid #aab6c5;
+    border-radius: 7px;
+
+    background: #ffffff;
+
+    transition:
+        border-color 0.14s ease,
+        box-shadow 0.14s ease;
+}
+
+
+.rr-pr-purchase-search-box:hover {
+    border-color: #8797aa;
+}
+
+
+.rr-pr-purchase-search-box:focus-within,
+.rr-pr-purchase-search-box.is-open {
+    border-color: #3b82f6;
+
+    box-shadow:
+        0 0 0 3px rgba(59, 130, 246, 0.09);
+}
+
+
+/* --------------------------------------------------------------------------
+   Search Icon
+   -------------------------------------------------------------------------- */
+
+.rr-pr-purchase-search-icon {
+    width: 43px;
+    height: 42px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    flex: 0 0 43px;
+
+    color: #64748b;
+
+    font-size: 15px;
+}
+
+
+.rr-pr-purchase-search-box:focus-within .rr-pr-purchase-search-icon {
+    color: #2563eb;
+}
+
+
+/* --------------------------------------------------------------------------
+   Search Input
+   -------------------------------------------------------------------------- */
+
+.rr-pr-purchase-search-box input {
+    width: 100%;
+    height: 42px;
+
+    padding: 0 8px 0 0;
+
+    border: 0;
+    outline: 0;
+
+    background: transparent;
+
+    color: #0f172a;
+
+    font-size: 13px;
+    font-weight: 500;
+
+    box-shadow: none;
+}
+
+
+.rr-pr-purchase-search-box input::placeholder {
+    color: #94a3b8;
+}
+
+
+/* Remove browser search X */
+
+.rr-pr-purchase-search-box input[type="search"]::-webkit-search-cancel-button {
+    display: none;
+}
+
+
+/* --------------------------------------------------------------------------
+   Spinner
+   -------------------------------------------------------------------------- */
+
+.rr-pr-search-spinner {
+    width: 34px;
+    height: 34px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    flex-shrink: 0;
+
+    color: #2563eb;
+}
+
+
+.rr-pr-search-spinner .spinner-border {
+    width: 15px;
+    height: 15px;
+
+    border-width: 2px;
+}
+
+
+/* --------------------------------------------------------------------------
+   Clear Search
+   -------------------------------------------------------------------------- */
+
+.rr-pr-search-clear {
+    width: 30px;
+    height: 30px;
+
+    margin-right: 6px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    flex-shrink: 0;
+
+    border: 1px solid #e2e8f0;
+    border-radius: 5px;
+
+    background: #f8fafc;
+
+    color: #64748b;
+
+    font-size: 10px;
+
+    cursor: pointer;
+}
+
+
+.rr-pr-search-clear:hover {
+    border-color: #fecaca;
+
+    background: #fff1f2;
+
+    color: #dc2626;
+}
+
+
+/* ==========================================================================
+   PURCHASE SEARCH RESULTS
+   ========================================================================== */
+
+.rr-pr-search-results {
+    position: absolute;
+
+    top: calc(100% + 6px);
+    left: 0;
+    right: 0;
+
+    z-index: 9999;
+
+    overflow: hidden;
+
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+
+    background: #ffffff;
+
+    box-shadow:
+        0 18px 45px rgba(15, 23, 42, 0.16),
+        0 4px 12px rgba(15, 23, 42, 0.07);
+}
+
+
+/* --------------------------------------------------------------------------
+   Search Results Header
+   -------------------------------------------------------------------------- */
+
+.rr-pr-search-results-header {
+    min-height: 38px;
+
+    padding: 0 12px;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    gap: 10px;
+
+    border-bottom: 1px solid #e2e8f0;
+
+    background: #f8fafc;
+}
+
+
+.rr-pr-search-results-header>div {
+    display: flex;
+    align-items: center;
+
+    gap: 7px;
+
+    color: #334155;
+
+    font-size: 12px;
+    font-weight: 750;
+}
+
+
+.rr-pr-search-results-header>div i {
+    color: #2563eb;
+}
+
+
+.rr-pr-search-results-header>span {
+    padding: 2px 8px;
+
+    border: 1px solid #dbeafe;
+    border-radius: 999px;
+
+    background: #eff6ff;
+
+    color: #1d4ed8;
+
+    font-size: 12px;
+    font-weight: 700;
+}
+
+
+/* --------------------------------------------------------------------------
+   Search Results List
+   -------------------------------------------------------------------------- */
+
+.rr-pr-search-results-list {
+    max-height: 350px;
+
+    overflow-y: auto;
+
+    overscroll-behavior: contain;
+}
+
+
+.rr-pr-search-results-list::-webkit-scrollbar {
+    width: 7px;
+}
+
+
+.rr-pr-search-results-list::-webkit-scrollbar-track {
+    background: #f8fafc;
+}
+
+
+.rr-pr-search-results-list::-webkit-scrollbar-thumb {
+    border-radius: 10px;
+
+    background: #cbd5e1;
+}
+
+
+/* ==========================================================================
+   PURCHASE RESULT ROW
+   ========================================================================== */
+
+.rr-pr-search-result {
+    width: 100%;
+    min-height: 65px;
+
+    padding: 9px 11px;
+
+    display: grid;
+
+    grid-template-columns:
+        38px minmax(230px, 1fr) 115px 135px 28px;
+
+    align-items: center;
+
+    gap: 10px;
+
+    border: 0;
+    border-bottom: 1px solid #edf2f7;
+
+    background: #ffffff;
+
+    color: inherit;
+
+    text-align: left;
+
+    cursor: pointer;
+
+    transition:
+        background 0.12s ease,
+        box-shadow 0.12s ease;
+}
+
+
+.rr-pr-search-result:nth-child(even) {
+    background: #fbfdff;
+}
+
+
+.rr-pr-search-result:last-child {
+    border-bottom: 0;
+}
+
+
+.rr-pr-search-result:hover,
+.rr-pr-search-result:focus {
+    outline: 0;
+
+    background: #f0f7ff;
+
+    box-shadow:
+        inset 3px 0 0 #2563eb;
+}
+
+
+/* --------------------------------------------------------------------------
+   Result Icon
+   -------------------------------------------------------------------------- */
+
+.rr-pr-search-result-icon {
+    width: 35px;
+    height: 35px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border: 1px solid #dbeafe;
+    border-radius: 6px;
+
+    background: #eff6ff;
+
+    color: #2563eb;
+
+    font-size: 14px;
+}
+
+
+/* --------------------------------------------------------------------------
+   Result Info
+   -------------------------------------------------------------------------- */
+
+.rr-pr-search-result-info {
+    min-width: 0;
+}
+
+
+.rr-pr-search-result-info strong {
+    display: block;
+
+    overflow: hidden;
+
+    color: #0f172a;
+
+    font-size: 12px;
+    font-weight: 800;
+
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+
+.rr-pr-search-result-info span {
+    display: block;
+
+    margin-top: 3px;
+
+    overflow: hidden;
+
+    color: #64748b;
+
+    font-size: 11px;
+
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+
+/* --------------------------------------------------------------------------
+   Result Date / Amount
+   -------------------------------------------------------------------------- */
+
+.rr-pr-search-result-date,
+.rr-pr-search-result-amount {
+    text-align: right;
+}
+
+
+.rr-pr-search-result-date span,
+.rr-pr-search-result-amount span {
+    display: block;
+
+    margin-bottom: 2px;
+
+    color: #94a3b8;
+
+    font-size: 10px;
+    font-weight: 650;
+
+    text-transform: uppercase;
+}
+
+
+.rr-pr-search-result-date strong {
+    color: #475569;
+
+    font-size: 12px;
+    font-weight: 700;
+}
+
+
+.rr-pr-search-result-amount strong {
+    color: #047857;
+
+    font-size: 12px;
+    font-weight: 850;
+}
+
+
+/* --------------------------------------------------------------------------
+   Select Arrow
+   -------------------------------------------------------------------------- */
+
+.rr-pr-search-result-select {
+    width: 27px;
+    height: 27px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border: 1px solid #bfdbfe;
+    border-radius: 5px;
+
+    background: #eff6ff;
+
+    color: #2563eb;
+
+    font-size: 10px;
+}
+
+
+.rr-pr-search-result:hover .rr-pr-search-result-select {
+    border-color: #2563eb;
+
+    background: #2563eb;
+
+    color: #ffffff;
+}
+
+
+/* ==========================================================================
+   SEARCH EMPTY
+   ========================================================================== */
+
+.rr-pr-search-empty {
+    min-height: 150px;
+
+    padding: 24px;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+
+    text-align: center;
+}
+
+
+.rr-pr-search-empty>i {
+    width: 42px;
+    height: 42px;
+
+    margin-bottom: 9px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border: 1px solid #e2e8f0;
+    border-radius: 50%;
+
+    background: #f8fafc;
+
+    color: #64748b;
+
+    font-size: 16px;
+}
+
+
+.rr-pr-search-empty strong {
+    color: #334155;
+
+    font-size: 13px;
+    font-weight: 750;
+}
+
+
+.rr-pr-search-empty span {
+    max-width: 350px;
+
+    margin-top: 4px;
+
+    color: #94a3b8;
+
+    font-size: 12px;
+
+    line-height: 1.5;
+}
+
+
+/* ==========================================================================
+   PURCHASE INFO GRID
+   ========================================================================== */
+
+.rr-pr-purchase-info-grid {
+    display: grid;
+
+    grid-template-columns:
+        repeat(3,
+            minmax(0, 1fr));
+
+    gap: 8px;
+}
+
+
+.rr-pr-info-box {
+    min-width: 0;
+
+    padding: 10px 11px;
+
+    border: 1px solid #e2e8f0;
+    border-radius: 7px;
+
+    background: #fbfdff;
+}
+
+
+.rr-pr-info-box>span {
+    display: block;
+
+    margin-bottom: 4px;
+
+    color: #64748b;
+
+    font-size: 12px;
+    font-weight: 650;
+}
+
+
+.rr-pr-info-box>strong {
+    display: block;
+
+    overflow: hidden;
+
+    color: #0f172a;
+
+    font-size: 13px;
+    font-weight: 800;
+
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+
+/* ==========================================================================
+   TAX BADGE
+   ========================================================================== */
+
+.rr-pr-tax-badge {
+    min-height: 25px;
+
+    padding: 0 8px;
+
+    display: inline-flex;
+    align-items: center;
+
+    gap: 5px;
+
+    border-radius: 5px;
+
+    font-size: 12px;
+    font-weight: 750;
+}
+
+
+.rr-pr-tax-badge.gst {
+    border: 1px solid #bbf7d0;
+
+    background: #f0fdf4;
+
+    color: #166534;
+}
+
+
+.rr-pr-tax-badge.non-gst {
+    border: 1px solid #e2e8f0;
+
+    background: #f8fafc;
+
+    color: #475569;
+}
+
+
+/* ==========================================================================
+   RETURN DETAILS
+   ========================================================================== */
+
+.rr-pr-return-detail-grid {
+    display: grid;
+
+    grid-template-columns:
+        minmax(190px, 1fr) minmax(190px, 1fr);
+
+    gap: 10px;
+}
+
+
+.rr-pr-field label {
+    display: block;
+
+    margin-bottom: 5px;
+
+    color: #475569;
+
+    font-size: 12px;
+    font-weight: 750;
+}
+
+
+/* --------------------------------------------------------------------------
+   Readonly Field
+   -------------------------------------------------------------------------- */
+
+.rr-pr-readonly-field {
+    min-height: 38px;
+
+    padding: 0 10px;
+
+    display: flex;
+    align-items: center;
+
+    gap: 7px;
+
+    border: 1px solid #dbe3ec;
+    border-radius: 6px;
+
+    background: #f8fafc;
+
+    color: #475569;
+}
+
+
+.rr-pr-readonly-field i {
+    color: #94a3b8;
+
+    font-size: 11px;
+}
+
+
+.rr-pr-readonly-field strong {
+    color: #334155;
+
+    font-size: 12px;
+    font-weight: 750;
+}
+
+
+/* ==========================================================================
+   DATE ENTRY
+   ========================================================================== */
+
+.rr-pr-date-entry {
+    width: 100%;
+    height: 38px;
+
+    display: flex;
+    align-items: stretch;
+
+    overflow: hidden;
+
+    border: 1px solid #aab6c5;
+    border-radius: 6px;
+
+    background: #ffffff;
+
+    transition:
+        border-color 0.13s ease,
+        box-shadow 0.13s ease;
+}
+
+
+.rr-pr-date-entry:focus-within {
+    border-color: #3b82f6;
+
+    box-shadow:
+        0 0 0 3px rgba(59, 130, 246, 0.09);
+}
+
+
+.rr-pr-date-entry>button {
+    width: 38px;
+
+    flex: 0 0 38px;
+
+    border: 0;
+    border-right: 1px solid #dbe3ec;
+
+    background:
+        linear-gradient(180deg,
+            #f8fafc,
+            #eef2f7);
+
+    color: #475569;
+
+    font-size: 12px;
+
+    cursor: pointer;
+}
+
+
+.rr-pr-date-entry>button:hover {
+    background: #eff6ff;
+
+    color: #2563eb;
+}
+
+
+.rr-pr-date-entry input {
+    width: 100%;
+    height: 36px;
+
+    padding: 0 9px;
+
+    border: 0;
+    outline: 0;
+
+    background: transparent;
+
+    color: #0f172a;
+
+    font-size: 12px;
+    font-weight: 600;
+
+    cursor: pointer;
+}
+
+
+.rr-pr-date-entry input::-webkit-calendar-picker-indicator {
+    display: none;
+}
+
+
+/* ==========================================================================
+   RETURN ITEMS
+   ========================================================================== */
+
+.rr-pr-item-count {
+    min-height: 25px;
+
+    padding: 0 8px;
+
+    display: inline-flex;
+    align-items: center;
+
+    border: 1px solid #dbeafe;
+    border-radius: 999px;
+
+    background: #eff6ff;
+
+    color: #1d4ed8;
+
+    font-size: 12px;
+    font-weight: 700;
+}
+
+
+.rr-pr-items-wrap {
+    width: 100%;
+
+    overflow-x: auto;
+}
+
+
+.rr-pr-items-table {
+    width: 100%;
+    min-width: 1180px;
+
+    border-collapse: collapse;
+}
+
+
+.rr-pr-items-table thead th {
+    padding: 9px 8px;
+
+    border-right: 1px solid #cdd6e1;
+    border-bottom: 1px solid #aab5c3;
+
+    background:
+        linear-gradient(180deg,
+            #edf2f7,
+            #e3e9f0);
+
+    color: #334155;
+
+    font-size: 11px;
+    font-weight: 850;
+
+    text-align: left;
+
+    text-transform: uppercase;
+
+    white-space: nowrap;
+}
+
+
+.rr-pr-items-table tbody td {
+    padding: 8px;
+
+    border-right: 1px solid #edf1f5;
+    border-bottom: 1px solid #e7ebf0;
+
+    background: #ffffff;
+
+    color: #334155;
+
+    font-size: 12px;
+
+    vertical-align: middle;
+}
+
+
+.rr-pr-items-table tbody tr:nth-child(even) td {
+    background: #fafcff;
+}
+
+
+.rr-pr-items-table tbody tr:hover td {
+    background: #fff7f7;
+}
+
+
+.rr-pr-items-table .number {
+    text-align: right;
+
+    white-space: nowrap;
+}
+
+
+.rr-pr-items-table .serial {
+    width: 42px;
+
+    text-align: center;
+}
+
+
+/* ==========================================================================
+   PRODUCT
+   ========================================================================== */
+
+.rr-pr-product {
+    min-width: 230px;
+
+    display: flex;
+    align-items: center;
+
+    gap: 9px;
+}
+
+
+.rr-pr-product-icon {
+    width: 34px;
+    height: 34px;
+
+    flex: 0 0 34px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border: 1px solid #dbeafe;
+    border-radius: 6px;
+
+    background: #eff6ff;
+
+    color: #2563eb;
+
+    font-size: 13px;
+}
+
+
+.rr-pr-product strong {
+    display: block;
+
+    color: #0f172a;
+
+    font-size: 12px;
+    font-weight: 800;
+}
+
+
+.rr-pr-product span {
+    display: block;
+
+    margin-top: 2px;
+
+    color: #64748b;
+
+    font-size: 11px;
+}
+
+
+/* ==========================================================================
+   LOCATION BADGES
+   ========================================================================== */
+
+.rr-pr-location-badge {
+    min-height: 25px;
+
+    padding: 0 8px;
+
+    display: inline-flex;
+    align-items: center;
+
+    gap: 5px;
+
+    border-radius: 5px;
+
+    font-size: 11px;
+    font-weight: 700;
+
+    white-space: nowrap;
+}
+
+
+.rr-pr-location-badge.shop {
+    border: 1px solid #bfdbfe;
+
+    background: #eff6ff;
+
+    color: #1d4ed8;
+}
+
+
+.rr-pr-location-badge.godown {
+    border: 1px solid #ddd6fe;
+
+    background: #f5f3ff;
+
+    color: #6d28d9;
+}
+
+
+/* ==========================================================================
+   QUANTITY COLORS
+   ========================================================================== */
+
+.rr-pr-returned-qty {
+    color: #b45309 !important;
+
+    font-weight: 750;
+}
+
+
+.rr-pr-available-qty {
+    color: #166534 !important;
+
+    font-weight: 850;
+}
+
+
+.rr-pr-rate {
+    color: #475569 !important;
+
+    font-weight: 700;
+}
+
+
+.rr-pr-line-total {
+    color: #b91c1c !important;
+
+    font-weight: 850;
+}
+
+
+/* ==========================================================================
+   RETURN QUANTITY INPUT
+   ========================================================================== */
+
+.rr-pr-items-table input[type="number"] {
+    width: 90px;
+    height: 34px;
+
+    padding: 0 8px;
+
+    border: 1px solid #aab6c5;
+    border-radius: 5px;
+
+    outline: 0;
+
+    background: #ffffff;
+
+    color: #0f172a;
+
+    font-size: 12px;
+    font-weight: 700;
+
+    text-align: right;
+
+    transition:
+        border-color 0.13s ease,
+        box-shadow 0.13s ease;
+}
+
+
+.rr-pr-items-table input[type="number"]:focus {
+    border-color: #3b82f6;
+
+    box-shadow:
+        0 0 0 3px rgba(59, 130, 246, 0.09);
+}
+
+
+.rr-pr-items-table input[type="number"]:disabled {
+    border-color: #e2e8f0;
+
+    background: #f8fafc;
+
+    color: #94a3b8;
+
+    cursor: not-allowed;
+}
+
+
+/* ==========================================================================
+   BOTTOM LAYOUT
+   ========================================================================== */
+
+.rr-pr-bottom-layout {
+    display: grid;
+
+    grid-template-columns:
+        minmax(0, 1fr) 340px;
+
+    gap: 12px;
+
+    align-items: start;
+}
+
+
+/* ==========================================================================
+   REMARKS
+   ========================================================================== */
+
+.rr-pr-entry-body textarea {
+    width: 100%;
+
+    padding: 9px 10px;
+
+    resize: vertical;
+
+    border: 1px solid #aab6c5;
+    border-radius: 6px;
+
+    outline: 0;
+
+    background: #ffffff;
+
+    color: #0f172a;
+
+    font-size: 12px;
+
+    line-height: 1.5;
+}
+
+
+.rr-pr-entry-body textarea:focus {
+    border-color: #3b82f6;
+
+    box-shadow:
+        0 0 0 3px rgba(59, 130, 246, 0.09);
+}
+
+
+/* ==========================================================================
+   RETURN TOTAL WINDOW
+   ========================================================================== */
+
+.rr-pr-total-window {
+    overflow: hidden;
+
+    border: 1px solid #d8e0ea;
+    border-radius: 9px;
+
+    background: #ffffff;
+
+    box-shadow:
+        0 2px 7px rgba(15, 23, 42, 0.035);
+}
+
+
+.rr-pr-total-title {
+    min-height: 42px;
+
+    padding: 0 12px;
+
+    display: flex;
+    align-items: center;
+
+    gap: 7px;
+
+    border-bottom: 1px solid #e2e8f0;
+
+    background: #f8fafc;
+
+    color: #1e293b;
+
+    font-size: 12px;
+    font-weight: 850;
+
+    text-transform: uppercase;
+}
+
+
+.rr-pr-total-title i {
+    color: #2563eb;
+}
+
+
+.rr-pr-total-body {
+    padding: 10px;
+}
+
+
+.rr-pr-total-row {
+    min-height: 36px;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    gap: 10px;
+
+    border-bottom: 1px solid #edf2f7;
+}
+
+
+.rr-pr-total-row span {
+    color: #64748b;
+
+    font-size: 12px;
+}
+
+
+.rr-pr-total-row strong {
+    color: #0f172a;
+
+    font-size: 12px;
+    font-weight: 750;
+}
+
+
+/* --------------------------------------------------------------------------
+   Grand Total
+   -------------------------------------------------------------------------- */
+
+.rr-pr-grand-total {
+    margin-top: 10px;
+
+    padding: 11px;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    gap: 10px;
+
+    border: 1px solid #fecaca;
+    border-radius: 7px;
+
+    background: #fff1f2;
+}
+
+
+.rr-pr-grand-total span {
+    color: #991b1b;
+
+    font-size: 12px;
+    font-weight: 750;
+}
+
+
+.rr-pr-grand-total strong {
+    color: #b91c1c;
+
+    font-size: 16px;
+    font-weight: 900;
+}
+
+
+/* ==========================================================================
+   COMMAND BAR
+   ========================================================================== */
+
+.rr-pr-command-bar {
+    margin-top: 12px;
+
+    min-height: 54px;
+
+    padding: 8px 12px;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    gap: 12px;
+
+    border: 1px solid #d8e0ea;
+    border-radius: 9px;
+
+    background:
+        linear-gradient(180deg,
+            #fbfcfe,
+            #f3f6fa);
+}
+
+
+.rr-pr-command-bar>div:first-child {
+    display: flex;
+    align-items: center;
+
+    gap: 6px;
+
+    color: #64748b;
+
+    font-size: 12px;
+}
+
+
+.rr-pr-command-bar>div:first-child i {
+    color: #2563eb;
+}
+
+
+.rr-pr-command-bar>div:last-child {
+    display: flex;
+    align-items: center;
+
+    gap: 8px;
+}
+
+
+/* ==========================================================================
+   VALIDATION
+   ========================================================================== */
+
+.rr-pr-field-error {
+    margin-top: 5px;
+
+    display: flex;
+    align-items: flex-start;
+
+    gap: 5px;
+
+    color: #dc2626;
+
+    font-size: 12px;
+    font-weight: 600;
+}
+
+
+.rr-pr-field-error i {
+    margin-top: 2px;
+}
+
+
+.rr-pr-item-error {
+    display: block;
+
+    margin-top: 3px;
+
+    color: #dc2626;
+
+    font-size: 11px;
+    font-weight: 650;
+}
+
+
+.rr-pr-items-table input.is-invalid {
+    border-color: #ef4444;
+
+    background: #fff7f7;
+}
+
+
+/* --------------------------------------------------------------------------
+   Validation Auto Focus
+   -------------------------------------------------------------------------- */
+
+.rr-pr-page .rr-validation-focus {
+    position: relative;
+
+    z-index: 4;
+
+    border-color: #ef4444 !important;
+
+    background-color: #fff7f7 !important;
+
+    box-shadow:
+        0 0 0 3px rgba(239, 68, 68, 0.13) !important;
+
+    animation:
+        rrPrValidationPulse 0.55s ease-in-out 2;
+}
+
+
+@keyframes rrPrValidationPulse {
+
+    0%,
+    100% {
+        box-shadow:
+            0 0 0 3px rgba(239, 68, 68, 0.10);
+    }
+
+    50% {
+        box-shadow:
+            0 0 0 6px rgba(239, 68, 68, 0.17);
+    }
+}
+
+
+/* ==========================================================================
+   RESPONSIVE
+   ========================================================================== */
+
+@media (max-width: 1100px) {
+
+    .rr-pr-purchase-info-grid {
+        grid-template-columns:
+            repeat(2,
+                minmax(0, 1fr));
+    }
+
+
+    .rr-pr-search-result {
+        grid-template-columns:
+            38px minmax(190px, 1fr) 110px 28px;
+    }
+
+
+    .rr-pr-search-result-date {
+        display: none;
+    }
+}
+
+
+@media (max-width: 850px) {
+
+    .rr-pr-bottom-layout {
+        grid-template-columns:
+            1fr;
+    }
+
+
+    .rr-pr-return-detail-grid {
+        grid-template-columns:
+            1fr;
+    }
+
+
+    .rr-pr-search-result {
+        grid-template-columns:
+            36px minmax(0, 1fr) 28px;
+    }
+
+
+    .rr-pr-search-result-date,
+    .rr-pr-search-result-amount {
+        display: none;
+    }
+}
+
+
+@media (max-width: 650px) {
+
+    .rr-pr-purchase-info-grid {
+        grid-template-columns:
+            1fr;
+    }
+
+
+    .rr-pr-command-bar {
+        align-items: stretch;
+
+        flex-direction: column;
+    }
+
+
+    .rr-pr-command-bar>div:last-child {
+        width: 100%;
+    }
+
+
+    .rr-pr-command-bar .rr-pr-primary-btn,
+    .rr-pr-command-bar .rr-pr-secondary-btn {
+        flex: 1;
+    }
+}
+
+
+.rr-pr-edit-warning {
+    margin-bottom: 12px;
+
+    padding: 11px 13px;
+
+    display: flex;
+    align-items: flex-start;
+
+    gap: 10px;
+
+    border: 1px solid #fde68a;
+    border-radius: 8px;
+
+    background: #fffbeb;
+
+    color: #92400e;
+}
+
+
+.rr-pr-edit-warning>div:first-child {
+    width: 34px;
+    height: 34px;
+
+    flex: 0 0 34px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 6px;
+
+    background: #fef3c7;
+
+    color: #b45309;
+
+    font-size: 14px;
+}
+
+
+.rr-pr-edit-warning strong {
+    display: block;
+
+    font-size: 12px;
+    font-weight: 800;
+}
+
+
+.rr-pr-edit-warning span {
+    display: block;
+
+    margin-top: 2px;
+
+    color: #a16207;
+
+    font-size: 12px;
+    line-height: 1.45;
+}
+
+
+/* ==========================================================================
+   PURCHASE RETURN SHOW
+   ========================================================================== */
+
+.rr-pr-show-summary {
+    grid-template-columns:
+        repeat(4,
+            minmax(0, 1fr));
+}
+
+
+.rr-pr-show-layout {
+    display: grid;
+
+    grid-template-columns:
+        minmax(0, 1fr) 320px;
+
+    gap: 12px;
+
+    align-items: start;
+}
+
+
+.rr-pr-show-main {
+    min-width: 0;
+
+    display: grid;
+
+    gap: 12px;
+}
+
+
+.rr-pr-show-side {
+    display: grid;
+
+    gap: 10px;
+
+    position: sticky;
+
+    top: 78px;
+}
+
+
+/* --------------------------------------------------------------------------
+   Detail Grid
+   -------------------------------------------------------------------------- */
+
+.rr-pr-show-detail-grid {
+    display: grid;
+
+    grid-template-columns:
+        repeat(4,
+            minmax(0, 1fr));
+
+    gap: 8px;
+}
+
+
+.rr-pr-show-detail-item {
+    min-width: 0;
+
+    padding: 10px 11px;
+
+    border: 1px solid #e2e8f0;
+    border-radius: 7px;
+
+    background: #fbfdff;
+}
+
+
+.rr-pr-show-detail-item>span {
+    display: block;
+
+    margin-bottom: 4px;
+
+    color: #64748b;
+
+    font-size: 12px;
+    font-weight: 650;
+}
+
+
+.rr-pr-show-detail-item>strong {
+    display: block;
+
+    overflow: hidden;
+
+    color: #0f172a;
+
+    font-size: 13px;
+    font-weight: 800;
+
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+
+/* ==========================================================================
+   SHOW TABLE
+   ========================================================================== */
+
+.rr-pr-show-table-wrap {
+    width: 100%;
+
+    overflow-x: auto;
+}
+
+
+.rr-pr-show-table {
+    width: 100%;
+    min-width: 900px;
+
+    border-collapse: collapse;
+}
+
+
+.rr-pr-show-table thead th {
+    padding: 9px 8px;
+
+    border-right: 1px solid #cdd6e1;
+    border-bottom: 1px solid #aab5c3;
+
+    background:
+        linear-gradient(180deg,
+            #edf2f7,
+            #e3e9f0);
+
+    color: #334155;
+
+    font-size: 11px;
+    font-weight: 850;
+
+    text-align: left;
+
+    text-transform: uppercase;
+
+    white-space: nowrap;
+}
+
+
+.rr-pr-show-table tbody td {
+    padding: 9px 8px;
+
+    border-right: 1px solid #edf1f5;
+    border-bottom: 1px solid #e7ebf0;
+
+    background: #ffffff;
+
+    color: #334155;
+
+    font-size: 12px;
+
+    vertical-align: middle;
+}
+
+
+.rr-pr-show-table tbody tr:nth-child(even) td {
+    background: #fafcff;
+}
+
+
+.rr-pr-show-table tbody tr:hover td {
+    background: #fff7f7;
+}
+
+
+.rr-pr-show-table .number {
+    text-align: right;
+
+    white-space: nowrap;
+}
+
+
+.rr-pr-show-table .serial {
+    width: 42px;
+
+    text-align: center;
+}
+
+
+.rr-pr-tax-value {
+    color: #166534 !important;
+
+    font-weight: 750;
+}
+
+
+/* ==========================================================================
+   SIDE CARDS
+   ========================================================================== */
+
+.rr-pr-show-side-card {
+    overflow: hidden;
+
+    border: 1px solid #d8e0ea;
+    border-radius: 9px;
+
+    background: #ffffff;
+
+    box-shadow:
+        0 2px 6px rgba(15, 23, 42, 0.035);
+}
+
+
+.rr-pr-show-side-title {
+    min-height: 40px;
+
+    padding: 0 11px;
+
+    display: flex;
+    align-items: center;
+
+    gap: 7px;
+
+    border-bottom: 1px solid #e2e8f0;
+
+    background: #f8fafc;
+
+    color: #1e293b;
+
+    font-size: 12px;
+    font-weight: 850;
+
+    text-transform: uppercase;
+}
+
+
+.rr-pr-show-side-title i {
+    color: #dc2626;
+}
+
+
+/* --------------------------------------------------------------------------
+   Supplier
+   -------------------------------------------------------------------------- */
+
+.rr-pr-show-supplier-card {
+    margin: 10px;
+
+    padding: 10px;
+
+    display: flex;
+    align-items: center;
+
+    gap: 9px;
+
+    border: 1px solid #fecaca;
+    border-radius: 7px;
+
+    background: #fff7f7;
+}
+
+
+.rr-pr-show-supplier-icon {
+    width: 34px;
+    height: 34px;
+
+    flex: 0 0 34px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 6px;
+
+    background: #fff1f2;
+
+    color: #dc2626;
+}
+
+
+.rr-pr-show-supplier-card strong {
+    display: block;
+
+    color: #0f172a;
+
+    font-size: 12px;
+    font-weight: 800;
+}
+
+
+.rr-pr-show-supplier-card span {
+    display: block;
+
+    margin-top: 2px;
+
+    color: #64748b;
+
+    font-size: 11px;
+}
+
+
+/* --------------------------------------------------------------------------
+   Info Row
+   -------------------------------------------------------------------------- */
+
+.rr-pr-show-info-row {
+    min-height: 38px;
+
+    padding: 0 11px;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    gap: 10px;
+
+    border-top: 1px solid #edf2f7;
+}
+
+
+.rr-pr-show-info-row span {
+    color: #64748b;
+
+    font-size: 12px;
+}
+
+
+.rr-pr-show-info-row strong {
+    color: #0f172a;
+
+    font-size: 12px;
+    font-weight: 750;
+
+    text-align: right;
+}
+
+
+.rr-pr-show-info-row strong.highlight {
+    color: #dc2626;
+}
+
+
+/* --------------------------------------------------------------------------
+   Stock Note
+   -------------------------------------------------------------------------- */
+
+.rr-pr-stock-note {
+    margin: 10px;
+
+    padding: 9px;
+
+    display: flex;
+    align-items: flex-start;
+
+    gap: 7px;
+
+    border: 1px solid #fde68a;
+    border-radius: 6px;
+
+    background: #fffbeb;
+
+    color: #92400e;
+}
+
+
+.rr-pr-stock-note i {
+    margin-top: 1px;
+
+    font-size: 12px;
+}
+
+
+.rr-pr-stock-note span {
+    font-size: 12px;
+
+    line-height: 1.45;
+}
+
+
+/* --------------------------------------------------------------------------
+   Grand Total
+   -------------------------------------------------------------------------- */
+
+.rr-pr-show-grand-total {
+    margin: 10px;
+
+    padding: 11px;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    gap: 10px;
+
+    border: 1px solid #fecaca;
+    border-radius: 7px;
+
+    background: #fff1f2;
+}
+
+
+.rr-pr-show-grand-total span {
+    color: #991b1b;
+
+    font-size: 12px;
+    font-weight: 750;
+}
+
+
+.rr-pr-show-grand-total strong {
+    color: #b91c1c;
+
+    font-size: 15px;
+    font-weight: 900;
+}
+
+
+/* ==========================================================================
+   REMARKS
+   ========================================================================== */
+
+.rr-pr-show-remarks {
+    min-height: 70px;
+
+    padding: 10px 11px;
+
+    border: 1px solid #e2e8f0;
+    border-radius: 7px;
+
+    background: #fbfdff;
+
+    color: #475569;
+
+    font-size: 12px;
+
+    line-height: 1.55;
+}
+
+
+/* ==========================================================================
+   ACTION COLORS
+   ========================================================================== */
+
+.rr-pr-show-action-edit {
+    border-color: #fde68a;
+
+    background: #fffbeb;
+
+    color: #b45309;
+}
+
+
+.rr-pr-show-action-edit:hover {
+    border-color: #fbbf24;
+
+    background: #fef3c7;
+
+    color: #92400e;
+}
+
+
+.rr-pr-show-action-print {
+    border-color: #bbf7d0;
+
+    background: #f0fdf4;
+
+    color: #15803d;
+}
+
+
+.rr-pr-show-action-print:hover {
+    border-color: #86efac;
+
+    background: #dcfce7;
+
+    color: #166534;
+}
+
+
+.rr-pr-show-action-pdf {
+    border-color: #fecaca;
+
+    background: #fff1f2;
+
+    color: #dc2626;
+}
+
+
+.rr-pr-show-action-pdf:hover {
+    border-color: #fca5a5;
+
+    background: #fee2e2;
+
+    color: #b91c1c;
+}
+
+
+/* ==========================================================================
+   EMPTY
+   ========================================================================== */
+
+.rr-pr-show-empty {
+    padding: 28px;
+
+    color: #64748b;
+
+    font-size: 12px;
+
+    text-align: center;
+}
+
+
+/* ==========================================================================
+   RESPONSIVE
+   ========================================================================== */
+
+@media (max-width: 1180px) {
+
+    .rr-pr-show-layout {
+        grid-template-columns:
+            1fr;
+    }
+
+
+    .rr-pr-show-side {
+        position: static;
+
+        grid-template-columns:
+            repeat(2,
+                minmax(0, 1fr));
+    }
+
+
+    .rr-pr-show-detail-grid {
+        grid-template-columns:
+            repeat(2,
+                minmax(0, 1fr));
+    }
+}
+
+
+@media (max-width: 800px) {
+
+    .rr-pr-show-summary {
+        grid-template-columns:
+            repeat(2,
+                minmax(0, 1fr));
+    }
+
+
+    .rr-pr-show-side {
+        grid-template-columns:
+            1fr;
+    }
+}
+
+
+@media (max-width: 600px) {
+
+    .rr-pr-show-summary,
+    .rr-pr-show-detail-grid {
+        grid-template-columns:
+            1fr;
+    }
+}

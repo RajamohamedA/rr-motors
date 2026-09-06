@@ -12,33 +12,26 @@ Route::middleware([
 
     /*
     |--------------------------------------------------------------------------
-    | Purchase - Custom Routes
+    | PURCHASE - CUSTOM ROUTES
     |--------------------------------------------------------------------------
     |
     | IMPORTANT:
+    | Custom routes must be declared BEFORE Route::resource().
     |
-    | These routes must be declared BEFORE Route::resource().
-    |
-    | Especially:
+    | Otherwise routes such as:
     |
     | /purchases/search
     |
-    | Otherwise Laravel may interpret:
+    | may be interpreted as:
     |
-    | search
-    |
-    | as:
-    |
-    | {purchase}
-    |
-    | and return 404.
+    | /purchases/{purchase}
     |
     */
 
 
     /*
     |--------------------------------------------------------------------------
-    | Product Search
+    | Purchase Product Search
     |--------------------------------------------------------------------------
     */
 
@@ -55,18 +48,55 @@ Route::middleware([
 
     /*
     |--------------------------------------------------------------------------
-    | Purchase PDF
+    | Purchase Stores
+    |--------------------------------------------------------------------------
+    |
+    | Kept for compatibility with forms that load stores dynamically.
+    |
+    */
+
+    Route::get(
+        '/purchases/stores/{company}',
+        [
+            PurchaseController::class,
+            'getStores',
+        ]
+    )->name(
+        'purchases.stores'
+    );
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Purchase Godowns
     |--------------------------------------------------------------------------
     */
 
     Route::get(
-        '/purchases/{purchase}/pdf',
+        '/purchases/godowns/{store}',
         [
             PurchaseController::class,
-            'pdf',
+            'getGodowns',
         ]
     )->name(
-        'purchases.pdf'
+        'purchases.godowns'
+    );
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Purchase Suppliers
+    |--------------------------------------------------------------------------
+    */
+
+    Route::get(
+        '/purchases/suppliers/{company}',
+        [
+            PurchaseController::class,
+            'getSuppliers',
+        ]
+    )->name(
+        'purchases.suppliers'
     );
 
 
@@ -89,55 +119,18 @@ Route::middleware([
 
     /*
     |--------------------------------------------------------------------------
-    | Stores
-    |--------------------------------------------------------------------------
-    |
-    | Kept for compatibility.
-    |
-    */
-
-    Route::get(
-        '/purchases/stores/{company}',
-        [
-            PurchaseController::class,
-            'getStores',
-        ]
-    )->name(
-        'purchases.stores'
-    );
-
-
-    /*
-    |--------------------------------------------------------------------------
-    | Godowns
+    | Purchase PDF
     |--------------------------------------------------------------------------
     */
 
     Route::get(
-        '/purchases/godowns/{store}',
+        '/purchases/{purchase}/pdf',
         [
             PurchaseController::class,
-            'getGodowns',
+            'pdf',
         ]
     )->name(
-        'purchases.godowns'
-    );
-
-
-    /*
-    |--------------------------------------------------------------------------
-    | Suppliers
-    |--------------------------------------------------------------------------
-    */
-
-    Route::get(
-        '/purchases/suppliers/{company}',
-        [
-            PurchaseController::class,
-            'getSuppliers',
-        ]
-    )->name(
-        'purchases.suppliers'
+        'purchases.pdf'
     );
 
 
@@ -145,8 +138,6 @@ Route::middleware([
     |--------------------------------------------------------------------------
     | Purchase Resource
     |--------------------------------------------------------------------------
-    |
-    | Generates:
     |
     | GET       /purchases
     | GET       /purchases/create
@@ -167,11 +158,10 @@ Route::middleware([
 
     /*
     |--------------------------------------------------------------------------
-    | Purchase Return - Custom Routes
     |--------------------------------------------------------------------------
-    |
-    | Put custom routes BEFORE the resource for the same reason.
-    |
+    | PURCHASE RETURN
+    |--------------------------------------------------------------------------
+    |--------------------------------------------------------------------------
     */
 
 
@@ -179,33 +169,50 @@ Route::middleware([
     |--------------------------------------------------------------------------
     | Purchase Return Search
     |--------------------------------------------------------------------------
+    |
+    | Search original purchases by:
+    |
+    | Purchase No
+    | Supplier Invoice No
+    | Supplier
+    |
     */
 
     Route::get(
-        '/purchase-return/search',
+        '/purchase-returns/search',
         [
             PurchaseReturnController::class,
             'search',
         ]
     )->name(
-        'purchase-return.search'
+        'purchase-returns.search'
     );
 
 
     /*
     |--------------------------------------------------------------------------
-    | Purchase Return Invoice
+    | Get Original Purchase / Invoice
     |--------------------------------------------------------------------------
+    |
+    | Loads the selected purchase together with:
+    |
+    | supplier
+    | products
+    | godown/shop
+    | purchased quantity
+    | previously returned quantity
+    | available return quantity
+    |
     */
 
     Route::get(
-        '/purchase-return/get-invoice/{id}',
+        '/purchase-returns/purchase/{id}',
         [
             PurchaseReturnController::class,
             'getInvoice',
         ]
     )->name(
-        'purchase-return.invoice'
+        'purchase-returns.invoice'
     );
 
 
@@ -228,8 +235,35 @@ Route::middleware([
 
     /*
     |--------------------------------------------------------------------------
+    | Purchase Return PDF
+    |--------------------------------------------------------------------------
+    */
+
+    Route::get(
+        '/purchase-returns/{id}/pdf',
+        [
+            PurchaseReturnController::class,
+            'pdf',
+        ]
+    )->name(
+        'purchase-returns.pdf'
+    );
+
+
+    /*
+    |--------------------------------------------------------------------------
     | Purchase Return Resource
     |--------------------------------------------------------------------------
+    |
+    | GET       /purchase-returns
+    | GET       /purchase-returns/create
+    | POST      /purchase-returns
+    | GET       /purchase-returns/{purchase_return}
+    | GET       /purchase-returns/{purchase_return}/edit
+    | PUT       /purchase-returns/{purchase_return}
+    | PATCH     /purchase-returns/{purchase_return}
+    | DELETE    /purchase-returns/{purchase_return}
+    |
     */
 
     Route::resource(
