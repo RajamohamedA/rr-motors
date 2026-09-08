@@ -226,7 +226,7 @@ Route::middleware([
     */
 
     Route::get(
-        '/sales-returns/invoice/{id}',
+        '/sales-returns/invoice/{sale}',
         [
             SalesReturnController::class,
             'getInvoice',
@@ -243,13 +243,51 @@ Route::middleware([
     */
 
     Route::get(
-        '/sales-returns/{id}/print',
+        '/sales-returns/{salesReturn}/print',
         [
             SalesReturnController::class,
             'print',
         ]
     )->name(
         'sales-returns.print'
+    );
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Sales Return PDF
+    |--------------------------------------------------------------------------
+    */
+
+    Route::get(
+        '/sales-returns/{salesReturn}/pdf',
+        [
+            SalesReturnController::class,
+            'pdf',
+        ]
+    )->name(
+        'sales-returns.pdf'
+    );
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Cancel Sales Return
+    |--------------------------------------------------------------------------
+    |
+    | Cancellation reverses the stock added by the return. The record is kept
+    | for audit history and must not be permanently deleted.
+    |
+    */
+
+    Route::patch(
+        '/sales-returns/{salesReturn}/cancel',
+        [
+            SalesReturnController::class,
+            'cancel',
+        ]
+    )->name(
+        'sales-returns.cancel'
     );
 
 
@@ -262,7 +300,13 @@ Route::middleware([
     Route::resource(
         'sales-returns',
         SalesReturnController::class
-    );
+    )
+        ->parameters([
+            'sales-returns' => 'salesReturn',
+        ])
+        ->except([
+            'destroy',
+        ]);
 
 
     /*
