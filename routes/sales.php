@@ -318,7 +318,92 @@ Route::middleware([
 
     /*
     |--------------------------------------------------------------------------
-    | Quotation Print
+    | Quotation Product Search
+    |--------------------------------------------------------------------------
+    */
+
+    Route::get(
+        '/quotations/products/search',
+        [
+            QuotationController::class,
+            'searchProducts',
+        ]
+    )->name(
+        'quotations.products.search'
+    );
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Quotation Customer Search
+    |--------------------------------------------------------------------------
+    */
+
+    Route::get(
+        '/quotations/customers/search',
+        [
+            QuotationController::class,
+            'searchCustomers',
+        ]
+    )->name(
+        'quotations.customers.search'
+    );
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Quotation Quick Customer
+    |--------------------------------------------------------------------------
+    */
+
+    Route::post(
+        '/quotations/quick-customer',
+        [
+            QuotationController::class,
+            'quickCustomer',
+        ]
+    )->name(
+        'quotations.quick-customer'
+    );
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Quotation Mechanic Search
+    |--------------------------------------------------------------------------
+    */
+
+    Route::get(
+        '/quotations/mechanics/search',
+        [
+            QuotationController::class,
+            'searchMechanics',
+        ]
+    )->name(
+        'quotations.mechanics.search'
+    );
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Quotation Quick Mechanic
+    |--------------------------------------------------------------------------
+    */
+
+    Route::post(
+        '/quotations/quick-mechanic',
+        [
+            QuotationController::class,
+            'quickMechanic',
+        ]
+    )->name(
+        'quotations.quick-mechanic'
+    );
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Quotation / Proforma Print
     |--------------------------------------------------------------------------
     */
 
@@ -335,15 +420,107 @@ Route::middleware([
 
     /*
     |--------------------------------------------------------------------------
-    | Convert Quotation to Sale
+    | Quotation / Proforma PDF
     |--------------------------------------------------------------------------
     */
 
     Route::get(
+        '/quotations/{quotation}/pdf',
+        [
+            QuotationController::class,
+            'pdf',
+        ]
+    )->name(
+        'quotations.pdf'
+    );
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Update Quotation Status
+    |--------------------------------------------------------------------------
+    */
+
+    Route::patch(
+        '/quotations/{quotation}/status',
+        [
+            QuotationController::class,
+            'updateStatus',
+        ]
+    )->name(
+        'quotations.status'
+    );
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Cancel Quotation / Proforma
+    |--------------------------------------------------------------------------
+    |
+    | The document is retained for audit history.
+    |
+    */
+
+    Route::patch(
+        '/quotations/{quotation}/cancel',
+        [
+            QuotationController::class,
+            'cancel',
+        ]
+    )->name(
+        'quotations.cancel'
+    );
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Check Stock Before Conversion
+    |--------------------------------------------------------------------------
+    */
+
+    Route::get(
+        '/quotations/{quotation}/conversion-stock',
+        [
+            QuotationController::class,
+            'checkConversionStock',
+        ]
+    )->name(
+        'quotations.conversion-stock'
+    );
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | User-Selected Bulk Godown To Shop Transfer
+    |--------------------------------------------------------------------------
+    */
+
+    Route::post(
+        '/quotations/{quotation}/transfer-stock',
+        [
+            QuotationController::class,
+            'bulkTransferStock',
+        ]
+    )->name(
+        'quotations.transfer-stock'
+    );
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Convert Quotation To Sale
+    |--------------------------------------------------------------------------
+    |
+    | Conversion creates Sale, Sale Items, stock entries and any mechanic
+    | commission. POST is required because this operation changes data.
+    |
+    */
+
+    Route::post(
         '/quotations/{quotation}/convert',
         [
             QuotationController::class,
-            'convertToSales',
+            'convertToSale',
         ]
     )->name(
         'quotations.convert'
@@ -359,5 +536,7 @@ Route::middleware([
     Route::resource(
         'quotations',
         QuotationController::class
-    );
+    )->except([
+        'destroy',
+    ]);
 });
