@@ -50,6 +50,7 @@ export default function Create({
     const mechanicBox = useRef(null);
     const productBox = useRef(null);
     const productInput = useRef(null);
+    const formRef = useRef(null);
 
     const { data, setData, transform, post, put, processing, errors } = useForm({
         customer_id: quotation?.customer_id
@@ -140,6 +141,25 @@ export default function Create({
         document.addEventListener("mousedown", closeDropdowns);
         return () => document.removeEventListener("mousedown", closeDropdowns);
     }, []);
+
+    useEffect(() => {
+        if (!Object.keys(errors).length) return;
+
+        window.setTimeout(() => {
+            const firstError = formRef.current?.querySelector(".rr-quote-error");
+            if (!firstError) return;
+
+            const area = firstError.closest(
+                "label, td, .rr-quote-summary, .rr-quote-window-body, .rr-quote-product-window",
+            );
+            const input = area?.querySelector(
+                ".rr-quote-lookup input, input, select, textarea, button",
+            );
+
+            firstError.scrollIntoView({ behavior: "smooth", block: "center" });
+            input?.focus({ preventScroll: true });
+        }, 80);
+    }, [errors]);
 
     const totals = useMemo(
         () =>
@@ -287,10 +307,22 @@ export default function Create({
 
         if (!customer) {
             setCustomerError("Select a customer before saving.");
+            customerBox.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+            window.setTimeout(
+                () => customerBox.current?.querySelector("input")?.focus(),
+                250,
+            );
             return;
         }
 
-        if (data.sale_source === "mechanic" && !mechanic) return;
+        if (data.sale_source === "mechanic" && !mechanic) {
+            mechanicBox.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+            window.setTimeout(
+                () => mechanicBox.current?.querySelector("input")?.focus(),
+                250,
+            );
+            return;
+        }
         if (!rows.length) {
             setProductError("Add at least one product.");
             productInput.current?.focus();
@@ -332,7 +364,7 @@ export default function Create({
                     }
                 />
 
-                <form onSubmit={(event) => submit(event)}>
+                <form ref={formRef} onSubmit={(event) => submit(event)}>
                     <header className="rr-quote-header">
                         <div className="rr-quote-header-main">
                             <Link href={backUrl} className="rr-quote-back">
@@ -357,12 +389,12 @@ export default function Create({
                         </div>
 
                         <div className="rr-quote-header-actions">
-                            <Link href={backUrl} className="rr-quote-btn">
+                            <Link href={backUrl} className="rr-quote-btn cancel">
                                 Cancel
                             </Link>
                             <button
                                 type="button"
-                                className="rr-quote-btn"
+                                className="rr-quote-btn draft"
                                 disabled={processing}
                                 onClick={(event) => submit(event, "Draft")}
                             >
@@ -370,7 +402,7 @@ export default function Create({
                             </button>
                             <button
                                 type="button"
-                                className="rr-quote-btn primary"
+                                className="rr-quote-btn primary save"
                                 disabled={processing}
                                 onClick={(event) =>
                                     submit(event, editing ? data.status : "Pending")
@@ -445,7 +477,7 @@ export default function Create({
                         <section className="rr-quote-window">
                             <WindowTitle icon="bi-file-earmark-text" title="Document" />
                             <div className="rr-quote-window-body rr-quote-mini-grid">
-                                <Field label="Document Type">
+                                <Field label="Document Type" error={errors.document_type}>
                                     <select
                                         value={data.document_type}
                                         disabled={editing}
@@ -457,7 +489,7 @@ export default function Create({
                                         <option value="proforma_invoice">Proforma Invoice</option>
                                     </select>
                                 </Field>
-                                <Field label="Billing Type">
+                                <Field label="Billing Type" error={errors.billing_type}>
                                     <select
                                         value={data.billing_type}
                                         onChange={(event) =>
@@ -468,7 +500,7 @@ export default function Create({
                                         <option value="non_gst">Without GST</option>
                                     </select>
                                 </Field>
-                                <Field label="Document Date">
+                                <Field label="Document Date" error={errors.quotation_date}>
                                     <input
                                         type="date"
                                         value={data.quotation_date}
@@ -477,7 +509,7 @@ export default function Create({
                                         }
                                     />
                                 </Field>
-                                <Field label="Valid Until">
+                                <Field label="Valid Until" error={errors.valid_until}>
                                     <input
                                         type="date"
                                         min={data.quotation_date}
@@ -575,7 +607,10 @@ export default function Create({
                         <section className="rr-quote-window">
                             <WindowTitle icon="bi-percent" title="Commission Preview" />
                             <div className="rr-quote-window-body rr-quote-commission-grid">
-                                <Field label="Commission Type">
+                                <Field
+                                    label="Commission Type"
+                                    error={errors.commission_type}
+                                >
                                     <select
                                         value={data.commission_type}
                                         onChange={(event) =>
@@ -587,7 +622,10 @@ export default function Create({
                                     </select>
                                 </Field>
                                 {data.commission_type === "percentage" ? (
-                                    <Field label="Percentage">
+                                    <Field
+                                        label="Percentage"
+                                        error={errors.commission_percent}
+                                    >
                                         <input
                                             type="number"
                                             min="0"
@@ -600,7 +638,10 @@ export default function Create({
                                         />
                                     </Field>
                                 ) : (
-                                    <Field label="Fixed Amount">
+                                    <Field
+                                        label="Fixed Amount"
+                                        error={errors.commission_amount}
+                                    >
                                         <input
                                             type="number"
                                             min="0"
@@ -659,6 +700,12 @@ export default function Create({
                                             extra: `${formatMoney(productPrice(item))} · GST ${productGst(item)}%`,
                                         })}
                                         onSelect={addProduct}
+                                        onCancel={() => {
+                                            setProductSearch("");
+                                            setProductResults([]);
+                                            setProductOpen(false);
+                                            productInput.current?.focus();
+                                        }}
                                     />
                                 )}
                             </div>
@@ -694,7 +741,8 @@ export default function Create({
                                                     </td>
                                                     <NumberCell
                                                         value={row.quantity}
-                                                        min="0.01"
+                                                        min="1"
+                                                        step="1"
                                                         onChange={(value) =>
                                                             updateRow(index, "quantity", value)
                                                         }
@@ -703,6 +751,7 @@ export default function Create({
                                                     <NumberCell
                                                         value={row.free_quantity}
                                                         min="0"
+                                                        step="1"
                                                         onChange={(value) =>
                                                             updateRow(index, "free_quantity", value)
                                                         }
@@ -713,6 +762,7 @@ export default function Create({
                                                         onChange={(value) =>
                                                             updateRow(index, "sale_price", value)
                                                         }
+                                                        error={errors[`sale_price.${index}`]}
                                                     />
                                                     <td>
                                                         <div className="rr-quote-discount-input">
@@ -744,6 +794,9 @@ export default function Create({
                                                                 }
                                                             />
                                                         </div>
+                                                        <ErrorText
+                                                            message={errors[`discount_value.${index}`]}
+                                                        />
                                                     </td>
                                                     <td className="number">
                                                         {formatMoney(value.taxable)}
@@ -767,6 +820,9 @@ export default function Create({
                                                                 />
                                                                 <span>{formatMoney(value.gst)}</span>
                                                             </div>
+                                                            <ErrorText
+                                                                message={errors[`gst_percent.${index}`]}
+                                                            />
                                                         </td>
                                                     )}
                                                     <td className="number amount">
@@ -804,7 +860,10 @@ export default function Create({
                         <section className="rr-quote-window">
                             <WindowTitle icon="bi-card-text" title="Terms & Notes" />
                             <div className="rr-quote-window-body rr-quote-notes-grid">
-                                <Field label="Terms and Conditions">
+                                <Field
+                                    label="Terms and Conditions"
+                                    error={errors.terms_conditions}
+                                >
                                     <textarea
                                         rows="4"
                                         value={data.terms_conditions}
@@ -813,7 +872,10 @@ export default function Create({
                                         }
                                     ></textarea>
                                 </Field>
-                                <Field label="Internal / Customer Remarks">
+                                <Field
+                                    label="Internal / Customer Remarks"
+                                    error={errors.remarks}
+                                >
                                     <textarea
                                         rows="4"
                                         value={data.remarks}
@@ -858,6 +920,7 @@ export default function Create({
                                         }
                                     />
                                 </div>
+                                <ErrorText message={errors.final_discount} />
                                 <SummaryRow label="Round Off" value={formatMoney(roundOff)} />
                                 <SummaryRow
                                     label="Grand Total"
@@ -867,6 +930,46 @@ export default function Create({
                             </div>
                         </section>
                     </div>
+
+                    <footer className="rr-quote-form-actions">
+                        <div>
+                            <i className="bi bi-info-circle"></i>
+                            Review customer, products and totals before saving.
+                        </div>
+
+                        <div className="rr-quote-form-action-buttons">
+                            <Link href={backUrl} className="rr-quote-btn cancel">
+                                <i className="bi bi-x-lg"></i>
+                                Cancel
+                            </Link>
+
+                            <button
+                                type="button"
+                                className="rr-quote-btn draft"
+                                disabled={processing}
+                                onClick={(event) => submit(event, "Draft")}
+                            >
+                                <i className="bi bi-file-earmark"></i>
+                                {editing ? "Save as Draft" : "Save Draft"}
+                            </button>
+
+                            <button
+                                type="button"
+                                className="rr-quote-btn save"
+                                disabled={processing}
+                                onClick={(event) =>
+                                    submit(event, editing ? data.status : "Pending")
+                                }
+                            >
+                                <i className="bi bi-check2-circle"></i>
+                                {processing
+                                    ? "Saving..."
+                                    : editing
+                                        ? "Update Document"
+                                        : "Save & Submit"}
+                            </button>
+                        </div>
+                    </footer>
                 </form>
 
                 {quickModal === "customer" && (
@@ -1000,10 +1103,23 @@ function LookupResults({
     minimumReached,
     render,
     onSelect,
+    onCancel,
     product = false,
 }) {
     return (
         <div className={`rr-quote-results ${product ? "product" : ""}`}>
+            {product && (
+                <div className="rr-quote-product-result-title">
+                    <span>
+                        <i className="bi bi-box-seam"></i>
+                        Search Results
+                    </span>
+                    <button type="button" onClick={onCancel}>
+                        <i className="bi bi-x-lg"></i>
+                        Cancel
+                    </button>
+                </div>
+            )}
             {!minimumReached ? (
                 <div className="rr-quote-result-message">
                     Type at least two characters.
@@ -1044,22 +1160,23 @@ function SelectedParty({ icon, name, meta, onClear }) {
     );
 }
 
-function Field({ label, children }) {
+function Field({ label, error, children }) {
     return (
         <label className="rr-quote-create-field">
             <span>{label}</span>
             {children}
+            <ErrorText message={error} />
         </label>
     );
 }
 
-function NumberCell({ value, min, onChange, error }) {
+function NumberCell({ value, min, step = "0.01", onChange, error }) {
     return (
         <td className="number">
             <input
                 type="number"
                 min={min}
-                step="0.01"
+                step={step}
                 value={value}
                 onFocus={(event) => event.target.select()}
                 onChange={(event) => onChange(event.target.value)}

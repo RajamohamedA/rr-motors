@@ -321,7 +321,7 @@ export default function Index({
         <>
             <Head title="Quotations & Proforma Invoices" />
 
-            <div className="rr-quote-page">
+            <div className="rr-quote-page rr-quote-index-page">
                 <MasterNavigation
                     active="quotations"
                     title="Quotations"
@@ -499,24 +499,35 @@ export default function Index({
 
                             {form.quick_filter === "custom" && (
                                 <>
-                                    <Field label="From Date">
-                                        <input
-                                            type="date"
-                                            value={form.date_from}
-                                            onChange={(event) =>
-                                                updateFilter("date_from", event.target.value)
-                                            }
-                                        />
-                                    </Field>
-                                    <Field label="To Date">
-                                        <input
-                                            type="date"
-                                            value={form.date_to}
-                                            onChange={(event) =>
-                                                updateFilter("date_to", event.target.value)
-                                            }
-                                        />
-                                    </Field>
+                                    <div className="rr-quote-date-field">
+                                        <Field label="From Date">
+                                            <input
+                                                type="date"
+                                                value={form.date_from}
+                                                onClick={(event) =>
+                                                    event.currentTarget.showPicker?.()
+                                                }
+                                                onChange={(event) =>
+                                                    updateFilter("date_from", event.target.value)
+                                                }
+                                            />
+                                        </Field>
+                                    </div>
+
+                                    <div className="rr-quote-date-field">
+                                        <Field label="To Date">
+                                            <input
+                                                type="date"
+                                                value={form.date_to}
+                                                onClick={(event) =>
+                                                    event.currentTarget.showPicker?.()
+                                                }
+                                                onChange={(event) =>
+                                                    updateFilter("date_to", event.target.value)
+                                                }
+                                            />
+                                        </Field>
+                                    </div>
                                 </>
                             )}
 
@@ -634,6 +645,7 @@ export default function Index({
                                                 <td className="actions">
                                                     <Link
                                                         href={`/quotations/${quotation.id}`}
+                                                        className="view"
                                                         title="View"
                                                     >
                                                         <i className="bi bi-eye"></i>
@@ -642,6 +654,7 @@ export default function Index({
                                                     {!terminal && !expired && (
                                                         <Link
                                                             href={`/quotations/${quotation.id}/edit`}
+                                                            className="edit"
                                                             title="Edit"
                                                         >
                                                             <i className="bi bi-pencil"></i>
@@ -650,6 +663,7 @@ export default function Index({
 
                                                     <a
                                                         href={`/quotations/${quotation.id}/print`}
+                                                        className="print"
                                                         target="_blank"
                                                         rel="noreferrer"
                                                         title="Print"

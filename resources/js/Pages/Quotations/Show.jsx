@@ -251,8 +251,8 @@ export default function Show({ quotation }) {
                         <div className="rr-quote-header-icon">
                             <i
                                 className={`bi ${title === "Proforma Invoice"
-                                        ? "bi-receipt"
-                                        : "bi-file-earmark-text"
+                                    ? "bi-receipt"
+                                    : "bi-file-earmark-text"
                                     }`}
                             ></i>
                         </div>
@@ -272,7 +272,7 @@ export default function Show({ quotation }) {
                         {canEdit && (
                             <Link
                                 href={`/quotations/${quotation.id}/edit`}
-                                className="rr-quote-btn"
+                                className="rr-quote-btn edit"
                             >
                                 <i className="bi bi-pencil-square"></i>
                                 Edit
@@ -283,7 +283,7 @@ export default function Show({ quotation }) {
                             href={`/quotations/${quotation.id}/print?paper=a4`}
                             target="_blank"
                             rel="noreferrer"
-                            className="rr-quote-btn"
+                            className="rr-quote-btn print"
                         >
                             <i className="bi bi-printer"></i>
                             Print
@@ -292,7 +292,7 @@ export default function Show({ quotation }) {
                         <div className="rr-quote-download-group">
                             <a
                                 href={`/quotations/${quotation.id}/pdf?paper=a4`}
-                                className="rr-quote-btn"
+                                className="rr-quote-btn pdf"
                                 title="Download A4 PDF"
                             >
                                 <i className="bi bi-file-earmark-pdf"></i>
@@ -300,7 +300,7 @@ export default function Show({ quotation }) {
                             </a>
                             <a
                                 href={`/quotations/${quotation.id}/pdf?paper=a5`}
-                                className="rr-quote-btn compact"
+                                className="rr-quote-btn compact pdf"
                                 title="Download A5 PDF"
                             >
                                 A5
@@ -310,7 +310,7 @@ export default function Show({ quotation }) {
                         {canConvert && (
                             <button
                                 type="button"
-                                className="rr-quote-btn primary"
+                                className="rr-quote-btn primary convert"
                                 disabled={stockModal.loading}
                                 onClick={prepareConversion}
                             >
@@ -329,6 +329,7 @@ export default function Show({ quotation }) {
                     <div>
                         <span>Status</span>
                         <select
+                            title="Change document status"
                             value={quotation.status}
                             disabled={statusProcessing || terminal || expired}
                             onChange={(event) => updateStatus(event.target.value)}
@@ -375,40 +376,50 @@ export default function Show({ quotation }) {
                     <section className="rr-quote-window">
                         <WindowTitle icon="bi-person" title="Customer Details" />
                         <div className="rr-quote-show-party">
-                            <div className="rr-quote-party-avatar">
-                                <i className="bi bi-person"></i>
+                            <div className="rr-quote-party-identity">
+                                <div className="rr-quote-party-avatar">
+                                    <i className="bi bi-person"></i>
+                                </div>
+                                <div className="rr-quote-party-primary">
+                                    <strong>
+                                        {quotation.customer?.customer_name ?? "—"}
+                                    </strong>
+                                    <span>
+                                        {quotation.customer?.customer_code ??
+                                            "No customer code"}
+                                    </span>
+                                </div>
                             </div>
-                            <div className="rr-quote-party-primary">
-                                <strong>{quotation.customer?.customer_name ?? "—"}</strong>
-                                <span>
-                                    {quotation.customer?.customer_code ?? "No customer code"}
-                                </span>
+
+                            <div className="rr-quote-party-information">
+                                <InfoLine
+                                    icon="bi-telephone"
+                                    label="Mobile"
+                                    value={
+                                        quotation.customer?.mobile ||
+                                        quotation.customer?.phone ||
+                                        "—"
+                                    }
+                                />
+                                <InfoLine
+                                    icon="bi-envelope"
+                                    label="Email"
+                                    value={quotation.customer?.email || "—"}
+                                />
+                                <InfoLine
+                                    icon="bi-receipt"
+                                    label="GSTIN"
+                                    value={
+                                        quotation.customer?.gst_number || "Not provided"
+                                    }
+                                />
+                                <InfoLine
+                                    wide
+                                    icon="bi-geo-alt"
+                                    label="Billing Address"
+                                    value={customerAddress(quotation.customer)}
+                                />
                             </div>
-                            <InfoLine
-                                icon="bi-telephone"
-                                label="Mobile"
-                                value={
-                                    quotation.customer?.mobile ||
-                                    quotation.customer?.phone ||
-                                    "—"
-                                }
-                            />
-                            <InfoLine
-                                icon="bi-envelope"
-                                label="Email"
-                                value={quotation.customer?.email || "—"}
-                            />
-                            <InfoLine
-                                icon="bi-receipt"
-                                label="GSTIN"
-                                value={quotation.customer?.gst_number || "Not provided"}
-                            />
-                            <InfoLine
-                                wide
-                                icon="bi-geo-alt"
-                                label="Billing Address"
-                                value={customerAddress(quotation.customer)}
-                            />
                         </div>
                     </section>
 
