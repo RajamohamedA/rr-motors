@@ -32,29 +32,29 @@ Route::middleware(['auth'])->group(function () {
     | stock Report
     |--------------------------------------------------------------------------
     */
-    Route::get(
-        '/inventory/current-stock',
-        [StockReportController::class, 'currentStock']
-    )
-        ->name('inventory.current-stock');
+    // Route::get(
+    //     '/inventory/current-stock',
+    //     [StockReportController::class, 'currentStock']
+    // )
+    //     ->name('inventory.current-stock');
 
-    Route::get(
-        '/inventory/current-stock/print',
-        [StockReportController::class, 'print']
-    )
-        ->name('inventory.current-stock.print');
+    // Route::get(
+    //     '/inventory/current-stock/print',
+    //     [StockReportController::class, 'print']
+    // )
+    //     ->name('inventory.current-stock.print');
 
-    Route::get(
-        '/inventory/current-stock/pdf',
-        [StockReportController::class, 'pdf']
-    )
-        ->name('inventory.current-stock.pdf');
+    // Route::get(
+    //     '/inventory/current-stock/pdf',
+    //     [StockReportController::class, 'pdf']
+    // )
+    //     ->name('inventory.current-stock.pdf');
 
-    Route::get(
-        '/inventory/current-stock/csv',
-        [StockReportController::class, 'csv']
-    )
-        ->name('inventory.current-stock.csv');
+    // Route::get(
+    //     '/inventory/current-stock/csv',
+    //     [StockReportController::class, 'csv']
+    // )
+    //     ->name('inventory.current-stock.csv');
 
 
     /*

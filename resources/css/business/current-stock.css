@@ -1,0 +1,1383 @@
+:root {
+    --rr-stock-blue: #1769a8;
+    --rr-stock-blue-dark: #0b4e82;
+    --rr-stock-border: #a8b7c5;
+    --rr-stock-soft-border: #d0d9e1;
+    --rr-stock-text: #203247;
+    --rr-stock-muted: #65768a;
+}
+
+.rr-current-stock-page {
+    width: 100%;
+    min-width: 0;
+    padding: 11px;
+    color: var(--rr-stock-text);
+    font-family: Inter, "Segoe UI", Arial, sans-serif;
+    font-size: 12px;
+    line-height: 1.35;
+}
+
+.rr-current-stock-page button,
+.rr-current-stock-page input,
+.rr-current-stock-page select {
+    font: inherit;
+}
+
+.rr-current-stock-header {
+    display: flex;
+    min-height: 66px;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 9px;
+    padding: 9px 11px;
+    border: 1px solid #96a8b8;
+    border-radius: 4px;
+    background: linear-gradient(180deg, #fff, #e6edf2);
+    box-shadow: 0 2px 6px rgb(28 48 67 / 12%);
+}
+
+.rr-current-stock-heading,
+.rr-current-stock-actions,
+.rr-current-stock-window-title,
+.rr-current-stock-window-title>div {
+    display: flex;
+    align-items: center;
+}
+
+.rr-current-stock-heading {
+    min-width: 0;
+    gap: 9px;
+}
+
+.rr-current-stock-heading-icon {
+    display: grid;
+    width: 42px;
+    height: 42px;
+    flex: 0 0 42px;
+    place-items: center;
+    border: 1px solid var(--rr-stock-blue-dark);
+    border-radius: 4px;
+    color: #fff;
+    background: linear-gradient(180deg, #3488c3, #1769a8);
+    font-size: 19px;
+}
+
+.rr-current-stock-heading span {
+    color: #617286;
+    font-size: 10px;
+    font-weight: 750;
+    letter-spacing: 0.6px;
+    text-transform: uppercase;
+}
+
+.rr-current-stock-heading h1 {
+    margin: 0;
+    color: #20364b;
+    font-size: 14px;
+    font-weight: 800;
+}
+
+.rr-current-stock-heading small {
+    color: #69798b;
+    font-size: 10px;
+}
+
+.rr-current-stock-actions {
+    gap: 5px;
+}
+
+.rr-current-stock-actions a {
+    display: inline-flex;
+    min-height: 31px;
+    align-items: center;
+    gap: 5px;
+    padding: 0 10px;
+    border: 1px solid;
+    border-radius: 3px;
+    color: #fff;
+    font-size: 11px;
+    font-weight: 700;
+    text-decoration: none;
+    box-shadow: 0 1px 0 rgb(255 255 255 / 20%) inset;
+}
+
+.rr-current-stock-actions a.print {
+    border-color: #365f74;
+    background: linear-gradient(#5d8ca0, #3d6e83);
+}
+
+.rr-current-stock-actions a.pdf {
+    border-color: #a12637;
+    background: linear-gradient(#d65060, #b72d3f);
+}
+
+.rr-current-stock-actions a.excel {
+    border-color: #087443;
+    background: linear-gradient(#22a568, #087b49);
+}
+
+.rr-current-stock-actions a:hover {
+    color: #fff;
+    filter: brightness(0.9);
+}
+
+.rr-current-stock-metrics {
+    display: grid;
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+    gap: 7px;
+    margin-bottom: 9px;
+}
+
+.rr-current-stock-metric {
+    position: relative;
+    display: grid;
+    min-width: 0;
+    min-height: 61px;
+    grid-template-columns: 34px minmax(0, 1fr);
+    grid-template-rows: auto auto;
+    align-content: center;
+    column-gap: 7px;
+    overflow: hidden;
+    padding: 7px 8px 9px;
+    border: 1px solid var(--rr-stock-border);
+    border-radius: 4px;
+    background: linear-gradient(135deg, #fff, #edf2f6);
+    box-shadow: 0 2px 4px rgb(28 47 65 / 8%);
+}
+
+.rr-current-stock-metric::after {
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    height: 3px;
+    background: #607589;
+    content: "";
+}
+
+.rr-current-stock-metric>div {
+    display: grid;
+    width: 32px;
+    height: 32px;
+    grid-row: 1 / 3;
+    place-items: center;
+    border: 1px solid #a8bccd;
+    border-radius: 3px;
+    color: var(--rr-stock-blue);
+    background: #e8f3fa;
+    font-size: 14px;
+}
+
+.rr-current-stock-metric span {
+    overflow: hidden;
+    color: var(--rr-stock-muted);
+    font-size: 9px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.rr-current-stock-metric strong {
+    overflow: hidden;
+    color: #233a50;
+    font-size: 13px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.rr-current-stock-metric.blue::after {
+    background: #1769a8;
+}
+
+.rr-current-stock-metric.slate::after {
+    background: #607589;
+}
+
+.rr-current-stock-metric.violet::after {
+    background: #7045a4;
+}
+
+.rr-current-stock-metric.amber::after {
+    background: #d0870c;
+}
+
+.rr-current-stock-metric.red::after {
+    background: #c33445;
+}
+
+.rr-current-stock-metric.dark-red::after {
+    background: #8e1d2b;
+}
+
+.rr-current-stock-metric.amber>div {
+    color: #9b6209;
+    background: #fff6dc;
+}
+
+.rr-current-stock-metric.red>div,
+.rr-current-stock-metric.dark-red>div {
+    color: #aa2737;
+    background: #fff0f2;
+}
+
+.rr-current-stock-metric.violet>div {
+    color: #68409a;
+    background: #f4effa;
+}
+
+.rr-current-stock-window {
+    margin-bottom: 9px;
+    overflow: hidden;
+    border: 1px solid var(--rr-stock-border);
+    border-radius: 4px;
+    background: #fff;
+    box-shadow: 0 2px 5px rgb(28 48 67 / 8%);
+}
+
+.rr-current-stock-filter-window {
+    overflow: visible;
+}
+
+.rr-current-stock-window-title {
+    min-height: 34px;
+    justify-content: space-between;
+    gap: 8px;
+    padding: 0 9px;
+    border-bottom: 1px solid #174f79;
+    color: #fff;
+    background: linear-gradient(180deg, #397fac, #205f8b);
+}
+
+.rr-current-stock-window-title>div {
+    gap: 6px;
+}
+
+.rr-current-stock-window-title strong {
+    font-size: 11px;
+}
+
+.rr-current-stock-window-title>span {
+    font-size: 9px;
+}
+
+.rr-current-stock-window-title>button {
+    display: inline-flex;
+    min-height: 24px;
+    align-items: center;
+    gap: 4px;
+    padding: 0 7px;
+    border: 1px solid #adc4d6;
+    border-radius: 3px;
+    color: #214a69;
+    background: #f7fbfe;
+    font-size: 9px;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.rr-current-stock-filter-body {
+    padding: 8px;
+    background: linear-gradient(#fafdff, #eef3f7);
+}
+
+.rr-current-stock-location-tabs {
+    display: flex;
+    gap: 4px;
+    margin-bottom: 7px;
+    padding-bottom: 7px;
+    border-bottom: 1px solid #d1dbe3;
+}
+
+.rr-current-stock-location-tabs button {
+    display: inline-flex;
+    min-height: 27px;
+    align-items: center;
+    gap: 5px;
+    padding: 0 9px;
+    border: 1px solid #a9b7c4;
+    border-radius: 3px;
+    color: #3f5468;
+    background: linear-gradient(#fff, #e5ebf0);
+    font-size: 10px;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.rr-current-stock-location-tabs button:hover {
+    border-color: #5e8caf;
+    background: #eaf4fb;
+}
+
+.rr-current-stock-location-tabs button.active {
+    border-color: var(--rr-stock-blue-dark);
+    color: #fff;
+    background: linear-gradient(#3387c1, #1769a8);
+}
+
+.rr-current-stock-filter-grid {
+    display: grid;
+    grid-template-columns: minmax(250px, 1.8fr) repeat(5, minmax(120px, 0.75fr)) auto;
+    align-items: end;
+    gap: 6px;
+}
+
+.rr-current-stock-field {
+    display: block;
+    min-width: 0;
+}
+
+.rr-current-stock-field>span {
+    display: block;
+    margin-bottom: 3px;
+    color: #40576c;
+    font-size: 9px;
+    font-weight: 700;
+}
+
+.rr-current-stock-field input,
+.rr-current-stock-field select,
+.rr-current-stock-search {
+    width: 100%;
+    height: 31px;
+    border: 1px solid #9cacba;
+    border-radius: 3px;
+    color: #253a4e;
+    background: #fff;
+    outline: 0;
+    font-size: 10px;
+}
+
+.rr-current-stock-field select {
+    padding: 0 6px;
+    cursor: pointer;
+}
+
+.rr-current-stock-search {
+    position: relative;
+    display: flex;
+    align-items: center;
+    overflow: hidden;
+}
+
+.rr-current-stock-search>i {
+    display: grid;
+    width: 31px;
+    height: 29px;
+    flex: 0 0 31px;
+    place-items: center;
+    border-right: 1px solid #c4ced7;
+    color: var(--rr-stock-blue);
+    background: #edf3f7;
+}
+
+.rr-current-stock-search input {
+    height: 29px;
+    padding: 0 28px 0 7px;
+    border: 0;
+}
+
+.rr-current-stock-search button {
+    position: absolute;
+    right: 4px;
+    border: 0;
+    color: #68798a;
+    background: transparent;
+    cursor: pointer;
+}
+
+.rr-current-stock-search:focus-within,
+.rr-current-stock-field select:focus {
+    border-color: #2676b3;
+    box-shadow: 0 0 0 2px rgb(38 118 179 / 13%);
+}
+
+.rr-current-stock-apply {
+    display: inline-flex;
+    min-height: 31px;
+    align-items: center;
+    gap: 5px;
+    padding: 0 11px;
+    border: 1px solid var(--rr-stock-blue-dark);
+    border-radius: 3px;
+    color: #fff;
+    background: linear-gradient(#3387c1, #1769a8);
+    font-size: 10px;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.rr-current-stock-table-wrap {
+    overflow: auto;
+}
+
+.rr-current-stock-table {
+    width: 100%;
+    min-width: 1350px;
+    border-collapse: separate;
+    border-spacing: 0;
+}
+
+.rr-current-stock-table th {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    height: 31px;
+    padding: 5px 6px;
+    border-right: 1px solid #174f79;
+    border-bottom: 1px solid #174f79;
+    color: #fff;
+    background: linear-gradient(#397fac, #205f8b);
+    font-size: 9px;
+    text-align: left;
+    white-space: nowrap;
+}
+
+.rr-current-stock-table td {
+    height: 43px;
+    padding: 5px 6px;
+    border-right: 1px solid var(--rr-stock-soft-border);
+    border-bottom: 1px solid var(--rr-stock-soft-border);
+    color: #30465b;
+    font-size: 10px;
+    vertical-align: middle;
+}
+
+.rr-current-stock-table th:last-child,
+.rr-current-stock-table td:last-child {
+    border-right: 0;
+}
+
+.rr-current-stock-table tbody tr {
+    background: #fff;
+    cursor: pointer;
+}
+
+.rr-current-stock-table tbody tr:nth-child(even) {
+    background: #f3f6f9;
+}
+
+.rr-current-stock-table tbody tr:hover,
+.rr-current-stock-table tbody tr:focus {
+    background: #e1f0fb;
+    box-shadow: inset 3px 0 0 var(--rr-stock-blue);
+    outline: 0;
+}
+
+.rr-current-stock-table tbody tr.low_stock {
+    background: #fffaf0;
+}
+
+.rr-current-stock-table tbody tr.out_of_stock {
+    background: #fff3f4;
+}
+
+.rr-current-stock-table tbody tr.negative {
+    background: #f8e8eb;
+}
+
+.rr-current-stock-table td strong,
+.rr-current-stock-table td>span {
+    display: block;
+}
+
+.rr-current-stock-table td>span:not(.rr-current-stock-status, .rr-current-stock-location) {
+    margin-top: 2px;
+    color: #6b7c8d;
+    font-size: 9px;
+}
+
+.rr-current-stock-table td.product strong {
+    color: #213a50;
+    font-size: 11px;
+}
+
+.rr-current-stock-table .number {
+    text-align: right;
+    white-space: nowrap;
+}
+
+.rr-current-stock-table .quantity {
+    color: #174f80;
+    font-size: 12px;
+    font-weight: 800;
+}
+
+.rr-current-stock-table .value {
+    color: #275b3f;
+    font-size: 11px;
+    font-weight: 750;
+}
+
+.rr-current-stock-location,
+.rr-current-stock-status {
+    display: inline-flex !important;
+    width: fit-content;
+    align-items: center;
+    gap: 4px;
+    padding: 2px 6px;
+    border: 1px solid;
+    border-radius: 3px;
+    font-size: 9px;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+.rr-current-stock-location.shop {
+    color: #145d8d;
+    border-color: #91b8d3;
+    background: #eaf5fc;
+}
+
+.rr-current-stock-location.godown {
+    color: #62418e;
+    border-color: #c0adda;
+    background: #f3eff9;
+}
+
+.rr-current-stock-status.in_stock {
+    color: #087443;
+    border-color: #92c5aa;
+    background: #eaf8f1;
+}
+
+.rr-current-stock-status.low_stock {
+    color: #8c5a08;
+    border-color: #dec27a;
+    background: #fff7d9;
+}
+
+.rr-current-stock-status.out_of_stock,
+.rr-current-stock-status.negative {
+    color: #a42637;
+    border-color: #dda5ae;
+    background: #fff0f2;
+}
+
+.rr-current-stock-table .action {
+    text-align: center;
+}
+
+.rr-current-stock-table td.action a {
+    display: inline-grid;
+    width: 27px;
+    height: 27px;
+    place-items: center;
+    border: 1px solid #135c93;
+    border-radius: 3px;
+    color: #fff;
+    background: linear-gradient(#3488c3, #1769a8);
+    text-decoration: none;
+}
+
+.rr-current-stock-empty {
+    height: 145px !important;
+    color: #6b7b8d !important;
+    text-align: center;
+    cursor: default;
+}
+
+.rr-current-stock-empty i,
+.rr-current-stock-empty strong,
+.rr-current-stock-empty span {
+    display: block;
+}
+
+.rr-current-stock-empty i {
+    margin-bottom: 5px;
+    font-size: 23px;
+}
+
+.rr-current-stock-empty strong {
+    color: #344a5f;
+    font-size: 12px;
+}
+
+.rr-current-stock-pagination {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: 4px;
+    padding: 8px;
+    border-top: 1px solid #c5d0d9;
+    background: #edf2f6;
+}
+
+.rr-current-stock-pagination a {
+    display: inline-flex;
+    min-width: 28px;
+    min-height: 27px;
+    align-items: center;
+    justify-content: center;
+    padding: 0 7px;
+    border: 1px solid #a8b6c3;
+    border-radius: 3px;
+    color: #3e5368;
+    background: #fff;
+    font-size: 9px;
+    text-decoration: none;
+}
+
+.rr-current-stock-pagination a.active {
+    border-color: var(--rr-stock-blue-dark);
+    color: #fff;
+    background: var(--rr-stock-blue);
+}
+
+.rr-current-stock-pagination a.disabled {
+    pointer-events: none;
+    opacity: 0.5;
+}
+
+@media (max-width: 1350px) {
+    .rr-current-stock-metrics {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .rr-current-stock-filter-grid {
+        grid-template-columns: repeat(4, minmax(140px, 1fr));
+    }
+}
+
+@media (max-width: 760px) {
+    .rr-current-stock-page {
+        padding: 7px;
+    }
+
+    .rr-current-stock-header {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .rr-current-stock-actions {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+    }
+
+    .rr-current-stock-actions a {
+        justify-content: center;
+    }
+
+    .rr-current-stock-metrics {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .rr-current-stock-filter-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .rr-current-stock-location-tabs {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+    }
+
+    .rr-current-stock-location-tabs button {
+        justify-content: center;
+    }
+}
+
+:root {
+    --rr-stock-blue: #1769a8;
+    --rr-stock-blue-dark: #0b4e82;
+    --rr-stock-border: #a8b7c5;
+    --rr-stock-soft-border: #d0d9e1;
+    --rr-stock-text: #203247;
+    --rr-stock-muted: #65768a;
+}
+
+.rr-current-stock-page {
+    width: 100%;
+    min-width: 0;
+    padding: 11px;
+    color: var(--rr-stock-text);
+    font-family: Inter, "Segoe UI", Arial, sans-serif;
+    font-size: 13px;
+    line-height: 1.4;
+}
+
+.rr-current-stock-page button,
+.rr-current-stock-page input,
+.rr-current-stock-page select {
+    font: inherit;
+}
+
+.rr-current-stock-header {
+    display: flex;
+    min-height: 66px;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 9px;
+    padding: 9px 11px;
+    border: 1px solid #96a8b8;
+    border-radius: 4px;
+    background: linear-gradient(180deg, #fff, #e6edf2);
+    box-shadow: 0 2px 6px rgb(28 48 67 / 12%);
+}
+
+.rr-current-stock-heading,
+.rr-current-stock-actions,
+.rr-current-stock-window-title,
+.rr-current-stock-window-title>div {
+    display: flex;
+    align-items: center;
+}
+
+.rr-current-stock-heading {
+    min-width: 0;
+    gap: 9px;
+}
+
+.rr-current-stock-heading-icon {
+    display: grid;
+    width: 42px;
+    height: 42px;
+    flex: 0 0 42px;
+    place-items: center;
+    border: 1px solid var(--rr-stock-blue-dark);
+    border-radius: 4px;
+    color: #fff;
+    background: linear-gradient(180deg, #3488c3, #1769a8);
+    font-size: 19px;
+}
+
+.rr-current-stock-heading span {
+    color: #617286;
+    font-size: 10px;
+    font-weight: 750;
+    letter-spacing: 0.6px;
+    text-transform: uppercase;
+}
+
+.rr-current-stock-heading h1 {
+    margin: 0;
+    color: #20364b;
+    font-size: 14px;
+    font-weight: 800;
+}
+
+.rr-current-stock-heading small {
+    color: #69798b;
+    font-size: 10px;
+}
+
+.rr-current-stock-actions {
+    gap: 5px;
+}
+
+.rr-current-stock-actions a {
+    display: inline-flex;
+    min-height: 31px;
+    align-items: center;
+    gap: 5px;
+    padding: 0 10px;
+    border: 1px solid;
+    border-radius: 3px;
+    color: #fff;
+    font-size: 11px;
+    font-weight: 700;
+    text-decoration: none;
+    box-shadow: 0 1px 0 rgb(255 255 255 / 20%) inset;
+}
+
+.rr-current-stock-actions a.print {
+    border-color: #365f74;
+    background: linear-gradient(#5d8ca0, #3d6e83);
+}
+
+.rr-current-stock-actions a.pdf {
+    border-color: #a12637;
+    background: linear-gradient(#d65060, #b72d3f);
+}
+
+.rr-current-stock-actions a.excel {
+    border-color: #087443;
+    background: linear-gradient(#22a568, #087b49);
+}
+
+.rr-current-stock-actions a:hover {
+    color: #fff;
+    filter: brightness(0.9);
+}
+
+.rr-current-stock-metrics {
+    display: grid;
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+    gap: 9px;
+    margin-bottom: 11px;
+}
+
+.rr-current-stock-metric {
+    position: relative;
+    display: grid;
+    min-width: 0;
+    min-height: 78px;
+    grid-template-columns: 43px minmax(0, 1fr);
+    align-content: center;
+    column-gap: 10px;
+    overflow: hidden;
+    padding: 10px 11px 12px;
+    border: 1px solid #aab9c6;
+    border-radius: 6px;
+    background: linear-gradient(135deg, #fff 0%, #eef3f7 100%);
+    box-shadow: 0 3px 8px rgb(28 47 65 / 10%);
+}
+
+.rr-current-stock-metric::after {
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    height: 3px;
+    background: #607589;
+    content: "";
+}
+
+.rr-current-stock-metric>div {
+    display: grid;
+    width: 42px;
+    height: 42px;
+    place-items: center;
+    border: 1px solid #a8bccd;
+    border-radius: 6px;
+    color: var(--rr-stock-blue);
+    background: #e8f3fa;
+    font-size: 18px;
+}
+
+.rr-current-stock-metric .rr-current-stock-metric-content {
+    display: flex;
+    width: auto;
+    height: auto;
+    min-width: 0;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: center;
+    gap: 2px;
+    border: 0;
+    background: transparent;
+}
+
+.rr-current-stock-metric span {
+    overflow: hidden;
+    color: var(--rr-stock-muted);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.15px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.rr-current-stock-metric strong {
+    overflow: hidden;
+    color: #233a50;
+    font-size: 17px;
+    font-weight: 800;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.rr-current-stock-metric.featured {
+    border-color: #7899b3;
+    background: linear-gradient(135deg, #ffffff 0%, #e8f2f9 100%);
+    box-shadow: 0 4px 10px rgb(23 105 168 / 14%);
+}
+
+.rr-current-stock-metric.featured strong {
+    color: #103f65;
+    font-size: 20px;
+    letter-spacing: -0.25px;
+}
+
+.rr-current-stock-metric.blue::after {
+    background: #1769a8;
+}
+
+.rr-current-stock-metric.slate::after {
+    background: #607589;
+}
+
+.rr-current-stock-metric.violet::after {
+    background: #7045a4;
+}
+
+.rr-current-stock-metric.amber::after {
+    background: #d0870c;
+}
+
+.rr-current-stock-metric.red::after {
+    background: #c33445;
+}
+
+.rr-current-stock-metric.dark-red::after {
+    background: #8e1d2b;
+}
+
+.rr-current-stock-metric.amber>div:first-child {
+    color: #9b6209;
+    background: #fff6dc;
+}
+
+.rr-current-stock-metric.red>div:first-child,
+.rr-current-stock-metric.dark-red>div:first-child {
+    color: #aa2737;
+    background: #fff0f2;
+}
+
+.rr-current-stock-metric.violet>div:first-child {
+    color: #68409a;
+    background: #f4effa;
+}
+
+.rr-current-stock-window {
+    margin-bottom: 9px;
+    overflow: hidden;
+    border: 1px solid var(--rr-stock-border);
+    border-radius: 6px;
+    background: #fff;
+    box-shadow: 0 2px 5px rgb(28 48 67 / 8%);
+}
+
+.rr-current-stock-filter-window {
+    overflow: visible;
+}
+
+.rr-current-stock-window-title {
+    min-height: 40px;
+    justify-content: space-between;
+    gap: 8px;
+    padding: 0 12px;
+    border-bottom: 1px solid #174f79;
+    color: #fff;
+    background: linear-gradient(180deg, #397fac, #205f8b);
+}
+
+.rr-current-stock-window-title>div {
+    gap: 6px;
+}
+
+.rr-current-stock-window-title strong {
+    font-size: 13px;
+}
+
+.rr-current-stock-window-title>span {
+    font-size: 11px;
+    font-weight: 600;
+}
+
+.rr-current-stock-window-title>button {
+    display: inline-flex;
+    min-height: 29px;
+    align-items: center;
+    gap: 4px;
+    padding: 0 10px;
+    border: 1px solid #adc4d6;
+    border-radius: 3px;
+    color: #214a69;
+    background: #f7fbfe;
+    font-size: 11px;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.rr-current-stock-filter-body {
+    padding: 12px;
+    background: linear-gradient(180deg, #fbfdff, #edf3f7);
+}
+
+.rr-current-stock-location-tabs {
+    display: flex;
+    gap: 6px;
+    margin-bottom: 11px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #d1dbe3;
+}
+
+.rr-current-stock-location-tabs button {
+    display: inline-flex;
+    min-height: 34px;
+    align-items: center;
+    gap: 5px;
+    padding: 0 13px;
+    border: 1px solid #a9b7c4;
+    border-radius: 3px;
+    color: #3f5468;
+    background: linear-gradient(#fff, #e5ebf0);
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.rr-current-stock-location-tabs button:hover {
+    border-color: #5e8caf;
+    background: #eaf4fb;
+}
+
+.rr-current-stock-location-tabs button.active {
+    border-color: var(--rr-stock-blue-dark);
+    color: #fff;
+    background: linear-gradient(#3387c1, #1769a8);
+}
+
+.rr-current-stock-filter-grid {
+    display: grid;
+    grid-template-columns: minmax(250px, 1.8fr) repeat(5, minmax(120px, 0.75fr)) auto;
+    align-items: end;
+    gap: 9px;
+}
+
+.rr-current-stock-field {
+    display: block;
+    min-width: 0;
+}
+
+.rr-current-stock-field>span {
+    display: block;
+    margin-bottom: 5px;
+    color: #304b63;
+    font-size: 11px;
+    font-weight: 750;
+}
+
+.rr-current-stock-field input,
+.rr-current-stock-field select,
+.rr-current-stock-search {
+    width: 100%;
+    height: 38px;
+    border: 1px solid #8da2b4;
+    border-radius: 5px;
+    color: #253a4e;
+    background: #fff;
+    outline: 0;
+    font-size: 13px;
+}
+
+.rr-current-stock-field select {
+    padding: 0 9px;
+    cursor: pointer;
+}
+
+.rr-current-stock-search {
+    position: relative;
+    display: flex;
+    align-items: center;
+    overflow: hidden;
+}
+
+.rr-current-stock-search>i {
+    display: grid;
+    width: 38px;
+    height: 36px;
+    flex: 0 0 38px;
+    place-items: center;
+    border-right: 1px solid #c4ced7;
+    color: var(--rr-stock-blue);
+    background: #e7f0f6;
+    font-size: 14px;
+}
+
+.rr-current-stock-search input {
+    height: 36px;
+    padding: 0 31px 0 10px;
+    border: 0;
+}
+
+.rr-current-stock-search button {
+    position: absolute;
+    right: 4px;
+    border: 0;
+    color: #68798a;
+    background: transparent;
+    cursor: pointer;
+}
+
+.rr-current-stock-search:focus-within,
+.rr-current-stock-field select:focus {
+    border-color: #2676b3;
+    box-shadow: 0 0 0 2px rgb(38 118 179 / 13%);
+}
+
+.rr-current-stock-apply {
+    display: inline-flex;
+    min-height: 38px;
+    align-items: center;
+    gap: 5px;
+    padding: 0 16px;
+    border: 1px solid var(--rr-stock-blue-dark);
+    border-radius: 5px;
+    color: #fff;
+    background: linear-gradient(#3387c1, #1769a8);
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.rr-current-stock-table-wrap {
+    overflow: auto;
+}
+
+.rr-current-stock-table {
+    width: 100%;
+    min-width: 1420px;
+    border-collapse: separate;
+    border-spacing: 0;
+}
+
+.rr-current-stock-table th {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    height: 39px;
+    padding: 7px 9px;
+    border-right: 1px solid #174f79;
+    border-bottom: 1px solid #174f79;
+    color: #fff;
+    background: linear-gradient(#397fac, #205f8b);
+    font-size: 11px;
+    font-weight: 750;
+    letter-spacing: 0.1px;
+    text-align: left;
+    white-space: nowrap;
+}
+
+.rr-current-stock-table td {
+    height: 52px;
+    padding: 7px 9px;
+    border-right: 1px solid var(--rr-stock-soft-border);
+    border-bottom: 1px solid var(--rr-stock-soft-border);
+    color: #30465b;
+    font-size: 12px;
+    vertical-align: middle;
+}
+
+.rr-current-stock-table th:last-child,
+.rr-current-stock-table td:last-child {
+    border-right: 0;
+}
+
+.rr-current-stock-table tbody tr {
+    background: #fff;
+    cursor: pointer;
+}
+
+.rr-current-stock-table tbody tr:nth-child(even) {
+    background: #f4f7fa;
+}
+
+.rr-current-stock-table tbody tr:hover,
+.rr-current-stock-table tbody tr:focus {
+    background: #dceefa;
+    box-shadow: inset 3px 0 0 var(--rr-stock-blue);
+    outline: 0;
+}
+
+.rr-current-stock-table tbody tr.low_stock {
+    background: #fffaf0;
+}
+
+.rr-current-stock-table tbody tr.out_of_stock {
+    background: #fff3f4;
+}
+
+.rr-current-stock-table tbody tr.negative {
+    background: #f8e8eb;
+}
+
+.rr-current-stock-table td strong,
+.rr-current-stock-table td>span {
+    display: block;
+}
+
+.rr-current-stock-table td>span:not(.rr-current-stock-status, .rr-current-stock-location) {
+    margin-top: 2px;
+    color: #6b7c8d;
+    font-size: 10px;
+}
+
+.rr-current-stock-table td.product strong {
+    color: #213a50;
+    font-size: 13px;
+}
+
+.rr-current-stock-table .number {
+    text-align: right;
+    white-space: nowrap;
+}
+
+.rr-current-stock-table .quantity {
+    color: #174f80;
+    font-size: 14px;
+    font-weight: 800;
+}
+
+.rr-current-stock-table .value {
+    color: #275b3f;
+    font-size: 13px;
+    font-weight: 750;
+}
+
+.rr-current-stock-location,
+.rr-current-stock-status {
+    display: inline-flex !important;
+    width: fit-content;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 7px;
+    border: 1px solid;
+    border-radius: 3px;
+    font-size: 10px;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+.rr-current-stock-location.shop {
+    color: #145d8d;
+    border-color: #91b8d3;
+    background: #eaf5fc;
+}
+
+.rr-current-stock-location.godown {
+    color: #62418e;
+    border-color: #c0adda;
+    background: #f3eff9;
+}
+
+.rr-current-stock-status.in_stock {
+    color: #087443;
+    border-color: #92c5aa;
+    background: #eaf8f1;
+}
+
+.rr-current-stock-status.low_stock {
+    color: #8c5a08;
+    border-color: #dec27a;
+    background: #fff7d9;
+}
+
+.rr-current-stock-status.out_of_stock,
+.rr-current-stock-status.negative {
+    color: #a42637;
+    border-color: #dda5ae;
+    background: #fff0f2;
+}
+
+.rr-current-stock-table .action {
+    text-align: center;
+}
+
+.rr-current-stock-table td.action a {
+    display: inline-grid;
+    width: 31px;
+    height: 31px;
+    place-items: center;
+    border: 1px solid #135c93;
+    border-radius: 3px;
+    color: #fff;
+    background: linear-gradient(#3488c3, #1769a8);
+    text-decoration: none;
+}
+
+.rr-current-stock-empty {
+    height: 145px !important;
+    color: #6b7b8d !important;
+    text-align: center;
+    cursor: default;
+}
+
+.rr-current-stock-empty i,
+.rr-current-stock-empty strong,
+.rr-current-stock-empty span {
+    display: block;
+}
+
+.rr-current-stock-empty i {
+    margin-bottom: 5px;
+    font-size: 23px;
+}
+
+.rr-current-stock-empty strong {
+    color: #344a5f;
+    font-size: 12px;
+}
+
+.rr-current-stock-pagination {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: 4px;
+    padding: 8px;
+    border-top: 1px solid #c5d0d9;
+    background: #edf2f6;
+}
+
+.rr-current-stock-pagination a {
+    display: inline-flex;
+    min-width: 31px;
+    min-height: 30px;
+    align-items: center;
+    justify-content: center;
+    padding: 0 7px;
+    border: 1px solid #a8b6c3;
+    border-radius: 3px;
+    color: #3e5368;
+    background: #fff;
+    font-size: 11px;
+    text-decoration: none;
+}
+
+.rr-current-stock-pagination a.active {
+    border-color: var(--rr-stock-blue-dark);
+    color: #fff;
+    background: var(--rr-stock-blue);
+}
+
+.rr-current-stock-pagination a.disabled {
+    pointer-events: none;
+    opacity: 0.5;
+}
+
+@media (max-width: 1350px) {
+    .rr-current-stock-metrics {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .rr-current-stock-filter-grid {
+        grid-template-columns: repeat(4, minmax(140px, 1fr));
+    }
+}
+
+@media (max-width: 760px) {
+    .rr-current-stock-page {
+        padding: 7px;
+    }
+
+    .rr-current-stock-header {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .rr-current-stock-actions {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+    }
+
+    .rr-current-stock-actions a {
+        justify-content: center;
+    }
+
+    .rr-current-stock-metrics {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .rr-current-stock-filter-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .rr-current-stock-location-tabs {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+    }
+
+    .rr-current-stock-location-tabs button {
+        justify-content: center;
+    }
+}
