@@ -100,6 +100,39 @@ Route::middleware([
     |
     */
 
+    /*
+    |--------------------------------------------------------------------------
+    | AJAX Product Search
+    |--------------------------------------------------------------------------
+    */
+
+    Route::get(
+        '/stock-adjustments/products/search',
+        [
+            StockAdjustmentController::class,
+            'searchProduct',
+        ]
+    )->name(
+        'stock-adjustments.products.search'
+    );
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | AJAX Current Stock Lookup
+    |--------------------------------------------------------------------------
+    */
+
+    Route::get(
+        '/stock-adjustments/product-stock',
+        [
+            StockAdjustmentController::class,
+            'getProductStock',
+        ]
+    )->name(
+        'stock-adjustments.stock'
+    );
+
 
     /*
     |--------------------------------------------------------------------------
@@ -154,6 +187,61 @@ Route::middleware([
 
     /*
     |--------------------------------------------------------------------------
+    | Stock Adjustment Print
+    |--------------------------------------------------------------------------
+    */
+
+    Route::get(
+        '/stock-adjustments/{stockAdjustment}/print',
+        [
+            StockAdjustmentController::class,
+            'print',
+        ]
+    )->name(
+        'stock-adjustments.print'
+    );
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Stock Adjustment PDF
+    |--------------------------------------------------------------------------
+    */
+
+    Route::get(
+        '/stock-adjustments/{stockAdjustment}/pdf',
+        [
+            StockAdjustmentController::class,
+            'pdf',
+        ]
+    )->name(
+        'stock-adjustments.pdf'
+    );
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Cancel Stock Adjustment
+    |--------------------------------------------------------------------------
+    |
+    | A stock adjustment is never permanently deleted. Cancellation creates
+    | reversing ledger entries and keeps the original document for audit.
+    |
+    */
+
+    Route::patch(
+        '/stock-adjustments/{stockAdjustment}/cancel',
+        [
+            StockAdjustmentController::class,
+            'cancel',
+        ]
+    )->name(
+        'stock-adjustments.cancel'
+    );
+
+
+    /*
+    |--------------------------------------------------------------------------
     | Stock Adjustment Resource
     |--------------------------------------------------------------------------
     */
@@ -161,7 +249,13 @@ Route::middleware([
     Route::resource(
         'stock-adjustments',
         StockAdjustmentController::class
-    );
+    )
+        ->parameters([
+            'stock-adjustments' => 'stockAdjustment',
+        ])
+        ->except([
+            'destroy',
+        ]);
 
 
     /*
