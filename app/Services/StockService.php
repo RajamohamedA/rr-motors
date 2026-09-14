@@ -5,13 +5,14 @@ namespace App\Services;
 use App\Models\Product;
 use App\Models\StockLedger;
 use Illuminate\Support\Facades\DB;
+use RuntimeException;
 
 class StockService
 {
     /**
-     * Get current stock for a specific location.
+     * Get the latest balance for one stock location.
      *
-     * godown_id = NULL means Shop stock.
+     * godown_id = NULL represents shop stock.
      */
     private function getCurrentBalance(
         int $companyId,
@@ -19,13 +20,12 @@ class StockService
         ?int $godownId,
         int $productId
     ): float {
-
         return (float) (
-            StockLedger::where('company_id', $companyId)
+            StockLedger::query()
+            ->where('company_id', $companyId)
             ->where('store_id', $storeId)
             ->where('product_id', $productId)
             ->where(function ($query) use ($godownId) {
-
                 if ($godownId === null) {
                     $query->whereNull('godown_id');
                 } else {
@@ -39,9 +39,7 @@ class StockService
 
 
     /**
-     * Get current stock for a specific location.
-     *
-     * Public method for controllers / AJAX.
+     * Public stock lookup for controllers and AJAX requests.
      */
     public function getStock(
         int $companyId,
@@ -49,7 +47,6 @@ class StockService
         ?int $godownId,
         int $productId
     ): float {
-
         return $this->getCurrentBalance(
             $companyId,
             $storeId,
@@ -60,7 +57,79 @@ class StockService
 
 
     /**
-     * Increase stock.
+     * Lock the product row.
+     *
+     * All stock movements for the same product are serialized through this
+     * lock, preventing simultaneous requests from using the same balance.
+     */
+    private function lockProduct(
+        Product $product,
+        int $companyId
+    ): Product {
+        $lockedProduct = Product::query()
+            ->whereKey($product->getKey())
+            ->lockForUpdate()
+            ->firstOrFail();
+
+        if (
+            isset($lockedProduct->company_id) &&
+            (int) $lockedProduct->company_id !== $companyId
+        ) {
+            throw new RuntimeException(
+                'The selected product does not belong to the active company.'
+            );
+        }
+
+        return $lockedProduct;
+    }
+
+
+    /**
+     * Create one stock-ledger entry.
+     */
+    private function createLedgerEntry(
+        Product $product,
+        int $companyId,
+        int $storeId,
+        ?int $godownId,
+        string $transactionType,
+        ?int $referenceId,
+        ?string $referenceNo,
+        float $qtyIn,
+        float $qtyOut,
+        float $balanceQty,
+        float $unitCost,
+        string $remarks
+    ): StockLedger {
+        return StockLedger::create([
+            'company_id' => $companyId,
+            'store_id' => $storeId,
+            'godown_id' => $godownId,
+            'product_id' => $product->id,
+
+            'transaction_date' => now(),
+            'transaction_type' => $transactionType,
+
+            'reference_id' => $referenceId,
+            'reference_no' => $referenceNo,
+
+            'qty_in' => $qtyIn,
+            'qty_out' => $qtyOut,
+            'balance_qty' => $balanceQty,
+
+            'unit_cost' => $unitCost,
+            'total_cost' => ($qtyIn + $qtyOut) * $unitCost,
+
+            'remarks' => $remarks,
+        ]);
+    }
+
+
+    /**
+     * Increase stock at a location.
+     *
+     * This also increases Product::current_stock because stock is entering
+     * the business through purchase, sales return, opening stock, etc.
      */
     public function increaseStock(
         Product $product,
@@ -74,67 +143,66 @@ class StockService
         float $unitCost = 0,
         string $remarks = ''
     ): void {
-
         if ($qty <= 0) {
-            throw new \Exception(
+            throw new RuntimeException(
                 'Stock increase quantity must be greater than zero.'
             );
         }
 
-
-        $currentBalance = $this->getCurrentBalance(
+        DB::transaction(function () use (
+            $product,
+            $qty,
+            $transactionType,
             $companyId,
             $storeId,
             $godownId,
-            $product->id
-        );
+            $referenceId,
+            $referenceNo,
+            $unitCost,
+            $remarks
+        ) {
+            $lockedProduct = $this->lockProduct(
+                $product,
+                $companyId
+            );
 
+            $currentBalance = $this->getCurrentBalance(
+                $companyId,
+                $storeId,
+                $godownId,
+                $lockedProduct->id
+            );
 
-        $newBalance = $currentBalance + $qty;
+            $newBalance = $currentBalance + $qty;
 
+            $this->createLedgerEntry(
+                product: $lockedProduct,
+                companyId: $companyId,
+                storeId: $storeId,
+                godownId: $godownId,
+                transactionType: $transactionType,
+                referenceId: $referenceId,
+                referenceNo: $referenceNo,
+                qtyIn: $qty,
+                qtyOut: 0,
+                balanceQty: $newBalance,
+                unitCost: $unitCost,
+                remarks: $remarks
+            );
 
-        StockLedger::create([
-
-            'company_id'       => $companyId,
-            'store_id'         => $storeId,
-            'godown_id'        => $godownId,
-            'product_id'       => $product->id,
-
-            'transaction_date' => now(),
-
-            'transaction_type' => $transactionType,
-
-            'reference_id'     => $referenceId,
-            'reference_no'     => $referenceNo,
-
-            'qty_in'           => $qty,
-            'qty_out'          => 0,
-
-            'balance_qty'      => $newBalance,
-
-            'unit_cost'        => $unitCost,
-
-            'total_cost'       => $qty * $unitCost,
-
-            'remarks'          => $remarks,
-        ]);
-
-
-        /*
-        |--------------------------------------------------------------------------
-        | Product Overall Stock
-        |--------------------------------------------------------------------------
-        */
-
-        $product->increment(
-            'current_stock',
-            $qty
-        );
+            $lockedProduct->increment(
+                'current_stock',
+                $qty
+            );
+        });
     }
 
 
     /**
-     * Decrease stock.
+     * Decrease stock at a location.
+     *
+     * This also decreases Product::current_stock because stock is leaving
+     * the business through sale, purchase return, damage, etc.
      */
     public function decreaseStock(
         Product $product,
@@ -148,89 +216,92 @@ class StockService
         float $unitCost = 0,
         string $remarks = ''
     ): void {
-
         if ($qty <= 0) {
-            throw new \Exception(
+            throw new RuntimeException(
                 'Stock decrease quantity must be greater than zero.'
             );
         }
 
-
-        $currentBalance = $this->getCurrentBalance(
+        DB::transaction(function () use (
+            $product,
+            $qty,
+            $transactionType,
             $companyId,
             $storeId,
             $godownId,
-            $product->id
-        );
-
-
-        if ($qty > $currentBalance) {
-
-            $locationName =
-                $godownId === null
-                ? 'Shop'
-                : 'Godown ID ' . $godownId;
-
-
-            throw new \Exception(
-                "Insufficient stock for {$product->product_name} in {$locationName}. " .
-                    "Available: {$currentBalance}, Required: {$qty}"
+            $referenceId,
+            $referenceNo,
+            $unitCost,
+            $remarks
+        ) {
+            $lockedProduct = $this->lockProduct(
+                $product,
+                $companyId
             );
-        }
 
+            $currentBalance = $this->getCurrentBalance(
+                $companyId,
+                $storeId,
+                $godownId,
+                $lockedProduct->id
+            );
 
-        $newBalance = $currentBalance - $qty;
+            if ($qty > $currentBalance) {
+                $locationName = $godownId === null
+                    ? 'Shop'
+                    : 'Godown ID ' . $godownId;
 
+                throw new RuntimeException(
+                    "Insufficient stock for {$lockedProduct->product_name} " .
+                        "in {$locationName}. Available: {$currentBalance}, " .
+                        "Required: {$qty}"
+                );
+            }
 
-        StockLedger::create([
+            $newBalance = $currentBalance - $qty;
 
-            'company_id'       => $companyId,
-            'store_id'         => $storeId,
-            'godown_id'        => $godownId,
-            'product_id'       => $product->id,
+            $this->createLedgerEntry(
+                product: $lockedProduct,
+                companyId: $companyId,
+                storeId: $storeId,
+                godownId: $godownId,
+                transactionType: $transactionType,
+                referenceId: $referenceId,
+                referenceNo: $referenceNo,
+                qtyIn: 0,
+                qtyOut: $qty,
+                balanceQty: $newBalance,
+                unitCost: $unitCost,
+                remarks: $remarks
+            );
 
-            'transaction_date' => now(),
-
-            'transaction_type' => $transactionType,
-
-            'reference_id'     => $referenceId,
-            'reference_no'     => $referenceNo,
-
-            'qty_in'           => 0,
-            'qty_out'          => $qty,
-
-            'balance_qty'      => $newBalance,
-
-            'unit_cost'        => $unitCost,
-
-            'total_cost'       => $qty * $unitCost,
-
-            'remarks'          => $remarks,
-        ]);
-
-
-        /*
-        |--------------------------------------------------------------------------
-        | Product Overall Stock
-        |--------------------------------------------------------------------------
-        */
-
-        $product->decrement(
-            'current_stock',
-            $qty
-        );
+            $lockedProduct->decrement(
+                'current_stock',
+                $qty
+            );
+        });
     }
 
 
     /**
-     * Transfer stock between two locations.
+     * Transfer stock between two locations in the same branch.
      *
-     * Example:
+     * Examples:
      *
-     * Godown → Shop
+     * Shop to Godown:
+     * fromGodownId = NULL
+     * toGodownId   = godown ID
      *
-     * Source godown_id = 1
-     * Destination godown_id = NULL
+     * Godown to Shop:
+     * fromGodownId = godown ID
+     * toGodownId   = NULL
+     *
+     * Godown to Godown:
+     * fromGodownId = source godown ID
+     * toGodownId   = destination godown ID
+     *
+     * Product::current_stock is not changed because the product remains
+     * inside the same company and branch.
      */
     public function transferStock(
         Product $product,
@@ -242,66 +313,22 @@ class StockService
         ?int $referenceId = null,
         ?string $referenceNo = null,
         float $unitCost = 0,
-        string $remarks = ''
-    ): void {
-
+        string $remarks = '',
+        string $transactionType = 'Stock Transfer'
+    ): array {
         if ($qty <= 0) {
-            throw new \Exception(
+            throw new RuntimeException(
                 'Transfer quantity must be greater than zero.'
             );
         }
 
-
-        /*
-        |--------------------------------------------------------------------------
-        | Prevent Same Location Transfer
-        |--------------------------------------------------------------------------
-        */
-
         if ($fromGodownId === $toGodownId) {
-
-            throw new \Exception(
+            throw new RuntimeException(
                 'Source and destination locations cannot be the same.'
             );
         }
 
-
-        /*
-        |--------------------------------------------------------------------------
-        | Check Source Stock
-        |--------------------------------------------------------------------------
-        */
-
-        $sourceBalance = $this->getCurrentBalance(
-            $companyId,
-            $storeId,
-            $fromGodownId,
-            $product->id
-        );
-
-
-        if ($qty > $sourceBalance) {
-
-            $sourceName =
-                $fromGodownId === null
-                ? 'Shop'
-                : 'Godown ID ' . $fromGodownId;
-
-
-            throw new \Exception(
-                "Insufficient stock in {$sourceName} for {$product->product_name}. " .
-                    "Available: {$sourceBalance}, Required: {$qty}"
-            );
-        }
-
-
-        /*
-        |--------------------------------------------------------------------------
-        | Perform Both Ledger Entries Atomically
-        |--------------------------------------------------------------------------
-        */
-
-        DB::transaction(function () use (
+        return DB::transaction(function () use (
             $product,
             $qty,
             $companyId,
@@ -311,174 +338,131 @@ class StockService
             $referenceId,
             $referenceNo,
             $unitCost,
-            $remarks
+            $remarks,
+            $transactionType
         ) {
+            $lockedProduct = $this->lockProduct(
+                $product,
+                $companyId
+            );
 
             /*
             |--------------------------------------------------------------------------
-            | Source → Decrease
+            | Read balances after obtaining the product lock
             |--------------------------------------------------------------------------
             */
 
-            $this->decreaseLocationOnly(
-                $product,
-                $qty,
-                'Stock Transfer',
+            $sourceBalance = $this->getCurrentBalance(
                 $companyId,
                 $storeId,
                 $fromGodownId,
-                $referenceId,
-                $referenceNo,
-                $unitCost,
-                $remarks
+                $lockedProduct->id
             );
 
-
-            /*
-            |--------------------------------------------------------------------------
-            | Destination → Increase
-            |--------------------------------------------------------------------------
-            */
-
-            $this->increaseLocationOnly(
-                $product,
-                $qty,
-                'Stock Transfer',
+            $destinationBalance = $this->getCurrentBalance(
                 $companyId,
                 $storeId,
                 $toGodownId,
-                $referenceId,
-                $referenceNo,
-                $unitCost,
-                $remarks
+                $lockedProduct->id
             );
+
+            if ($qty > $sourceBalance) {
+                $sourceName = $fromGodownId === null
+                    ? 'Shop'
+                    : 'Godown ID ' . $fromGodownId;
+
+                throw new RuntimeException(
+                    "Insufficient stock in {$sourceName} for " .
+                        "{$lockedProduct->product_name}. " .
+                        "Available: {$sourceBalance}, Required: {$qty}"
+                );
+            }
+
+            $sourceNewBalance = $sourceBalance - $qty;
+            $destinationNewBalance = $destinationBalance + $qty;
+
+            /*
+            |--------------------------------------------------------------------------
+            | Source ledger entry
+            |--------------------------------------------------------------------------
+            */
+
+            $this->createLedgerEntry(
+                product: $lockedProduct,
+                companyId: $companyId,
+                storeId: $storeId,
+                godownId: $fromGodownId,
+                transactionType: $transactionType,
+                referenceId: $referenceId,
+                referenceNo: $referenceNo,
+                qtyIn: 0,
+                qtyOut: $qty,
+                balanceQty: $sourceNewBalance,
+                unitCost: $unitCost,
+                remarks: $remarks
+            );
+
+            /*
+            |--------------------------------------------------------------------------
+            | Destination ledger entry
+            |--------------------------------------------------------------------------
+            */
+
+            $this->createLedgerEntry(
+                product: $lockedProduct,
+                companyId: $companyId,
+                storeId: $storeId,
+                godownId: $toGodownId,
+                transactionType: $transactionType,
+                referenceId: $referenceId,
+                referenceNo: $referenceNo,
+                qtyIn: $qty,
+                qtyOut: 0,
+                balanceQty: $destinationNewBalance,
+                unitCost: $unitCost,
+                remarks: $remarks
+            );
+
+            return [
+                'from_stock_before' => $sourceBalance,
+                'from_stock_after' => $sourceNewBalance,
+                'to_stock_before' => $destinationBalance,
+                'to_stock_after' => $destinationNewBalance,
+            ];
         });
     }
 
 
     /**
-     * Decrease stock location only.
+     * Reverse a completed transfer.
      *
-     * Used by transfer.
-     *
-     * Does NOT change Product::current_stock.
+     * Cancellation moves stock from the original destination back to the
+     * original source and creates separate reversing ledger entries.
      */
-    private function decreaseLocationOnly(
+    public function reverseTransfer(
         Product $product,
         float $qty,
-        string $transactionType,
         int $companyId,
         int $storeId,
-        ?int $godownId,
-        ?int $referenceId,
-        ?string $referenceNo,
-        float $unitCost,
-        string $remarks
-    ): void {
-
-        $currentBalance = $this->getCurrentBalance(
-            $companyId,
-            $storeId,
-            $godownId,
-            $product->id
+        ?int $originalFromGodownId,
+        ?int $originalToGodownId,
+        ?int $referenceId = null,
+        ?string $referenceNo = null,
+        float $unitCost = 0,
+        string $remarks = ''
+    ): array {
+        return $this->transferStock(
+            product: $product,
+            qty: $qty,
+            companyId: $companyId,
+            storeId: $storeId,
+            fromGodownId: $originalToGodownId,
+            toGodownId: $originalFromGodownId,
+            referenceId: $referenceId,
+            referenceNo: $referenceNo,
+            unitCost: $unitCost,
+            remarks: $remarks,
+            transactionType: 'Stock Transfer Cancellation'
         );
-
-
-        if ($qty > $currentBalance) {
-
-            throw new \Exception(
-                "Insufficient stock for {$product->product_name}. " .
-                    "Available: {$currentBalance}, Required: {$qty}"
-            );
-        }
-
-
-        $newBalance = $currentBalance - $qty;
-
-
-        StockLedger::create([
-
-            'company_id'       => $companyId,
-            'store_id'         => $storeId,
-            'godown_id'        => $godownId,
-            'product_id'       => $product->id,
-
-            'transaction_date' => now(),
-
-            'transaction_type' => $transactionType,
-
-            'reference_id'     => $referenceId,
-            'reference_no'     => $referenceNo,
-
-            'qty_in'           => 0,
-            'qty_out'          => $qty,
-
-            'balance_qty'      => $newBalance,
-
-            'unit_cost'        => $unitCost,
-
-            'total_cost'       => $qty * $unitCost,
-
-            'remarks'          => $remarks,
-        ]);
-    }
-
-
-    /**
-     * Increase stock location only.
-     *
-     * Used by transfer.
-     *
-     * Does NOT change Product::current_stock.
-     */
-    private function increaseLocationOnly(
-        Product $product,
-        float $qty,
-        string $transactionType,
-        int $companyId,
-        int $storeId,
-        ?int $godownId,
-        ?int $referenceId,
-        ?string $referenceNo,
-        float $unitCost,
-        string $remarks
-    ): void {
-
-        $currentBalance = $this->getCurrentBalance(
-            $companyId,
-            $storeId,
-            $godownId,
-            $product->id
-        );
-
-
-        $newBalance = $currentBalance + $qty;
-
-
-        StockLedger::create([
-
-            'company_id'       => $companyId,
-            'store_id'         => $storeId,
-            'godown_id'        => $godownId,
-            'product_id'       => $product->id,
-
-            'transaction_date' => now(),
-
-            'transaction_type' => $transactionType,
-
-            'reference_id'     => $referenceId,
-            'reference_no'     => $referenceNo,
-
-            'qty_in'           => $qty,
-            'qty_out'          => 0,
-
-            'balance_qty'      => $newBalance,
-
-            'unit_cost'        => $unitCost,
-
-            'total_cost'       => $qty * $unitCost,
-
-            'remarks'          => $remarks,
-        ]);
     }
 }

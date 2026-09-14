@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\CurrentStockController;
 use App\Http\Controllers\StockAdjustmentController;
 use App\Http\Controllers\StockLedgerController;
+use App\Http\Controllers\StockTransferController;
 
 
 Route::middleware([
@@ -14,17 +15,6 @@ Route::middleware([
     /*
     |--------------------------------------------------------------------------
     | CURRENT STOCK
-    |--------------------------------------------------------------------------
-    |
-    | Current stock routes are read-only. Their permissions are enforced by
-    | CurrentStockController through Laravel 13 controller middleware.
-    |
-    */
-
-
-    /*
-    |--------------------------------------------------------------------------
-    | Current Stock Register
     |--------------------------------------------------------------------------
     */
 
@@ -38,13 +28,6 @@ Route::middleware([
         'current-stock.index'
     );
 
-
-    /*
-    |--------------------------------------------------------------------------
-    | Current Stock Print
-    |--------------------------------------------------------------------------
-    */
-
     Route::get(
         '/inventory/current-stock/print',
         [
@@ -55,13 +38,6 @@ Route::middleware([
         'current-stock.print'
     );
 
-
-    /*
-    |--------------------------------------------------------------------------
-    | Current Stock PDF
-    |--------------------------------------------------------------------------
-    */
-
     Route::get(
         '/inventory/current-stock/pdf',
         [
@@ -71,13 +47,6 @@ Route::middleware([
     )->name(
         'current-stock.pdf'
     );
-
-
-    /*
-    |--------------------------------------------------------------------------
-    | Current Stock Excel
-    |--------------------------------------------------------------------------
-    */
 
     Route::get(
         '/inventory/current-stock/excel',
@@ -94,16 +63,6 @@ Route::middleware([
     |--------------------------------------------------------------------------
     | STOCK ADJUSTMENTS
     |--------------------------------------------------------------------------
-    |
-    | Custom Stock Adjustment routes must be declared before the resource
-    | route when their path could otherwise be treated as a resource ID.
-    |
-    */
-
-    /*
-    |--------------------------------------------------------------------------
-    | AJAX Product Search
-    |--------------------------------------------------------------------------
     */
 
     Route::get(
@@ -116,13 +75,6 @@ Route::middleware([
         'stock-adjustments.products.search'
     );
 
-
-    /*
-    |--------------------------------------------------------------------------
-    | AJAX Current Stock Lookup
-    |--------------------------------------------------------------------------
-    */
-
     Route::get(
         '/stock-adjustments/product-stock',
         [
@@ -132,13 +84,6 @@ Route::middleware([
     )->name(
         'stock-adjustments.stock'
     );
-
-
-    /*
-    |--------------------------------------------------------------------------
-    | Product Stock Lookup
-    |--------------------------------------------------------------------------
-    */
 
     Route::get(
         '/stock-adjustments/product-stock/{product}/{company}/{store}',
@@ -150,13 +95,6 @@ Route::middleware([
         'stock-adjustments.product-stock'
     );
 
-
-    /*
-    |--------------------------------------------------------------------------
-    | Create Adjustment for Product
-    |--------------------------------------------------------------------------
-    */
-
     Route::get(
         '/stock-adjustments/create/{store}/{product}',
         [
@@ -166,13 +104,6 @@ Route::middleware([
     )->name(
         'stock-adjustments.create.product'
     );
-
-
-    /*
-    |--------------------------------------------------------------------------
-    | AJAX Product Stock
-    |--------------------------------------------------------------------------
-    */
 
     Route::get(
         '/ajax/product-stock',
@@ -184,13 +115,6 @@ Route::middleware([
         'ajax.product-stock'
     );
 
-
-    /*
-    |--------------------------------------------------------------------------
-    | Stock Adjustment Print
-    |--------------------------------------------------------------------------
-    */
-
     Route::get(
         '/stock-adjustments/{stockAdjustment}/print',
         [
@@ -200,13 +124,6 @@ Route::middleware([
     )->name(
         'stock-adjustments.print'
     );
-
-
-    /*
-    |--------------------------------------------------------------------------
-    | Stock Adjustment PDF
-    |--------------------------------------------------------------------------
-    */
 
     Route::get(
         '/stock-adjustments/{stockAdjustment}/pdf',
@@ -218,17 +135,6 @@ Route::middleware([
         'stock-adjustments.pdf'
     );
 
-
-    /*
-    |--------------------------------------------------------------------------
-    | Cancel Stock Adjustment
-    |--------------------------------------------------------------------------
-    |
-    | A stock adjustment is never permanently deleted. Cancellation creates
-    | reversing ledger entries and keeps the original document for audit.
-    |
-    */
-
     Route::patch(
         '/stock-adjustments/{stockAdjustment}/cancel',
         [
@@ -238,13 +144,6 @@ Route::middleware([
     )->name(
         'stock-adjustments.cancel'
     );
-
-
-    /*
-    |--------------------------------------------------------------------------
-    | Stock Adjustment Resource
-    |--------------------------------------------------------------------------
-    */
 
     Route::resource(
         'stock-adjustments',
@@ -260,18 +159,149 @@ Route::middleware([
 
     /*
     |--------------------------------------------------------------------------
-    | STOCK LEDGER
+    | STOCK TRANSFERS
     |--------------------------------------------------------------------------
-    |
-    | Custom report and search routes must be declared before the resource
-    | route. Otherwise words such as "print" are treated as a ledger ID.
-    |
     */
 
 
     /*
     |--------------------------------------------------------------------------
-    | AJAX Product Search
+    | Product Search
+    |--------------------------------------------------------------------------
+    */
+
+    Route::get(
+        '/stock-transfers/products/search',
+        [
+            StockTransferController::class,
+            'searchProduct',
+        ]
+    )->name(
+        'stock-transfers.products.search'
+    );
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Product Location Stock
+    |--------------------------------------------------------------------------
+    */
+
+    Route::get(
+        '/stock-transfers/product-stock',
+        [
+            StockTransferController::class,
+            'getProductStock',
+        ]
+    )->name(
+        'stock-transfers.product-stock'
+    );
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Quick Transfer
+    |--------------------------------------------------------------------------
+    |
+    | This endpoint is used by the Sales billing screen when shop stock is
+    | insufficient and available quantity must be moved from a godown.
+    |
+    */
+
+    Route::post(
+        '/stock-transfers/quick',
+        [
+            StockTransferController::class,
+            'quickTransfer',
+        ]
+    )->name(
+        'stock-transfers.quick'
+    );
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Stock Transfer Print
+    |--------------------------------------------------------------------------
+    */
+
+    Route::get(
+        '/stock-transfers/{stockTransfer}/print',
+        [
+            StockTransferController::class,
+            'print',
+        ]
+    )->name(
+        'stock-transfers.print'
+    );
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Stock Transfer PDF
+    |--------------------------------------------------------------------------
+    */
+
+    Route::get(
+        '/stock-transfers/{stockTransfer}/pdf',
+        [
+            StockTransferController::class,
+            'pdf',
+        ]
+    )->name(
+        'stock-transfers.pdf'
+    );
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Cancel Stock Transfer
+    |--------------------------------------------------------------------------
+    |
+    | Cancellation creates reversing ledger entries. The original transfer
+    | and its items remain in the database for audit purposes.
+    |
+    */
+
+    Route::patch(
+        '/stock-transfers/{stockTransfer}/cancel',
+        [
+            StockTransferController::class,
+            'cancel',
+        ]
+    )->name(
+        'stock-transfers.cancel'
+    );
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Stock Transfer Resource
+    |--------------------------------------------------------------------------
+    |
+    | Transfers cannot be edited or permanently deleted after their stock
+    | ledger entries have been created.
+    |
+    */
+
+    Route::resource(
+        'stock-transfers',
+        StockTransferController::class
+    )
+        ->parameters([
+            'stock-transfers' => 'stockTransfer',
+        ])
+        ->only([
+            'index',
+            'create',
+            'store',
+            'show',
+        ]);
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | STOCK LEDGER
     |--------------------------------------------------------------------------
     */
 
@@ -285,13 +315,6 @@ Route::middleware([
         'stock-ledgers.search'
     );
 
-
-    /*
-    |--------------------------------------------------------------------------
-    | Stock Ledger Print
-    |--------------------------------------------------------------------------
-    */
-
     Route::get(
         '/stock-ledgers/print',
         [
@@ -301,13 +324,6 @@ Route::middleware([
     )->name(
         'stock-ledgers.print'
     );
-
-
-    /*
-    |--------------------------------------------------------------------------
-    | Stock Ledger PDF
-    |--------------------------------------------------------------------------
-    */
 
     Route::get(
         '/stock-ledgers/pdf',
@@ -319,13 +335,6 @@ Route::middleware([
         'stock-ledgers.pdf'
     );
 
-
-    /*
-    |--------------------------------------------------------------------------
-    | Stock Ledger Excel
-    |--------------------------------------------------------------------------
-    */
-
     Route::get(
         '/stock-ledgers/excel',
         [
@@ -335,18 +344,6 @@ Route::middleware([
     )->name(
         'stock-ledgers.excel'
     );
-
-
-    /*
-    |--------------------------------------------------------------------------
-    | Stock Ledger Register and Transaction Details
-    |--------------------------------------------------------------------------
-    |
-    | Only Index and Show are required. Stock Ledger entries are generated by
-    | purchases, sales, returns, transfers and stock adjustments; they must
-    | not be created, edited or deleted directly from this resource.
-    |
-    */
 
     Route::resource(
         'stock-ledgers',
