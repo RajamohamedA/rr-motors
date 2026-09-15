@@ -42,7 +42,7 @@
     display: flex;
     flex-direction: column;
 
-    overflow: hidden;
+    overflow: visible;
 
     border-right:
         1px solid var(--rr-bs-border);
@@ -101,6 +101,18 @@
 
     box-shadow:
         14px 0 38px rgba(15, 23, 42, 0.22);
+}
+
+.rr-business-sidebar.hover-expanded {
+    width: var(--rr-bs-width);
+    box-shadow:
+        14px 0 38px rgba(15, 23, 42, 0.28);
+}
+
+.rr-business-sidebar.hover-expanded .rr-business-sidebar-collapse-btn {
+    border-color: rgba(96, 165, 250, 0.55);
+    color: #ffffff;
+    background: rgba(37, 99, 235, 0.34);
 }
 
 
@@ -239,10 +251,10 @@
 .rr-business-sidebar-collapse-btn {
     position: absolute;
 
-    top: 24px;
-    right: 12px;
+    top: 25px;
+    right: -16px;
 
-    z-index: 20;
+    z-index: 1060;
 
     width: 32px;
     height: 32px;
@@ -256,16 +268,21 @@
     border:
         1px solid rgba(148, 163, 184, 0.18);
 
-    border-radius: 9px;
+    border-radius: 50%;
 
-    background:
-        rgba(255, 255, 255, 0.055);
+    border-color: rgba(96, 165, 250, 0.58);
 
-    color: #94a3b8;
+    background: #2563eb;
+
+    color: #ffffff;
 
     font-size: 13px;
 
     cursor: pointer;
+
+    box-shadow:
+        0 4px 14px rgba(15, 23, 42, 0.32),
+        0 0 0 3px rgba(255, 255, 255, 0.08);
 
     transition:
         background 0.18s ease,
@@ -275,14 +292,24 @@
 }
 
 
+.rr-business-sidebar-collapse-btn[data-collapsed="true"] {
+    border-color: rgba(251, 191, 36, 0.72);
+
+    background: #d97706;
+
+    color: #ffffff;
+}
+
+
 .rr-business-sidebar-collapse-btn:hover {
     border-color:
         rgba(96, 165, 250, 0.35);
 
-    background:
-        rgba(59, 130, 246, 0.14);
+    background: #16a34a;
 
     color: #ffffff;
+
+    transform: scale(1.08);
 }
 
 
@@ -692,15 +719,13 @@
 
 
 .rr-business-sidebar.collapsed .rr-business-sidebar-collapse-btn {
-    position: static;
+    position: absolute;
 
-    order: 2;
+    top: 25px;
+    right: -16px;
 
-    width: 34px;
-    height: 30px;
-
-    flex:
-        0 0 30px;
+    width: 32px;
+    height: 32px;
 }
 
 

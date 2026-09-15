@@ -6,6 +6,7 @@ import {
 import {
     useEffect,
     useMemo,
+    useRef,
     useState,
 } from 'react';
 
@@ -14,8 +15,7 @@ export default function BusinessSidebar({
     open = false,
     collapsed = false,
     onClose = null,
-    onMouseEnter = null,
-    onMouseLeave = null,
+    onToggleCollapse = null,
 }) {
 
     /*
@@ -37,6 +37,133 @@ export default function BusinessSidebar({
     const currentUrl =
         page.url
         ?? '/';
+
+
+    const [
+        locallyCollapsed,
+        setLocallyCollapsed,
+    ] = useState(
+        Boolean(collapsed)
+    );
+
+
+    const [
+        hoverExpanded,
+        setHoverExpanded,
+    ] = useState(false);
+
+
+    const hoverLeaveTimer =
+        useRef(null);
+
+
+    useEffect(
+        () => {
+            setLocallyCollapsed(
+                Boolean(collapsed)
+            );
+
+            setHoverExpanded(false);
+        },
+        [collapsed]
+    );
+
+
+    useEffect(
+        () => {
+            return () => {
+                if (hoverLeaveTimer.current) {
+                    window.clearTimeout(
+                        hoverLeaveTimer.current
+                    );
+                }
+            };
+        },
+        []
+    );
+
+
+    const pinnedCollapsed =
+        locallyCollapsed;
+
+
+    const displayCollapsed =
+        pinnedCollapsed
+        &&
+        !hoverExpanded;
+
+
+    const toggleSidebar =
+        event => {
+            event.preventDefault();
+            event.stopPropagation();
+
+            if (hoverLeaveTimer.current) {
+                window.clearTimeout(
+                    hoverLeaveTimer.current
+                );
+
+                hoverLeaveTimer.current = null;
+            }
+
+            const next =
+                !pinnedCollapsed;
+
+            setLocallyCollapsed(next);
+            setHoverExpanded(false);
+
+            if (
+                typeof onToggleCollapse
+                === 'function'
+            ) {
+                onToggleCollapse(next);
+            }
+        };
+
+
+    const handleMouseEnter =
+        () => {
+            if (hoverLeaveTimer.current) {
+                window.clearTimeout(
+                    hoverLeaveTimer.current
+                );
+
+                hoverLeaveTimer.current = null;
+            }
+
+            if (pinnedCollapsed) {
+                setHoverExpanded(true);
+            }
+
+        };
+
+
+    const handleMouseLeave =
+        () => {
+            /*
+            | Hover behavior is allowed only while permanently collapsed.
+            | A sidebar opened by the toggle must ignore mouse leave.
+            */
+            if (!pinnedCollapsed) {
+                return;
+            }
+
+            if (hoverLeaveTimer.current) {
+                window.clearTimeout(
+                    hoverLeaveTimer.current
+                );
+            }
+
+            hoverLeaveTimer.current =
+                window.setTimeout(
+                    () => {
+                        setHoverExpanded(false);
+                        hoverLeaveTimer.current = null;
+                    },
+                    280
+                );
+
+        };
 
 
     const user =
@@ -248,6 +375,26 @@ export default function BusinessSidebar({
                 ||
                 path.startsWith(
                     '/customer-ledger'
+                )
+                ||
+                path.startsWith(
+                    '/mechanic-accounts'
+                )
+                ||
+                path.startsWith(
+                    '/mechanic-ledgers'
+                )
+                ||
+                path.startsWith(
+                    '/supplier-payments'
+                )
+                ||
+                path.startsWith(
+                    '/supplier-ledger'
+                )
+                ||
+                path.startsWith(
+                    '/expenses'
                 )
                 ||
                 path.startsWith(
@@ -664,11 +811,29 @@ export default function BusinessSidebar({
                     icon: 'bi-wallet2',
                     visible: canAny([
                         'accounts.view',
+                        'accounts.dashboard.view',
                         'customer-payment.view',
                         'customer-payment.create',
                         'customer-ledger.view',
+                        'supplier-payment.view',
+                        'supplier-ledger.view',
+                        'mechanic-account.view',
+                        'mechanic-ledger.view',
+                        'account.view',
+                        'voucher.view',
+                        'expense.view',
+                        'accounts-report.view',
                     ]),
                     children: [
+                        {
+                            label: 'Accounts Dashboard',
+                            icon: 'bi-speedometer2',
+                            href: '/accounts/dashboard',
+                            exact: true,
+                            visible:
+                                can('accounts.dashboard.view')
+                                || can('accounts.view'),
+                        },
                         {
                             label: 'Customer Payments',
                             icon: 'bi-cash-coin',
@@ -681,6 +846,76 @@ export default function BusinessSidebar({
                             icon: 'bi-journal',
                             href: '/customer-ledger',
                             visible: can('customer-ledger.view'),
+                        },
+                        {
+                            label: 'Supplier Payments',
+                            icon: 'bi-cash-stack',
+                            href: '/supplier-payments',
+                            activePrefix: '/supplier-payments',
+                            visible: can('supplier-payment.view'),
+                        },
+                        {
+                            label: 'Supplier Ledger',
+                            icon: 'bi-journal-bookmark',
+                            href: '/supplier-ledger',
+                            activePrefix: '/supplier-ledger',
+                            visible: can('supplier-ledger.view'),
+                        },
+                        {
+                            label: 'Mechanic Accounts',
+                            icon: 'bi-person-workspace',
+                            href: '/mechanic-accounts',
+                            activePrefix: '/mechanic-accounts',
+                            visible: can('mechanic-account.view'),
+                        },
+                        {
+                            label: 'Mechanic Ledger',
+                            icon: 'bi-journal-check',
+                            href: '/mechanic-ledgers',
+                            activePrefix: '/mechanic-ledgers',
+                            visible: can('mechanic-ledger.view'),
+                        },
+                        {
+                            label: 'Cash & Bank Accounts',
+                            icon: 'bi-bank',
+                            href: '/accounts/cash-bank',
+                            activePrefix: '/accounts/cash-bank',
+                            visible: can('account.view'),
+                        },
+                        {
+                            label: 'Receipts & Payments',
+                            icon: 'bi-arrow-left-right',
+                            href: '/accounts/vouchers',
+                            activePrefix: '/accounts/vouchers',
+                            visible: can('voucher.view'),
+                        },
+                        {
+                            label: 'Expenses',
+                            icon: 'bi-wallet',
+                            href: '/expenses',
+                            activePrefix: '/expenses',
+                            visible: can('expense.view'),
+                        },
+                        {
+                            label: 'Outstanding Reports',
+                            icon: 'bi-person-exclamation',
+                            href: '/accounts/outstanding',
+                            activePrefix: '/accounts/outstanding',
+                            visible: can('accounts-report.view'),
+                        },
+                        {
+                            label: 'Cash / Bank Book',
+                            icon: 'bi-book',
+                            href: '/accounts/cash-bank-book',
+                            activePrefix: '/accounts/cash-bank-book',
+                            visible: can('accounts-report.view'),
+                        },
+                        {
+                            label: 'Day Book',
+                            icon: 'bi-calendar2-week',
+                            href: '/accounts/day-book',
+                            activePrefix: '/accounts/day-book',
+                            visible: can('accounts-report.view'),
                         },
                     ],
                 },
@@ -743,15 +978,53 @@ export default function BusinessSidebar({
             className={
                 `rr-business-sidebar ` +
                 `${open ? 'mobile-open' : ''} ` +
-                `${collapsed ? 'collapsed' : ''}`
+                `${displayCollapsed ? 'collapsed' : ''} ` +
+                `${hoverExpanded ? 'hover-expanded' : ''}`
             }
             onMouseEnter={
-                onMouseEnter
+                handleMouseEnter
             }
             onMouseLeave={
-                onMouseLeave
+                handleMouseLeave
             }
         >
+
+            <button
+                type="button"
+                className="rr-business-sidebar-collapse-btn"
+                data-collapsed={
+                    pinnedCollapsed
+                        ? 'true'
+                        : 'false'
+                }
+                title={
+                    pinnedCollapsed
+                        ? 'Keep sidebar expanded'
+                        : 'Collapse sidebar'
+                }
+                aria-label={
+                    pinnedCollapsed
+                        ? 'Expand sidebar'
+                        : 'Collapse sidebar'
+                }
+                aria-expanded={!pinnedCollapsed}
+                onPointerDown={toggleSidebar}
+                onClick={event => {
+                    /* Keyboard-generated clicks have detail 0. */
+                    if (event.detail === 0) {
+                        toggleSidebar(event);
+                    }
+                }}
+            >
+                <i
+                    className={
+                        `bi ${pinnedCollapsed
+                            ? 'bi-chevron-double-right'
+                            : 'bi-chevron-double-left'
+                        }`
+                    }
+                ></i>
+            </button>
 
             {/* =========================================================
                 BUSINESS IDENTITY
@@ -771,7 +1044,7 @@ export default function BusinessSidebar({
 
 
                 {
-                    !collapsed && (
+                    !displayCollapsed && (
 
                         <div className="rr-business-sidebar-company-info">
 
@@ -867,7 +1140,7 @@ export default function BusinessSidebar({
                                                 item
                                             }
                                             collapsed={
-                                                collapsed
+                                                displayCollapsed
                                             }
                                             onClose={
                                                 onClose
@@ -915,7 +1188,7 @@ export default function BusinessSidebar({
                                             ]
                                         }
                                         collapsed={
-                                            collapsed
+                                            displayCollapsed
                                         }
                                         onToggle={
                                             () =>
@@ -962,7 +1235,7 @@ export default function BusinessSidebar({
 
 
                     {
-                        !collapsed && (
+                        !displayCollapsed && (
 
                             <div className="rr-business-sidebar-profile-info">
 
