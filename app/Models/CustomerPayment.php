@@ -2,82 +2,103 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class CustomerPayment extends Model
 {
-    use HasFactory;
+    public const STATUS_COMPLETED = 'Completed';
+    public const STATUS_CANCELLED = 'Cancelled';
 
     protected $fillable = [
-
         'company_id',
         'store_id',
         'customer_id',
         'sale_id',
-
+        'account_id',
         'receipt_no',
-
         'payment_date',
-
         'amount',
-
         'payment_mode',
-
         'reference_no',
-
+        'status',
         'remarks',
-
+        'created_by',
+        'cancelled_by',
+        'cancelled_at',
     ];
 
-    protected $casts = [
+    protected function casts(): array
+    {
+        return [
+            'payment_date' => 'date',
+            'amount' => 'decimal:2',
+            'cancelled_at' => 'datetime',
+        ];
+    }
 
-        'payment_date' => 'date',
+    public function scopeForContext(
+        Builder $query,
+        int $companyId,
+        int $storeId
+    ): Builder {
+        return $query
+            ->where('company_id', $companyId)
+            ->where('store_id', $storeId);
+    }
 
-    ];
+    public function scopeCompleted(Builder $query): Builder
+    {
+        return $query->where('status', self::STATUS_COMPLETED);
+    }
 
-    /*
-    |--------------------------------------------------------------------------
-    | Relationships
-    |--------------------------------------------------------------------------
-    */
+    public function isCancelled(): bool
+    {
+        return $this->status === self::STATUS_CANCELLED;
+    }
 
-    public function company()
+    public function company(): BelongsTo
     {
         return $this->belongsTo(Company::class);
     }
 
-    public function store()
+    public function store(): BelongsTo
     {
         return $this->belongsTo(Store::class);
     }
 
-    public function customer()
+    public function customer(): BelongsTo
     {
         return $this->belongsTo(Customer::class);
     }
 
-    public function sale()
+    /**
+     * Legacy single-invoice reference. New receipts should use allocations.
+     */
+    public function sale(): BelongsTo
     {
         return $this->belongsTo(Sales::class);
     }
 
-    /*
-    |--------------------------------------------------------------------------
-    | Generate Receipt Number
-    |--------------------------------------------------------------------------
-    */
-
-    public static function generateReceiptNo()
+    public function account(): BelongsTo
     {
-        $last = self::latest()->first();
+        return $this->belongsTo(Account::class);
+    }
 
-        if (!$last) {
-            return 'RCPT000001';
-        }
+    public function allocations(): HasMany
+    {
+        return $this->hasMany(CustomerPaymentAllocation::class);
+    }
 
-        $number = (int) substr($last->receipt_no, 4);
+    public function creator(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'created_by');
+    }
 
-        return 'RCPT' . str_pad($number + 1, 6, '0', STR_PAD_LEFT);
+    public function canceller(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'cancelled_by');
     }
 }

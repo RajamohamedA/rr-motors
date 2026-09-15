@@ -10,7 +10,7 @@ import ConfirmModal from "../../Components/ConfirmModal";
 
 import "../../../css/business/quotations.css";
 
-export default function Show({ quotation }) {
+export default function Show({ quotation, accounts = [] }) {
     const { flash = {}, errors: pageErrors = {} } = usePage().props;
     const [statusProcessing, setStatusProcessing] = useState(false);
     const [confirmation, setConfirmation] = useState({
@@ -25,6 +25,14 @@ export default function Show({ quotation }) {
         shortages: [],
         transfers: [],
         error: "",
+    });
+    const [conversionModal, setConversionModal] = useState({
+        show: false,
+        processing: false,
+        error: "",
+        invoice_date: today(),
+        remarks: "",
+        payments: [],
     });
 
     const items = Array.isArray(quotation?.items) ? quotation.items : [];
@@ -79,6 +87,17 @@ export default function Show({ quotation }) {
         });
     };
 
+    const openConversion = () => {
+        setConversionModal({
+            show: true,
+            processing: false,
+            error: "",
+            invoice_date: today(),
+            remarks: `Converted from ${quotation.quotation_no}`,
+            payments: [],
+        });
+    };
+
     const prepareConversion = async () => {
         setStockModal((previous) => ({
             ...previous,
@@ -94,7 +113,7 @@ export default function Show({ quotation }) {
 
             if (response.data?.ready || shortages.length === 0) {
                 setStockModal((previous) => ({ ...previous, loading: false }));
-                openConfirmation("convert");
+                openConversion();
                 return;
             }
 
@@ -162,7 +181,7 @@ export default function Show({ quotation }) {
                     transfers: [],
                     error: "",
                 });
-                openConfirmation("convert");
+                openConversion();
                 return;
             }
 
@@ -188,6 +207,133 @@ export default function Show({ quotation }) {
         setConfirmation({ show: false, action: null, processing: false });
     };
 
+    const addPayment = () => {
+        const usedIds = conversionModal.payments.map((payment) =>
+            Number(payment.account_id),
+        );
+        const account = accounts.find((item) => !usedIds.includes(Number(item.id)))
+            ?? accounts[0];
+
+        if (!account) {
+            setConversionModal((previous) => ({
+                ...previous,
+                error: "No active Cash, GPay or Bank account is available for this branch.",
+            }));
+            return;
+        }
+
+        const paid = conversionModal.payments.reduce(
+            (sum, payment) => sum + numberValue(payment.amount),
+            0,
+        );
+        const balance = Math.max(0, numberValue(quotation.grand_total) - paid);
+
+        setConversionModal((previous) => ({
+            ...previous,
+            error: "",
+            payments: [
+                ...previous.payments,
+                {
+                    key: `${Date.now()}-${Math.random()}`,
+                    account_id: String(account.id),
+                    payment_mode: account.payment_mode || accountMode(account),
+                    amount: balance > 0 ? String(balance) : "0",
+                    reference_no: "",
+                },
+            ],
+        }));
+    };
+
+    const updatePayment = (index, field, value) => {
+        setConversionModal((previous) => ({
+            ...previous,
+            error: "",
+            payments: previous.payments.map((payment, paymentIndex) => {
+                if (paymentIndex !== index) return payment;
+
+                if (field === "account_id") {
+                    const account = accounts.find(
+                        (item) => Number(item.id) === Number(value),
+                    );
+
+                    return {
+                        ...payment,
+                        account_id: value,
+                        payment_mode:
+                            account?.payment_mode || accountMode(account),
+                    };
+                }
+
+                return { ...payment, [field]: value };
+            }),
+        }));
+    };
+
+    const removePayment = (index) => {
+        setConversionModal((previous) => ({
+            ...previous,
+            payments: previous.payments.filter(
+                (_, paymentIndex) => paymentIndex !== index,
+            ),
+        }));
+    };
+
+    const submitConversion = (event) => {
+        event.preventDefault();
+
+        const payments = conversionModal.payments
+            .filter((payment) => numberValue(payment.amount) > 0)
+            .map(({ account_id, payment_mode, amount, reference_no }) => ({
+                account_id,
+                payment_mode,
+                amount,
+                reference_no: reference_no || null,
+            }));
+        const paidAmount = payments.reduce(
+            (sum, payment) => sum + numberValue(payment.amount),
+            0,
+        );
+
+        if (paidAmount > numberValue(quotation.grand_total) + 0.001) {
+            setConversionModal((previous) => ({
+                ...previous,
+                error: "Total payment cannot exceed the quotation grand total.",
+            }));
+            return;
+        }
+
+        setConversionModal((previous) => ({
+            ...previous,
+            processing: true,
+            error: "",
+        }));
+
+        router.post(
+            `/quotations/${quotation.id}/convert`,
+            {
+                invoice_date: conversionModal.invoice_date,
+                remarks: conversionModal.remarks || null,
+                paid_amount: paidAmount,
+                payments,
+            },
+            {
+                preserveScroll: true,
+                onError: (errors) => {
+                    setConversionModal((previous) => ({
+                        ...previous,
+                        error: firstError(errors, "Unable to convert quotation."),
+                    }));
+                },
+                onFinish: () => {
+                    setConversionModal((previous) => ({
+                        ...previous,
+                        processing: false,
+                    }));
+                },
+            },
+        );
+    };
+
     const confirmAction = () => {
         setConfirmation((previous) => ({ ...previous, processing: true }));
 
@@ -195,23 +341,12 @@ export default function Show({ quotation }) {
             setConfirmation({ show: false, action: null, processing: false });
         };
 
-        if (confirmation.action === "convert") {
-            router.post(
-                `/quotations/${quotation.id}/convert`,
-                {},
-                { preserveScroll: true, onFinish: finish },
-            );
-            return;
-        }
-
         router.patch(
             `/quotations/${quotation.id}/cancel`,
             {},
             { preserveScroll: true, onFinish: finish },
         );
     };
-
-    const confirmationIsConvert = confirmation.action === "convert";
 
     return (
         <>
@@ -640,27 +775,39 @@ export default function Show({ quotation }) {
 
                 <ConfirmModal
                     show={confirmation.show}
-                    title={
-                        confirmationIsConvert
-                            ? "Convert to Sales Invoice"
-                            : "Cancel Document"
-                    }
-                    message={
-                        confirmationIsConvert
-                            ? `Convert "${quotation.quotation_no}" into a Sales invoice? Current shop stock will be checked and reduced.`
-                            : `Cancel "${quotation.quotation_no}"? The document will remain available for audit history.`
-                    }
-                    confirmText={
-                        confirmationIsConvert ? "Convert to Sale" : "Cancel Document"
-                    }
-                    cancelText={confirmationIsConvert ? "Not Now" : "Keep Document"}
-                    icon={
-                        confirmationIsConvert ? "bi-arrow-right-circle" : "bi-x-octagon"
-                    }
-                    variant={confirmationIsConvert ? "primary" : "danger"}
+                    title="Cancel Document"
+                    message={`Cancel "${quotation.quotation_no}"? The document will remain available for audit history.`}
+                    confirmText="Cancel Document"
+                    cancelText="Keep Document"
+                    icon="bi-x-octagon"
+                    variant="danger"
                     processing={confirmation.processing}
                     onConfirm={confirmAction}
                     onCancel={closeConfirmation}
+                />
+
+                <ConversionModal
+                    state={conversionModal}
+                    quotation={quotation}
+                    accounts={accounts}
+                    onAddPayment={addPayment}
+                    onUpdatePayment={updatePayment}
+                    onRemovePayment={removePayment}
+                    onChange={(field, value) =>
+                        setConversionModal((previous) => ({
+                            ...previous,
+                            [field]: value,
+                            error: "",
+                        }))
+                    }
+                    onClose={() => {
+                        if (conversionModal.processing) return;
+                        setConversionModal((previous) => ({
+                            ...previous,
+                            show: false,
+                        }));
+                    }}
+                    onSubmit={submitConversion}
                 />
 
                 <StockTransferModal
@@ -740,6 +887,260 @@ function SummaryRow({ label, value, grand = false }) {
         <div className={`rr-quote-summary-row ${grand ? "grand" : ""}`}>
             <span>{label}</span>
             <strong>{value}</strong>
+        </div>
+    );
+}
+
+function ConversionModal({
+    state,
+    quotation,
+    accounts,
+    onAddPayment,
+    onUpdatePayment,
+    onRemovePayment,
+    onChange,
+    onClose,
+    onSubmit,
+}) {
+    if (!state.show) return null;
+
+    const grandTotal = numberValue(quotation.grand_total);
+    const paidAmount = state.payments.reduce(
+        (sum, payment) => sum + numberValue(payment.amount),
+        0,
+    );
+    const balanceAmount = Math.max(0, grandTotal - paidAmount);
+
+    return (
+        <div className="rr-quote-modal-backdrop" role="presentation">
+            <form
+                className="rr-quote-modal rr-quote-stock-modal"
+                onSubmit={onSubmit}
+            >
+                <div className="rr-quote-modal-title">
+                    <div>
+                        <i className="bi bi-receipt-cutoff"></i>
+                        <strong>Convert to Sales Invoice</strong>
+                    </div>
+                    <button
+                        type="button"
+                        disabled={state.processing}
+                        onClick={onClose}
+                    >
+                        <i className="bi bi-x-lg"></i>
+                    </button>
+                </div>
+
+                <div className="rr-quote-stock-notice">
+                    <i className="bi bi-info-circle"></i>
+                    The quotation will become a completed Sales invoice. Shop stock,
+                    bill-wise cost and profit will be recorded during conversion.
+                </div>
+
+                {state.error && (
+                    <div className="rr-quote-stock-error">{state.error}</div>
+                )}
+
+                <div className="rr-quote-window-body rr-quote-mini-grid">
+                    <label className="rr-quote-create-field">
+                        <span>Invoice Date</span>
+                        <input
+                            required
+                            type="date"
+                            value={state.invoice_date}
+                            onChange={(event) =>
+                                onChange("invoice_date", event.target.value)
+                            }
+                        />
+                    </label>
+
+                    <label className="rr-quote-create-field">
+                        <span>Quotation Total</span>
+                        <input readOnly value={formatMoney(grandTotal)} />
+                    </label>
+                </div>
+
+                <div className="rr-quote-window-title">
+                    <div>
+                        <i className="bi bi-wallet2"></i>
+                        <strong>Payment Collection</strong>
+                    </div>
+                    <button
+                        type="button"
+                        className="rr-quote-btn primary compact"
+                        disabled={state.processing || !accounts.length}
+                        onClick={onAddPayment}
+                    >
+                        <i className="bi bi-plus-lg"></i>
+                        Add Payment
+                    </button>
+                </div>
+
+                <div className="rr-quote-stock-table-wrap">
+                    <table className="rr-quote-stock-table">
+                        <thead>
+                            <tr>
+                                <th>Cash / Bank Account</th>
+                                <th>Payment Mode</th>
+                                <th>Reference No.</th>
+                                <th className="number">Amount</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {state.payments.length ? (
+                                state.payments.map((payment, index) => (
+                                    <tr key={payment.key ?? index}>
+                                        <td>
+                                            <select
+                                                required
+                                                value={payment.account_id}
+                                                onChange={(event) =>
+                                                    onUpdatePayment(
+                                                        index,
+                                                        "account_id",
+                                                        event.target.value,
+                                                    )
+                                                }
+                                            >
+                                                <option value="">Select Account</option>
+                                                {accounts.map((account) => (
+                                                    <option
+                                                        key={account.id}
+                                                        value={account.id}
+                                                    >
+                                                        {account.account_name}
+                                                        {account.account_code
+                                                            ? ` — ${account.account_code}`
+                                                            : ""}
+                                                    </option>
+                                                ))}
+                                            </select>
+                                        </td>
+                                        <td>
+                                            <select
+                                                required
+                                                value={payment.payment_mode}
+                                                onChange={(event) =>
+                                                    onUpdatePayment(
+                                                        index,
+                                                        "payment_mode",
+                                                        event.target.value,
+                                                    )
+                                                }
+                                            >
+                                                <option value="cash">Cash</option>
+                                                <option value="gpay">GPay</option>
+                                                <option value="phonepe">PhonePe</option>
+                                                <option value="upi">Other UPI</option>
+                                                <option value="bank_transfer">
+                                                    Bank Transfer
+                                                </option>
+                                                <option value="card">Card</option>
+                                                <option value="cheque">Cheque</option>
+                                            </select>
+                                        </td>
+                                        <td>
+                                            <input
+                                                type="text"
+                                                maxLength="150"
+                                                value={payment.reference_no}
+                                                placeholder="Optional"
+                                                onChange={(event) =>
+                                                    onUpdatePayment(
+                                                        index,
+                                                        "reference_no",
+                                                        event.target.value,
+                                                    )
+                                                }
+                                            />
+                                        </td>
+                                        <td>
+                                            <input
+                                                required
+                                                type="number"
+                                                min="0.01"
+                                                step="0.01"
+                                                value={payment.amount}
+                                                onFocus={(event) =>
+                                                    event.target.select()
+                                                }
+                                                onChange={(event) =>
+                                                    onUpdatePayment(
+                                                        index,
+                                                        "amount",
+                                                        event.target.value,
+                                                    )
+                                                }
+                                            />
+                                        </td>
+                                        <td>
+                                            <button
+                                                type="button"
+                                                className="rr-quote-remove"
+                                                title="Remove payment"
+                                                onClick={() => onRemovePayment(index)}
+                                            >
+                                                <i className="bi bi-x-lg"></i>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                ))
+                            ) : (
+                                <tr>
+                                    <td colSpan="5" className="rr-quote-items-empty">
+                                        No payment added. The invoice will be created as
+                                        Unpaid.
+                                    </td>
+                                </tr>
+                            )}
+                        </tbody>
+                    </table>
+                </div>
+
+                <div className="rr-quote-summary rr-quote-show-summary">
+                    <SummaryRow label="Invoice Total" value={formatMoney(grandTotal)} />
+                    <SummaryRow label="Paid Amount" value={formatMoney(paidAmount)} />
+                    <SummaryRow
+                        grand
+                        label="Balance Amount"
+                        value={formatMoney(balanceAmount)}
+                    />
+                </div>
+
+                <div className="rr-quote-window-body">
+                    <label className="rr-quote-create-field">
+                        <span>Conversion Remarks</span>
+                        <textarea
+                            rows="2"
+                            maxLength="2000"
+                            value={state.remarks}
+                            onChange={(event) =>
+                                onChange("remarks", event.target.value)
+                            }
+                        ></textarea>
+                    </label>
+                </div>
+
+                <div className="rr-quote-modal-actions">
+                    <button
+                        type="button"
+                        disabled={state.processing}
+                        onClick={onClose}
+                    >
+                        Not Now
+                    </button>
+                    <button
+                        type="submit"
+                        className="primary"
+                        disabled={state.processing || paidAmount > grandTotal}
+                    >
+                        {state.processing
+                            ? "Converting..."
+                            : "Convert to Sales Invoice"}
+                    </button>
+                </div>
+            </form>
         </div>
     );
 }
@@ -907,6 +1308,23 @@ function apiError(error, fallback) {
     return error?.response?.data?.message ?? fallback;
 }
 
+function firstError(errors, fallback) {
+    if (!errors || typeof errors !== "object") return fallback;
+
+    return Object.values(errors).flat().find(Boolean) || fallback;
+}
+
+function accountMode(account) {
+    if (!account) return "cash";
+
+    return {
+        cash: "cash",
+        upi: "upi",
+        bank: "bank_transfer",
+        card: "card",
+    }[account.account_type] ?? "cash";
+}
+
 function productDetails(product) {
     if (!product) return "Product details unavailable";
 
@@ -945,6 +1363,14 @@ function isExpired(quotation) {
         .slice(0, 10);
 
     return validity < today;
+}
+
+function today() {
+    const now = new Date();
+
+    return new Date(now.getTime() - now.getTimezoneOffset() * 60000)
+        .toISOString()
+        .slice(0, 10);
 }
 
 function statusTone(status) {

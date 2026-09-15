@@ -1,0 +1,267 @@
+.rr-sale-split-payment {
+    margin-top: 10px;
+    border: 1px solid #aebdce;
+    border-radius: 5px;
+    overflow: hidden;
+    background: #f8fafc;
+}
+
+.rr-sale-split-heading {
+    display: flex;
+    min-height: 48px;
+    padding: 8px 11px;
+    border-bottom: 1px solid #b9c6d6;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    background: linear-gradient(180deg, #eef4fb 0%, #dfe8f4 100%);
+}
+
+.rr-sale-split-heading>div:first-child strong,
+.rr-sale-split-heading>div:first-child span {
+    display: block;
+}
+
+.rr-sale-split-heading>div:first-child strong {
+    color: #172b4d;
+    font-size: 12px;
+}
+
+.rr-sale-split-heading>div:first-child span {
+    margin-top: 2px;
+    color: #52647a;
+    font-size: 10px;
+}
+
+.rr-sale-payment-metrics {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+}
+
+.rr-sale-payment-metrics>span {
+    display: flex;
+    min-width: 105px;
+    padding: 5px 8px;
+    border: 1px solid #b8c5d5;
+    border-radius: 4px;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    background: #fff;
+    color: #475569;
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+}
+
+.rr-sale-payment-metrics b {
+    color: #166534;
+    font-size: 12px;
+}
+
+.rr-sale-payment-metrics .balance b {
+    color: #1d4ed8;
+}
+
+.rr-sale-payment-metrics .danger {
+    border-color: #fca5a5;
+    background: #fff1f2;
+}
+
+.rr-sale-payment-metrics .danger b {
+    color: #b91c1c;
+}
+
+.rr-sale-payment-shortcuts {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    padding: 9px 10px;
+    border-bottom: 1px solid #d1dae6;
+    background: #fff;
+}
+
+.rr-sale-payment-shortcut {
+    display: inline-flex;
+    min-height: 32px;
+    padding: 0 11px;
+    border: 1px solid #93a4b8;
+    border-radius: 4px;
+    align-items: center;
+    gap: 6px;
+    background: #f8fafc;
+    color: #25364d;
+    font-size: 11px;
+    font-weight: 700;
+    cursor: pointer;
+    box-shadow: 0 1px 1px rgba(15, 23, 42, .08);
+}
+
+.rr-sale-payment-shortcut:hover:not(:disabled) {
+    border-color: #2563eb;
+    background: #eff6ff;
+    color: #1d4ed8;
+}
+
+.rr-sale-payment-shortcut.cash {
+    border-left: 4px solid #16a34a;
+}
+
+.rr-sale-payment-shortcut.upi {
+    border-left: 4px solid #7c3aed;
+}
+
+.rr-sale-payment-shortcut.bank {
+    border-left: 4px solid #2563eb;
+}
+
+.rr-sale-payment-shortcut.card {
+    border-left: 4px solid #d97706;
+}
+
+.rr-sale-payment-shortcut:disabled {
+    border-color: #86efac;
+    background: #f0fdf4;
+    color: #166534;
+    cursor: default;
+}
+
+.rr-sale-payment-rows {
+    display: grid;
+    gap: 6px;
+    padding: 8px 10px;
+}
+
+.rr-sale-payment-row {
+    display: grid;
+    grid-template-columns: minmax(140px, .9fr) minmax(110px, .55fr) minmax(160px, 1fr) 30px;
+    padding: 8px;
+    border: 1px solid #c5d0df;
+    border-left: 3px solid #2563eb;
+    border-radius: 4px;
+    align-items: start;
+    gap: 8px;
+    background: #fff;
+}
+
+.rr-sale-payment-account {
+    display: flex;
+    min-height: 35px;
+    align-items: center;
+    gap: 8px;
+}
+
+.rr-sale-payment-account>i {
+    display: grid;
+    width: 31px;
+    height: 31px;
+    border-radius: 4px;
+    place-items: center;
+    background: #dbeafe;
+    color: #1d4ed8;
+    font-size: 14px;
+}
+
+.rr-sale-payment-account span,
+.rr-sale-payment-account strong,
+.rr-sale-payment-account small {
+    display: block;
+}
+
+.rr-sale-payment-account strong {
+    color: #1e293b;
+    font-size: 11px;
+}
+
+.rr-sale-payment-account small {
+    margin-top: 2px;
+    color: #64748b;
+    font-size: 9px;
+}
+
+.rr-sale-payment-row .rr-sale-field label {
+    margin-bottom: 3px;
+    font-size: 9px;
+}
+
+.rr-sale-payment-row .rr-sale-field input {
+    min-height: 31px;
+    font-size: 11px;
+}
+
+.rr-sale-payment-remove {
+    display: grid;
+    width: 28px;
+    height: 28px;
+    margin-top: 16px;
+    padding: 0;
+    border: 1px solid #fca5a5;
+    border-radius: 4px;
+    place-items: center;
+    background: #fff1f2;
+    color: #b91c1c;
+    cursor: pointer;
+}
+
+.rr-sale-payment-remove:hover {
+    border-color: #dc2626;
+    background: #dc2626;
+    color: #fff;
+}
+
+.rr-sale-payment-empty,
+.rr-sale-payment-warning,
+.rr-sale-payment-error {
+    display: flex;
+    margin: 8px 10px;
+    padding: 8px 10px;
+    border: 1px dashed #aab8ca;
+    border-radius: 4px;
+    align-items: center;
+    gap: 7px;
+    color: #526176;
+    font-size: 10px;
+}
+
+.rr-sale-payment-warning {
+    border-style: solid;
+    border-color: #f4c56a;
+    background: #fffbeb;
+    color: #854d0e;
+}
+
+.rr-sale-payment-error {
+    border-style: solid;
+    border-color: #fca5a5;
+    background: #fff1f2;
+    color: #b91c1c;
+    font-weight: 700;
+}
+
+@media (max-width: 900px) {
+    .rr-sale-payment-row {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .rr-sale-payment-remove {
+        margin-top: 0;
+    }
+}
+
+@media (max-width: 600px) {
+
+    .rr-sale-split-heading,
+    .rr-sale-payment-metrics {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .rr-sale-payment-row {
+        grid-template-columns: 1fr;
+    }
+
+    .rr-sale-payment-remove {
+        width: 100%;
+    }
+}

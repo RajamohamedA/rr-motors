@@ -57,6 +57,52 @@ class StockService
 
 
     /**
+     * Return the latest quantity and weighted-average cost for one location.
+     *
+     * Existing ledger rows created before the valuation upgrade have a NULL
+     * average_cost. In that case the product purchase price is used only as
+     * the opening fallback; every new movement stores a fresh snapshot.
+     */
+    public function getValuation(
+        int $companyId,
+        int $storeId,
+        ?int $godownId,
+        Product $product
+    ): array {
+        $latest = StockLedger::query()
+            ->where('company_id', $companyId)
+            ->where('store_id', $storeId)
+            ->where('product_id', $product->id)
+            ->where(function ($query) use ($godownId) {
+                $godownId === null
+                    ? $query->whereNull('godown_id')
+                    : $query->where('godown_id', $godownId);
+            })
+            ->latest('id')
+            ->first([
+                'balance_qty',
+                'average_cost',
+                'balance_value',
+            ]);
+
+        $quantity = (float) ($latest?->balance_qty ?? 0);
+
+        $averageCost = $latest?->average_cost !== null
+            ? (float) $latest->average_cost
+            : (float) ($product->purchase_price ?? 0);
+
+        return [
+            'quantity' => round($quantity, 3),
+            'average_cost' => round($averageCost, 4),
+            'balance_value' => round($quantity * $averageCost, 2),
+            'cost_source' => $latest?->average_cost !== null
+                ? 'weighted_average'
+                : 'purchase_price_fallback',
+        ];
+    }
+
+
+    /**
      * Lock the product row.
      *
      * All stock movements for the same product are serialized through this
@@ -99,9 +145,11 @@ class StockService
         float $qtyOut,
         float $balanceQty,
         float $unitCost,
+        float $averageCost,
+        float $balanceValue,
         string $remarks
     ): StockLedger {
-        return StockLedger::create([
+        return StockLedger::forceCreate([
             'company_id' => $companyId,
             'store_id' => $storeId,
             'godown_id' => $godownId,
@@ -119,6 +167,8 @@ class StockService
 
             'unit_cost' => $unitCost,
             'total_cost' => ($qtyIn + $qtyOut) * $unitCost,
+            'average_cost' => $averageCost,
+            'balance_value' => $balanceValue,
 
             'remarks' => $remarks,
         ]);
@@ -142,14 +192,14 @@ class StockService
         ?string $referenceNo,
         float $unitCost = 0,
         string $remarks = ''
-    ): void {
+    ): array {
         if ($qty <= 0) {
             throw new RuntimeException(
                 'Stock increase quantity must be greater than zero.'
             );
         }
 
-        DB::transaction(function () use (
+        return DB::transaction(function () use (
             $product,
             $qty,
             $transactionType,
@@ -166,14 +216,24 @@ class StockService
                 $companyId
             );
 
-            $currentBalance = $this->getCurrentBalance(
+            $valuation = $this->getValuation(
                 $companyId,
                 $storeId,
                 $godownId,
-                $lockedProduct->id
+                $lockedProduct
             );
 
+            $currentBalance = $valuation['quantity'];
             $newBalance = $currentBalance + $qty;
+
+            $incomingCost = $unitCost > 0
+                ? $unitCost
+                : $valuation['average_cost'];
+            $currentValue = $currentBalance * $valuation['average_cost'];
+            $newValue = $currentValue + ($qty * $incomingCost);
+            $newAverageCost = $newBalance > 0
+                ? $newValue / $newBalance
+                : 0;
 
             $this->createLedgerEntry(
                 product: $lockedProduct,
@@ -186,7 +246,9 @@ class StockService
                 qtyIn: $qty,
                 qtyOut: 0,
                 balanceQty: $newBalance,
-                unitCost: $unitCost,
+                unitCost: $incomingCost,
+                averageCost: $newAverageCost,
+                balanceValue: $newValue,
                 remarks: $remarks
             );
 
@@ -194,6 +256,15 @@ class StockService
                 'current_stock',
                 $qty
             );
+
+            return [
+                'stock_before' => round($currentBalance, 3),
+                'stock_after' => round($newBalance, 3),
+                'unit_cost' => round($incomingCost, 4),
+                'average_cost' => round($newAverageCost, 4),
+                'balance_value' => round($newValue, 2),
+                'cost_source' => 'weighted_average',
+            ];
         });
     }
 
@@ -215,14 +286,14 @@ class StockService
         ?string $referenceNo,
         float $unitCost = 0,
         string $remarks = ''
-    ): void {
+    ): array {
         if ($qty <= 0) {
             throw new RuntimeException(
                 'Stock decrease quantity must be greater than zero.'
             );
         }
 
-        DB::transaction(function () use (
+        return DB::transaction(function () use (
             $product,
             $qty,
             $transactionType,
@@ -239,12 +310,14 @@ class StockService
                 $companyId
             );
 
-            $currentBalance = $this->getCurrentBalance(
+            $valuation = $this->getValuation(
                 $companyId,
                 $storeId,
                 $godownId,
-                $lockedProduct->id
+                $lockedProduct
             );
+
+            $currentBalance = $valuation['quantity'];
 
             if ($qty > $currentBalance) {
                 $locationName = $godownId === null
@@ -259,6 +332,10 @@ class StockService
             }
 
             $newBalance = $currentBalance - $qty;
+            // Outgoing stock always uses its stored valuation. Never use a
+            // selling price supplied by an older caller as inventory cost.
+            $movementCost = max(0, $valuation['average_cost']);
+            $newValue = max(0, $newBalance * $movementCost);
 
             $this->createLedgerEntry(
                 product: $lockedProduct,
@@ -271,7 +348,9 @@ class StockService
                 qtyIn: 0,
                 qtyOut: $qty,
                 balanceQty: $newBalance,
-                unitCost: $unitCost,
+                unitCost: $movementCost,
+                averageCost: $movementCost,
+                balanceValue: $newValue,
                 remarks: $remarks
             );
 
@@ -279,6 +358,16 @@ class StockService
                 'current_stock',
                 $qty
             );
+
+            return [
+                'stock_before' => round($currentBalance, 3),
+                'stock_after' => round($newBalance, 3),
+                'unit_cost' => round($movementCost, 4),
+                'cost_total' => round($qty * $movementCost, 2),
+                'average_cost' => round($movementCost, 4),
+                'balance_value' => round($newValue, 2),
+                'cost_source' => $valuation['cost_source'],
+            ];
         });
     }
 
@@ -352,19 +441,22 @@ class StockService
             |--------------------------------------------------------------------------
             */
 
-            $sourceBalance = $this->getCurrentBalance(
+            $sourceValuation = $this->getValuation(
                 $companyId,
                 $storeId,
                 $fromGodownId,
-                $lockedProduct->id
+                $lockedProduct
             );
 
-            $destinationBalance = $this->getCurrentBalance(
+            $destinationValuation = $this->getValuation(
                 $companyId,
                 $storeId,
                 $toGodownId,
-                $lockedProduct->id
+                $lockedProduct
             );
+
+            $sourceBalance = $sourceValuation['quantity'];
+            $destinationBalance = $destinationValuation['quantity'];
 
             if ($qty > $sourceBalance) {
                 $sourceName = $fromGodownId === null
@@ -380,6 +472,27 @@ class StockService
 
             $sourceNewBalance = $sourceBalance - $qty;
             $destinationNewBalance = $destinationBalance + $qty;
+
+            $movementCost = $sourceValuation['average_cost'] > 0
+                ? $sourceValuation['average_cost']
+                : max(0, $unitCost);
+
+            $sourceNewValue = max(
+                0,
+                $sourceNewBalance * $movementCost
+            );
+
+            $destinationCurrentValue =
+                $destinationBalance
+                * $destinationValuation['average_cost'];
+
+            $destinationNewValue =
+                $destinationCurrentValue
+                + ($qty * $movementCost);
+
+            $destinationNewAverageCost = $destinationNewBalance > 0
+                ? $destinationNewValue / $destinationNewBalance
+                : 0;
 
             /*
             |--------------------------------------------------------------------------
@@ -398,7 +511,9 @@ class StockService
                 qtyIn: 0,
                 qtyOut: $qty,
                 balanceQty: $sourceNewBalance,
-                unitCost: $unitCost,
+                unitCost: $movementCost,
+                averageCost: $movementCost,
+                balanceValue: $sourceNewValue,
                 remarks: $remarks
             );
 
@@ -419,7 +534,9 @@ class StockService
                 qtyIn: $qty,
                 qtyOut: 0,
                 balanceQty: $destinationNewBalance,
-                unitCost: $unitCost,
+                unitCost: $movementCost,
+                averageCost: $destinationNewAverageCost,
+                balanceValue: $destinationNewValue,
                 remarks: $remarks
             );
 
@@ -428,6 +545,9 @@ class StockService
                 'from_stock_after' => $sourceNewBalance,
                 'to_stock_before' => $destinationBalance,
                 'to_stock_after' => $destinationNewBalance,
+                'unit_cost' => round($movementCost, 4),
+                'cost_total' => round($qty * $movementCost, 2),
+                'cost_source' => $sourceValuation['cost_source'],
             ];
         });
     }

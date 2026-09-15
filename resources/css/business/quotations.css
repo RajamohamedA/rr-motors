@@ -2728,3 +2728,282 @@
         grid-template-columns: repeat(2, minmax(0, 1fr));
     }
 }
+
+/* --------------------------------------------------------------------------
+   Final quotation workspace refinements
+   -------------------------------------------------------------------------- */
+
+.rr-quote-page {
+    min-height: calc(100vh - 58px);
+    background:
+        linear-gradient(135deg, rgb(255 255 255 / 42%), transparent 38%),
+        #e9edf2;
+}
+
+.rr-quote-party-window,
+.rr-quote-mechanic-strip {
+    position: relative;
+}
+
+.rr-quote-party-window {
+    overflow: visible;
+}
+
+.rr-quote-mechanic-strip {
+    border-color: #9fb8ca;
+    background: #f8fbfd;
+}
+
+.rr-quote-page input[type="date"] {
+    cursor: pointer;
+}
+
+.rr-quote-page input[type="date"]::-webkit-calendar-picker-indicator {
+    padding: 3px;
+    border-radius: 3px;
+    background-color: #e4eef7;
+    cursor: pointer;
+}
+
+.rr-quote-page button:not(:disabled),
+.rr-quote-page select:not(:disabled),
+.rr-quote-page a {
+    cursor: pointer;
+}
+
+.rr-quote-page button:disabled,
+.rr-quote-page select:disabled,
+.rr-quote-page input:disabled {
+    cursor: not-allowed;
+    opacity: 0.68;
+}
+
+/* Conversion and stock modal foundation */
+
+.rr-quote-modal-backdrop {
+    padding: 18px;
+    background: rgb(20 29 40 / 66%);
+    backdrop-filter: blur(2px);
+}
+
+.rr-quote-stock-modal {
+    display: flex;
+    width: min(1060px, 96vw);
+    max-height: calc(100vh - 36px);
+    flex-direction: column;
+    overflow: hidden;
+    border: 1px solid #65798c;
+    border-radius: 6px;
+    background: #f4f6f8;
+    box-shadow:
+        0 1px 0 rgb(255 255 255 / 75%) inset,
+        0 20px 55px rgb(0 0 0 / 34%);
+}
+
+.rr-quote-stock-modal>.rr-quote-modal-title {
+    flex: 0 0 auto;
+    color: #fff;
+    border-bottom-color: #064776;
+    background: linear-gradient(180deg, #2679b4, #0b598f);
+}
+
+.rr-quote-stock-modal>.rr-quote-modal-title strong,
+.rr-quote-stock-modal>.rr-quote-modal-title i {
+    color: #fff;
+}
+
+.rr-quote-stock-modal>.rr-quote-modal-title button {
+    color: #fff;
+    border-color: rgb(255 255 255 / 32%);
+    background: rgb(255 255 255 / 10%);
+}
+
+.rr-quote-stock-modal>.rr-quote-modal-title button:hover:not(:disabled) {
+    background: #b72f40;
+}
+
+.rr-quote-stock-modal>.rr-quote-window-body,
+.rr-quote-stock-modal>.rr-quote-summary,
+.rr-quote-stock-modal>.rr-quote-window-title,
+.rr-quote-stock-modal>.rr-quote-stock-notice,
+.rr-quote-stock-modal>.rr-quote-stock-error,
+.rr-quote-stock-modal>.rr-quote-stock-table-wrap {
+    flex: 0 0 auto;
+}
+
+.rr-quote-stock-modal>.rr-quote-stock-table-wrap {
+    max-height: 38vh;
+}
+
+.rr-quote-stock-modal>.rr-quote-window-title {
+    min-height: 35px;
+    margin: 2px 8px 0;
+    border: 1px solid #a8b7c5;
+    border-radius: 3px 3px 0 0;
+    background: linear-gradient(180deg, #fbfdff, #e3eaf0);
+}
+
+.rr-quote-stock-modal>.rr-quote-window-title .rr-quote-btn {
+    min-height: 26px;
+    padding: 0 8px;
+    font-size: 10px;
+}
+
+.rr-quote-stock-modal .rr-quote-mini-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+    margin: 8px 8px 0;
+    padding: 8px;
+    border: 1px solid #b8c5d0;
+    border-radius: 3px;
+    background: #fff;
+}
+
+.rr-quote-stock-modal .rr-quote-create-field {
+    min-width: 0;
+}
+
+.rr-quote-stock-modal .rr-quote-create-field input,
+.rr-quote-stock-modal .rr-quote-create-field textarea {
+    width: 100%;
+}
+
+.rr-quote-stock-modal .rr-quote-create-field input[readonly] {
+    color: #174f80;
+    border-color: #b1c4d3;
+    background: #edf5fa;
+    font-weight: 800;
+}
+
+/* Split payment table */
+
+.rr-quote-stock-modal .rr-quote-stock-table th:last-child,
+.rr-quote-stock-modal .rr-quote-stock-table td:last-child {
+    width: 42px;
+    border-right: 0;
+    text-align: center;
+}
+
+.rr-quote-stock-modal .rr-quote-stock-table td:nth-last-child(2) input {
+    min-width: 105px;
+    font-weight: 750;
+}
+
+.rr-quote-stock-modal .rr-quote-remove {
+    display: inline-grid;
+    width: 27px;
+    height: 27px;
+    place-items: center;
+    padding: 0;
+    border: 1px solid #c98e97;
+    border-radius: 3px;
+    color: #a62335;
+    background: linear-gradient(180deg, #fff, #f6dfe3);
+}
+
+.rr-quote-stock-modal .rr-quote-remove:hover {
+    color: #fff;
+    border-color: #9e2233;
+    background: linear-gradient(180deg, #d95364, #ad283a);
+}
+
+.rr-quote-stock-modal>.rr-quote-summary {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 7px;
+    margin: 0 8px 8px;
+    padding: 8px;
+    border: 1px solid #aab9c7;
+    border-top: 0;
+    border-radius: 0 0 3px 3px;
+    background: #e9eef3;
+}
+
+.rr-quote-stock-modal>.rr-quote-summary .rr-quote-summary-row {
+    min-height: 48px;
+    padding: 6px 8px;
+    border: 1px solid #c1ccd6;
+    border-radius: 3px;
+    background: #fff;
+}
+
+.rr-quote-stock-modal>.rr-quote-summary .rr-quote-summary-row.grand {
+    color: #fff;
+    border-color: #0b5d91;
+    background: linear-gradient(180deg, #277dad, #145b87);
+}
+
+.rr-quote-stock-modal>.rr-quote-summary .rr-quote-summary-row.grand span,
+.rr-quote-stock-modal>.rr-quote-summary .rr-quote-summary-row.grand strong {
+    color: #fff;
+}
+
+.rr-quote-stock-modal>.rr-quote-window-body:last-of-type {
+    margin: 0 8px 8px;
+    padding: 0;
+}
+
+.rr-quote-stock-modal>.rr-quote-modal-actions {
+    flex: 0 0 auto;
+    border-top-color: #9faebb;
+    background: linear-gradient(180deg, #f7f9fb, #dfe6ec);
+}
+
+.rr-quote-stock-modal>.rr-quote-modal-actions button {
+    min-width: 112px;
+    min-height: 31px;
+    font-weight: 750;
+}
+
+.rr-quote-stock-modal>.rr-quote-modal-actions button.primary {
+    color: #fff;
+    border-color: #087443;
+    background: linear-gradient(180deg, #20a565, #087946);
+}
+
+.rr-quote-stock-modal>.rr-quote-modal-actions button.primary:hover:not(:disabled) {
+    background: #087443;
+}
+
+@media (max-width: 760px) {
+    .rr-quote-page {
+        padding: 8px;
+    }
+
+    .rr-quote-modal-backdrop {
+        align-items: flex-start;
+        padding: 8px;
+        overflow-y: auto;
+    }
+
+    .rr-quote-stock-modal {
+        width: 100%;
+        max-height: none;
+    }
+
+    .rr-quote-stock-modal .rr-quote-mini-grid,
+    .rr-quote-stock-modal>.rr-quote-summary {
+        grid-template-columns: 1fr;
+    }
+
+    .rr-quote-stock-modal>.rr-quote-stock-table-wrap {
+        max-height: 45vh;
+    }
+
+    .rr-quote-stock-modal>.rr-quote-modal-actions {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .rr-quote-stock-modal>.rr-quote-modal-actions button {
+        width: 100%;
+        min-width: 0;
+    }
+}
+
+@media (max-width: 480px) {
+    .rr-quote-stock-modal>.rr-quote-modal-actions {
+        grid-template-columns: 1fr;
+    }
+}

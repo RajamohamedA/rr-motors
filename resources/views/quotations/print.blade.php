@@ -1,6 +1,8 @@
 @php
 $pdfMode = $pdfMode ?? false;
 $paper = strtolower($paper ?? 'a4');
+$paper = in_array($paper, ['a4', 'a5'], true) ? $paper : 'a4';
+$isA5 = $paper === 'a5';
 $isGstBill = ($quotation->billing_type ?? 'gst') === 'gst';
 $company = $quotation->company;
 $store = $quotation->store;
@@ -116,7 +118,7 @@ fn ($item) => (float) $item->free_quantity
 
             width: {
                     {
-                    $paper ==='a5' ? '148mm': '210mm'
+                    $isA5 ? '148mm': '210mm'
                 }
             }
 
@@ -124,7 +126,7 @@ fn ($item) => (float) $item->free_quantity
 
             min-height: {
                     {
-                    $paper ==='a5' ? '210mm': '297mm'
+                    $isA5 ? '210mm': '297mm'
                 }
             }
 
@@ -198,7 +200,15 @@ fn ($item) => (float) $item->free_quantity
 
         .top-table td {
             width: 50%;
+            padding: 0;
             vertical-align: top;
+        }
+
+        .brand-line {
+            width: 54px;
+            height: 3px;
+            margin: 0 0 6px;
+            background: #17679f;
         }
 
         .company-name {
@@ -212,6 +222,7 @@ fn ($item) => (float) $item->free_quantity
         .company-lines {
             color: #4e5f70;
             font-size: 10px;
+            line-height: 1.45;
         }
 
         .document-side {
@@ -229,6 +240,13 @@ fn ($item) => (float) $item->free_quantity
             font-weight: 800;
             text-align: center;
             text-transform: uppercase;
+        }
+
+        .document-number {
+            margin-top: 6px;
+            color: #17324d;
+            font-size: 11px;
+            font-weight: 800;
         }
 
         .status {
@@ -297,6 +315,16 @@ fn ($item) => (float) $item->free_quantity
 
         .items {
             table-layout: fixed;
+            page-break-inside: auto;
+        }
+
+        .items thead {
+            display: table-header-group;
+        }
+
+        .items tr {
+            page-break-inside: avoid;
+            page-break-after: auto;
         }
 
         .items th {
@@ -394,6 +422,7 @@ fn ($item) => (float) $item->free_quantity
             margin-top: 12px;
             padding-top: 7px;
             border-top: 1px solid #9eacba;
+            page-break-inside: avoid;
         }
 
         .footer td {
@@ -440,6 +469,19 @@ fn ($item) => (float) $item->free_quantity
         body.a5 .items th,
         body.a5 .product-meta {
             font-size: 8px;
+        }
+
+        body.a5 .box {
+            min-height: 80px;
+        }
+
+        body.a5 .items th,
+        body.a5 .items td {
+            padding: 3px 2px;
+        }
+
+        body.a5 .note-box {
+            padding: 4px 5px;
         }
 
         @media print {
@@ -521,6 +563,7 @@ fn ($item) => (float) $item->free_quantity
         <table class="top-table">
             <tr>
                 <td>
+                    <div class="brand-line"></div>
                     <h1 class="company-name">
                         {{ $company->company_name ?? 'Company' }}
                     </h1>
@@ -550,6 +593,9 @@ fn ($item) => (float) $item->free_quantity
 
                 <td class="document-side">
                     <div class="document-title">{{ $title }}</div>
+                    <div class="document-number">
+                        {{ $quotation->quotation_no }}
+                    </div>
                     <br>
                     <span class="status">{{ $quotation->status }}</span>
                 </td>
@@ -568,8 +614,22 @@ fn ($item) => (float) $item->free_quantity
                                 {{ $customer->customer_name ?? 'Walk-in Customer' }}
                             </div>
 
+                            @if ($customer?->customer_code)
+                            <div>Code: {{ $customer->customer_code }}</div>
+                            @endif
+
                             @if ($customer?->billing_address)
                             <div>{{ $customer->billing_address }}</div>
+                            @endif
+
+                            @if ($customer?->city || $customer?->state || $customer?->pincode)
+                            <div>
+                                {{ collect([
+                                    $customer->city,
+                                    $customer->state,
+                                    $customer->pincode,
+                                ])->filter()->join(', ') }}
+                            </div>
                             @endif
 
                             @if ($customer?->mobile)
@@ -578,6 +638,10 @@ fn ($item) => (float) $item->free_quantity
 
                             @if ($customer?->gst_number)
                             <div>GSTIN: {{ $customer->gst_number }}</div>
+                            @endif
+
+                            @if ($customer?->email)
+                            <div>Email: {{ $customer->email }}</div>
                             @endif
                         </div>
                     </div>
@@ -611,6 +675,10 @@ fn ($item) => (float) $item->free_quantity
                                 <strong>{{ $mechanic->mechanic_name }}</strong>
                             </div>
                             @endif
+                            <div class="meta-row">
+                                <span>Prepared By</span>
+                                <strong>{{ $quotation->creator->name ?? 'System' }}</strong>
+                            </div>
                         </div>
                     </div>
                 </td>
@@ -645,6 +713,9 @@ fn ($item) => (float) $item->free_quantity
                             {{ collect([
                                     $item->product->product_code ?? null,
                                     $item->product->part_number ?? null,
+                                    $item->product->hsn_code
+                                        ? 'HSN '.$item->product->hsn_code
+                                        : null,
                                     $item->product->unit->unit_name ?? null,
                                 ])->filter()->join(' · ') }}
                         </div>

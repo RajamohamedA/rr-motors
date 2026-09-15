@@ -3,12 +3,17 @@
 namespace App\Http\Controllers;
 
 use App\Models\Customer;
+use App\Models\CustomerPayment;
+use App\Models\CustomerPaymentAllocation;
+use App\Models\Account;
+use App\Models\AccountTransaction;
 use App\Models\Godown;
 use App\Models\Mechanic;
 use App\Models\MechanicCommission;
 use App\Models\Product;
 use App\Models\SaleItems;
 use App\Models\Sales;
+use App\Models\SalePayment;
 use App\Models\StockLedger;
 use App\Models\Store;
 use App\Services\StockService;
@@ -295,6 +300,10 @@ class SalesController extends Controller implements HasMiddleware
                 $storeId
             ),
             'mechanics' => $this->mechanicsForStore($companyId, $storeId),
+            'accounts' => $this->paymentAccountsForStore(
+                $companyId,
+                $storeId
+            ),
             'godowns' => Godown::query()
                 ->where('company_id', $companyId)
                 ->where('store_id', $storeId)
@@ -1495,13 +1504,15 @@ class SalesController extends Controller implements HasMiddleware
     {
         [$companyId, $storeId] = $this->context($request);
         $validated = $this->validateSaleRequest($request);
+        $userId = (int) $request->user()->id;
 
         try {
             $sale = DB::transaction(function () use (
                 $validated,
                 $companyId,
                 $storeId,
-                $stockService
+                $stockService,
+                $userId
             ) {
                 $customer = $this->validateCustomer(
                     (int) $validated['customer_id'],
@@ -1660,9 +1671,15 @@ class SalesController extends Controller implements HasMiddleware
                 |--------------------------------------------------------------------------
                 */
 
-                $paidAmount = round(
-                    (float) ($validated['paid_amount'] ?? 0),
-                    2
+                $paymentLines = $this->buildPaymentLines(
+                    $validated,
+                    $companyId,
+                    $storeId
+                );
+
+                $paidAmount = $this->paymentTotal(
+                    $paymentLines,
+                    (float) ($validated['paid_amount'] ?? 0)
                 );
 
                 if ($paidAmount > $grandTotal) {
@@ -1724,22 +1741,7 @@ class SalesController extends Controller implements HasMiddleware
                 ]);
 
                 foreach ($lines as $line) {
-                    SaleItems::create([
-                        'sale_id' => $sale->id,
-                        'product_id' => $line['product']->id,
-                        'godown_id' => $line['godown_id'],
-                        'quantity' => $line['quantity'],
-                        'free_quantity' => $line['free_quantity'],
-                        'sale_price' => $line['sale_price'],
-                        'discount_type' => $line['discount_type'],
-                        'discount_value' => $line['discount_value'],
-                        'discount' => $line['discount'],
-                        'gst_percent' => $line['gst_percent'],
-                        'gst_amount' => $line['gst_amount'],
-                        'line_total' => $line['line_total'],
-                    ]);
-
-                    $stockService->decreaseStock(
+                    $stockSnapshot = $stockService->decreaseStock(
                         $line['product'],
                         $line['stock_quantity'],
                         'SALE',
@@ -1748,10 +1750,47 @@ class SalesController extends Controller implements HasMiddleware
                         $line['godown_id'],
                         $sale->id,
                         $sale->invoice_no,
-                        $line['sale_price'],
+                        0,
                         'Sales Invoice'
                     );
+
+                    $costTotal = round(
+                        (float) $stockSnapshot['cost_total'],
+                        2
+                    );
+
+                    SaleItems::create([
+                        'sale_id' => $sale->id,
+                        'product_id' => $line['product']->id,
+                        'godown_id' => $line['godown_id'],
+                        'quantity' => $line['quantity'],
+                        'free_quantity' => $line['free_quantity'],
+                        'sale_price' => $line['sale_price'],
+                        'unit_cost' => $stockSnapshot['unit_cost'],
+                        'cost_total' => $costTotal,
+                        'cost_source' => $stockSnapshot['cost_source'],
+                        'discount_type' => $line['discount_type'],
+                        'discount_value' => $line['discount_value'],
+                        'discount' => $line['discount'],
+                        'gst_percent' => $line['gst_percent'],
+                        'gst_amount' => $line['gst_amount'],
+                        'line_total' => $line['line_total'],
+                        'net_sale_amount' => $line['taxable_amount'],
+                        'gross_profit' => round(
+                            $line['taxable_amount'] - $costTotal,
+                            2
+                        ),
+                    ]);
                 }
+
+                $this->recordSalePayments(
+                    $sale,
+                    $paymentLines,
+                    $paidAmount,
+                    $companyId,
+                    $storeId,
+                    $userId
+                );
 
                 if (
                     $commission['sale_source'] === 'mechanic'
@@ -1807,6 +1846,7 @@ class SalesController extends Controller implements HasMiddleware
             'customer',
             'mechanic',
             'mechanicCommission',
+            'salePayments.account',
             'items.product.unit',
             'items.godown',
         ]);
@@ -1825,6 +1865,7 @@ class SalesController extends Controller implements HasMiddleware
             'customer',
             'mechanic',
             'mechanicCommission',
+            'salePayments.account',
             'items.product.unit',
             'items.godown',
         ]);
@@ -1844,6 +1885,10 @@ class SalesController extends Controller implements HasMiddleware
                 ],
             ],
             'mechanics' => $this->mechanicsForStore($companyId, $storeId),
+            'accounts' => $this->paymentAccountsForStore(
+                $companyId,
+                $storeId
+            ),
             'godowns' => Godown::query()
                 ->where('company_id', $companyId)
                 ->where('store_id', $storeId)
@@ -1861,6 +1906,7 @@ class SalesController extends Controller implements HasMiddleware
         [$companyId, $storeId] = $this->context($request);
         $this->ensureSaleContext($sale, $companyId, $storeId);
         $validated = $this->validateSaleRequest($request);
+        $userId = (int) $request->user()->id;
 
         try {
             DB::transaction(function () use (
@@ -1868,12 +1914,33 @@ class SalesController extends Controller implements HasMiddleware
                 $validated,
                 $companyId,
                 $storeId,
-                $stockService
+                $stockService,
+                $userId
             ) {
                 $lockedSale = Sales::query()
                     ->with(['items', 'mechanicCommission'])
                     ->lockForUpdate()
                     ->findOrFail($sale->id);
+
+                $hasAllocatedReceipts = CustomerPaymentAllocation::query()
+                    ->where('company_id', $companyId)
+                    ->where('store_id', $storeId)
+                    ->where('sale_id', $lockedSale->id)
+                    ->whereHas(
+                        'customerPayment',
+                        fn(Builder $query) => $query->where(
+                            'status',
+                            CustomerPayment::STATUS_COMPLETED
+                        )
+                    )
+                    ->exists();
+
+                if ($hasAllocatedReceipts) {
+                    throw ValidationException::withMessages([
+                        'sale' =>
+                        'Customer receipts are allocated to this invoice. Cancel those receipts before editing the sale.',
+                    ]);
+                }
 
                 if (
                     $lockedSale->mechanicCommission
@@ -2026,9 +2093,15 @@ class SalesController extends Controller implements HasMiddleware
                 |--------------------------------------------------------------------------
                 */
 
-                $paidAmount = round(
-                    (float) ($validated['paid_amount'] ?? 0),
-                    2
+                $paymentLines = $this->buildPaymentLines(
+                    $validated,
+                    $companyId,
+                    $storeId
+                );
+
+                $paidAmount = $this->paymentTotal(
+                    $paymentLines,
+                    (float) ($validated['paid_amount'] ?? 0)
                 );
 
                 if ($paidAmount > $grandTotal) {
@@ -2069,7 +2142,7 @@ class SalesController extends Controller implements HasMiddleware
                         $oldItem->godown_id,
                         $lockedSale->id,
                         $lockedSale->invoice_no,
-                        (float) $oldItem->sale_price,
+                        (float) ($oldItem->unit_cost ?? 0),
                         'Reverse old sales invoice'
                     );
                 }
@@ -2083,22 +2156,7 @@ class SalesController extends Controller implements HasMiddleware
                 */
 
                 foreach ($lines as $line) {
-                    SaleItems::create([
-                        'sale_id' => $lockedSale->id,
-                        'product_id' => $line['product']->id,
-                        'godown_id' => $line['godown_id'],
-                        'quantity' => $line['quantity'],
-                        'free_quantity' => $line['free_quantity'],
-                        'sale_price' => $line['sale_price'],
-                        'discount_type' => $line['discount_type'],
-                        'discount_value' => $line['discount_value'],
-                        'discount' => $line['discount'],
-                        'gst_percent' => $line['gst_percent'],
-                        'gst_amount' => $line['gst_amount'],
-                        'line_total' => $line['line_total'],
-                    ]);
-
-                    $stockService->decreaseStock(
+                    $stockSnapshot = $stockService->decreaseStock(
                         $line['product'],
                         $line['stock_quantity'],
                         'SALE',
@@ -2107,9 +2165,37 @@ class SalesController extends Controller implements HasMiddleware
                         $line['godown_id'],
                         $lockedSale->id,
                         $lockedSale->invoice_no,
-                        $line['sale_price'],
+                        0,
                         'Sales Invoice'
                     );
+
+                    $costTotal = round(
+                        (float) $stockSnapshot['cost_total'],
+                        2
+                    );
+
+                    SaleItems::create([
+                        'sale_id' => $lockedSale->id,
+                        'product_id' => $line['product']->id,
+                        'godown_id' => $line['godown_id'],
+                        'quantity' => $line['quantity'],
+                        'free_quantity' => $line['free_quantity'],
+                        'sale_price' => $line['sale_price'],
+                        'unit_cost' => $stockSnapshot['unit_cost'],
+                        'cost_total' => $costTotal,
+                        'cost_source' => $stockSnapshot['cost_source'],
+                        'discount_type' => $line['discount_type'],
+                        'discount_value' => $line['discount_value'],
+                        'discount' => $line['discount'],
+                        'gst_percent' => $line['gst_percent'],
+                        'gst_amount' => $line['gst_amount'],
+                        'line_total' => $line['line_total'],
+                        'net_sale_amount' => $line['taxable_amount'],
+                        'gross_profit' => round(
+                            $line['taxable_amount'] - $costTotal,
+                            2
+                        ),
+                    ]);
                 }
 
                 $lockedSale->update([
@@ -2139,6 +2225,23 @@ class SalesController extends Controller implements HasMiddleware
                     'payment_status' => $paymentStatus,
                     'remarks' => $validated['remarks'] ?? null,
                 ]);
+
+                $this->reverseSalePayments(
+                    $lockedSale,
+                    $companyId,
+                    $storeId,
+                    $userId,
+                    'Sales invoice edited'
+                );
+
+                $this->recordSalePayments(
+                    $lockedSale,
+                    $paymentLines,
+                    $paidAmount,
+                    $companyId,
+                    $storeId,
+                    $userId
+                );
 
                 $lockedSale->mechanicCommission()->delete();
 
@@ -2190,18 +2293,46 @@ class SalesController extends Controller implements HasMiddleware
     ): RedirectResponse {
         [$companyId, $storeId] = $this->context($request);
         $this->ensureSaleContext($sale, $companyId, $storeId);
+        $userId = (int) $request->user()->id;
 
         try {
             DB::transaction(function () use (
                 $sale,
                 $companyId,
                 $storeId,
-                $stockService
+                $stockService,
+                $userId
             ) {
                 $lockedSale = Sales::query()
                     ->with(['items', 'mechanicCommission'])
                     ->lockForUpdate()
                     ->findOrFail($sale->id);
+
+                if ($lockedSale->status === 'Cancelled') {
+                    throw ValidationException::withMessages([
+                        'sale' => 'This sale is already cancelled.',
+                    ]);
+                }
+
+                $hasAllocatedReceipts = CustomerPaymentAllocation::query()
+                    ->where('company_id', $companyId)
+                    ->where('store_id', $storeId)
+                    ->where('sale_id', $lockedSale->id)
+                    ->whereHas(
+                        'customerPayment',
+                        fn(Builder $query) => $query->where(
+                            'status',
+                            CustomerPayment::STATUS_COMPLETED
+                        )
+                    )
+                    ->exists();
+
+                if ($hasAllocatedReceipts) {
+                    throw ValidationException::withMessages([
+                        'sale' =>
+                        'Customer receipts are allocated to this invoice. Cancel those receipts before cancelling the sale.',
+                    ]);
+                }
 
                 if (
                     $lockedSale->mechanicCommission
@@ -2209,7 +2340,7 @@ class SalesController extends Controller implements HasMiddleware
                 ) {
                     throw ValidationException::withMessages([
                         'sale' =>
-                        'This sale has a paid mechanic commission and cannot be deleted.',
+                        'This sale has a paid mechanic commission and cannot be cancelled.',
                     ]);
                 }
 
@@ -2222,25 +2353,33 @@ class SalesController extends Controller implements HasMiddleware
                     $stockService->increaseStock(
                         $product,
                         (float) $item->quantity + (float) $item->free_quantity,
-                        'SALE_DELETE',
+                        'SALE_CANCELLATION',
                         $companyId,
                         $storeId,
                         $item->godown_id,
                         $lockedSale->id,
                         $lockedSale->invoice_no,
-                        (float) $item->sale_price,
-                        'Reverse deleted sales invoice'
+                        (float) ($item->unit_cost ?? 0),
+                        'Reverse cancelled sales invoice'
                     );
                 }
 
-                $lockedSale->mechanicCommission()->delete();
-                $lockedSale->items()->delete();
-                $lockedSale->delete();
+                $this->reverseSalePayments(
+                    $lockedSale,
+                    $companyId,
+                    $storeId,
+                    $userId,
+                    'Sales invoice cancelled'
+                );
+
+                $lockedSale->update([
+                    'status' => Sales::STATUS_CANCELLED,
+                ]);
             });
 
             return AppResponse::successRoute(
                 'sales.index',
-                'Sale deleted successfully.'
+                'Sale cancelled successfully.'
             );
         } catch (ValidationException $exception) {
             throw $exception;
@@ -2248,7 +2387,7 @@ class SalesController extends Controller implements HasMiddleware
             report($exception);
 
             return AppResponse::error(
-                $exception->getMessage() ?: 'Unable to delete sale.'
+                $exception->getMessage() ?: 'Unable to cancel sale.'
             );
         }
     }
@@ -2395,6 +2534,42 @@ class SalesController extends Controller implements HasMiddleware
                 'nullable',
                 'numeric',
                 'min:0',
+            ],
+
+            'payments' => [
+                'nullable',
+                'array',
+            ],
+
+            'payments.*.account_id' => [
+                'required',
+                'integer',
+                'exists:accounts,id',
+            ],
+
+            'payments.*.payment_mode' => [
+                'required',
+                Rule::in([
+                    'cash',
+                    'gpay',
+                    'phonepe',
+                    'upi',
+                    'bank_transfer',
+                    'card',
+                    'cheque',
+                ]),
+            ],
+
+            'payments.*.amount' => [
+                'required',
+                'numeric',
+                'gt:0',
+            ],
+
+            'payments.*.reference_no' => [
+                'nullable',
+                'string',
+                'max:150',
             ],
 
             'remarks' => [
@@ -3016,6 +3191,209 @@ class SalesController extends Controller implements HasMiddleware
                 'mechanic_name',
                 'mobile',
             ]);
+    }
+
+    private function paymentAccountsForStore(
+        int $companyId,
+        int $storeId
+    ) {
+        return Account::query()
+            ->where('company_id', $companyId)
+            ->where('store_id', $storeId)
+            ->where('status', true)
+            ->orderByRaw(
+                "FIELD(account_type, 'cash', 'upi', 'bank', 'card', 'other')"
+            )
+            ->orderBy('account_name')
+            ->get([
+                'id',
+                'account_code',
+                'account_name',
+                'account_type',
+                'payment_mode',
+            ]);
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | Sale Payment Lines
+    |--------------------------------------------------------------------------
+    */
+
+    private function buildPaymentLines(
+        array $validated,
+        int $companyId,
+        int $storeId
+    ): array {
+        $payments = $validated['payments'] ?? [];
+
+        if (!is_array($payments) || count($payments) === 0) {
+            return [];
+        }
+
+        $lines = [];
+
+        foreach ($payments as $index => $payment) {
+            $account = Account::query()
+                ->where('company_id', $companyId)
+                ->where('store_id', $storeId)
+                ->where('status', true)
+                ->find($payment['account_id']);
+
+            if (!$account) {
+                throw ValidationException::withMessages([
+                    "payments.{$index}.account_id" =>
+                    'The selected payment account is invalid for the active branch.',
+                ]);
+            }
+
+            $lines[] = [
+                'account_id' => $account->id,
+                'payment_mode' => $payment['payment_mode'],
+                'amount' => round((float) $payment['amount'], 2),
+                'reference_no' => filled($payment['reference_no'] ?? null)
+                    ? trim((string) $payment['reference_no'])
+                    : null,
+            ];
+        }
+
+        return $lines;
+    }
+
+    private function paymentTotal(
+        array $paymentLines,
+        float $legacyPaidAmount
+    ): float {
+        if (count($paymentLines) === 0) {
+            return round(max(0, $legacyPaidAmount), 2);
+        }
+
+        return round(
+            collect($paymentLines)->sum('amount'),
+            2
+        );
+    }
+
+    private function recordSalePayments(
+        Sales $sale,
+        array $paymentLines,
+        float $paidAmount,
+        int $companyId,
+        int $storeId,
+        int $userId
+    ): void {
+        if ($paidAmount <= 0) {
+            return;
+        }
+
+        if (count($paymentLines) === 0) {
+            SalePayment::create([
+                'company_id' => $companyId,
+                'store_id' => $storeId,
+                'sale_id' => $sale->id,
+                'account_id' => null,
+                'payment_date' => $sale->invoice_date,
+                'payment_mode' => 'legacy',
+                'amount' => $paidAmount,
+                'status' => SalePayment::STATUS_COMPLETED,
+                'remarks' =>
+                'Payment captured by the legacy paid amount field; payment account was not supplied.',
+                'created_by' => $userId,
+            ]);
+
+            return;
+        }
+
+        foreach ($paymentLines as $line) {
+            $payment = SalePayment::create([
+                'company_id' => $companyId,
+                'store_id' => $storeId,
+                'sale_id' => $sale->id,
+                'account_id' => $line['account_id'],
+                'payment_date' => $sale->invoice_date,
+                'payment_mode' => $line['payment_mode'],
+                'amount' => $line['amount'],
+                'reference_no' => $line['reference_no'],
+                'status' => SalePayment::STATUS_COMPLETED,
+                'remarks' => 'Payment received with sales invoice.',
+                'created_by' => $userId,
+            ]);
+
+            AccountTransaction::create([
+                'company_id' => $companyId,
+                'store_id' => $storeId,
+                'account_id' => $line['account_id'],
+                'transaction_date' => $sale->invoice_date,
+                'transaction_type' => AccountTransaction::TYPE_SALE,
+                'reference_type' => SalePayment::class,
+                'reference_id' => $payment->id,
+                'reference_no' => $sale->invoice_no,
+                'debit' => $line['amount'],
+                'credit' => 0,
+                'payment_mode' => $line['payment_mode'],
+                'external_reference' => $line['reference_no'],
+                'remarks' => 'Sales collection for ' . $sale->invoice_no,
+                'created_by' => $userId,
+            ]);
+        }
+    }
+
+    private function reverseSalePayments(
+        Sales $sale,
+        int $companyId,
+        int $storeId,
+        int $userId,
+        string $reason
+    ): void {
+        $payments = SalePayment::query()
+            ->where('company_id', $companyId)
+            ->where('store_id', $storeId)
+            ->where('sale_id', $sale->id)
+            ->where('status', SalePayment::STATUS_COMPLETED)
+            ->lockForUpdate()
+            ->get();
+
+        foreach ($payments as $payment) {
+            if ($payment->account_id !== null) {
+                $originalTransaction = AccountTransaction::query()
+                    ->where('company_id', $companyId)
+                    ->where('store_id', $storeId)
+                    ->where('reference_type', SalePayment::class)
+                    ->where('reference_id', $payment->id)
+                    ->where('is_reversal', false)
+                    ->latest('id')
+                    ->first();
+
+                AccountTransaction::create([
+                    'company_id' => $companyId,
+                    'store_id' => $storeId,
+                    'account_id' => $payment->account_id,
+                    'transaction_date' => now()->toDateString(),
+                    'transaction_type' => AccountTransaction::TYPE_REVERSAL,
+                    'reference_type' => SalePayment::class,
+                    'reference_id' => $payment->id,
+                    'reference_no' => $sale->invoice_no,
+                    'debit' => 0,
+                    'credit' => $payment->amount,
+                    'payment_mode' => $payment->payment_mode,
+                    'external_reference' => $payment->reference_no,
+                    'remarks' => $reason,
+                    'is_reversal' => true,
+                    'reversal_of_id' => $originalTransaction?->id,
+                    'created_by' => $userId,
+                ]);
+            }
+
+            $payment->update([
+                'status' => SalePayment::STATUS_CANCELLED,
+                'cancelled_by' => $userId,
+                'cancelled_at' => now(),
+                'remarks' => trim(
+                    ($payment->remarks ? $payment->remarks . ' ' : '')
+                        . $reason
+                ),
+            ]);
+        }
     }
 
     /*

@@ -8,12 +8,14 @@ import BusinessLayout from "@/Layouts/BusinessLayout";
 import MasterNavigation from "../../Components/Business/MasterNavigation";
 
 import "../../../css/business/sales.css";
+import "../../../css/business/sales-payment-split.css";
 
 export default function Create({
     invoiceNo = "",
     customers = [],
     mechanics = [],
     godowns = [],
+    accounts = [],
 }) {
     const { business } = usePage().props;
 
@@ -70,6 +72,7 @@ export default function Create({
 
         final_discount: "0",
         paid_amount: "0",
+        payments: [],
         remarks: "",
 
         product_id: [],
@@ -707,9 +710,14 @@ export default function Create({
         const grandTotal = Math.round(beforeRound);
         const roundOff = round2(grandTotal - beforeRound);
 
-        const paid = Math.min(numberValue(data.paid_amount), grandTotal);
+        const paid = round2(
+            (data.payments ?? []).reduce(
+                (total, payment) => total + numberValue(payment.amount),
+                0,
+            ),
+        );
 
-        const balance = round2(grandTotal - paid);
+        const balance = round2(Math.max(0, grandTotal - paid));
 
         let paymentStatus = "Unpaid";
         if (paid > 0 && balance > 0) paymentStatus = "Partially Paid";
@@ -747,7 +755,7 @@ export default function Create({
     }, [
         rows,
         data.final_discount,
-        data.paid_amount,
+        data.payments,
         data.sale_source,
         data.commission_type,
         data.commission_percent,
@@ -1608,16 +1616,6 @@ export default function Create({
                                         <ErrorText message={errors.final_discount} />
                                     </div>
 
-                                    <div className="rr-sale-field">
-                                        <label>Paid Amount</label>
-                                        <MoneyInput
-                                            validationKey="paid_amount"
-                                            value={data.paid_amount}
-                                            onChange={(value) => setData("paid_amount", value)}
-                                        />
-                                        <ErrorText message={errors.paid_amount} />
-                                    </div>
-
                                     <div className="rr-sale-payment-status-box">
                                         <span>Payment Status</span>
                                         <strong
@@ -1627,6 +1625,32 @@ export default function Create({
                                         </strong>
                                     </div>
                                 </div>
+
+                                <SplitPaymentPanel
+                                    accounts={accounts}
+                                    payments={data.payments}
+                                    grandTotal={totals.grandTotal}
+                                    paid={totals.paid}
+                                    balance={totals.balance}
+                                    errors={errors}
+                                    onChange={(payments) =>
+                                        setData((previous) => ({
+                                            ...previous,
+                                            payments,
+                                            paid_amount: String(
+                                                round2(
+                                                    payments.reduce(
+                                                        (sum, payment) =>
+                                                            sum + numberValue(payment.amount),
+                                                        0,
+                                                    ),
+                                                ),
+                                            ),
+                                        }))
+                                    }
+                                />
+
+                                <ErrorText message={errors.paid_amount} />
 
                                 <div className="rr-sale-field rr-sale-remarks-field">
                                     <label>Remarks</label>
@@ -2508,6 +2532,198 @@ function focusValidationError(errorKey, searchInputRef) {
     window.setTimeout(() => {
         target.classList.remove("rr-sale-validation-focus");
     }, 2200);
+}
+
+function SplitPaymentPanel({
+    accounts,
+    payments,
+    grandTotal,
+    paid,
+    balance,
+    errors,
+    onChange,
+}) {
+    const activeAccounts = Array.isArray(accounts) ? accounts : [];
+    const rows = Array.isArray(payments) ? payments : [];
+    const overpaid = paid > grandTotal;
+
+    const addAccount = (account) => {
+        if (rows.some((row) => Number(row.account_id) === Number(account.id))) {
+            return;
+        }
+
+        onChange([
+            ...rows,
+            {
+                account_id: account.id,
+                payment_mode: account.payment_mode || modeForAccount(account),
+                amount: balance > 0 ? String(balance) : "0",
+                reference_no: "",
+            },
+        ]);
+    };
+
+    const updateRow = (index, field, value) => {
+        onChange(
+            rows.map((row, rowIndex) =>
+                rowIndex === index
+                    ? { ...row, [field]: value }
+                    : row,
+            ),
+        );
+    };
+
+    const removeRow = (index) => {
+        onChange(rows.filter((_, rowIndex) => rowIndex !== index));
+    };
+
+    return (
+        <div className="rr-sale-split-payment">
+            <div className="rr-sale-split-heading">
+                <div>
+                    <strong>Payment Methods</strong>
+                    <span>Add one or more payment accounts</span>
+                </div>
+
+                <div className="rr-sale-payment-metrics">
+                    <span>Paid <b>{formatMoney(paid)}</b></span>
+                    <span className={overpaid ? "danger" : "balance"}>
+                        {overpaid ? "Excess" : "Balance"}
+                        <b>{formatMoney(Math.abs(grandTotal - paid))}</b>
+                    </span>
+                </div>
+            </div>
+
+            <div className="rr-sale-payment-shortcuts">
+                {activeAccounts.map((account) => {
+                    const selected = rows.some(
+                        (row) => Number(row.account_id) === Number(account.id),
+                    );
+
+                    return (
+                        <button
+                            key={account.id}
+                            type="button"
+                            disabled={selected || balance <= 0}
+                            className={`rr-sale-payment-shortcut ${account.account_type || "other"}`}
+                            onClick={() => addAccount(account)}
+                        >
+                            <i className={`bi ${accountIcon(account)}`}></i>
+                            {account.account_name}
+                            {selected && <i className="bi bi-check2"></i>}
+                        </button>
+                    );
+                })}
+            </div>
+
+            {activeAccounts.length === 0 && (
+                <div className="rr-sale-payment-warning">
+                    <i className="bi bi-exclamation-triangle"></i>
+                    No active payment accounts are available for this branch.
+                </div>
+            )}
+
+            <div className="rr-sale-payment-rows">
+                {rows.map((payment, index) => {
+                    const account = activeAccounts.find(
+                        (item) => Number(item.id) === Number(payment.account_id),
+                    );
+
+                    const needsReference = ![
+                        "cash",
+                    ].includes(payment.payment_mode);
+
+                    return (
+                        <div className="rr-sale-payment-row" key={`${payment.account_id}-${index}`}>
+                            <div className="rr-sale-payment-account">
+                                <i className={`bi ${accountIcon(account)}`}></i>
+                                <span>
+                                    <strong>{account?.account_name || "Payment Account"}</strong>
+                                    <small>{paymentModeLabel(payment.payment_mode)}</small>
+                                </span>
+                            </div>
+
+                            <div className="rr-sale-field">
+                                <label>Amount</label>
+                                <MoneyInput
+                                    validationKey={`payments.${index}.amount`}
+                                    value={payment.amount}
+                                    onChange={(value) => updateRow(index, "amount", value)}
+                                />
+                                <ErrorText message={errors[`payments.${index}.amount`]} />
+                            </div>
+
+                            <div className="rr-sale-field">
+                                <label>{needsReference ? "Reference No." : "Reference (optional)"}</label>
+                                <input
+                                    type="text"
+                                    maxLength="150"
+                                    value={payment.reference_no || ""}
+                                    placeholder={needsReference ? "Transaction/reference number" : "Optional note"}
+                                    onChange={(event) =>
+                                        updateRow(index, "reference_no", event.target.value)
+                                    }
+                                />
+                                <ErrorText message={errors[`payments.${index}.reference_no`]} />
+                            </div>
+
+                            <button
+                                type="button"
+                                className="rr-sale-payment-remove"
+                                title="Remove payment"
+                                onClick={() => removeRow(index)}
+                            >
+                                <i className="bi bi-x-lg"></i>
+                            </button>
+                        </div>
+                    );
+                })}
+            </div>
+
+            {rows.length === 0 && activeAccounts.length > 0 && (
+                <div className="rr-sale-payment-empty">
+                    <i className="bi bi-wallet2"></i>
+                    No payment entered. This invoice will be saved as unpaid.
+                </div>
+            )}
+
+            {overpaid && (
+                <div className="rr-sale-payment-error">
+                    Payment total cannot exceed the invoice total.
+                </div>
+            )}
+        </div>
+    );
+}
+
+function modeForAccount(account) {
+    if (account?.account_type === "cash") return "cash";
+    if (account?.account_type === "upi") return "upi";
+    if (account?.account_type === "bank") return "bank_transfer";
+    if (account?.account_type === "card") return "card";
+    return "cash";
+}
+
+function accountIcon(account) {
+    if (account?.account_type === "cash") return "bi-cash-stack";
+    if (account?.account_type === "upi") return "bi-phone";
+    if (account?.account_type === "bank") return "bi-bank";
+    if (account?.account_type === "card") return "bi-credit-card";
+    return "bi-wallet2";
+}
+
+function paymentModeLabel(mode) {
+    const labels = {
+        cash: "Cash",
+        gpay: "GPay",
+        phonepe: "PhonePe",
+        upi: "UPI",
+        bank_transfer: "Bank Transfer",
+        card: "Card",
+        cheque: "Cheque",
+    };
+
+    return labels[mode] || "Payment";
 }
 
 function paymentStatusClass(status) {

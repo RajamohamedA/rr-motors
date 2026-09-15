@@ -2,443 +2,341 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class Sales extends Model
 {
-    /*
-    |--------------------------------------------------------------------------
-    | Fillable
-    |--------------------------------------------------------------------------
-    */
+    public const STATUS_PENDING = 'Pending';
+    public const STATUS_COMPLETED = 'Completed';
+    public const STATUS_CANCELLED = 'Cancelled';
+
+    public const PAYMENT_UNPAID = 'Unpaid';
+    public const PAYMENT_PARTIAL = 'Partially Paid';
+    public const PAYMENT_PAID = 'Paid';
+
+    protected $table = 'sales';
 
     protected $fillable = [
-
         'company_id',
-
         'store_id',
-
+        'quotation_id',
         'customer_id',
-
-        /*
-        |--------------------------------------------------------------------------
-        | Sale Source / Mechanic
-        |--------------------------------------------------------------------------
-        */
-
         'sale_source',
-
         'mechanic_id',
-
-        /*
-        |--------------------------------------------------------------------------
-        | Mechanic Commission
-        |--------------------------------------------------------------------------
-        */
-
         'commission_type',
-
         'commission_percent',
-
         'commission_amount',
-
         'commission_status',
-
-        /*
-        |--------------------------------------------------------------------------
-        | Invoice
-        |--------------------------------------------------------------------------
-        */
-
         'invoice_no',
-
         'invoice_date',
-
-        /*
-        |--------------------------------------------------------------------------
-        | Billing Type
-        |--------------------------------------------------------------------------
-        |
-        | gst
-        | non_gst
-        |
-        */
-
         'billing_type',
-
-        /*
-        |--------------------------------------------------------------------------
-        | Amounts
-        |--------------------------------------------------------------------------
-        */
-
         'sub_total',
-
-        /*
-        |--------------------------------------------------------------------------
-        | Legacy Sale-Level Discount
-        |--------------------------------------------------------------------------
-        |
-        | Keep for database compatibility.
-        |
-        | New Sales UI will not use this.
-        | Controller can save this as 0.
-        |
-        */
-
         'discount',
-
         'gst_total',
-
-        /*
-        |--------------------------------------------------------------------------
-        | Final Discount
-        |--------------------------------------------------------------------------
-        */
-
         'final_discount',
-
-        /*
-        |--------------------------------------------------------------------------
-        | Round Off
-        |--------------------------------------------------------------------------
-        */
-
         'round_off',
-
-        /*
-        |--------------------------------------------------------------------------
-        | Final Net Amount
-        |--------------------------------------------------------------------------
-        */
-
         'grand_total',
-
-        /*
-        |--------------------------------------------------------------------------
-        | Payment
-        |--------------------------------------------------------------------------
-        */
-
         'paid_amount',
-
         'balance_amount',
-
         'payment_status',
-
-        /*
-        |--------------------------------------------------------------------------
-        | Other
-        |--------------------------------------------------------------------------
-        */
-
         'remarks',
-
         'status',
     ];
 
-
-    /*
-    |--------------------------------------------------------------------------
-    | Casts
-    |--------------------------------------------------------------------------
-    */
-
-    protected $casts = [
-
-        'invoice_date' =>
-        'date',
-
-        'sub_total' =>
-        'decimal:2',
-
-        'discount' =>
-        'decimal:2',
-
-        'gst_total' =>
-        'decimal:2',
-
-        'final_discount' =>
-        'decimal:2',
-
-        'round_off' =>
-        'decimal:2',
-
-        'grand_total' =>
-        'decimal:2',
-
-        'paid_amount' =>
-        'decimal:2',
-
-        'balance_amount' =>
-        'decimal:2',
-
-        'commission_percent' =>
-        'decimal:2',
-
-        'commission_amount' =>
-        'decimal:2',
-    ];
-
-
-    /*
-    |--------------------------------------------------------------------------
-    | Company
-    |--------------------------------------------------------------------------
-    */
-
-    public function company()
+    protected function casts(): array
     {
-        return $this->belongsTo(
-            Company::class
-        );
+        return [
+            'invoice_date' => 'date',
+            'sub_total' => 'decimal:2',
+            'discount' => 'decimal:2',
+            'gst_total' => 'decimal:2',
+            'final_discount' => 'decimal:2',
+            'round_off' => 'decimal:2',
+            'grand_total' => 'decimal:2',
+            'paid_amount' => 'decimal:2',
+            'balance_amount' => 'decimal:2',
+            'commission_percent' => 'decimal:2',
+            'commission_amount' => 'decimal:2',
+        ];
     }
 
-
     /*
     |--------------------------------------------------------------------------
-    | Store / Branch
+    | Query Scopes
     |--------------------------------------------------------------------------
     */
 
-    public function store()
-    {
-        return $this->belongsTo(
-            Store::class
-        );
+    public function scopeForContext(
+        Builder $query,
+        int $companyId,
+        int $storeId
+    ): Builder {
+        return $query
+            ->where('company_id', $companyId)
+            ->where('store_id', $storeId);
     }
 
-
-    /*
-    |--------------------------------------------------------------------------
-    | Customer
-    |--------------------------------------------------------------------------
-    */
-
-    public function customer()
+    public function scopeCompleted(Builder $query): Builder
     {
-        return $this->belongsTo(
-            Customer::class
-        );
+        return $query->where('status', self::STATUS_COMPLETED);
     }
 
-
-    /*
-    |--------------------------------------------------------------------------
-    | Mechanic
-    |--------------------------------------------------------------------------
-    */
-
-    public function mechanic()
-    {
-        return $this->belongsTo(
-            Mechanic::class
-        );
+    public function scopeForDate(
+        Builder $query,
+        string $date
+    ): Builder {
+        return $query->whereDate('invoice_date', $date);
     }
 
-
     /*
     |--------------------------------------------------------------------------
-    | Mechanic Commission Ledger
+    | Relationships
     |--------------------------------------------------------------------------
     */
 
-    public function mechanicCommission()
+    public function company(): BelongsTo
+    {
+        return $this->belongsTo(Company::class);
+    }
+
+    public function store(): BelongsTo
+    {
+        return $this->belongsTo(Store::class);
+    }
+
+    public function quotation(): BelongsTo
+    {
+        return $this->belongsTo(Quotation::class);
+    }
+
+    public function customer(): BelongsTo
+    {
+        return $this->belongsTo(Customer::class);
+    }
+
+    public function mechanic(): BelongsTo
+    {
+        return $this->belongsTo(Mechanic::class);
+    }
+
+    public function mechanicCommission(): HasOne
     {
         return $this->hasOne(
             MechanicCommission::class,
-            'sale_id',
-            'id'
+            'sale_id'
         );
     }
 
-
-    /*
-    |--------------------------------------------------------------------------
-    | Sale Items
-    |--------------------------------------------------------------------------
-    */
-
-    public function items()
+    public function items(): HasMany
     {
         return $this->hasMany(
             SaleItems::class,
-            'sale_id',
-            'id'
+            'sale_id'
         );
     }
 
+    /**
+     * Payments entered directly while creating the sales bill.
+     */
+    public function salePayments(): HasMany
+    {
+        return $this->hasMany(
+            SalePayment::class,
+            'sale_id'
+        );
+    }
 
-    /*
-    |--------------------------------------------------------------------------
-    | Customer Payments
-    |--------------------------------------------------------------------------
-    */
-
-    public function payments()
+    /**
+     * Customer receipts recorded after or during the sale.
+     * Kept as payments() for compatibility with the current project.
+     */
+    public function payments(): HasMany
     {
         return $this->hasMany(
             CustomerPayment::class,
-            'sale_id',
-            'id'
+            'sale_id'
         );
     }
 
+    public function customerPayments(): HasMany
+    {
+        return $this->payments();
+    }
+
+    public function paymentAllocations(): HasMany
+    {
+        return $this->hasMany(
+            CustomerPaymentAllocation::class,
+            'sale_id'
+        );
+    }
 
     /*
     |--------------------------------------------------------------------------
-    | Payment Status Helpers
+    | Status Helpers
     |--------------------------------------------------------------------------
     */
+
+    public function isCompleted(): bool
+    {
+        return $this->status === self::STATUS_COMPLETED;
+    }
+
+    public function isCancelled(): bool
+    {
+        return $this->status === self::STATUS_CANCELLED;
+    }
 
     public function isPaid(): bool
     {
-        return
-            $this->payment_status
-            ===
-            'Paid';
+        return $this->payment_status === self::PAYMENT_PAID;
     }
-
 
     public function isPartiallyPaid(): bool
     {
-        return
-            $this->payment_status
-            ===
-            'Partially Paid';
+        return $this->payment_status === self::PAYMENT_PARTIAL;
     }
-
 
     public function isUnpaid(): bool
     {
-        return
-            $this->payment_status
-            ===
-            'Unpaid';
+        return $this->payment_status === self::PAYMENT_UNPAID;
     }
-
 
     public function hasBalance(): bool
     {
-        return
-            (float) $this->balance_amount
-            >
-            0;
+        return (float) $this->balance_amount > 0;
     }
-
-
-    /*
-    |--------------------------------------------------------------------------
-    | Mechanic Sale Helper
-    |--------------------------------------------------------------------------
-    */
 
     public function isMechanicSale(): bool
     {
-        return
-            $this->sale_source
-            ===
-            'mechanic'
-            &&
-            $this->mechanic_id !== null;
+        return $this->sale_source === 'mechanic'
+            && $this->mechanic_id !== null;
     }
-
-
-    /*
-    |--------------------------------------------------------------------------
-    | GST Billing Helper
-    |--------------------------------------------------------------------------
-    */
 
     public function isGstBill(): bool
     {
-        return
-            $this->billing_type
-            ===
-            'gst';
+        return $this->billing_type === 'gst';
     }
-
-
-    /*
-    |--------------------------------------------------------------------------
-    | Non-GST Billing Helper
-    |--------------------------------------------------------------------------
-    */
 
     public function isNonGstBill(): bool
     {
-        return
-            $this->billing_type
-            ===
-            'non_gst';
+        return $this->billing_type === 'non_gst';
     }
-
 
     /*
     |--------------------------------------------------------------------------
-    | Generate Invoice Number
+    | Profit Helpers
+    |--------------------------------------------------------------------------
+    */
+
+    public function getCostTotalAttribute(): ?float
+    {
+        if (!$this->relationLoaded('items')) {
+            return null;
+        }
+
+        if ($this->items->contains(
+            fn(SaleItems $item) => $item->cost_total === null
+        )) {
+            return null;
+        }
+
+        return round(
+            $this->items->sum(
+                fn(SaleItems $item) => (float) $item->cost_total
+            ),
+            2
+        );
+    }
+
+    public function getGrossProfitAttribute(): ?float
+    {
+        if (!$this->relationLoaded('items')) {
+            return null;
+        }
+
+        if ($this->items->contains(
+            fn(SaleItems $item) => $item->gross_profit === null
+        )) {
+            return null;
+        }
+
+        return round(
+            $this->items->sum(
+                fn(SaleItems $item) => (float) $item->gross_profit
+            ),
+            2
+        );
+    }
+
+    public function getNetProfitAttribute(): ?float
+    {
+        $grossProfit = $this->gross_profit;
+
+        if ($grossProfit === null) {
+            return null;
+        }
+
+        return round(
+            $grossProfit
+                - (float) $this->final_discount
+                + (float) $this->round_off
+                - (float) $this->commission_amount,
+            2
+        );
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | Invoice Number
     |--------------------------------------------------------------------------
     |
-    | Invoice number is unique PER STORE.
-    |
-    | Example:
-    |
-    | Branch 1 -> INV000001
-    | Branch 2 -> INV000001
+    | Call this method inside the transaction that creates the sale.
+    | The unique index on store_id + invoice_no is the final safeguard.
     |
     */
 
-    public static function generateInvoiceNo(
-        int $storeId
-    ): string {
+    public static function generateInvoiceNo(int $storeId): string
+    {
+        $lastInvoice = self::query()
+            ->where('store_id', $storeId)
+            ->where('invoice_no', 'like', 'INV%')
+            ->orderByDesc('id')
+            ->lockForUpdate()
+            ->value('invoice_no');
 
-        $lastSale =
-            self::query()
-            ->where(
-                'store_id',
-                $storeId
-            )
-            ->latest('id')
-            ->first();
+        $nextNumber = 1;
 
-
-        if (
-            !$lastSale
-        ) {
-
-            return 'INV000001';
-        }
-
-
-        /*
-        |--------------------------------------------------------------------------
-        | Extract Numeric Portion
-        |--------------------------------------------------------------------------
-        |
-        | INV000125 -> 125
-        |
-        */
-
-        $number =
-            (int) preg_replace(
+        if ($lastInvoice) {
+            $numericPart = preg_replace(
                 '/\D/',
                 '',
-                (string) $lastSale->invoice_no
+                (string) $lastInvoice
             );
 
+            $nextNumber = ((int) $numericPart) + 1;
+        }
 
-        $nextNumber =
-            $number + 1;
-
-
-        return
-            'INV'
-            .
-            str_pad(
+        do {
+            $invoiceNo = 'INV' . str_pad(
                 (string) $nextNumber,
                 6,
                 '0',
                 STR_PAD_LEFT
             );
+
+            $exists = self::query()
+                ->where('store_id', $storeId)
+                ->where('invoice_no', $invoiceNo)
+                ->exists();
+
+            $nextNumber++;
+        } while ($exists);
+
+        return $invoiceNo;
     }
 }

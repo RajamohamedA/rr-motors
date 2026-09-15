@@ -697,7 +697,7 @@ export default function Create({
                                         render={(item) => ({
                                             title: item.product_name,
                                             meta: productMeta(item),
-                                            extra: `${formatMoney(productPrice(item))} · GST ${productGst(item)}%`,
+                                            extra: productSearchExtra(item),
                                         })}
                                         onSelect={addProduct}
                                         onCancel={() => {
@@ -1360,6 +1360,24 @@ function productMeta(product) {
     ]
         .filter(Boolean)
         .join(" · ");
+}
+
+function productSearchExtra(product) {
+    const details = [
+        formatMoney(productPrice(product)),
+        `GST ${productGst(product)}%`,
+    ];
+
+    const stock =
+        product.shop_stock
+        ?? product.available_stock
+        ?? product.current_stock;
+
+    if (stock !== undefined && stock !== null) {
+        details.push(`Available ${formatQty(stock)}`);
+    }
+
+    return details.join(" · ");
 }
 
 function emptyCustomer() {

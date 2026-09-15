@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Account;
+use App\Models\AccountTransaction;
 use App\Models\Customer;
 use App\Models\Godown;
 use App\Models\Mechanic;
@@ -10,6 +12,7 @@ use App\Models\Product;
 use App\Models\Quotation;
 use App\Models\QuotationItem;
 use App\Models\SaleItems;
+use App\Models\SalePayment;
 use App\Models\Sales;
 use App\Models\StockLedger;
 use App\Models\Store;
@@ -237,6 +240,21 @@ class QuotationController extends Controller implements HasMiddleware
             ->orderBy('product_name')
             ->limit(30)
             ->get();
+
+        $products->each(function (Product $product) use (
+            $companyId,
+            $storeId
+        ) {
+            $product->setAttribute(
+                'shop_stock',
+                $this->currentStock(
+                    $companyId,
+                    $storeId,
+                    null,
+                    (int) $product->id
+                )
+            );
+        });
 
         return response()->json([
             'success' => true,
@@ -596,11 +614,16 @@ class QuotationController extends Controller implements HasMiddleware
         Request $request,
         Quotation $quotation
     ): Response {
-        $this->ensureQuotationContext($quotation, ...$this->context($request));
+        [$companyId, $storeId] = $this->context($request);
+        $this->ensureQuotationContext($quotation, $companyId, $storeId);
         $this->loadDocument($quotation);
 
         return Inertia::render('Quotations/Show', [
             'quotation' => $quotation,
+            'accounts' => $this->paymentAccountsForStore(
+                $companyId,
+                $storeId
+            ),
         ]);
     }
 
@@ -915,7 +938,7 @@ class QuotationController extends Controller implements HasMiddleware
                         ]);
                     }
 
-                    $quantity = round((float) $transfer['quantity'], 2);
+                    $quantity = round((float) $transfer['quantity'], 3);
                     $freshShortage = round(
                         max(
                             0,
@@ -1053,8 +1076,38 @@ class QuotationController extends Controller implements HasMiddleware
         $validated = $request->validate([
             'invoice_date' => ['nullable', 'date'],
             'paid_amount' => ['nullable', 'numeric', 'min:0'],
+            'payments' => ['nullable', 'array'],
+            'payments.*.account_id' => [
+                'required',
+                'integer',
+                'exists:accounts,id',
+            ],
+            'payments.*.payment_mode' => [
+                'required',
+                Rule::in([
+                    'cash',
+                    'gpay',
+                    'phonepe',
+                    'upi',
+                    'bank_transfer',
+                    'card',
+                    'cheque',
+                ]),
+            ],
+            'payments.*.amount' => [
+                'required',
+                'numeric',
+                'gt:0',
+            ],
+            'payments.*.reference_no' => [
+                'nullable',
+                'string',
+                'max:150',
+            ],
             'remarks' => ['nullable', 'string', 'max:2000'],
         ]);
+
+        $userId = (int) $request->user()->id;
 
         try {
             $sale = DB::transaction(function () use (
@@ -1062,7 +1115,8 @@ class QuotationController extends Controller implements HasMiddleware
                 $validated,
                 $companyId,
                 $storeId,
-                $stockService
+                $stockService,
+                $userId
             ) {
                 $document = Quotation::query()
                     ->with(['items.product'])
@@ -1107,8 +1161,8 @@ class QuotationController extends Controller implements HasMiddleware
                         ]);
                     }
 
-                    $quantity = round((float) $item->quantity, 2);
-                    $freeQuantity = round((float) $item->free_quantity, 2);
+                    $quantity = round((float) $item->quantity, 3);
+                    $freeQuantity = round((float) $item->free_quantity, 3);
                     $gross = round($quantity * (float) $item->sale_price, 2);
                     $discount = $item->isPercentageDiscount()
                         ? round($gross * (float) $item->discount_value / 100, 2)
@@ -1149,7 +1203,15 @@ class QuotationController extends Controller implements HasMiddleware
                 $beforeRound = round($grossTotal - $finalDiscount, 2);
                 $grandTotal = round($beforeRound);
                 $roundOff = round($grandTotal - $beforeRound, 2);
-                $paidAmount = round((float) ($validated['paid_amount'] ?? 0), 2);
+                $paymentLines = $this->buildPaymentLines(
+                    $validated,
+                    $companyId,
+                    $storeId
+                );
+
+                $paidAmount = count($paymentLines) > 0
+                    ? round(collect($paymentLines)->sum('amount'), 2)
+                    : round((float) ($validated['paid_amount'] ?? 0), 2);
 
                 if ($paidAmount > $grandTotal) {
                     throw ValidationException::withMessages([
@@ -1186,6 +1248,7 @@ class QuotationController extends Controller implements HasMiddleware
                 $sale = Sales::create([
                     'company_id' => $companyId,
                     'store_id' => $storeId,
+                    'quotation_id' => $document->id,
                     'customer_id' => $document->customer_id,
                     ...$commission,
                     'commission_status' => 'Pending',
@@ -1207,6 +1270,29 @@ class QuotationController extends Controller implements HasMiddleware
                 ]);
 
                 foreach ($lines as $line) {
+                    $stockQuantity = round(
+                        $line['quantity'] + $line['free_quantity'],
+                        3
+                    );
+
+                    $stockSnapshot = $stockService->decreaseStock(
+                        $line['product'],
+                        $stockQuantity,
+                        'SALE',
+                        $companyId,
+                        $storeId,
+                        null,
+                        $sale->id,
+                        $sale->invoice_no,
+                        0,
+                        'Converted from ' . $document->quotation_no
+                    );
+
+                    $costTotal = round(
+                        (float) $stockSnapshot['cost_total'],
+                        2
+                    );
+
                     SaleItems::create([
                         'sale_id' => $sale->id,
                         'product_id' => $line['product']->id,
@@ -1214,30 +1300,32 @@ class QuotationController extends Controller implements HasMiddleware
                         'quantity' => $line['quantity'],
                         'free_quantity' => $line['free_quantity'],
                         'sale_price' => $line['sale_price'],
+                        'unit_cost' => $stockSnapshot['unit_cost'],
+                        'cost_total' => $costTotal,
+                        'cost_source' => $stockSnapshot['cost_source'],
                         'discount_type' => $line['discount_type'],
                         'discount_value' => $line['discount_value'],
                         'discount' => $line['discount'],
                         'gst_percent' => $line['gst_percent'],
                         'gst_amount' => $line['gst_amount'],
                         'line_total' => $line['line_total'],
-                    ]);
-
-                    $stockService->decreaseStock(
-                        $line['product'],
-                        round(
-                            $line['quantity'] + $line['free_quantity'],
+                        'net_sale_amount' => $line['taxable_amount'],
+                        'gross_profit' => round(
+                            $line['taxable_amount'] - $costTotal,
                             2
                         ),
-                        'SALE',
-                        $companyId,
-                        $storeId,
-                        null,
-                        $sale->id,
-                        $sale->invoice_no,
-                        $line['sale_price'],
-                        'Converted from ' . $document->quotation_no
-                    );
+                    ]);
                 }
+
+                $this->recordSalePayments(
+                    $sale,
+                    $paymentLines,
+                    $paidAmount,
+                    $companyId,
+                    $storeId,
+                    $userId,
+                    $document->quotation_no
+                );
 
                 if (
                     $commission['sale_source'] === 'mechanic'
@@ -1434,10 +1522,10 @@ class QuotationController extends Controller implements HasMiddleware
                 ]);
             }
 
-            $quantity = round((float) $validated['qty'][$index], 2);
+            $quantity = round((float) $validated['qty'][$index], 3);
             $freeQuantity = round(
                 (float) ($validated['free_qty'][$index] ?? 0),
-                2
+                3
             );
             $salePrice = round((float) $validated['sale_price'][$index], 2);
             $discountType = $validated['discount_type'][$index];
@@ -2004,12 +2092,12 @@ class QuotationController extends Controller implements HasMiddleware
             ->latest('id')
             ->value('balance_qty');
 
-        return round((float) ($balance ?? 0), 2);
+        return round((float) ($balance ?? 0), 3);
     }
 
     private function formatStockQuantity(float $quantity): string
     {
-        return number_format($quantity, 2, '.', '');
+        return number_format($quantity, 3, '.', '');
     }
 
     /*
@@ -2258,6 +2346,139 @@ class QuotationController extends Controller implements HasMiddleware
             '0',
             STR_PAD_LEFT
         );
+    }
+
+    private function paymentAccountsForStore(
+        int $companyId,
+        int $storeId
+    ) {
+        return Account::query()
+            ->where('company_id', $companyId)
+            ->where('store_id', $storeId)
+            ->where('status', true)
+            ->orderByRaw(
+                "FIELD(account_type, 'cash', 'upi', 'bank', 'card', 'other')"
+            )
+            ->orderBy('account_name')
+            ->get([
+                'id',
+                'account_code',
+                'account_name',
+                'account_type',
+                'payment_mode',
+            ]);
+    }
+
+    private function buildPaymentLines(
+        array $validated,
+        int $companyId,
+        int $storeId
+    ): array {
+        $payments = $validated['payments'] ?? [];
+
+        if (!is_array($payments) || count($payments) === 0) {
+            return [];
+        }
+
+        $lines = [];
+
+        foreach ($payments as $index => $payment) {
+            $account = Account::query()
+                ->where('company_id', $companyId)
+                ->where('store_id', $storeId)
+                ->where('status', true)
+                ->find($payment['account_id']);
+
+            if (!$account) {
+                throw ValidationException::withMessages([
+                    "payments.{$index}.account_id" =>
+                    'The selected payment account is invalid for the active branch.',
+                ]);
+            }
+
+            $lines[] = [
+                'account_id' => $account->id,
+                'payment_mode' => $payment['payment_mode'],
+                'amount' => round((float) $payment['amount'], 2),
+                'reference_no' => filled($payment['reference_no'] ?? null)
+                    ? trim((string) $payment['reference_no'])
+                    : null,
+            ];
+        }
+
+        return $lines;
+    }
+
+    private function recordSalePayments(
+        Sales $sale,
+        array $paymentLines,
+        float $paidAmount,
+        int $companyId,
+        int $storeId,
+        int $userId,
+        string $quotationNo
+    ): void {
+        if ($paidAmount <= 0) {
+            return;
+        }
+
+        if (count($paymentLines) === 0) {
+            SalePayment::create([
+                'company_id' => $companyId,
+                'store_id' => $storeId,
+                'sale_id' => $sale->id,
+                'account_id' => null,
+                'payment_date' => $sale->invoice_date,
+                'payment_mode' => 'legacy',
+                'amount' => $paidAmount,
+                'status' => SalePayment::STATUS_COMPLETED,
+                'remarks' =>
+                'Payment captured while converting quotation '
+                    . $quotationNo
+                    . '; payment account was not supplied.',
+                'created_by' => $userId,
+            ]);
+
+            return;
+        }
+
+        foreach ($paymentLines as $line) {
+            $payment = SalePayment::create([
+                'company_id' => $companyId,
+                'store_id' => $storeId,
+                'sale_id' => $sale->id,
+                'account_id' => $line['account_id'],
+                'payment_date' => $sale->invoice_date,
+                'payment_mode' => $line['payment_mode'],
+                'amount' => $line['amount'],
+                'reference_no' => $line['reference_no'],
+                'status' => SalePayment::STATUS_COMPLETED,
+                'remarks' => 'Payment received while converting quotation '
+                    . $quotationNo
+                    . '.',
+                'created_by' => $userId,
+            ]);
+
+            AccountTransaction::create([
+                'company_id' => $companyId,
+                'store_id' => $storeId,
+                'account_id' => $line['account_id'],
+                'transaction_date' => $sale->invoice_date,
+                'transaction_type' => AccountTransaction::TYPE_SALE,
+                'reference_type' => SalePayment::class,
+                'reference_id' => $payment->id,
+                'reference_no' => $sale->invoice_no,
+                'debit' => $line['amount'],
+                'credit' => 0,
+                'payment_mode' => $line['payment_mode'],
+                'external_reference' => $line['reference_no'],
+                'remarks' => 'Sales collection for '
+                    . $sale->invoice_no
+                    . ' converted from '
+                    . $quotationNo,
+                'created_by' => $userId,
+            ]);
+        }
     }
 
     private function paymentStatus(
