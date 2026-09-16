@@ -11,6 +11,7 @@ use App\Models\PurchaseReturn;
 use App\Models\Store;
 use App\Models\Supplier;
 use App\Services\StockService;
+use App\Services\SupplierLedgerService;
 use App\Support\AppResponse;
 
 use Illuminate\Http\Request;
@@ -36,12 +37,18 @@ class PurchaseController extends Controller implements HasMiddleware
 
     protected StockService $stockService;
 
+    protected SupplierLedgerService $supplierLedgerService;
+
 
     public function __construct(
-        StockService $stockService
+        StockService $stockService,
+        SupplierLedgerService $supplierLedgerService
     ) {
         $this->stockService =
             $stockService;
+
+        $this->supplierLedgerService =
+            $supplierLedgerService;
     }
 
 
@@ -1049,6 +1056,13 @@ class PurchaseController extends Controller implements HasMiddleware
             }
 
 
+            $this->supplierLedgerService
+                ->postPurchase(
+                    $purchase,
+                    auth()->id()
+                );
+
+
             DB::commit();
 
 
@@ -1661,6 +1675,13 @@ class PurchaseController extends Controller implements HasMiddleware
             }
 
 
+            $this->supplierLedgerService
+                ->postPurchase(
+                    $purchase->fresh(),
+                    auth()->id()
+                );
+
+
             DB::commit();
 
 
@@ -1822,6 +1843,21 @@ class PurchaseController extends Controller implements HasMiddleware
                         'Purchase deleted - reverse stock'
                     );
             }
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | Reverse Supplier Ledger
+            |--------------------------------------------------------------------------
+            */
+
+            $this->supplierLedgerService
+                ->reversePurchase(
+                    purchase: $purchase,
+                    reversalDate: now()->toDateString(),
+                    remarks: 'Purchase deleted - supplier ledger reversal',
+                    createdBy: auth()->id()
+                );
 
 
             /*

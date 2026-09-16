@@ -8,6 +8,7 @@ use App\Models\Purchase;
 use App\Models\PurchaseReturn;
 use App\Models\Supplier;
 use App\Models\SupplierPayment;
+use App\Services\SupplierLedgerService;
 use App\Support\AppResponse;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Contracts\View\View as ViewContract;
@@ -222,8 +223,10 @@ class SupplierPaymentController extends Controller implements HasMiddleware
     |--------------------------------------------------------------------------
     */
 
-    public function store(Request $request): RedirectResponse
-    {
+    public function store(
+        Request $request,
+        SupplierLedgerService $supplierLedgerService
+    ): RedirectResponse {
         [$companyId, $storeId] = $this->context();
 
         $validated = $request->validate([
@@ -245,7 +248,8 @@ class SupplierPaymentController extends Controller implements HasMiddleware
             $payment = DB::transaction(function () use (
                 $validated,
                 $companyId,
-                $storeId
+                $storeId,
+                $supplierLedgerService
             ) {
                 $supplier = Supplier::query()
                     ->forContext($companyId, $storeId)
@@ -327,6 +331,12 @@ class SupplierPaymentController extends Controller implements HasMiddleware
                     'reversal_of_id' => null,
                     'created_by' => auth()->id(),
                 ]);
+
+                $supplierLedgerService
+                    ->postSupplierPayment(
+                        $payment,
+                        auth()->id()
+                    );
 
                 return $payment;
             }, 3);
@@ -430,7 +440,8 @@ class SupplierPaymentController extends Controller implements HasMiddleware
     */
 
     public function cancel(
-        SupplierPayment $supplierPayment
+        SupplierPayment $supplierPayment,
+        SupplierLedgerService $supplierLedgerService
     ): RedirectResponse {
         [$companyId, $storeId] = $this->context();
 
@@ -444,7 +455,8 @@ class SupplierPaymentController extends Controller implements HasMiddleware
             DB::transaction(function () use (
                 $supplierPayment,
                 $companyId,
-                $storeId
+                $storeId,
+                $supplierLedgerService
             ) {
                 $payment = SupplierPayment::query()
                     ->forContext($companyId, $storeId)
@@ -494,6 +506,14 @@ class SupplierPaymentController extends Controller implements HasMiddleware
                     'reversal_of_id' => $originalEntry->id,
                     'created_by' => auth()->id(),
                 ]);
+
+                $supplierLedgerService
+                    ->reverseSupplierPayment(
+                        supplierPayment: $payment,
+                        reversalDate: now()->toDateString(),
+                        remarks: "Reversal of supplier payment {$payment->payment_no}",
+                        createdBy: auth()->id()
+                    );
 
                 $payment->update([
                     'status' => SupplierPayment::STATUS_CANCELLED,

@@ -6,6 +6,7 @@ use App\Models\Purchase;
 use App\Models\PurchaseReturn;
 use App\Models\Store;
 use App\Models\Supplier;
+use App\Models\SupplierLedgerEntry;
 use App\Models\SupplierPayment;
 use App\Services\GstLookupService;
 use App\Support\AppResponse;
@@ -992,7 +993,7 @@ class SupplierController extends Controller implements HasMiddleware
             : 0;
 
 
-        $netSupplierBalance =
+        $documentNetBalance =
             round(
                 $openingCredit
                     +
@@ -1005,6 +1006,67 @@ class SupplierController extends Controller implements HasMiddleware
                     $totalPayments,
                 2
             );
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Authoritative Supplier Ledger Balance
+        |--------------------------------------------------------------------------
+        |
+        | During rollout, use the document calculation when this supplier has
+        | not yet been backfilled into supplier_ledger_entries.
+        |
+        */
+
+        $ledgerQuery =
+            SupplierLedgerEntry::query()
+            ->where(
+                'company_id',
+                $companyId
+            )
+            ->where(
+                'store_id',
+                $storeId
+            )
+            ->where(
+                'supplier_id',
+                $supplier->id
+            );
+
+
+        $hasLedgerEntries =
+            (clone $ledgerQuery)
+            ->exists();
+
+
+        $ledgerDebit =
+            round(
+                (float) (
+                    (clone $ledgerQuery)
+                    ->sum('debit')
+                ),
+                2
+            );
+
+
+        $ledgerCredit =
+            round(
+                (float) (
+                    (clone $ledgerQuery)
+                    ->sum('credit')
+                ),
+                2
+            );
+
+
+        $netSupplierBalance =
+            $hasLedgerEntries
+            ? round(
+                $ledgerCredit
+                    - $ledgerDebit,
+                2
+            )
+            : $documentNetBalance;
 
 
         $currentPayable =
@@ -1118,6 +1180,15 @@ class SupplierController extends Controller implements HasMiddleware
 
                     'net_supplier_balance' =>
                     $netSupplierBalance,
+
+                    'ledger_debit' =>
+                    $ledgerDebit,
+
+                    'ledger_credit' =>
+                    $ledgerCredit,
+
+                    'ledger_backfilled' =>
+                    $hasLedgerEntries,
 
                     'credit_limit' =>
                     $creditLimit,

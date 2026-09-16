@@ -28,6 +28,7 @@ export default function Show({
     purchases,
     purchase_returns: purchaseReturns,
     supplier_payments: supplierPayments,
+    supplier_ledger_entries: supplierLedgerEntries,
 }) {
 
     const {
@@ -154,6 +155,20 @@ export default function Show({
                 },
                 {
                     key:
+                        'ledger',
+
+                    label:
+                        'Ledger',
+
+                    icon:
+                        'bi-journal-text',
+
+                    count:
+                        supplierLedgerEntries?.total
+                        ?? 0,
+                },
+                {
+                    key:
                         'branches',
 
                     label:
@@ -171,6 +186,7 @@ export default function Show({
                 purchases?.total,
                 purchaseReturns?.total,
                 supplierPayments?.total,
+                supplierLedgerEntries?.total,
                 supplier?.stores_count,
             ]
         );
@@ -729,6 +745,30 @@ export default function Show({
                     />
 
                     <AccountStat
+                        label="Ledger Debit"
+                        value={
+                            money(
+                                accountSummary?.ledger_debit
+                            )
+                        }
+                        prefix="₹"
+                        icon="bi-arrow-up-right"
+                        tone="danger"
+                    />
+
+                    <AccountStat
+                        label="Ledger Credit"
+                        value={
+                            money(
+                                accountSummary?.ledger_credit
+                            )
+                        }
+                        prefix="₹"
+                        icon="bi-arrow-down-left"
+                        tone="success"
+                    />
+
+                    <AccountStat
                         label="Total Purchases"
                         value={
                             money(
@@ -918,6 +958,26 @@ export default function Show({
                                         can(
                                             'supplier-payment.create'
                                         )
+                                    }
+                                />
+
+                            )
+                        }
+
+
+                        {
+                            activeTab ===
+                            'ledger' && (
+
+                                <LedgerTab
+                                    supplier={
+                                        supplier
+                                    }
+                                    ledgerEntries={
+                                        supplierLedgerEntries
+                                    }
+                                    currentBalance={
+                                        accountSummary?.net_supplier_balance
                                     }
                                 />
 
@@ -1210,6 +1270,33 @@ function OverviewTab({
                             formatSupplierBalance(
                                 accountSummary?.net_supplier_balance
                             )
+                        }
+                    />
+
+                    <InfoRow
+                        label="Ledger Debit"
+                        value={
+                            `₹${money(
+                                accountSummary?.ledger_debit
+                            )}`
+                        }
+                    />
+
+                    <InfoRow
+                        label="Ledger Credit"
+                        value={
+                            `₹${money(
+                                accountSummary?.ledger_credit
+                            )}`
+                        }
+                    />
+
+                    <InfoRow
+                        label="Balance Source"
+                        value={
+                            accountSummary?.ledger_backfilled
+                                ? 'Supplier Ledger'
+                                : 'Transaction Documents'
                         }
                     />
 
@@ -1922,6 +2009,158 @@ function PaymentsTab({
                                 <EmptyTable
                                     colspan="8"
                                     text="No supplier payments found in the current branch."
+                                />
+                            )
+                    }
+
+                </tbody>
+
+            </table>
+
+        </DataSection>
+    );
+}
+
+
+/*
+|--------------------------------------------------------------------------
+| Supplier Ledger
+|--------------------------------------------------------------------------
+*/
+
+function LedgerTab({
+    supplier,
+    ledgerEntries,
+    currentBalance,
+}) {
+
+    const rows =
+        ledgerEntries?.data
+        ?? [];
+
+
+    return (
+
+        <DataSection
+            title="Supplier Ledger"
+            subtitle={
+                `Current balance: ${formatSupplierBalance(
+                    currentBalance
+                )}`
+            }
+            icon="bi-journal-text"
+            paginator={
+                ledgerEntries
+            }
+            action={
+                <Link
+                    href={
+                        `/supplier-ledger?supplier_id=${supplier.id}`
+                    }
+                    className="rr-supplier-primary-btn"
+                >
+                    <i className="bi bi-box-arrow-up-right"></i>
+                    Full Ledger
+                </Link>
+            }
+        >
+
+            <table className="rr-supplier-account-table">
+
+                <thead>
+
+                    <tr>
+                        <th>Date</th>
+                        <th>Transaction</th>
+                        <th>Reference</th>
+                        <th>Remarks</th>
+                        <th className="text-end">Debit</th>
+                        <th className="text-end">Credit</th>
+                    </tr>
+
+                </thead>
+
+
+                <tbody>
+
+                    {
+                        rows.length > 0
+                            ? rows.map(
+                                entry => (
+
+                                    <tr
+                                        key={
+                                            entry.id
+                                        }
+                                        className={
+                                            entry.is_reversal
+                                                ? 'rr-supplier-ledger-reversal'
+                                                : ''
+                                        }
+                                    >
+
+                                        <td>
+                                            {
+                                                formatDate(
+                                                    entry.transaction_date
+                                                )
+                                            }
+                                        </td>
+
+                                        <td>
+                                            <span className="rr-supplier-purchase-status">
+                                                {
+                                                    entry.transaction_label
+                                                }
+                                            </span>
+                                        </td>
+
+                                        <td>
+                                            {
+                                                entry.reference_no
+                                                ?? '—'
+                                            }
+                                        </td>
+
+                                        <td>
+                                            {
+                                                entry.remarks
+                                                ?? '—'
+                                            }
+                                        </td>
+
+                                        <td className="text-end rr-supplier-account-debit">
+                                            {
+                                                Number(
+                                                    entry.debit
+                                                ) > 0
+                                                    ? `₹${money(
+                                                        entry.debit
+                                                    )}`
+                                                    : '—'
+                                            }
+                                        </td>
+
+                                        <td className="text-end rr-supplier-account-credit">
+                                            {
+                                                Number(
+                                                    entry.credit
+                                                ) > 0
+                                                    ? `₹${money(
+                                                        entry.credit
+                                                    )}`
+                                                    : '—'
+                                            }
+                                        </td>
+
+                                    </tr>
+
+                                )
+                            )
+                            : (
+                                <EmptyTable
+                                    colspan="6"
+                                    text="No supplier ledger entries found for this branch."
                                 />
                             )
                     }

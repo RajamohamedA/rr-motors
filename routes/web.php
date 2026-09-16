@@ -1645,7 +1645,7 @@ Route::middleware([
     |--------------------------------------------------------------------------
     */
 
-    require __DIR__ . '/supplier-payment-routes.php';
+    require __DIR__ . '/accounts.php';
 
 
     /*

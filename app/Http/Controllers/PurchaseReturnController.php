@@ -11,6 +11,7 @@ use App\Models\PurchaseReturnItem;
 use App\Models\Store;
 use App\Models\Supplier;
 use App\Services\StockService;
+use App\Services\SupplierLedgerService;
 use App\Support\AppResponse;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Database\Eloquent\Builder;
@@ -231,7 +232,8 @@ class PurchaseReturnController extends Controller implements HasMiddleware
 
     public function store(
         Request $request,
-        StockService $stockService
+        StockService $stockService,
+        SupplierLedgerService $supplierLedgerService
     ): RedirectResponse {
         [$companyId, $storeId] = $this->context($request);
         $validated = $this->validateRequest($request);
@@ -241,7 +243,8 @@ class PurchaseReturnController extends Controller implements HasMiddleware
                 $validated,
                 $companyId,
                 $storeId,
-                $stockService
+                $stockService,
+                $supplierLedgerService
             ) {
                 $purchase = Purchase::query()
                     ->with(['items.product'])
@@ -286,6 +289,12 @@ class PurchaseReturnController extends Controller implements HasMiddleware
                     'gst_total' => $totals['gst_total'],
                     'total_amount' => $totals['total_amount'],
                 ]);
+
+                $supplierLedgerService
+                    ->postPurchaseReturn(
+                        $return->fresh('purchase'),
+                        auth()->id()
+                    );
 
                 return $return;
             });
@@ -392,7 +401,8 @@ class PurchaseReturnController extends Controller implements HasMiddleware
     public function update(
         Request $request,
         PurchaseReturn $purchaseReturn,
-        StockService $stockService
+        StockService $stockService,
+        SupplierLedgerService $supplierLedgerService
     ): RedirectResponse {
         [$companyId, $storeId] = $this->context($request);
 
@@ -410,7 +420,8 @@ class PurchaseReturnController extends Controller implements HasMiddleware
                 $validated,
                 $companyId,
                 $storeId,
-                $stockService
+                $stockService,
+                $supplierLedgerService
             ) {
                 $lockedReturn = PurchaseReturn::query()
                     ->with(['items', 'purchase.items.product'])
@@ -473,6 +484,12 @@ class PurchaseReturnController extends Controller implements HasMiddleware
                     'total_amount' => $totals['total_amount'],
                     'remarks' => $validated['remarks'] ?? null,
                 ]);
+
+                $supplierLedgerService
+                    ->postPurchaseReturn(
+                        $lockedReturn->fresh('purchase'),
+                        auth()->id()
+                    );
             });
 
             return AppResponse::successRoute(
@@ -495,7 +512,8 @@ class PurchaseReturnController extends Controller implements HasMiddleware
     public function destroy(
         Request $request,
         PurchaseReturn $purchaseReturn,
-        StockService $stockService
+        StockService $stockService,
+        SupplierLedgerService $supplierLedgerService
     ): RedirectResponse {
         [$companyId, $storeId] = $this->context($request);
 
@@ -510,7 +528,8 @@ class PurchaseReturnController extends Controller implements HasMiddleware
                 $purchaseReturn,
                 $companyId,
                 $storeId,
-                $stockService
+                $stockService,
+                $supplierLedgerService
             ) {
                 $lockedReturn = PurchaseReturn::query()
                     ->with(['items', 'purchase'])
@@ -542,6 +561,14 @@ class PurchaseReturnController extends Controller implements HasMiddleware
                         'Reverse deleted purchase return'
                     );
                 }
+
+                $supplierLedgerService
+                    ->reversePurchaseReturn(
+                        purchaseReturn: $lockedReturn,
+                        reversalDate: now()->toDateString(),
+                        remarks: 'Purchase return deleted - supplier ledger reversal',
+                        createdBy: auth()->id()
+                    );
 
                 $lockedReturn->items()->delete();
                 $lockedReturn->delete();
