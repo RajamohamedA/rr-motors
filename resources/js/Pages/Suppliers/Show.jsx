@@ -27,6 +27,7 @@ export default function Show({
     account_summary: accountSummary,
     purchases,
     purchase_returns: purchaseReturns,
+    supplier_payments: supplierPayments,
 }) {
 
     const {
@@ -139,6 +140,20 @@ export default function Show({
                 },
                 {
                     key:
+                        'payments',
+
+                    label:
+                        'Payments',
+
+                    icon:
+                        'bi-cash-stack',
+
+                    count:
+                        supplierPayments?.total
+                        ?? 0,
+                },
+                {
+                    key:
                         'branches',
 
                     label:
@@ -155,6 +170,7 @@ export default function Show({
             [
                 purchases?.total,
                 purchaseReturns?.total,
+                supplierPayments?.total,
                 supplier?.stores_count,
             ]
         );
@@ -381,7 +397,7 @@ export default function Show({
                 <MasterNavigation
                     active="suppliers"
                     title="Supplier Account"
-                    subtitle="Supplier profile, purchases, returns and branch assignments"
+                    subtitle="Supplier profile, purchases, payments, advances and branch assignments"
                 />
 
 
@@ -530,6 +546,27 @@ export default function Show({
 
                     <div className="rr-supplier-account-header-actions">
 
+                        {
+                            can(
+                                'supplier-payment.create'
+                            ) && (
+
+                                <Link
+                                    href={
+                                        `/supplier-payments/create?supplier=${supplier.id}`
+                                    }
+                                    className="rr-supplier-primary-btn"
+                                >
+
+                                    <i className="bi bi-cash-coin"></i>
+
+                                    Record Payment
+
+                                </Link>
+
+                            )
+                        }
+
                         <span
                             className={
                                 `rr-supplier-status ${supplier?.status
@@ -638,7 +675,7 @@ export default function Show({
                                 </strong>
 
                                 <span>
-                                    Supplier master details are shared across assigned branches, while purchases and returns shown here belong only to the active branch.
+                                    Supplier master details are shared across assigned branches, while purchases, returns and payments shown here belong only to the active branch.
                                 </span>
 
                             </div>
@@ -665,6 +702,30 @@ export default function Show({
                         prefix="₹"
                         icon="bi-wallet2"
                         tone="danger"
+                    />
+
+                    <AccountStat
+                        label="Supplier Advance"
+                        value={
+                            money(
+                                accountSummary?.supplier_advance_balance
+                            )
+                        }
+                        prefix="₹"
+                        icon="bi-piggy-bank"
+                        tone="success"
+                    />
+
+                    <AccountStat
+                        label="Total Payments"
+                        value={
+                            money(
+                                accountSummary?.total_payments
+                            )
+                        }
+                        prefix="₹"
+                        icon="bi-cash-stack"
+                        tone="primary"
                     />
 
                     <AccountStat
@@ -835,6 +896,28 @@ export default function Show({
                                 <ReturnsTab
                                     purchaseReturns={
                                         purchaseReturns
+                                    }
+                                />
+
+                            )
+                        }
+
+
+                        {
+                            activeTab ===
+                            'payments' && (
+
+                                <PaymentsTab
+                                    supplier={
+                                        supplier
+                                    }
+                                    supplierPayments={
+                                        supplierPayments
+                                    }
+                                    canCreate={
+                                        can(
+                                            'supplier-payment.create'
+                                        )
                                     }
                                 />
 
@@ -1086,6 +1169,51 @@ function OverviewTab({
                     />
 
                     <InfoRow
+                        label="Supplier Advance"
+                        value={
+                            `₹${money(
+                                accountSummary?.supplier_advance_balance
+                            )}`
+                        }
+                    />
+
+                    <InfoRow
+                        label="Total Payments"
+                        value={
+                            `₹${money(
+                                accountSummary?.total_payments
+                            )}`
+                        }
+                    />
+
+                    <InfoRow
+                        label="Allocated Payments"
+                        value={
+                            `₹${money(
+                                accountSummary?.allocated_payments
+                            )}`
+                        }
+                    />
+
+                    <InfoRow
+                        label="Advance Payments"
+                        value={
+                            `₹${money(
+                                accountSummary?.advance_payments
+                            )}`
+                        }
+                    />
+
+                    <InfoRow
+                        label="Net Supplier Balance"
+                        value={
+                            formatSupplierBalance(
+                                accountSummary?.net_supplier_balance
+                            )
+                        }
+                    />
+
+                    <InfoRow
                         label="Credit Limit"
                         value={
                             `₹${money(
@@ -1109,6 +1237,62 @@ function OverviewTab({
                             `${accountSummary?.credit_days
                             ?? 0
                             } days`
+                        }
+                    />
+
+                </div>
+
+            </section>
+
+
+            <section className="rr-supplier-account-card rr-supplier-account-card-wide">
+
+                <CardHeader
+                    icon="bi-cash-stack"
+                    title="Recent Payment"
+                />
+
+
+                <div className="rr-supplier-account-card-body">
+
+                    <InfoRow
+                        label="Last Payment"
+                        value={
+                            accountSummary?.last_payment?.payment_no
+                            ?? '—'
+                        }
+                    />
+
+                    <InfoRow
+                        label="Payment Date"
+                        value={
+                            formatDate(
+                                accountSummary?.last_payment?.payment_date
+                            )
+                        }
+                    />
+
+                    <InfoRow
+                        label="Amount"
+                        value={
+                            accountSummary?.last_payment
+                                ? `₹${money(
+                                    accountSummary.last_payment.amount
+                                )}`
+                                : '—'
+                        }
+                    />
+
+                    <InfoRow
+                        label="Payment Type"
+                        value={
+                            accountSummary?.last_payment
+                                ? (
+                                    accountSummary.last_payment.is_advance
+                                        ? 'Advance Payment'
+                                        : 'Purchase Payment'
+                                )
+                                : '—'
                         }
                     />
 
@@ -1507,6 +1691,252 @@ function ReturnsTab({
 
 /*
 |--------------------------------------------------------------------------
+| Supplier Payments
+|--------------------------------------------------------------------------
+*/
+
+function PaymentsTab({
+    supplier,
+    supplierPayments,
+    canCreate,
+}) {
+
+    const rows =
+        supplierPayments?.data
+        ?? [];
+
+
+    return (
+
+        <DataSection
+            title="Supplier Payment History"
+            subtitle="Allocated and advance payments recorded in the active branch"
+            icon="bi-cash-stack"
+            paginator={
+                supplierPayments
+            }
+            action={
+                canCreate
+                    ? (
+                        <Link
+                            href={
+                                `/supplier-payments/create?supplier=${supplier.id}`
+                            }
+                            className="rr-supplier-primary-btn"
+                        >
+
+                            <i className="bi bi-plus-lg"></i>
+
+                            New Payment
+
+                        </Link>
+                    )
+                    : null
+            }
+        >
+
+            <table className="rr-supplier-account-table">
+
+                <thead>
+
+                    <tr>
+
+                        <th>
+                            Payment No
+                        </th>
+
+                        <th>
+                            Date
+                        </th>
+
+                        <th>
+                            Type
+                        </th>
+
+                        <th>
+                            Purchase
+                        </th>
+
+                        <th>
+                            Account / Mode
+                        </th>
+
+                        <th className="text-end">
+                            Amount
+                        </th>
+
+                        <th>
+                            Status
+                        </th>
+
+                        <th className="text-end">
+                            Action
+                        </th>
+
+                    </tr>
+
+                </thead>
+
+
+                <tbody>
+
+                    {
+                        rows.length > 0
+                            ? rows.map(
+                                payment => (
+
+                                    <tr
+                                        key={
+                                            payment.id
+                                        }
+                                    >
+
+                                        <td>
+
+                                            <Link
+                                                href={
+                                                    `/supplier-payments/${payment.id}`
+                                                }
+                                                className="rr-supplier-reference-link"
+                                            >
+
+                                                {
+                                                    payment.payment_no
+                                                    ?? `Payment #${payment.id}`
+                                                }
+
+                                            </Link>
+
+                                        </td>
+
+                                        <td>
+                                            {
+                                                formatDate(
+                                                    payment.payment_date
+                                                )
+                                            }
+                                        </td>
+
+                                        <td>
+
+                                            <span className="rr-supplier-purchase-status">
+                                                {
+                                                    payment.is_advance
+                                                        ? 'Advance'
+                                                        : 'Allocated'
+                                                }
+                                            </span>
+
+                                        </td>
+
+                                        <td>
+
+                                            {
+                                                payment.purchase
+                                                    ? (
+                                                        <Link
+                                                            href={
+                                                                `/purchases/${payment.purchase.id}`
+                                                            }
+                                                            className="rr-supplier-reference-link"
+                                                        >
+                                                            {
+                                                                payment.purchase.purchase_no
+                                                                ?? `Purchase #${payment.purchase.id}`
+                                                            }
+                                                        </Link>
+                                                    )
+                                                    : (
+                                                        <span className="rr-supplier-account-muted">
+                                                            On account
+                                                        </span>
+                                                    )
+                                            }
+
+                                        </td>
+
+                                        <td>
+
+                                            <strong>
+                                                {
+                                                    payment.account?.account_name
+                                                    ?? payment.payment_mode
+                                                    ?? '—'
+                                                }
+                                            </strong>
+
+                                            {
+                                                payment.reference_no && (
+
+                                                    <div className="rr-supplier-account-muted">
+                                                        Ref: {payment.reference_no}
+                                                    </div>
+
+                                                )
+                                            }
+
+                                        </td>
+
+                                        <td className="text-end rr-supplier-account-credit">
+                                            ₹{
+                                                money(
+                                                    payment.amount
+                                                )
+                                            }
+                                        </td>
+
+                                        <td>
+
+                                            <span className="rr-supplier-purchase-status">
+                                                {
+                                                    payment.status
+                                                    ?? 'Completed'
+                                                }
+                                            </span>
+
+                                        </td>
+
+                                        <td className="text-end">
+
+                                            <Link
+                                                href={
+                                                    `/supplier-payments/${payment.id}`
+                                                }
+                                                className="rr-supplier-reference-link"
+                                                title="View payment"
+                                            >
+
+                                                <i className="bi bi-eye"></i>
+
+                                                View
+
+                                            </Link>
+
+                                        </td>
+
+                                    </tr>
+
+                                )
+                            )
+                            : (
+                                <EmptyTable
+                                    colspan="8"
+                                    text="No supplier payments found in the current branch."
+                                />
+                            )
+                    }
+
+                </tbody>
+
+            </table>
+
+        </DataSection>
+    );
+}
+
+
+/*
+|--------------------------------------------------------------------------
 | Branches
 |--------------------------------------------------------------------------
 */
@@ -1642,6 +2072,7 @@ function DataSection({
     subtitle,
     icon,
     paginator,
+    action,
     children,
 }) {
 
@@ -1684,6 +2115,10 @@ function DataSection({
                         ?? 0
                     } records
                 </span>
+
+                {
+                    action
+                }
 
             </div>
 
@@ -2137,6 +2572,35 @@ function formatDate(
                 'numeric',
         }
     );
+}
+
+
+function formatSupplierBalance(
+    value
+) {
+
+    const balance =
+        Number(
+            value
+            ?? 0
+        );
+
+
+    if (
+        balance < 0
+    ) {
+
+        return `₹${money(
+            Math.abs(
+                balance
+            )
+        )} Advance`;
+    }
+
+
+    return `₹${money(
+        balance
+    )} Payable`;
 }
 
 

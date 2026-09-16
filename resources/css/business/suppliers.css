@@ -1666,7 +1666,13 @@
 .rr-supplier-account-header-actions {
     display: flex;
     align-items: center;
+    justify-content: flex-end;
+    flex-wrap: wrap;
     gap: 8px;
+}
+
+.rr-supplier-account-header-actions .rr-supplier-primary-btn {
+    white-space: nowrap;
 }
 
 .rr-supplier-shared-warning {
@@ -1702,7 +1708,7 @@
 
 .rr-supplier-account-summary {
     display: grid;
-    grid-template-columns: repeat(6, minmax(0, 1fr));
+    grid-template-columns: repeat(4, minmax(0, 1fr));
     gap: 7px;
     margin-bottom: 10px;
 }
@@ -1717,6 +1723,34 @@
     border: 1px solid #dde5ee;
     border-radius: 6px;
     background: #fff;
+    box-shadow: 0 1px 3px rgba(15, 23, 42, .04);
+    transition: border-color .16s ease, box-shadow .16s ease, transform .16s ease;
+}
+
+.rr-supplier-account-stat:hover {
+    border-color: #bfdbfe;
+    box-shadow: 0 5px 14px rgba(37, 99, 235, .08);
+    transform: translateY(-1px);
+}
+
+.rr-supplier-account-stat.success {
+    border-left: 3px solid #10b981;
+}
+
+.rr-supplier-account-stat.danger {
+    border-left: 3px solid #ef4444;
+}
+
+.rr-supplier-account-stat.warning {
+    border-left: 3px solid #f59e0b;
+}
+
+.rr-supplier-account-stat.primary {
+    border-left: 3px solid #3b82f6;
+}
+
+.rr-supplier-account-stat.muted {
+    border-left: 3px solid #94a3b8;
 }
 
 .rr-supplier-account-stat-icon {
@@ -1811,6 +1845,11 @@
     background: #fff;
     color: #1d4ed8;
     box-shadow: inset 0 -2px 0 #2563eb;
+}
+
+.rr-supplier-account-tab:hover:not(.active) {
+    background: #eef4fb;
+    color: #334155;
 }
 
 .rr-supplier-account-tab small {
@@ -1941,9 +1980,19 @@
 }
 
 .rr-supplier-data-section-header>div {
+    min-width: 0;
+    flex: 1;
     display: flex;
     align-items: center;
     gap: 7px;
+}
+
+.rr-supplier-data-section-header>.rr-supplier-primary-btn {
+    flex: 0 0 auto;
+    min-height: 31px;
+    padding: 0 10px;
+    font-size: 11px;
+    white-space: nowrap;
 }
 
 .rr-supplier-data-section-header>div>i {
@@ -1972,6 +2021,7 @@
 
 .rr-supplier-account-table {
     width: 100%;
+    min-width: 760px;
     border-collapse: collapse;
 }
 
@@ -1996,6 +2046,24 @@
 
 .rr-supplier-account-table tbody tr:hover {
     background: #f8fbff;
+}
+
+.rr-supplier-account-table tbody tr:nth-child(even) {
+    background: #fbfdff;
+}
+
+.rr-supplier-account-table tbody tr:nth-child(even):hover {
+    background: #f1f7ff;
+}
+
+.rr-supplier-account-table td strong {
+    font-size: 11px;
+}
+
+.rr-supplier-account-table td .rr-supplier-account-muted {
+    display: block;
+    margin-top: 2px;
+    font-size: 10px;
 }
 
 .rr-supplier-account-table .text-end {
@@ -2031,6 +2099,14 @@
     color: #475569;
     font-size: 10px;
     font-weight: 700;
+}
+
+.rr-supplier-account-table td .rr-supplier-purchase-status {
+    white-space: nowrap;
+}
+
+.rr-supplier-account-table td .rr-supplier-reference-link i {
+    margin-right: 4px;
 }
 
 .rr-supplier-table-empty {
@@ -2250,6 +2326,28 @@
     .rr-supplier-account-pagination {
         align-items: flex-start;
         flex-direction: column;
+    }
+
+    .rr-supplier-account-header-actions {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .rr-supplier-account-header-actions>* {
+        width: 100%;
+    }
+
+    .rr-supplier-data-section-header {
+        align-items: flex-start;
+        flex-wrap: wrap;
+    }
+
+    .rr-supplier-data-section-header>div {
+        flex-basis: calc(100% - 80px);
+    }
+
+    .rr-supplier-data-section-header>.rr-supplier-primary-btn {
+        width: 100%;
     }
 }
 

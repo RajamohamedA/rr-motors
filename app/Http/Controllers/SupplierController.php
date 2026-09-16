@@ -6,6 +6,7 @@ use App\Models\Purchase;
 use App\Models\PurchaseReturn;
 use App\Models\Store;
 use App\Models\Supplier;
+use App\Models\SupplierPayment;
 use App\Services\GstLookupService;
 use App\Support\AppResponse;
 use Illuminate\Database\QueryException;
@@ -729,6 +730,145 @@ class SupplierController extends Controller implements HasMiddleware
             ->withQueryString();
 
 
+        /*
+        |--------------------------------------------------------------------------
+        | Supplier Payments
+        |--------------------------------------------------------------------------
+        |
+        | Includes purchase-linked payments and unallocated supplier advances.
+        | Cancelled documents remain visible for audit but do not affect balance.
+        |
+        */
+
+        $supplierPayments =
+            SupplierPayment::query()
+
+            ->where(
+                'company_id',
+                $companyId
+            )
+
+            ->where(
+                'store_id',
+                $storeId
+            )
+
+            ->where(
+                'supplier_id',
+                $supplier->id
+            )
+
+            ->with([
+                'purchase:id,purchase_no,purchase_date,grand_total',
+                'account:id,account_code,account_name,account_type,payment_mode',
+                'creator:id,name',
+                'canceller:id,name',
+            ])
+
+            ->orderByDesc(
+                'payment_date'
+            )
+
+            ->orderByDesc(
+                'id'
+            )
+
+            ->paginate(
+                15,
+                ['*'],
+                'payments_page'
+            )
+
+            ->withQueryString();
+
+
+        $supplierPayments->through(
+            fn(
+                SupplierPayment $payment
+            ) => [
+
+                'id' =>
+                $payment->id,
+
+                'payment_no' =>
+                $payment->payment_no,
+
+                'payment_date' =>
+                $payment->payment_date
+                    ?->format('Y-m-d'),
+
+                'amount' =>
+                (float) $payment->amount,
+
+                'payment_mode' =>
+                $payment->payment_mode,
+
+                'reference_no' =>
+                $payment->reference_no,
+
+                'status' =>
+                $payment->status,
+
+                'remarks' =>
+                $payment->remarks,
+
+                'is_advance' =>
+                $payment->purchase_id === null,
+
+                'can_cancel' =>
+                $payment->canBeCancelled(),
+
+                'purchase' =>
+                $payment->purchase
+                    ? [
+                        'id' =>
+                        $payment->purchase->id,
+
+                        'purchase_no' =>
+                        $payment->purchase->purchase_no,
+
+                        'purchase_date' =>
+                        (string) $payment->purchase->purchase_date,
+
+                        'grand_total' =>
+                        (float) $payment->purchase->grand_total,
+                    ]
+                    : null,
+
+                'account' =>
+                $payment->account
+                    ? [
+                        'id' =>
+                        $payment->account->id,
+
+                        'account_code' =>
+                        $payment->account->account_code,
+
+                        'account_name' =>
+                        $payment->account->account_name,
+
+                        'account_type' =>
+                        $payment->account->account_type,
+
+                        'payment_mode' =>
+                        $payment->account->payment_mode,
+                    ]
+                    : null,
+
+                'creator' =>
+                $payment->creator
+                    ? [
+                        'id' =>
+                        $payment->creator->id,
+
+                        'name' =>
+                        $payment->creator->name,
+                    ]
+                    : null,
+            ]
+        );
+
+
         $totalPurchases =
             (float) Purchase::query()
 
@@ -785,6 +925,57 @@ class SupplierController extends Controller implements HasMiddleware
                 );
 
 
+        $completedPaymentsQuery =
+            SupplierPayment::query()
+
+            ->where(
+                'company_id',
+                $companyId
+            )
+
+            ->where(
+                'store_id',
+                $storeId
+            )
+
+            ->where(
+                'supplier_id',
+                $supplier->id
+            )
+
+            ->where(
+                'status',
+                SupplierPayment::STATUS_COMPLETED
+            );
+
+
+        $totalPayments =
+            (float) (clone $completedPaymentsQuery)
+                ->sum(
+                    'amount'
+                );
+
+
+        $allocatedPayments =
+            (float) (clone $completedPaymentsQuery)
+                ->whereNotNull(
+                    'purchase_id'
+                )
+                ->sum(
+                    'amount'
+                );
+
+
+        $advancePayments =
+            (float) (clone $completedPaymentsQuery)
+                ->whereNull(
+                    'purchase_id'
+                )
+                ->sum(
+                    'amount'
+                );
+
+
         $openingBalance =
             (float) $supplier->opening_balance;
 
@@ -801,9 +992,8 @@ class SupplierController extends Controller implements HasMiddleware
             : 0;
 
 
-        $currentPayable =
-            max(
-                0,
+        $netSupplierBalance =
+            round(
                 $openingCredit
                     +
                     $totalPurchases
@@ -811,6 +1001,23 @@ class SupplierController extends Controller implements HasMiddleware
                     $totalReturns
                     -
                     $openingDebit
+                    -
+                    $totalPayments,
+                2
+            );
+
+
+        $currentPayable =
+            max(
+                0,
+                $netSupplierBalance
+            );
+
+
+        $supplierAdvanceBalance =
+            max(
+                0,
+                -$netSupplierBalance
             );
 
 
@@ -852,6 +1059,40 @@ class SupplierController extends Controller implements HasMiddleware
             ->first();
 
 
+        $lastPayment =
+            SupplierPayment::query()
+
+            ->where(
+                'company_id',
+                $companyId
+            )
+
+            ->where(
+                'store_id',
+                $storeId
+            )
+
+            ->where(
+                'supplier_id',
+                $supplier->id
+            )
+
+            ->where(
+                'status',
+                SupplierPayment::STATUS_COMPLETED
+            )
+
+            ->latest(
+                'payment_date'
+            )
+
+            ->latest(
+                'id'
+            )
+
+            ->first();
+
+
         return Inertia::render(
             'Suppliers/Show',
             [
@@ -872,6 +1113,12 @@ class SupplierController extends Controller implements HasMiddleware
                     'current_payable' =>
                     $currentPayable,
 
+                    'supplier_advance_balance' =>
+                    $supplierAdvanceBalance,
+
+                    'net_supplier_balance' =>
+                    $netSupplierBalance,
+
                     'credit_limit' =>
                     $creditLimit,
 
@@ -886,6 +1133,15 @@ class SupplierController extends Controller implements HasMiddleware
 
                     'total_returns' =>
                     $totalReturns,
+
+                    'total_payments' =>
+                    $totalPayments,
+
+                    'allocated_payments' =>
+                    $allocatedPayments,
+
+                    'advance_payments' =>
+                    $advancePayments,
 
                     'last_purchase' =>
                     $lastPurchase
@@ -907,6 +1163,26 @@ class SupplierController extends Controller implements HasMiddleware
                             ),
                         ]
                         : null,
+
+                    'last_payment' =>
+                    $lastPayment
+                        ? [
+                            'id' =>
+                            $lastPayment->id,
+
+                            'payment_no' =>
+                            $lastPayment->payment_no,
+
+                            'date' =>
+                            $lastPayment->payment_date,
+
+                            'amount' =>
+                            (float) $lastPayment->amount,
+
+                            'is_advance' =>
+                            $lastPayment->purchase_id === null,
+                        ]
+                        : null,
                 ],
 
                 'purchases' =>
@@ -914,6 +1190,9 @@ class SupplierController extends Controller implements HasMiddleware
 
                 'purchase_returns' =>
                 $purchaseReturns,
+
+                'supplier_payments' =>
+                $supplierPayments,
             ]
         );
     }
@@ -2204,7 +2483,7 @@ class SupplierController extends Controller implements HasMiddleware
                 ->all(),
         ];
     }
-    
+
 
     public function toggleStatus(
         Supplier $supplier
