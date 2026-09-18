@@ -352,4 +352,13 @@ class Customer extends Model
             'walk_in'
         );
     }
+
+    public function ledgerEntries(): HasMany
+    {
+        return $this->hasMany(
+            CustomerLedgerEntry::class,
+            'customer_id',
+            'id'
+        );
+    }
 }

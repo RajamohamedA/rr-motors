@@ -9,7 +9,7 @@ import MasterNavigation from "../../Components/Business/MasterNavigation";
 
 import "../../../css/business/sales-return.css";
 
-export default function Create({ returnNo = "" }) {
+export default function Create({ returnNo = "", accounts = [] }) {
     const { business } = usePage().props;
 
     const [invoiceSearch, setInvoiceSearch] = useState("");
@@ -28,6 +28,7 @@ export default function Create({ returnNo = "" }) {
     const { data, setData, post, processing, errors, clearErrors } = useForm({
         sale_id: "",
         return_date: today(),
+        account_id: "",
         refund_method: "cash",
         refund_status: "refunded",
         remarks: "",
@@ -35,6 +36,52 @@ export default function Create({ returnNo = "" }) {
         qty: [],
         free_qty: [],
     });
+
+    const moneyRefundMethods = ["cash", "bank", "original_payment"];
+    const requiresRefundAccount =
+        data.refund_status === "refunded" &&
+        moneyRefundMethods.includes(data.refund_method);
+
+    const availableAccounts = useMemo(() => {
+        if (data.refund_method === "cash") {
+            return accounts.filter(
+                (account) =>
+                    normalizeMode(account.payment_mode) === "cash" ||
+                    String(account.account_type ?? "").toLowerCase() === "cash",
+            );
+        }
+
+        if (data.refund_method === "bank") {
+            return accounts.filter((account) => {
+                const type = String(account.account_type ?? "").toLowerCase();
+                const mode = normalizeMode(account.payment_mode);
+                return ["bank", "upi", "card"].includes(type) ||
+                    ["bank_transfer", "gpay", "upi", "card"].includes(mode);
+            });
+        }
+
+        return accounts;
+    }, [accounts, data.refund_method]);
+
+    useEffect(() => {
+        if (!requiresRefundAccount) {
+            if (data.account_id !== "") {
+                setData("account_id", "");
+            }
+            return;
+        }
+
+        const selectedIsAvailable = availableAccounts.some(
+            (account) => String(account.id) === String(data.account_id),
+        );
+
+        if (!selectedIsAvailable) {
+            setData(
+                "account_id",
+                availableAccounts.length ? String(availableAccounts[0].id) : "",
+            );
+        }
+    }, [requiresRefundAccount, availableAccounts]);
 
     useEffect(() => {
         setData((previous) => ({
@@ -200,6 +247,49 @@ export default function Create({ returnNo = "" }) {
         );
     };
 
+    const changeRefundMethod = (method) => {
+        if (method === "customer_credit") {
+            setData((previous) => ({
+                ...previous,
+                refund_method: method,
+                refund_status: "credited",
+                account_id: "",
+            }));
+            return;
+        }
+
+        if (method === "none") {
+            setData((previous) => ({
+                ...previous,
+                refund_method: method,
+                refund_status: "pending",
+                account_id: "",
+            }));
+            return;
+        }
+
+        setData((previous) => ({
+            ...previous,
+            refund_method: method,
+            refund_status: "refunded",
+        }));
+    };
+
+    const changeRefundStatus = (status) => {
+        setData((previous) => ({
+            ...previous,
+            refund_status: status,
+            refund_method:
+                status === "credited"
+                    ? "customer_credit"
+                    : status === "pending" &&
+                        previous.refund_method === "customer_credit"
+                        ? "none"
+                        : previous.refund_method,
+            account_id: status === "refunded" ? previous.account_id : "",
+        }));
+    };
+
     const totals = useMemo(() => {
         return rows.reduce(
             (total, row) => {
@@ -239,6 +329,11 @@ export default function Create({ returnNo = "" }) {
 
         if (!hasReturnQuantity) {
             setInvoiceError("Enter a return quantity for at least one product.");
+            return;
+        }
+
+        if (requiresRefundAccount && !data.account_id) {
+            setInvoiceError("Select the cash or bank account used for the refund.");
             return;
         }
 
@@ -565,7 +660,7 @@ export default function Create({ returnNo = "" }) {
                                             <select
                                                 value={data.refund_method}
                                                 onChange={(event) =>
-                                                    setData("refund_method", event.target.value)
+                                                    changeRefundMethod(event.target.value)
                                                 }
                                             >
                                                 <option value="cash">Cash</option>
@@ -576,23 +671,60 @@ export default function Create({ returnNo = "" }) {
                                                 <option value="customer_credit">Customer Credit</option>
                                                 <option value="none">No Immediate Refund</option>
                                             </select>
+                                            <ErrorText message={errors.refund_method} />
                                         </Field>
                                         <Field label="Refund Status">
                                             <select
                                                 value={data.refund_status}
                                                 onChange={(event) =>
-                                                    setData("refund_status", event.target.value)
+                                                    changeRefundStatus(event.target.value)
                                                 }
                                             >
                                                 <option value="refunded">Refunded</option>
                                                 <option value="pending">Pending</option>
                                                 <option value="credited">Customer Credit</option>
                                             </select>
+                                            <ErrorText message={errors.refund_status} />
                                         </Field>
-                                        <Field
-                                            label="Remarks"
-                                            wide
-                                        >
+                                        {requiresRefundAccount && (
+                                            <Field label="Refund Account" wide>
+                                                <select
+                                                    value={data.account_id}
+                                                    onChange={(event) =>
+                                                        setData(
+                                                            "account_id",
+                                                            event.target.value,
+                                                        )
+                                                    }
+                                                >
+                                                    <option value="">
+                                                        Select cash or bank account
+                                                    </option>
+                                                    {availableAccounts.map((account) => (
+                                                        <option
+                                                            key={account.id}
+                                                            value={account.id}
+                                                        >
+                                                            {account.account_name}
+                                                            {account.account_code
+                                                                ? ` (${account.account_code})`
+                                                                : ""}
+                                                            {account.bank_name
+                                                                ? ` · ${account.bank_name}`
+                                                                : ""}
+                                                        </option>
+                                                    ))}
+                                                </select>
+                                                <ErrorText message={errors.account_id} />
+                                                {!availableAccounts.length && (
+                                                    <div className="rr-return-error">
+                                                        No matching active refund account is
+                                                        available.
+                                                    </div>
+                                                )}
+                                            </Field>
+                                        )}
+                                        <Field label="Remarks" wide>
                                             <textarea
                                                 rows="3"
                                                 value={data.remarks}
@@ -720,6 +852,20 @@ function numberValue(value) {
     return Number.isFinite(number) ? number : 0;
 }
 
+function normalizeMode(value) {
+    const mode = String(value ?? "")
+        .trim()
+        .toLowerCase()
+        .replace(/[\s-]+/g, "_");
+
+    if (["g_pay", "phonepe"].includes(mode)) return "gpay";
+    if (["bank", "banktransfer", "cheque"].includes(mode)) {
+        return "bank_transfer";
+    }
+
+    return mode;
+}
+
 function round2(value) {
     return Math.round((numberValue(value) + Number.EPSILON) * 100) / 100;
 }
@@ -752,3 +898,4 @@ function today() {
 }
 
 Create.layout = (page) => <BusinessLayout>{page}</BusinessLayout>;
+

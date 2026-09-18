@@ -8,7 +8,11 @@ import ConfirmModal from "../../Components/ConfirmModal";
 
 import "../../../css/business/sales-return.css";
 
-export default function Show({ salesReturn }) {
+export default function Show({
+    salesReturn,
+    refundReversal = null,
+    ledgerEntries = [],
+}) {
     const { flash = {} } = usePage().props;
 
     const items = Array.isArray(salesReturn?.items)
@@ -18,6 +22,9 @@ export default function Show({ salesReturn }) {
     const company = salesReturn?.company ?? {};
     const store = salesReturn?.store ?? {};
     const sale = salesReturn?.sale ?? {};
+    const account = salesReturn?.account ?? null;
+    const refundTransaction = salesReturn?.refund_account_transaction ?? null;
+    const customerCredit = salesReturn?.refund_status === "credited";
     const isGstBill = (salesReturn?.billing_type ?? "gst") === "gst";
     const isCancelled = salesReturn?.status === "cancelled";
     const [cancelConfirmation, setCancelConfirmation] = useState(false);
@@ -192,9 +199,15 @@ export default function Show({ salesReturn }) {
                     />
                     <Metric
                         icon="bi-currency-rupee"
-                        label="Refund Amount"
-                        value={formatMoney(salesReturn?.refund_amount)}
-                        tone={isCancelled ? "red" : "green"}
+                        label={customerCredit ? "Customer Credit" : "Refund Amount"}
+                        value={formatMoney(
+                            customerCredit
+                                ? salesReturn?.total_amount
+                                : salesReturn?.refund_amount,
+                        )}
+                        tone={
+                            isCancelled ? "red" : customerCredit ? "blue" : "green"
+                        }
                     />
                 </div>
 
@@ -254,6 +267,36 @@ export default function Show({ salesReturn }) {
                             value={formatMoney(salesReturn?.refund_amount)}
                             strong
                         />
+                        <InfoRow
+                            label="Refund Account"
+                            value={
+                                account
+                                    ? `${account.account_name}${account.account_code
+                                        ? ` (${account.account_code})`
+                                        : ""
+                                    }`
+                                    : customerCredit
+                                        ? "Customer Ledger Credit"
+                                        : "Not selected"
+                            }
+                        />
+                        {refundTransaction && (
+                            <InfoRow
+                                label="Account Entry"
+                                value={`${refundTransaction.reference_no ??
+                                    salesReturn?.return_no
+                                    } · ${formatMoney(refundTransaction.credit)}`}
+                            />
+                        )}
+                        {refundReversal && (
+                            <InfoRow
+                                label="Refund Reversal"
+                                value={`${displayDate(
+                                    refundReversal.transaction_date,
+                                )} · ${formatMoney(refundReversal.debit)}`}
+                                strong
+                            />
+                        )}
                         <InfoRow
                             label="Return Status"
                             value={labelize(salesReturn?.status)}
@@ -343,6 +386,64 @@ export default function Show({ salesReturn }) {
                                         >
                                             <i className="bi bi-inbox"></i>
                                             <strong>No returned products found</strong>
+                                        </td>
+                                    </tr>
+                                )}
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+
+                <section className="rr-return-window">
+                    <div className="rr-return-window-title">
+                        <div>
+                            <i className="bi bi-journal-text"></i>
+                            <strong>Customer Ledger Effect</strong>
+                        </div>
+                        <span className="rr-return-record-count">
+                            {ledgerEntries.length} entry(s)
+                        </span>
+                    </div>
+
+                    <div className="rr-return-table-wrap">
+                        <table className="rr-return-table rr-return-show-table">
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Type</th>
+                                    <th>Reference</th>
+                                    <th>Remarks</th>
+                                    <th className="number">Debit</th>
+                                    <th className="number">Credit</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {ledgerEntries.length ? (
+                                    ledgerEntries.map((entry) => (
+                                        <tr key={entry.id}>
+                                            <td>
+                                                {displayDate(entry.transaction_date)}
+                                            </td>
+                                            <td>
+                                                {labelize(entry.transaction_type)}
+                                            </td>
+                                            <td>{entry.reference_no ?? "-"}</td>
+                                            <td>{entry.remarks ?? "-"}</td>
+                                            <td className="number">
+                                                {formatMoney(entry.debit)}
+                                            </td>
+                                            <td className="number">
+                                                {formatMoney(entry.credit)}
+                                            </td>
+                                        </tr>
+                                    ))
+                                ) : (
+                                    <tr>
+                                        <td
+                                            colSpan="6"
+                                            className="rr-return-empty"
+                                        >
+                                            No customer ledger entries found.
                                         </td>
                                     </tr>
                                 )}
@@ -553,3 +654,4 @@ function displayDate(value) {
 }
 
 Show.layout = (page) => <BusinessLayout>{page}</BusinessLayout>;
+

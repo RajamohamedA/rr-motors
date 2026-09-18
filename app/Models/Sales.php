@@ -40,6 +40,7 @@ class Sales extends Model
         'final_discount',
         'round_off',
         'grand_total',
+        'advance_used',
         'paid_amount',
         'balance_amount',
         'payment_status',
@@ -50,6 +51,11 @@ class Sales extends Model
     protected function casts(): array
     {
         return [
+            'company_id' => 'integer',
+            'store_id' => 'integer',
+            'quotation_id' => 'integer',
+            'customer_id' => 'integer',
+            'mechanic_id' => 'integer',
             'invoice_date' => 'date',
             'sub_total' => 'decimal:2',
             'discount' => 'decimal:2',
@@ -57,6 +63,7 @@ class Sales extends Model
             'final_discount' => 'decimal:2',
             'round_off' => 'decimal:2',
             'grand_total' => 'decimal:2',
+            'advance_used' => 'decimal:2',
             'paid_amount' => 'decimal:2',
             'balance_amount' => 'decimal:2',
             'commission_percent' => 'decimal:2',
@@ -90,6 +97,13 @@ class Sales extends Model
         string $date
     ): Builder {
         return $query->whereDate('invoice_date', $date);
+    }
+
+    public function scopeWithBalance(Builder $query): Builder
+    {
+        return $query
+            ->completed()
+            ->where('balance_amount', '>', 0);
     }
 
     /*
@@ -139,9 +153,7 @@ class Sales extends Model
         );
     }
 
-    /**
-     * Payments entered directly while creating the sales bill.
-     */
+    /** Payments collected directly while creating or editing the sale. */
     public function salePayments(): HasMany
     {
         return $this->hasMany(
@@ -150,10 +162,7 @@ class Sales extends Model
         );
     }
 
-    /**
-     * Customer receipts recorded after or during the sale.
-     * Kept as payments() for compatibility with the current project.
-     */
+    /** Customer receipts linked directly to this invoice. */
     public function payments(): HasMany
     {
         return $this->hasMany(
@@ -164,7 +173,10 @@ class Sales extends Model
 
     public function customerPayments(): HasMany
     {
-        return $this->payments();
+        return $this->hasMany(
+            CustomerPayment::class,
+            'sale_id'
+        );
     }
 
     public function paymentAllocations(): HasMany
@@ -180,6 +192,11 @@ class Sales extends Model
     | Status Helpers
     |--------------------------------------------------------------------------
     */
+
+    public function isPending(): bool
+    {
+        return $this->status === self::STATUS_PENDING;
+    }
 
     public function isCompleted(): bool
     {
@@ -229,6 +246,32 @@ class Sales extends Model
 
     /*
     |--------------------------------------------------------------------------
+    | Advance and Payment Helpers
+    |--------------------------------------------------------------------------
+    */
+
+    public function hasAdvanceUsed(): bool
+    {
+        return (float) $this->advance_used > 0;
+    }
+
+    /**
+     * paid_amount contains both direct collection and advance consumed.
+     */
+    public function getDirectPaidAmountAttribute(): float
+    {
+        return round(
+            max(
+                0,
+                (float) $this->paid_amount
+                    - (float) $this->advance_used
+            ),
+            2
+        );
+    }
+
+    /*
+    |--------------------------------------------------------------------------
     | Profit Helpers
     |--------------------------------------------------------------------------
     */
@@ -240,14 +283,14 @@ class Sales extends Model
         }
 
         if ($this->items->contains(
-            fn(SaleItems $item) => $item->cost_total === null
+            fn(SaleItems $item): bool => $item->cost_total === null
         )) {
             return null;
         }
 
         return round(
             $this->items->sum(
-                fn(SaleItems $item) => (float) $item->cost_total
+                fn(SaleItems $item): float => (float) $item->cost_total
             ),
             2
         );
@@ -260,14 +303,14 @@ class Sales extends Model
         }
 
         if ($this->items->contains(
-            fn(SaleItems $item) => $item->gross_profit === null
+            fn(SaleItems $item): bool => $item->gross_profit === null
         )) {
             return null;
         }
 
         return round(
             $this->items->sum(
-                fn(SaleItems $item) => (float) $item->gross_profit
+                fn(SaleItems $item): float => (float) $item->gross_profit
             ),
             2
         );
@@ -295,8 +338,8 @@ class Sales extends Model
     | Invoice Number
     |--------------------------------------------------------------------------
     |
-    | Call this method inside the transaction that creates the sale.
-    | The unique index on store_id + invoice_no is the final safeguard.
+    | Call this inside the transaction that creates the sale. The unique index
+    | on store_id and invoice_no remains the final concurrency safeguard.
     |
     */
 
@@ -313,7 +356,7 @@ class Sales extends Model
 
         if ($lastInvoice) {
             $numericPart = preg_replace(
-                '/\D/',
+                '/\D+/',
                 '',
                 (string) $lastInvoice
             );

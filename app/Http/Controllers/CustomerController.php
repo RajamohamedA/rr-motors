@@ -3,10 +3,12 @@
 namespace App\Http\Controllers;
 
 use App\Models\Customer;
+use App\Models\CustomerLedgerEntry;
 use App\Models\CustomerPayment;
 use App\Models\Sales;
 use App\Models\Store;
 use App\Services\GstLookupService;
+use App\Services\CustomerLedgerService;
 use App\Support\AppResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -134,6 +136,14 @@ class CustomerController extends Controller implements HasMiddleware
                     $storeId
                 )
             )
+
+            ->addSelect([
+                'current_balance' => CustomerLedgerEntry::query()
+                    ->selectRaw('COALESCE(SUM(debit - credit), 0)')
+                    ->whereColumn('customer_id', 'customers.id')
+                    ->where('company_id', $companyId)
+                    ->where('store_id', $storeId),
+            ])
 
             ->withCount(
                 'stores'
@@ -263,6 +273,15 @@ class CustomerController extends Controller implements HasMiddleware
                 'credit_days' =>
                 (int) $customer->credit_days,
 
+                'current_balance' =>
+                round((float) $customer->current_balance, 2),
+
+                'due_amount' =>
+                max(0, round((float) $customer->current_balance, 2)),
+
+                'advance_amount' =>
+                max(0, -round((float) $customer->current_balance, 2)),
+
                 'status' =>
                 (bool) $customer->status,
 
@@ -366,7 +385,8 @@ class CustomerController extends Controller implements HasMiddleware
     */
 
     public function store(
-        Request $request
+        Request $request,
+        CustomerLedgerService $customerLedgerService
     ): RedirectResponse {
 
         [
@@ -508,7 +528,8 @@ class CustomerController extends Controller implements HasMiddleware
                 function () use (
                     $validated,
                     $companyId,
-                    $storeId
+                    $storeId,
+                    $customerLedgerService
                 ) {
 
                     $customer =
@@ -615,6 +636,13 @@ class CustomerController extends Controller implements HasMiddleware
                             $storeId,
                         ]);
 
+                    $customerLedgerService->ensureOpeningBalance(
+                        $customer,
+                        $companyId,
+                        $storeId,
+                        auth()->id()
+                    );
+
 
                     return $customer;
                 }
@@ -692,6 +720,7 @@ class CustomerController extends Controller implements HasMiddleware
                     'invoice_no',
                     'invoice_date',
                     'grand_total',
+                    'advance_used',
                     'paid_amount',
                     'balance_amount',
                     'status',
@@ -716,6 +745,12 @@ class CustomerController extends Controller implements HasMiddleware
 
                 'grand_total' =>
                 (float) $sale->grand_total,
+
+                'advance_used' =>
+                (float) $sale->advance_used,
+
+                'direct_paid_amount' =>
+                (float) $sale->direct_paid_amount,
 
                 'paid_amount' =>
                 (float) $sale->paid_amount,
@@ -816,6 +851,7 @@ class CustomerController extends Controller implements HasMiddleware
                     'customer_id',
                     $customer->id
                 )
+                ->where('status', Sales::STATUS_COMPLETED)
                 ->sum(
                     'grand_total'
                 );
@@ -835,6 +871,7 @@ class CustomerController extends Controller implements HasMiddleware
                     'customer_id',
                     $customer->id
                 )
+                ->where('status', Sales::STATUS_COMPLETED)
                 ->sum(
                     'paid_amount'
                 );
@@ -866,19 +903,19 @@ class CustomerController extends Controller implements HasMiddleware
             : 0;
 
 
-        $currentBalance =
-            max(
-                0,
-                $openingDebit
-                    +
-                    $totalSales
-                    -
-                    $salesPaid
-                    -
-                    $separatePayments
-                    -
-                    $openingCredit
-            );
+        $currentBalance = round(
+            (float) CustomerLedgerEntry::query()
+                ->forContext($companyId, $storeId)
+                ->forCustomer($customer->id)
+                ->selectRaw(
+                    'COALESCE(SUM(debit - credit), 0) AS balance'
+                )
+                ->value('balance'),
+            2
+        );
+
+        $dueAmount = max(0, $currentBalance);
+        $advanceAmount = max(0, -$currentBalance);
 
 
         $creditLimit =
@@ -889,7 +926,7 @@ class CustomerController extends Controller implements HasMiddleware
             $creditLimit > 0
             ? max(
                 0,
-                $creditLimit - $currentBalance
+                $creditLimit - $dueAmount
             )
             : 0;
 
@@ -908,6 +945,7 @@ class CustomerController extends Controller implements HasMiddleware
                 'customer_id',
                 $customer->id
             )
+            ->where('status', Sales::STATUS_COMPLETED)
             ->latest(
                 'invoice_date'
             )
@@ -974,6 +1012,12 @@ class CustomerController extends Controller implements HasMiddleware
 
                     'current_balance' =>
                     $currentBalance,
+
+                    'due_amount' =>
+                    $dueAmount,
+
+                    'advance_amount' =>
+                    $advanceAmount,
 
                     'credit_limit' =>
                     $creditLimit,
@@ -1091,7 +1135,8 @@ class CustomerController extends Controller implements HasMiddleware
 
     public function update(
         Request $request,
-        Customer $customer
+        Customer $customer,
+        CustomerLedgerService $customerLedgerService
     ): RedirectResponse {
 
         [
@@ -1234,6 +1279,13 @@ class CustomerController extends Controller implements HasMiddleware
             $validated['remarks']
                 ?? null,
         ]);
+
+        $customerLedgerService->ensureOpeningBalance(
+            $customer->refresh(),
+            $companyId,
+            $storeId,
+            auth()->id()
+        );
 
 
         return AppResponse::successRoute(
@@ -2036,6 +2088,18 @@ class CustomerController extends Controller implements HasMiddleware
             'Select an active company and branch before accessing customers.'
         );
 
+        $validStore = Store::query()
+            ->whereKey($storeId)
+            ->where('company_id', $companyId)
+            ->where('status', true)
+            ->exists();
+
+        abort_unless(
+            $validStore,
+            403,
+            'The active branch is invalid or inactive.'
+        );
+
 
         return [
             $companyId,
@@ -2087,100 +2151,11 @@ class CustomerController extends Controller implements HasMiddleware
         int $companyId,
         int $storeId
     ) {
-
-        $paymentAmount =
-            $this->paymentAmountColumn();
-
-
-        $paymentDate =
-            $this->paymentDateColumn();
-
-
-        $paymentReference =
-            $this->paymentReferenceColumn();
-
-
-        $salesQuery =
-            DB::table(
-                'sales'
-            )
-            ->where(
-                'company_id',
-                $companyId
-            )
-            ->where(
-                'store_id',
-                $storeId
-            )
-            ->where(
-                'customer_id',
-                $customer->id
-            )
-            ->selectRaw(
-                "
-                    id,
-                    invoice_date as transaction_date,
-                    'sale' as transaction_type,
-                    invoice_no as reference_no,
-                    grand_total as debit,
-                    0 as credit
-                    "
-            );
-
-
-        $paymentQuery =
-            DB::table(
-                'customer_payments'
-            )
-            ->where(
-                'company_id',
-                $companyId
-            )
-            ->when(
-                Schema::hasColumn(
-                    'customer_payments',
-                    'store_id'
-                ),
-                fn($query) =>
-                $query->where(
-                    'store_id',
-                    $storeId
-                )
-            )
-            ->where(
-                'customer_id',
-                $customer->id
-            )
-            ->selectRaw(
-                "
-                    id,
-                    {$paymentDate} as transaction_date,
-                    'payment' as transaction_type,
-                    {$paymentReference} as reference_no,
-                    0 as debit,
-                    {$paymentAmount} as credit
-                    "
-            );
-
-
-        $union =
-            $salesQuery->unionAll(
-                $paymentQuery
-            );
-
-
-        $transactions =
-            DB::query()
-            ->fromSub(
-                $union,
-                'customer_transactions'
-            )
-            ->orderByDesc(
-                'transaction_date'
-            )
-            ->orderByDesc(
-                'id'
-            )
+        $transactions = CustomerLedgerEntry::query()
+            ->forContext($companyId, $storeId)
+            ->forCustomer($customer->id)
+            ->orderByDesc('transaction_date')
+            ->orderByDesc('id')
             ->paginate(
                 15,
                 ['*'],
@@ -2188,55 +2163,48 @@ class CustomerController extends Controller implements HasMiddleware
             )
             ->withQueryString();
 
+        $transactions->through(function (
+            CustomerLedgerEntry $entry
+        ) use ($companyId, $storeId, $customer): array {
+            $balanceAfter = (float) CustomerLedgerEntry::query()
+                ->forContext($companyId, $storeId)
+                ->forCustomer($customer->id)
+                ->where(function ($query) use ($entry): void {
+                    $query
+                        ->whereDate(
+                            'transaction_date',
+                            '<',
+                            $entry->transaction_date
+                        )
+                        ->orWhere(function ($sameDate) use ($entry): void {
+                            $sameDate
+                                ->whereDate(
+                                    'transaction_date',
+                                    $entry->transaction_date
+                                )
+                                ->where('id', '<=', $entry->id);
+                        });
+                })
+                ->selectRaw(
+                    'COALESCE(SUM(debit - credit), 0) AS balance'
+                )
+                ->value('balance');
 
-        $runningBalance =
-            0;
-
-
-        $transactions->through(
-            function (
-                $row
-            ) use (
-                &$runningBalance
-            ) {
-
-                $debit =
-                    (float) $row->debit;
-
-
-                $credit =
-                    (float) $row->credit;
-
-
-                $runningBalance +=
-                    $debit - $credit;
-
-
-                return [
-                    'id' =>
-                    $row->id,
-
-                    'date' =>
-                    $row->transaction_date,
-
-                    'type' =>
-                    $row->transaction_type,
-
-                    'reference' =>
-                    $row->reference_no,
-
-                    'debit' =>
-                    $debit,
-
-                    'credit' =>
-                    $credit,
-
-                    'page_balance' =>
-                    $runningBalance,
-                ];
-            }
-        );
-
+            return [
+                'id' => $entry->id,
+                'date' => $entry->transaction_date,
+                'type' => $entry->transaction_type,
+                'reference' => $entry->reference_no,
+                'reference_type' => $entry->reference_type,
+                'reference_id' => $entry->reference_id,
+                'debit' => (float) $entry->debit,
+                'credit' => (float) $entry->credit,
+                'is_reversal' => (bool) $entry->is_reversal,
+                'remarks' => $entry->remarks,
+                'page_balance' => round($balanceAfter, 2),
+                'balance_type' => $balanceAfter < 0 ? 'Cr' : 'Dr',
+            ];
+        });
 
         return $transactions;
     }
@@ -2369,6 +2337,10 @@ class CustomerController extends Controller implements HasMiddleware
             ->where(
                 'customer_id',
                 $customerId
+            )
+            ->where(
+                'status',
+                CustomerPayment::STATUS_COMPLETED
             )
             ->sum(
                 $amountColumn

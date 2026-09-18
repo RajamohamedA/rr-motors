@@ -17,6 +17,7 @@ use App\Models\SalePayment;
 use App\Models\StockLedger;
 use App\Models\Store;
 use App\Services\StockService;
+use App\Services\CustomerLedgerService;
 use App\Support\AppResponse;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Database\Eloquent\Builder;
@@ -1500,8 +1501,11 @@ class SalesController extends Controller implements HasMiddleware
         ]);
     }
 
-    public function store(Request $request, StockService $stockService): RedirectResponse
-    {
+    public function store(
+        Request $request,
+        StockService $stockService,
+        CustomerLedgerService $customerLedgerService
+    ): RedirectResponse {
         [$companyId, $storeId] = $this->context($request);
         $validated = $this->validateSaleRequest($request);
         $userId = (int) $request->user()->id;
@@ -1512,12 +1516,20 @@ class SalesController extends Controller implements HasMiddleware
                 $companyId,
                 $storeId,
                 $stockService,
+                $customerLedgerService,
                 $userId
             ) {
                 $customer = $this->validateCustomer(
                     (int) $validated['customer_id'],
                     $companyId,
                     $storeId
+                );
+
+                $customerLedgerService->ensureOpeningBalance(
+                    $customer,
+                    $companyId,
+                    $storeId,
+                    $userId
                 );
 
                 $lines = $this->buildSaleLines(
@@ -1677,17 +1689,39 @@ class SalesController extends Controller implements HasMiddleware
                     $storeId
                 );
 
-                $paidAmount = $this->paymentTotal(
+                $directPaidAmount = $this->paymentTotal(
                     $paymentLines,
                     (float) ($validated['paid_amount'] ?? 0)
                 );
 
-                if ($paidAmount > $grandTotal) {
+                if ($directPaidAmount > $grandTotal) {
                     throw ValidationException::withMessages([
                         'paid_amount' =>
                         'Paid amount cannot exceed the net invoice amount.',
                     ]);
                 }
+
+                $availableAdvance = max(
+                    0,
+                    -$customerLedgerService->currentBalance(
+                        $companyId,
+                        $storeId,
+                        $customer->id
+                    )
+                );
+
+                $advanceUsed = round(
+                    min(
+                        $availableAdvance,
+                        max(0, $grandTotal - $directPaidAmount)
+                    ),
+                    2
+                );
+
+                $paidAmount = round(
+                    $directPaidAmount + $advanceUsed,
+                    2
+                );
 
                 $balanceAmount = round(
                     $grandTotal - $paidAmount,
@@ -1732,6 +1766,7 @@ class SalesController extends Controller implements HasMiddleware
                     'final_discount' => $finalDiscount,
                     'round_off' => $roundOff,
                     'grand_total' => $grandTotal,
+                    'advance_used' => $advanceUsed,
                     'paid_amount' => $paidAmount,
                     'balance_amount' => $balanceAmount,
                     'payment_status' => $paymentStatus,
@@ -1786,9 +1821,20 @@ class SalesController extends Controller implements HasMiddleware
                 $this->recordSalePayments(
                     $sale,
                     $paymentLines,
-                    $paidAmount,
+                    $directPaidAmount,
                     $companyId,
                     $storeId,
+                    $userId
+                );
+
+                $customerLedgerService->postSale(
+                    $sale,
+                    $userId
+                );
+
+                $customerLedgerService->syncSaleCollection(
+                    $sale,
+                    $directPaidAmount,
                     $userId
                 );
 
@@ -1901,7 +1947,8 @@ class SalesController extends Controller implements HasMiddleware
     public function update(
         Request $request,
         Sales $sale,
-        StockService $stockService
+        StockService $stockService,
+        CustomerLedgerService $customerLedgerService
     ): RedirectResponse {
         [$companyId, $storeId] = $this->context($request);
         $this->ensureSaleContext($sale, $companyId, $storeId);
@@ -1915,6 +1962,7 @@ class SalesController extends Controller implements HasMiddleware
                 $companyId,
                 $storeId,
                 $stockService,
+                $customerLedgerService,
                 $userId
             ) {
                 $lockedSale = Sales::query()
@@ -1957,6 +2005,49 @@ class SalesController extends Controller implements HasMiddleware
                     $companyId,
                     $storeId
                 );
+
+                $customerLedgerService->ensureOpeningBalance(
+                    $customer,
+                    $companyId,
+                    $storeId,
+                    $userId
+                );
+
+                $oldDirectPaid = max(
+                    0,
+                    round(
+                        (float) $lockedSale->paid_amount
+                            - (float) ($lockedSale->advance_used ?? 0),
+                        2
+                    )
+                );
+
+                if ((int) $lockedSale->customer_id === (int) $customer->id) {
+                    /*
+                    | Remove this sale and its direct collection from the
+                    | current ledger balance before recalculating advance.
+                    */
+                    $balanceBeforeThisSale = round(
+                        $customerLedgerService->currentBalance(
+                            $companyId,
+                            $storeId,
+                            $customer->id
+                        )
+                            - (float) $lockedSale->grand_total
+                            + $oldDirectPaid,
+                        2
+                    );
+                } else {
+                    /*
+                    | The invoice is being moved to another customer. The new
+                    | customer's current credit balance is the available advance.
+                    */
+                    $balanceBeforeThisSale = $customerLedgerService->currentBalance(
+                        $companyId,
+                        $storeId,
+                        $customer->id
+                    );
+                }
 
                 $lines = $this->buildSaleLines(
                     $validated,
@@ -2099,17 +2190,35 @@ class SalesController extends Controller implements HasMiddleware
                     $storeId
                 );
 
-                $paidAmount = $this->paymentTotal(
+                $directPaidAmount = $this->paymentTotal(
                     $paymentLines,
                     (float) ($validated['paid_amount'] ?? 0)
                 );
 
-                if ($paidAmount > $grandTotal) {
+                if ($directPaidAmount > $grandTotal) {
                     throw ValidationException::withMessages([
                         'paid_amount' =>
                         'Paid amount cannot exceed the net invoice amount.',
                     ]);
                 }
+
+                $availableAdvance = max(
+                    0,
+                    -$balanceBeforeThisSale
+                );
+
+                $advanceUsed = round(
+                    min(
+                        $availableAdvance,
+                        max(0, $grandTotal - $directPaidAmount)
+                    ),
+                    2
+                );
+
+                $paidAmount = round(
+                    $directPaidAmount + $advanceUsed,
+                    2
+                );
 
                 $balanceAmount = round(
                     $grandTotal - $paidAmount,
@@ -2220,6 +2329,7 @@ class SalesController extends Controller implements HasMiddleware
                     'final_discount' => $finalDiscount,
                     'round_off' => $roundOff,
                     'grand_total' => $grandTotal,
+                    'advance_used' => $advanceUsed,
                     'paid_amount' => $paidAmount,
                     'balance_amount' => $balanceAmount,
                     'payment_status' => $paymentStatus,
@@ -2237,9 +2347,20 @@ class SalesController extends Controller implements HasMiddleware
                 $this->recordSalePayments(
                     $lockedSale,
                     $paymentLines,
-                    $paidAmount,
+                    $directPaidAmount,
                     $companyId,
                     $storeId,
+                    $userId
+                );
+
+                $customerLedgerService->postSale(
+                    $lockedSale->refresh(),
+                    $userId
+                );
+
+                $customerLedgerService->syncSaleCollection(
+                    $lockedSale,
+                    $directPaidAmount,
                     $userId
                 );
 
@@ -2289,7 +2410,8 @@ class SalesController extends Controller implements HasMiddleware
     public function destroy(
         Request $request,
         Sales $sale,
-        StockService $stockService
+        StockService $stockService,
+        CustomerLedgerService $customerLedgerService
     ): RedirectResponse {
         [$companyId, $storeId] = $this->context($request);
         $this->ensureSaleContext($sale, $companyId, $storeId);
@@ -2301,6 +2423,7 @@ class SalesController extends Controller implements HasMiddleware
                 $companyId,
                 $storeId,
                 $stockService,
+                $customerLedgerService,
                 $userId
             ) {
                 $lockedSale = Sales::query()
@@ -2370,6 +2493,21 @@ class SalesController extends Controller implements HasMiddleware
                     $storeId,
                     $userId,
                     'Sales invoice cancelled'
+                );
+
+                $customerLedgerService->reverseSaleCollection(
+                    $lockedSale,
+                    now(),
+                    'Reversal of collection for cancelled invoice '
+                        . $lockedSale->invoice_no,
+                    $userId
+                );
+
+                $customerLedgerService->reverseSale(
+                    $lockedSale,
+                    now(),
+                    'Cancellation of sale ' . $lockedSale->invoice_no,
+                    $userId
                 );
 
                 $lockedSale->update([

@@ -6,16 +6,34 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class SalesReturn extends Model
 {
+    public const STATUS_COMPLETED = 'completed';
+    public const STATUS_CANCELLED = 'cancelled';
+
+    public const REFUND_PENDING = 'pending';
+    public const REFUND_REFUNDED = 'refunded';
+    public const REFUND_CREDITED = 'credited';
+    public const REFUND_CANCELLED = 'cancelled';
+
+    public const METHOD_CASH = 'cash';
+    public const METHOD_BANK = 'bank';
+    public const METHOD_ORIGINAL_PAYMENT = 'original_payment';
+    public const METHOD_CUSTOMER_CREDIT = 'customer_credit';
+    public const METHOD_NONE = 'none';
+
+    protected $table = 'sales_returns';
+
     protected $fillable = [
         'company_id',
         'store_id',
         'sale_id',
+        'customer_id',
+        'account_id',
         'return_no',
         'return_date',
-        'customer_id',
         'billing_type',
         'sub_total',
         'discount_total',
@@ -29,19 +47,23 @@ class SalesReturn extends Model
         'remarks',
     ];
 
-    protected $casts = [
-        'company_id' => 'integer',
-        'store_id' => 'integer',
-        'sale_id' => 'integer',
-        'customer_id' => 'integer',
-        'return_date' => 'date',
-        'sub_total' => 'decimal:2',
-        'discount_total' => 'decimal:2',
-        'gst_total' => 'decimal:2',
-        'round_off' => 'decimal:2',
-        'total_amount' => 'decimal:2',
-        'refund_amount' => 'decimal:2',
-    ];
+    protected function casts(): array
+    {
+        return [
+            'company_id' => 'integer',
+            'store_id' => 'integer',
+            'sale_id' => 'integer',
+            'customer_id' => 'integer',
+            'account_id' => 'integer',
+            'return_date' => 'date',
+            'sub_total' => 'decimal:2',
+            'discount_total' => 'decimal:2',
+            'gst_total' => 'decimal:2',
+            'round_off' => 'decimal:2',
+            'total_amount' => 'decimal:2',
+            'refund_amount' => 'decimal:2',
+        ];
+    }
 
     /*
     |--------------------------------------------------------------------------
@@ -72,6 +94,12 @@ class SalesReturn extends Model
         return $this->belongsTo(Customer::class);
     }
 
+    /** Cash or bank account used when money was refunded. */
+    public function account(): BelongsTo
+    {
+        return $this->belongsTo(Account::class);
+    }
+
     public function items(): HasMany
     {
         return $this->hasMany(
@@ -80,9 +108,20 @@ class SalesReturn extends Model
         );
     }
 
+    /** Original cash/bank outflow generated for this refund. */
+    public function refundAccountTransaction(): HasOne
+    {
+        return $this->hasOne(
+            AccountTransaction::class,
+            'reference_id'
+        )
+            ->where('reference_type', 'sales_return_refund')
+            ->where('is_reversal', false);
+    }
+
     /*
     |--------------------------------------------------------------------------
-    | Context Scopes
+    | Query Scopes
     |--------------------------------------------------------------------------
     */
 
@@ -90,20 +129,14 @@ class SalesReturn extends Model
         Builder $query,
         int $companyId
     ): Builder {
-        return $query->where(
-            'company_id',
-            $companyId
-        );
+        return $query->where('company_id', $companyId);
     }
 
     public function scopeForStore(
         Builder $query,
         int $storeId
     ): Builder {
-        return $query->where(
-            'store_id',
-            $storeId
-        );
+        return $query->where('store_id', $storeId);
     }
 
     public function scopeForContext(
@@ -118,10 +151,21 @@ class SalesReturn extends Model
 
     public function scopeCompleted(Builder $query): Builder
     {
-        return $query->where(
-            'status',
-            'completed'
-        );
+        return $query->where('status', self::STATUS_COMPLETED);
+    }
+
+    public function scopeRefunded(Builder $query): Builder
+    {
+        return $query->where('refund_status', self::REFUND_REFUNDED);
+    }
+
+    public function scopeCustomerCredits(Builder $query): Builder
+    {
+        return $query->where(function (Builder $inner): void {
+            $inner
+                ->where('refund_status', self::REFUND_CREDITED)
+                ->orWhere('refund_method', self::METHOD_CUSTOMER_CREDIT);
+        });
     }
 
     /*
@@ -132,12 +176,12 @@ class SalesReturn extends Model
 
     public function isCompleted(): bool
     {
-        return $this->status === 'completed';
+        return $this->status === self::STATUS_COMPLETED;
     }
 
     public function isCancelled(): bool
     {
-        return $this->status === 'cancelled';
+        return $this->status === self::STATUS_CANCELLED;
     }
 
     public function isGstBill(): bool
@@ -152,40 +196,60 @@ class SalesReturn extends Model
 
     public function isRefunded(): bool
     {
-        return $this->refund_status === 'refunded';
+        return $this->refund_status === self::REFUND_REFUNDED;
     }
 
     public function isRefundPending(): bool
     {
-        return $this->refund_status === 'pending';
+        return $this->refund_status === self::REFUND_PENDING;
     }
 
     public function isCustomerCredit(): bool
     {
-        return $this->refund_status === 'credited'
-            || $this->refund_method === 'customer_credit';
+        return $this->refund_status === self::REFUND_CREDITED
+            || $this->refund_method === self::METHOD_CUSTOMER_CREDIT;
+    }
+
+    public function requiresRefundAccount(): bool
+    {
+        return $this->isRefunded()
+            && in_array(
+                $this->refund_method,
+                [
+                    self::METHOD_CASH,
+                    self::METHOD_BANK,
+                    self::METHOD_ORIGINAL_PAYMENT,
+                ],
+                true
+            );
+    }
+
+    public function hasCashRefund(): bool
+    {
+        return $this->isRefunded()
+            && (float) $this->refund_amount > 0;
     }
 
     /*
     |--------------------------------------------------------------------------
-    | Return Number
+    | Return Number Preview
     |--------------------------------------------------------------------------
     |
-    | return_no currently has a global unique index. Therefore, the generated
-    | number is globally unique rather than restarting for each branch.
+    | This is only a UI preview. The controller creates the document with a
+    | temporary unique value and changes it to SRT{id} after insertion. That
+    | inserted-ID approach is the concurrency-safe final return number.
     |
     */
 
     public static function generateReturnNo(): string
     {
-        $lastId = (int) self::query()->max('id');
+        $nextId = ((int) self::query()->max('id')) + 1;
 
-        return 'SRT'
-            . str_pad(
-                (string) ($lastId + 1),
-                6,
-                '0',
-                STR_PAD_LEFT
-            );
+        return 'SRT' . str_pad(
+            (string) $nextId,
+            6,
+            '0',
+            STR_PAD_LEFT
+        );
     }
 }

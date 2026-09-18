@@ -2,6 +2,8 @@
 
 use App\Http\Controllers\SupplierLedgerController;
 use App\Http\Controllers\SupplierPaymentController;
+use App\Http\Controllers\CustomerPaymentController;
+use App\Http\Controllers\CustomerLedgerController;
 use Illuminate\Support\Facades\Route;
 
 
@@ -291,4 +293,256 @@ Route::middleware([
     )->name(
         'supplier-ledger.index'
     );
+
+    /*
+    |--------------------------------------------------------------------------
+    | Customer Payment AJAX Routes
+    |--------------------------------------------------------------------------
+    |
+    | These routes must stay above /customer-payments/{customerPayment}.
+    |
+    */
+
+    Route::get(
+        '/customer-payments/customers/search',
+        [
+            CustomerPaymentController::class,
+            'searchCustomers',
+        ]
+    )->name(
+        'customer-payments.customers.search'
+    );
+
+    Route::get(
+        '/customer-payments/customers/{customer}/sales',
+        [
+            CustomerPaymentController::class,
+            'customerSales',
+        ]
+    )
+        ->whereNumber('customer')
+        ->name(
+            'customer-payments.customers.sales'
+        );
+
+    /*
+    |--------------------------------------------------------------------------
+    | Compatible Invoice Search Routes
+    |--------------------------------------------------------------------------
+    */
+
+    Route::get(
+        '/customer-payments/invoices/search',
+        [
+            CustomerPaymentController::class,
+            'searchInvoice',
+        ]
+    )->name(
+        'customer-payments.invoices.search'
+    );
+
+    Route::get(
+        '/customer-payments/invoices/{sale}',
+        [
+            CustomerPaymentController::class,
+            'invoiceDetails',
+        ]
+    )
+        ->whereNumber('sale')
+        ->name(
+            'customer-payments.invoices.show'
+        );
+
+    /*
+    |--------------------------------------------------------------------------
+    | Cancel Customer Payment
+    |--------------------------------------------------------------------------
+    |
+    | Posted receipts are never edited or deleted. Cancellation creates
+    | reversing account and customer-ledger entries.
+    |
+    */
+
+    Route::patch(
+        '/customer-payments/{customerPayment}/cancel',
+        [
+            CustomerPaymentController::class,
+            'cancel',
+        ]
+    )
+        ->whereNumber('customerPayment')
+        ->name(
+            'customer-payments.cancel'
+        );
+
+    /*
+    |--------------------------------------------------------------------------
+    | Print and PDF
+    |--------------------------------------------------------------------------
+    */
+
+    Route::get(
+        '/customer-payments/{customerPayment}/print',
+        [
+            CustomerPaymentController::class,
+            'print',
+        ]
+    )
+        ->whereNumber('customerPayment')
+        ->name(
+            'customer-payments.print'
+        );
+
+    Route::get(
+        '/customer-payments/{customerPayment}/pdf',
+        [
+            CustomerPaymentController::class,
+            'pdf',
+        ]
+    )
+        ->whereNumber('customerPayment')
+        ->name(
+            'customer-payments.pdf'
+        );
+
+    /*
+    |--------------------------------------------------------------------------
+    | Main Customer Payment Routes
+    |--------------------------------------------------------------------------
+    */
+
+    Route::get(
+        '/customer-payments',
+        [
+            CustomerPaymentController::class,
+            'index',
+        ]
+    )->name(
+        'customer-payments.index'
+    );
+
+    Route::get(
+        '/customer-payments/create',
+        [
+            CustomerPaymentController::class,
+            'create',
+        ]
+    )->name(
+        'customer-payments.create'
+    );
+
+    Route::post(
+        '/customer-payments',
+        [
+            CustomerPaymentController::class,
+            'store',
+        ]
+    )->name(
+        'customer-payments.store'
+    );
+
+    Route::get(
+        '/customer-payments/{customerPayment}',
+        [
+            CustomerPaymentController::class,
+            'show',
+        ]
+    )
+        ->whereNumber('customerPayment')
+        ->name(
+            'customer-payments.show'
+        );
+
+        /*
+        |--------------------------------------------------------------------------
+        | Customer Ledger
+        |--------------------------------------------------------------------------
+        |
+        | Customer Ledger is a read-only accounting register. Entries are created
+        | by sales, sales returns, customer receipts and their reversing actions.
+        | They must never be created, edited or deleted directly through routes.
+        |
+        */
+
+    /*
+        |--------------------------------------------------------------------------
+        | AJAX Customer Search
+        |--------------------------------------------------------------------------
+        */
+
+    Route::get(
+            '/customer-ledger/customers/search',
+            [
+                CustomerLedgerController::class,
+                'searchCustomers',
+            ]
+        )->name(
+            'customer-ledger.customers.search'
+        );
+    
+        /*
+        |--------------------------------------------------------------------------
+        | Print Report
+        |--------------------------------------------------------------------------
+        */
+    
+        Route::get(
+            '/customer-ledger/print',
+            [
+                CustomerLedgerController::class,
+                'print',
+            ]
+        )->name(
+            'customer-ledger.print'
+        );
+    
+        /*
+        |--------------------------------------------------------------------------
+        | PDF Report
+        |--------------------------------------------------------------------------
+        */
+    
+        Route::get(
+            '/customer-ledger/pdf',
+            [
+                CustomerLedgerController::class,
+                'pdf',
+            ]
+        )->name(
+            'customer-ledger.pdf'
+        );
+    
+        /*
+        |--------------------------------------------------------------------------
+        | Excel / CSV Report
+        |--------------------------------------------------------------------------
+        */
+    
+        Route::get(
+            '/customer-ledger/excel',
+            [
+                CustomerLedgerController::class,
+                'excel',
+            ]
+        )->name(
+            'customer-ledger.excel'
+        );
+    
+        /*
+        |--------------------------------------------------------------------------
+        | Customer Ledger Register
+        |--------------------------------------------------------------------------
+        */
+    
+        Route::get(
+            '/customer-ledger',
+            [
+                CustomerLedgerController::class,
+                'index',
+            ]
+        )->name(
+            'customer-ledger.index'
+        );
+
+
 });
