@@ -11,6 +11,7 @@ use App\Http\Controllers\BrandController;
 use App\Http\Controllers\UnitController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\GodownController;
+use App\Http\Controllers\MechanicController;
 
 use App\Models\Store;
 
@@ -725,3 +726,45 @@ Route::get(
             ]);
     }
 );
+
+
+/*
+|--------------------------------------------------------------------------
+| Mechanic
+|--------------------------------------------------------------------------
+|
+| Mechanics are company masters shared through the mechanic_stores pivot.
+| Custom routes must remain above the resource route.
+|
+*/
+
+Route::patch(
+    '/mechanics/{mechanic}/toggle-status',
+    [
+        MechanicController::class,
+        'toggleStatus',
+    ]
+)
+    ->whereNumber('mechanic')
+    ->name(
+        'mechanics.toggle-status'
+    );
+
+Route::delete(
+    '/mechanics/{mechanic}/remove-from-branch',
+    [
+        MechanicController::class,
+        'removeFromBranch',
+    ]
+)
+    ->whereNumber('mechanic')
+    ->name(
+        'mechanics.remove-from-branch'
+    );
+
+Route::resource(
+    'mechanics',
+    MechanicController::class
+)->where([
+    'mechanic' => '[0-9]+',
+]);

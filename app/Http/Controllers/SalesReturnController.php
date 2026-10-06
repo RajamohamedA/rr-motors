@@ -5,12 +5,16 @@ namespace App\Http\Controllers;
 use App\Models\Account;
 use App\Models\AccountTransaction;
 use App\Models\CustomerLedgerEntry;
+use App\Models\MechanicCommission;
+use App\Models\MechanicLedgerEntry;
 use App\Models\Product;
 use App\Models\SaleItems;
 use App\Models\SaleReturnItem;
 use App\Models\Sales;
 use App\Models\SalesReturn;
 use App\Services\CustomerLedgerService;
+use App\Services\MechanicLedgerService;
+use App\Services\MechanicPaymentService;
 use App\Services\StockService;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Database\Eloquent\Builder;
@@ -214,7 +218,9 @@ class SalesReturnController extends Controller implements HasMiddleware
     public function store(
         Request $request,
         StockService $stockService,
-        CustomerLedgerService $customerLedgerService
+        CustomerLedgerService $customerLedgerService,
+        MechanicLedgerService $mechanicLedgerService,
+        MechanicPaymentService $mechanicPaymentService
     ): RedirectResponse {
         $validated = $this->validateReturnRequest($request);
         [$companyId, $storeId] = $this->context($request);
@@ -224,10 +230,15 @@ class SalesReturnController extends Controller implements HasMiddleware
             $companyId,
             $storeId,
             $stockService,
-            $customerLedgerService
+            $customerLedgerService,
+            $mechanicLedgerService,
+            $mechanicPaymentService
         ) {
             $sale = Sales::query()
-                ->with('items.product')
+                ->with([
+                    'items.product',
+                    'mechanicCommission',
+                ])
                 ->lockForUpdate()
                 ->findOrFail($validated['sale_id']);
 
@@ -290,6 +301,18 @@ class SalesReturnController extends Controller implements HasMiddleware
                 $customerLedgerService
             );
 
+            $this->postMechanicCommissionReturn(
+                $return,
+                $sale,
+                $totals['sub_total'],
+                $mechanicLedgerService
+            );
+
+            $this->refreshMechanicCommission(
+                $sale,
+                $mechanicPaymentService
+            );
+
             $this->recalculateSaleBalance($sale);
 
             return $return;
@@ -309,7 +332,8 @@ class SalesReturnController extends Controller implements HasMiddleware
         $salesReturn->load([
             'company',
             'store',
-            'sale',
+            'sale.mechanic',
+            'sale.mechanicCommission.completedSalesReturns',
             'customer',
             'account',
             'refundAccountTransaction',
@@ -343,10 +367,13 @@ class SalesReturnController extends Controller implements HasMiddleware
             ->orderBy('id')
             ->get();
 
+        $mechanicImpact = $this->mechanicImpact($salesReturn);
+
         return Inertia::render('SalesReturns/Show', [
             'salesReturn' => $salesReturn,
             'refundReversal' => $refundReversal,
             'ledgerEntries' => $ledgerEntries,
+            'mechanicImpact' => $mechanicImpact,
         ]);
     }
 
@@ -377,7 +404,9 @@ class SalesReturnController extends Controller implements HasMiddleware
         Request $request,
         SalesReturn $salesReturn,
         StockService $stockService,
-        CustomerLedgerService $customerLedgerService
+        CustomerLedgerService $customerLedgerService,
+        MechanicLedgerService $mechanicLedgerService,
+        MechanicPaymentService $mechanicPaymentService
     ): RedirectResponse {
         $validated = $this->validateReturnRequest($request);
         [$companyId, $storeId] = $this->context($request);
@@ -389,13 +418,16 @@ class SalesReturnController extends Controller implements HasMiddleware
             $companyId,
             $storeId,
             $stockService,
-            $customerLedgerService
+            $customerLedgerService,
+            $mechanicLedgerService,
+            $mechanicPaymentService
         ) {
             $return = SalesReturn::query()
                 ->with([
                     'items.product',
                     'items.saleItem',
                     'sale.items.product',
+                    'sale.mechanicCommission',
                 ])
                 ->lockForUpdate()
                 ->findOrFail($salesReturn->id);
@@ -411,6 +443,13 @@ class SalesReturnController extends Controller implements HasMiddleware
                     'sale_id' => 'The original invoice cannot be changed.',
                 ]);
             }
+
+            $this->reverseMechanicCommissionReturn(
+                $return,
+                $mechanicLedgerService,
+                'Reversal before editing sales return '
+                    . $return->return_no
+            );
 
             $this->reverseStock($return, $stockService, 'EDIT_REVERSE');
             $return->items()->delete();
@@ -461,6 +500,19 @@ class SalesReturnController extends Controller implements HasMiddleware
                 $customerLedgerService
             );
 
+            $this->postMechanicCommissionReturn(
+                $return,
+                $return->sale,
+                $totals['sub_total'],
+                $mechanicLedgerService,
+                $return->id
+            );
+
+            $this->refreshMechanicCommission(
+                $return->sale,
+                $mechanicPaymentService
+            );
+
             $this->recalculateSaleBalance($return->sale);
         });
 
@@ -473,14 +525,18 @@ class SalesReturnController extends Controller implements HasMiddleware
         Request $request,
         SalesReturn $salesReturn,
         StockService $stockService,
-        CustomerLedgerService $customerLedgerService
+        CustomerLedgerService $customerLedgerService,
+        MechanicLedgerService $mechanicLedgerService,
+        MechanicPaymentService $mechanicPaymentService
     ): RedirectResponse {
         $this->ensureReturnContext($request, $salesReturn);
 
         DB::transaction(function () use (
             $salesReturn,
             $stockService,
-            $customerLedgerService
+            $customerLedgerService,
+            $mechanicLedgerService,
+            $mechanicPaymentService
         ) {
             $return = SalesReturn::query()
                 ->with([
@@ -511,10 +567,22 @@ class SalesReturnController extends Controller implements HasMiddleware
                 auth()->id()
             );
 
+            $this->reverseMechanicCommissionReturn(
+                $return,
+                $mechanicLedgerService,
+                'Cancellation of mechanic commission adjustment for '
+                    . $return->return_no
+            );
+
             $return->update([
                 'status' => 'cancelled',
                 'refund_status' => 'cancelled',
             ]);
+
+            $this->refreshMechanicCommission(
+                $return->sale,
+                $mechanicPaymentService
+            );
 
             $this->recalculateSaleBalance($return->sale);
         });
@@ -535,9 +603,11 @@ class SalesReturnController extends Controller implements HasMiddleware
 
         $this->loadForDocument($salesReturn);
 
+        $mechanicImpact = $this->mechanicImpact($salesReturn);
+
         return view(
             'sales_returns.print',
-            compact('salesReturn', 'paper')
+            compact('salesReturn', 'paper', 'mechanicImpact')
         );
     }
 
@@ -552,9 +622,11 @@ class SalesReturnController extends Controller implements HasMiddleware
 
         $this->loadForDocument($salesReturn);
 
+        $mechanicImpact = $this->mechanicImpact($salesReturn);
+
         return Pdf::loadView(
             'sales_returns.pdf',
-            compact('salesReturn', 'paper')
+            compact('salesReturn', 'paper', 'mechanicImpact')
         )
             ->setPaper($paper, 'portrait')
             ->download(
@@ -746,6 +818,160 @@ class SalesReturnController extends Controller implements HasMiddleware
             'round_off' => round($total - $unrounded, 2),
             'total_amount' => round($total, 2),
         ];
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | Mechanic Commission Adjustment
+    |--------------------------------------------------------------------------
+    |
+    | A sales return reduces the commission earned on the original sale.
+    | The adjustment is posted as a debit in the mechanic ledger:
+    |
+    | - unpaid commission: reduces the mechanic payable;
+    | - already-paid commission: creates a debit/advance balance recoverable
+    |   from the mechanic or adjustable against a future commission.
+    |
+    */
+
+    private function postMechanicCommissionReturn(
+        SalesReturn $return,
+        Sales $sale,
+        float $returnedCommissionBase,
+        MechanicLedgerService $mechanicLedgerService,
+        ?int $excludeReturnId = null
+    ): void {
+        if (!$sale->isMechanicSale() || !$sale->mechanic_id) {
+            return;
+        }
+
+        $commission = $sale->mechanicCommission;
+
+        if (
+            !$commission
+            || $commission->isCancelled()
+            || (float) $commission->commission_amount <= 0
+        ) {
+            return;
+        }
+
+        $amount = $this->mechanicReturnCommissionAmount(
+            $return,
+            $commission,
+            $returnedCommissionBase,
+            $excludeReturnId
+        );
+
+        if ($amount <= 0) {
+            return;
+        }
+
+        $mechanicLedgerService->recordSalesReturnCommission(
+            salesReturn: $return,
+            mechanicId: (int) $sale->mechanic_id,
+            amount: $amount,
+            createdBy: auth()->id(),
+            invoiceNo: $sale->invoice_no
+        );
+    }
+
+    private function mechanicReturnCommissionAmount(
+        SalesReturn $return,
+        MechanicCommission $commission,
+        float $returnedCommissionBase,
+        ?int $excludeReturnId = null
+    ): float {
+        $commissionAmount = round(
+            (float) $commission->commission_amount,
+            2
+        );
+
+        $commissionBase = round(
+            (float) $commission->commission_base,
+            2
+        );
+
+        if ($commissionBase <= 0 || $commissionAmount <= 0) {
+            return 0;
+        }
+
+        $previousReturnBase = (float) SalesReturn::query()
+            ->where('company_id', $return->company_id)
+            ->where('store_id', $return->store_id)
+            ->where('sale_id', $return->sale_id)
+            ->where('status', SalesReturn::STATUS_COMPLETED)
+            ->when(
+                $excludeReturnId ?? $return->id,
+                fn(Builder $query) =>
+                $query->where(
+                    'id',
+                    '!=',
+                    $excludeReturnId ?? $return->id
+                )
+            )
+            ->sum('sub_total');
+
+        $previouslyReduced = round(
+            $commissionAmount
+                * min(1, max(0, $previousReturnBase) / $commissionBase),
+            2
+        );
+
+        $remainingCommission = max(
+            0,
+            round($commissionAmount - $previouslyReduced, 2)
+        );
+
+        $currentReduction = round(
+            $commissionAmount
+                * min(
+                    1,
+                    max(0, $returnedCommissionBase) / $commissionBase
+                ),
+            2
+        );
+
+        return min($currentReduction, $remainingCommission);
+    }
+
+    private function reverseMechanicCommissionReturn(
+        SalesReturn $return,
+        MechanicLedgerService $mechanicLedgerService,
+        string $remarks
+    ): void {
+        $mechanicLedgerService->reverseReference(
+            companyId: (int) $return->company_id,
+            storeId: (int) $return->store_id,
+            referenceType: $return->getMorphClass(),
+            referenceId: (int) $return->id,
+            remarks: $remarks,
+            createdBy: auth()->id(),
+            transactionDate: now()->toDateString()
+        );
+    }
+
+    private function refreshMechanicCommission(
+        Sales $sale,
+        MechanicPaymentService $mechanicPaymentService
+    ): void {
+        if (!$sale->isMechanicSale() || !$sale->mechanic_id) {
+            return;
+        }
+
+        $commission = MechanicCommission::query()
+            ->where('company_id', $sale->company_id)
+            ->where('store_id', $sale->store_id)
+            ->where('sale_id', $sale->id)
+            ->lockForUpdate()
+            ->first();
+
+        if (!$commission || $commission->isCancelled()) {
+            return;
+        }
+
+        $mechanicPaymentService->refreshCommissionPaymentSummary(
+            $commission
+        );
     }
 
     private function saveLines(
@@ -1120,12 +1346,89 @@ class SalesReturnController extends Controller implements HasMiddleware
         $return->load([
             'company',
             'store',
-            'sale',
+            'sale.mechanic',
+            'sale.mechanicCommission.completedSalesReturns',
             'customer',
             'account',
             'refundAccountTransaction',
             'items.product.unit',
             'items.saleItem',
         ]);
+    }
+
+    private function mechanicImpact(
+        SalesReturn $salesReturn
+    ): ?array {
+        $commission = $salesReturn->sale?->mechanicCommission;
+        $mechanic = $salesReturn->sale?->mechanic;
+
+        if (!$commission || !$mechanic) {
+            return null;
+        }
+
+        $returnCommissionEntry = MechanicLedgerEntry::query()
+            ->forContext(
+                (int) $salesReturn->company_id,
+                (int) $salesReturn->store_id
+            )
+            ->forMechanic((int) $mechanic->id)
+            ->where(
+                'transaction_type',
+                MechanicLedgerEntry::TYPE_SALES_RETURN_COMMISSION
+            )
+            ->forReference(
+                $salesReturn->getMorphClass(),
+                (int) $salesReturn->id
+            )
+            ->first();
+
+        $originalCommission = round(
+            (float) $commission->commission_amount,
+            2
+        );
+        $returnedCommission = $commission->returnedCommissionAmount();
+        $effectiveCommission = $commission->effectiveCommissionAmount();
+        $paidCommission = round((float) $commission->paid_amount, 2);
+        $originalReturnDeduction = round(
+            (float) ($returnCommissionEntry?->debit ?? 0),
+            2
+        );
+        $reversedReturnDeduction = $returnCommissionEntry
+            ? round(
+                (float) $returnCommissionEntry
+                    ->reversals()
+                    ->sum('credit'),
+                2
+            )
+            : 0;
+        $netReturnDeduction = max(
+            0,
+            round(
+                $originalReturnDeduction - $reversedReturnDeduction,
+                2
+            )
+        );
+
+        return [
+            'mechanic' => [
+                'id' => (int) $mechanic->id,
+                'mechanic_code' => $mechanic->mechanic_code,
+                'mechanic_name' => $mechanic->mechanic_name,
+            ],
+            'commission_status' => $commission->status,
+            'original_commission' => $originalCommission,
+            'this_return_original_deduction' => $originalReturnDeduction,
+            'this_return_reversed' => $reversedReturnDeduction,
+            'this_return_deduction' => $netReturnDeduction,
+            'total_return_deduction' => $returnedCommission,
+            'effective_commission' => $effectiveCommission,
+            'paid_commission' => $paidCommission,
+            'payable_balance' => max(
+                0,
+                round($effectiveCommission - $paidCommission, 2)
+            ),
+            'advance_amount' => $commission->excessPaidAdvanceAmount(),
+            'ledger_entry_id' => $returnCommissionEntry?->id,
+        ];
     }
 }

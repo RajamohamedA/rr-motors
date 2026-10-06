@@ -16,6 +16,7 @@ use App\Models\SalePayment;
 use App\Models\Sales;
 use App\Models\StockLedger;
 use App\Models\Store;
+use App\Services\MechanicLedgerService;
 use App\Services\StockService;
 use App\Support\AppResponse;
 use Barryvdh\DomPDF\Facade\Pdf;
@@ -1068,7 +1069,8 @@ class QuotationController extends Controller implements HasMiddleware
     public function convertToSale(
         Request $request,
         Quotation $quotation,
-        StockService $stockService
+        StockService $stockService,
+        MechanicLedgerService $mechanicLedgerService
     ): RedirectResponse {
         [$companyId, $storeId] = $this->context($request);
         $this->ensureQuotationContext($quotation, $companyId, $storeId);
@@ -1116,6 +1118,7 @@ class QuotationController extends Controller implements HasMiddleware
                 $companyId,
                 $storeId,
                 $stockService,
+                $mechanicLedgerService,
                 $userId
             ) {
                 $document = Quotation::query()
@@ -1332,7 +1335,7 @@ class QuotationController extends Controller implements HasMiddleware
                     && $commission['mechanic_id']
                     && $commission['commission_amount'] > 0
                 ) {
-                    MechanicCommission::create([
+                    $mechanicCommission = MechanicCommission::create([
                         'company_id' => $companyId,
                         'store_id' => $storeId,
                         'mechanic_id' => $commission['mechanic_id'],
@@ -1350,6 +1353,11 @@ class QuotationController extends Controller implements HasMiddleware
                         'remarks' => 'Commission generated from sale '
                             . $sale->invoice_no,
                     ]);
+
+                    $mechanicLedgerService->recordCommission(
+                        $mechanicCommission,
+                        $userId
+                    );
                 }
 
                 $document->update([

@@ -9,6 +9,7 @@ $company = $salesReturn->company;
 $store = $salesReturn->store;
 $sale = $salesReturn->sale;
 $refundAccount = $salesReturn->account;
+$mechanicImpact = $mechanicImpact ?? null;
 @endphp
 
 <!DOCTYPE html>
@@ -279,6 +280,63 @@ $refundAccount = $salesReturn->account;
             color: #17324d;
             font-size: 12px;
             font-weight: 800;
+        }
+
+        .mechanic-impact {
+            margin: 0 0 8px;
+            border: 1px solid #d2a24d;
+            background: #fffaf0;
+        }
+
+        .mechanic-impact-title {
+            padding: 5px 7px;
+            color: #704507;
+            background: #f8dfad;
+            font-size: 9px;
+            font-weight: 800;
+            text-transform: uppercase;
+        }
+
+        .mechanic-impact table {
+            table-layout: fixed;
+        }
+
+        .mechanic-impact td {
+            width: 25%;
+            padding: 5px 7px;
+            border-top: 1px solid #ead3a8;
+            border-right: 1px solid #ead3a8;
+            vertical-align: top;
+        }
+
+        .mechanic-impact td:last-child {
+            border-right: 0;
+        }
+
+        .mechanic-impact span,
+        .mechanic-impact strong {
+            display: block;
+        }
+
+        .mechanic-impact span {
+            margin-bottom: 2px;
+            color: #7d6845;
+            font-size: 7.5px;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+
+        .mechanic-impact strong {
+            color: #3f2d10;
+            font-size: 9px;
+        }
+
+        .mechanic-impact .deduction strong {
+            color: #a3382e;
+        }
+
+        .mechanic-impact .advance strong {
+            color: #9a5a08;
         }
 
         .items th {
@@ -627,6 +685,60 @@ $refundAccount = $salesReturn->account;
                     </td>
                 </tr>
             </table>
+
+            @if ($mechanicImpact)
+            <section class="mechanic-impact">
+                <div class="mechanic-impact-title">
+                    Mechanic Commission Impact
+                </div>
+                <table>
+                    <tr>
+                        <td>
+                            <span>Mechanic</span>
+                            <strong>
+                                {{ $mechanicImpact['mechanic']['mechanic_name'] ?? '-' }}
+                                · {{ $mechanicImpact['mechanic']['mechanic_code'] ?? '-' }}
+                            </strong>
+                        </td>
+                        <td>
+                            <span>Original Commission</span>
+                            <strong>₹ {{ number_format((float) $mechanicImpact['original_commission'], 2) }}</strong>
+                        </td>
+                        <td class="deduction">
+                            <span>Net Return Deduction</span>
+                            <strong>₹ {{ number_format((float) $mechanicImpact['this_return_deduction'], 2) }}</strong>
+                            @if ((float) ($mechanicImpact['this_return_reversed'] ?? 0) > 0)
+                            <span style="margin-top: 2px; color: #16794a;">
+                                Reversed: ₹ {{ number_format((float) $mechanicImpact['this_return_reversed'], 2) }}
+                            </span>
+                            @endif
+                        </td>
+                        <td>
+                            <span>Total Return Deduction</span>
+                            <strong>₹ {{ number_format((float) $mechanicImpact['total_return_deduction'], 2) }}</strong>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <span>Effective Commission</span>
+                            <strong>₹ {{ number_format((float) $mechanicImpact['effective_commission'], 2) }}</strong>
+                        </td>
+                        <td>
+                            <span>Already Paid</span>
+                            <strong>₹ {{ number_format((float) $mechanicImpact['paid_commission'], 2) }}</strong>
+                        </td>
+                        <td>
+                            <span>Current Payable</span>
+                            <strong>₹ {{ number_format((float) $mechanicImpact['payable_balance'], 2) }}</strong>
+                        </td>
+                        <td class="advance">
+                            <span>Mechanic Advance</span>
+                            <strong>₹ {{ number_format((float) $mechanicImpact['advance_amount'], 2) }}</strong>
+                        </td>
+                    </tr>
+                </table>
+            </section>
+            @endif
 
             <table class="items">
                 <thead>

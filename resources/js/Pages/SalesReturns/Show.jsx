@@ -12,6 +12,7 @@ export default function Show({
     salesReturn,
     refundReversal = null,
     ledgerEntries = [],
+    mechanicImpact = null,
 }) {
     const { flash = {} } = usePage().props;
 
@@ -302,6 +303,66 @@ export default function Show({
                             value={labelize(salesReturn?.status)}
                         />
                     </InfoWindow>
+
+                    {mechanicImpact && (
+                        <InfoWindow
+                            icon="bi-person-gear"
+                            title="Mechanic Commission Impact"
+                        >
+                            <InfoRow
+                                label="Mechanic"
+                                value={`${mechanicImpact.mechanic?.mechanic_name ?? "-"} (${mechanicImpact.mechanic?.mechanic_code ?? "-"})`}
+                                href={
+                                    mechanicImpact.mechanic?.id
+                                        ? `/mechanics/${mechanicImpact.mechanic.id}`
+                                        : null
+                                }
+                            />
+                            <InfoRow
+                                label="Original Commission"
+                                value={formatMoney(mechanicImpact.original_commission)}
+                            />
+                            <InfoRow
+                                label="Net Return Deduction"
+                                value={formatMoney(mechanicImpact.this_return_deduction)}
+                                strong
+                            />
+                            {numberValue(mechanicImpact.this_return_reversed) > 0 && (
+                                <InfoRow
+                                    label="Deduction Reversed"
+                                    value={formatMoney(mechanicImpact.this_return_reversed)}
+                                    strong
+                                />
+                            )}
+                            <InfoRow
+                                label="Total Return Deduction"
+                                value={formatMoney(mechanicImpact.total_return_deduction)}
+                            />
+                            <InfoRow
+                                label="Effective Commission"
+                                value={formatMoney(mechanicImpact.effective_commission)}
+                                strong
+                            />
+                            <InfoRow
+                                label="Already Paid"
+                                value={formatMoney(mechanicImpact.paid_commission)}
+                            />
+                            <InfoRow
+                                label="Current Payable"
+                                value={formatMoney(mechanicImpact.payable_balance)}
+                                strong
+                            />
+                            <InfoRow
+                                label="Mechanic Advance"
+                                value={formatMoney(mechanicImpact.advance_amount)}
+                                strong
+                            />
+                            <InfoRow
+                                label="Commission Status"
+                                value={mechanicImpact.commission_status}
+                            />
+                        </InfoWindow>
+                    )}
                 </div>
 
                 <section className="rr-return-window">
@@ -654,4 +715,3 @@ function displayDate(value) {
 }
 
 Show.layout = (page) => <BusinessLayout>{page}</BusinessLayout>;
-

@@ -1169,6 +1169,23 @@
     color: #b45309;
 }
 
+.rr-cp-selected-customer .balance.advance {
+    margin: 0 2px;
+    padding: 6px 10px;
+    border: 1px solid #fdba74;
+    border-radius: 6px;
+    background: #fff7ed;
+}
+
+.rr-cp-selected-customer .balance.advance small {
+    color: #9a3412;
+    font-weight: 700;
+}
+
+.rr-cp-selected-customer .balance.advance strong {
+    color: #c2410c;
+}
+
 .rr-cp-selected-customer>button {
     display: grid;
     width: 29px;
@@ -1184,11 +1201,27 @@
 .rr-cp-invoice-wrap {
     overflow-x: auto;
     margin: -14px;
+    scrollbar-color: #94a3b8 #e2e8f0;
+    scrollbar-width: thin;
+}
+
+.rr-cp-invoice-wrap::-webkit-scrollbar {
+    height: 9px;
+}
+
+.rr-cp-invoice-wrap::-webkit-scrollbar-track {
+    background: #e2e8f0;
+}
+
+.rr-cp-invoice-wrap::-webkit-scrollbar-thumb {
+    border: 2px solid #e2e8f0;
+    border-radius: 10px;
+    background: #94a3b8;
 }
 
 .rr-cp-invoice-table {
     width: 100%;
-    min-width: 750px;
+    min-width: 980px;
     border-collapse: collapse;
 }
 
@@ -1229,6 +1262,18 @@
 .rr-cp-invoice-table .money {
     text-align: right;
     white-space: nowrap;
+}
+
+.rr-cp-invoice-table td.returned {
+    color: #b91c1c;
+    font-weight: 750;
+    background: #fff7f7;
+}
+
+.rr-cp-invoice-table td.effective {
+    color: #1d4ed8;
+    font-weight: 750;
+    background: #f5f9ff;
 }
 
 .rr-cp-invoice-table td.outstanding {

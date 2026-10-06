@@ -4,6 +4,8 @@ use App\Http\Controllers\SupplierLedgerController;
 use App\Http\Controllers\SupplierPaymentController;
 use App\Http\Controllers\CustomerPaymentController;
 use App\Http\Controllers\CustomerLedgerController;
+use App\Http\Controllers\MechanicPaymentController;
+use App\Http\Controllers\MechanicLedgerController;
 use Illuminate\Support\Facades\Route;
 
 
@@ -453,7 +455,7 @@ Route::middleware([
             'customer-payments.show'
         );
 
-        /*
+    /*
         |--------------------------------------------------------------------------
         | Customer Ledger
         |--------------------------------------------------------------------------
@@ -471,78 +473,266 @@ Route::middleware([
         */
 
     Route::get(
-            '/customer-ledger/customers/search',
-            [
-                CustomerLedgerController::class,
-                'searchCustomers',
-            ]
-        )->name(
-            'customer-ledger.customers.search'
-        );
-    
-        /*
+        '/customer-ledger/customers/search',
+        [
+            CustomerLedgerController::class,
+            'searchCustomers',
+        ]
+    )->name(
+        'customer-ledger.customers.search'
+    );
+
+    /*
         |--------------------------------------------------------------------------
         | Print Report
         |--------------------------------------------------------------------------
         */
-    
-        Route::get(
-            '/customer-ledger/print',
-            [
-                CustomerLedgerController::class,
-                'print',
-            ]
-        )->name(
-            'customer-ledger.print'
-        );
-    
-        /*
+
+    Route::get(
+        '/customer-ledger/print',
+        [
+            CustomerLedgerController::class,
+            'print',
+        ]
+    )->name(
+        'customer-ledger.print'
+    );
+
+    /*
         |--------------------------------------------------------------------------
         | PDF Report
         |--------------------------------------------------------------------------
         */
-    
-        Route::get(
-            '/customer-ledger/pdf',
-            [
-                CustomerLedgerController::class,
-                'pdf',
-            ]
-        )->name(
-            'customer-ledger.pdf'
-        );
-    
-        /*
+
+    Route::get(
+        '/customer-ledger/pdf',
+        [
+            CustomerLedgerController::class,
+            'pdf',
+        ]
+    )->name(
+        'customer-ledger.pdf'
+    );
+
+    /*
         |--------------------------------------------------------------------------
         | Excel / CSV Report
         |--------------------------------------------------------------------------
         */
-    
-        Route::get(
-            '/customer-ledger/excel',
-            [
-                CustomerLedgerController::class,
-                'excel',
-            ]
-        )->name(
-            'customer-ledger.excel'
-        );
-    
-        /*
+
+    Route::get(
+        '/customer-ledger/excel',
+        [
+            CustomerLedgerController::class,
+            'excel',
+        ]
+    )->name(
+        'customer-ledger.excel'
+    );
+
+    /*
         |--------------------------------------------------------------------------
         | Customer Ledger Register
         |--------------------------------------------------------------------------
         */
-    
-        Route::get(
-            '/customer-ledger',
-            [
-                CustomerLedgerController::class,
-                'index',
-            ]
-        )->name(
-            'customer-ledger.index'
+
+    Route::get(
+        '/customer-ledger',
+        [
+            CustomerLedgerController::class,
+            'index',
+        ]
+    )->name(
+        'customer-ledger.index'
+    );
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Mechanic Payments
+    |--------------------------------------------------------------------------
+    |
+    | Keep search and commission lookup routes above the dynamic show route.
+    |
+    */
+
+    Route::get(
+        '/mechanic-payments/mechanics/search',
+        [
+            MechanicPaymentController::class,
+            'searchMechanics',
+        ]
+    )->name(
+        'mechanic-payments.mechanics.search'
+    );
+
+    Route::get(
+        '/mechanic-payments/mechanics/{mechanic}/commissions',
+        [
+            MechanicPaymentController::class,
+            'mechanicCommissions',
+        ]
+    )
+        ->whereNumber('mechanic')
+        ->name(
+            'mechanic-payments.mechanics.commissions'
+        );
+
+    Route::patch(
+        '/mechanic-payments/{mechanicPayment}/cancel',
+        [
+            MechanicPaymentController::class,
+            'cancel',
+        ]
+    )
+        ->whereNumber('mechanicPayment')
+        ->name(
+            'mechanic-payments.cancel'
+        );
+
+    Route::get(
+        '/mechanic-payments/{mechanicPayment}/print',
+        [
+            MechanicPaymentController::class,
+            'print',
+        ]
+    )
+        ->whereNumber('mechanicPayment')
+        ->name(
+            'mechanic-payments.print'
+        );
+
+    Route::get(
+        '/mechanic-payments/{mechanicPayment}/pdf',
+        [
+            MechanicPaymentController::class,
+            'pdf',
+        ]
+    )
+        ->whereNumber('mechanicPayment')
+        ->name(
+            'mechanic-payments.pdf'
+        );
+
+    Route::get(
+        '/mechanic-payments',
+        [
+            MechanicPaymentController::class,
+            'index',
+        ]
+    )->name(
+        'mechanic-payments.index'
+    );
+
+    Route::get(
+        '/mechanic-payments/create',
+        [
+            MechanicPaymentController::class,
+            'create',
+        ]
+    )->name(
+        'mechanic-payments.create'
+    );
+
+    Route::post(
+        '/mechanic-payments',
+        [
+            MechanicPaymentController::class,
+            'store',
+        ]
+    )->name(
+        'mechanic-payments.store'
+    );
+
+    Route::get(
+        '/mechanic-payments/{mechanicPayment}',
+        [
+            MechanicPaymentController::class,
+            'show',
+        ]
+    )
+        ->whereNumber('mechanicPayment')
+        ->name(
+            'mechanic-payments.show'
         );
 
 
+    /*
+    |--------------------------------------------------------------------------
+    | Mechanic Ledger
+    |--------------------------------------------------------------------------
+    |
+    | The mechanic ledger is read-only. Commission, payment, cancellation and
+    | reversal services create its entries; routes only display/export them.
+    |
+    */
+
+    /*
+    |--------------------------------------------------------------------------
+    | Mechanic Accounts Compatibility Route
+    |--------------------------------------------------------------------------
+    |
+    | Retains compatibility with sidebar links that use /mechanic-accounts.
+    |
+    */
+
+    Route::get(
+        '/mechanic-accounts',
+        [
+            MechanicLedgerController::class,
+            'index',
+        ]
+    )->name(
+        'mechanic-accounts.index'
+    );
+
+    Route::get(
+        '/mechanic-ledger/mechanics/search',
+        [
+            MechanicLedgerController::class,
+            'searchMechanics',
+        ]
+    )->name(
+        'mechanic-ledger.mechanics.search'
+    );
+
+    Route::get(
+        '/mechanic-ledger/print',
+        [
+            MechanicLedgerController::class,
+            'print',
+        ]
+    )->name(
+        'mechanic-ledger.print'
+    );
+
+    Route::get(
+        '/mechanic-ledger/pdf',
+        [
+            MechanicLedgerController::class,
+            'pdf',
+        ]
+    )->name(
+        'mechanic-ledger.pdf'
+    );
+
+    Route::get(
+        '/mechanic-ledger/excel',
+        [
+            MechanicLedgerController::class,
+            'excel',
+        ]
+    )->name(
+        'mechanic-ledger.excel'
+    );
+
+    Route::get(
+        '/mechanic-ledger',
+        [
+            MechanicLedgerController::class,
+            'index',
+        ]
+    )->name(
+        'mechanic-ledger.index'
+    );
 });

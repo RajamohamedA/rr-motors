@@ -582,7 +582,7 @@ export default function Create({ returnNo = "", accounts = [] }) {
                                                         <td className="number">
                                                             <input
                                                                 type="number"
-                                                                min="1"
+                                                                min="0"
                                                                 max={row.balance_qty}
                                                                 step="1"
                                                                 value={row.return_qty}

@@ -386,12 +386,41 @@ class PermissionSeeder extends Seeder
 
             /*
             |--------------------------------------------------------------------------
-            | Mechanic Accounts
+            | Mechanic
+            |--------------------------------------------------------------------------
+            */
+
+            'mechanic.view',
+            'mechanic.show',
+            'mechanic.create',
+            'mechanic.edit',
+            'mechanic.delete',
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | Mechanic Payments
+            |--------------------------------------------------------------------------
+            */
+
+            'mechanic-payment.view',
+            'mechanic-payment.show',
+            'mechanic-payment.create',
+            'mechanic-payment.delete',
+            'mechanic-payment.print',
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | Mechanic Ledger
             |--------------------------------------------------------------------------
             */
 
             'mechanic-account.view',
             'mechanic-ledger.view',
+            'mechanic-ledger.print',
+            'mechanic-ledger.pdf',
+            'mechanic-ledger.excel',
 
 
             /*

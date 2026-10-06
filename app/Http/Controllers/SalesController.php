@@ -18,6 +18,7 @@ use App\Models\StockLedger;
 use App\Models\Store;
 use App\Services\StockService;
 use App\Services\CustomerLedgerService;
+use App\Services\MechanicLedgerService;
 use App\Support\AppResponse;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Database\Eloquent\Builder;
@@ -1504,7 +1505,8 @@ class SalesController extends Controller implements HasMiddleware
     public function store(
         Request $request,
         StockService $stockService,
-        CustomerLedgerService $customerLedgerService
+        CustomerLedgerService $customerLedgerService,
+        MechanicLedgerService $mechanicLedgerService
     ): RedirectResponse {
         [$companyId, $storeId] = $this->context($request);
         $validated = $this->validateSaleRequest($request);
@@ -1517,6 +1519,7 @@ class SalesController extends Controller implements HasMiddleware
                 $storeId,
                 $stockService,
                 $customerLedgerService,
+                $mechanicLedgerService,
                 $userId
             ) {
                 $customer = $this->validateCustomer(
@@ -1843,7 +1846,7 @@ class SalesController extends Controller implements HasMiddleware
                     && $commission['mechanic_id']
                     && $commission['commission_amount'] > 0
                 ) {
-                    MechanicCommission::create([
+                    $mechanicCommission = MechanicCommission::create([
                         'company_id' => $companyId,
                         'store_id' => $storeId,
                         'mechanic_id' => $commission['mechanic_id'],
@@ -1859,6 +1862,11 @@ class SalesController extends Controller implements HasMiddleware
                         'status' => 'Pending',
                         'remarks' => 'Commission generated from sale ' . $sale->invoice_no,
                     ]);
+
+                    $mechanicLedgerService->recordCommission(
+                        $mechanicCommission->load('sale'),
+                        $userId
+                    );
                 }
 
                 return $sale;
@@ -1948,7 +1956,8 @@ class SalesController extends Controller implements HasMiddleware
         Request $request,
         Sales $sale,
         StockService $stockService,
-        CustomerLedgerService $customerLedgerService
+        CustomerLedgerService $customerLedgerService,
+        MechanicLedgerService $mechanicLedgerService
     ): RedirectResponse {
         [$companyId, $storeId] = $this->context($request);
         $this->ensureSaleContext($sale, $companyId, $storeId);
@@ -1963,6 +1972,7 @@ class SalesController extends Controller implements HasMiddleware
                 $storeId,
                 $stockService,
                 $customerLedgerService,
+                $mechanicLedgerService,
                 $userId
             ) {
                 $lockedSale = Sales::query()
@@ -2364,14 +2374,23 @@ class SalesController extends Controller implements HasMiddleware
                     $userId
                 );
 
-                $lockedSale->mechanicCommission()->delete();
+                $oldMechanicCommission = $lockedSale->mechanicCommission;
+
+                if ($oldMechanicCommission) {
+                    $mechanicLedgerService->reverseCommission(
+                        $oldMechanicCommission,
+                        $userId,
+                        'Reversal of mechanic commission for edited sale '
+                            . $lockedSale->invoice_no
+                    );
+                }
 
                 if (
                     $commission['sale_source'] === 'mechanic'
                     && $commission['mechanic_id']
                     && $commission['commission_amount'] > 0
                 ) {
-                    MechanicCommission::create([
+                    $mechanicCommissionData = [
                         'company_id' => $companyId,
                         'store_id' => $storeId,
                         'mechanic_id' => $commission['mechanic_id'],
@@ -2386,7 +2405,32 @@ class SalesController extends Controller implements HasMiddleware
                         'balance_amount' => $commission['commission_amount'],
                         'status' => 'Pending',
                         'remarks' => 'Commission generated from sale ' . $lockedSale->invoice_no,
-                    ]);
+                    ];
+
+                    if ($oldMechanicCommission) {
+                        $oldMechanicCommission->forceFill(
+                            $mechanicCommissionData
+                        )->save();
+
+                        $mechanicCommission = $oldMechanicCommission->refresh();
+                    } else {
+                        $mechanicCommission = MechanicCommission::create(
+                            $mechanicCommissionData
+                        );
+                    }
+
+                    $mechanicLedgerService->recordCommission(
+                        $mechanicCommission->load('sale'),
+                        $userId
+                    );
+                } elseif ($oldMechanicCommission) {
+                    $oldMechanicCommission->forceFill([
+                        'paid_amount' => 0,
+                        'balance_amount' => 0,
+                        'status' => MechanicCommission::STATUS_CANCELLED,
+                        'remarks' => 'Commission cancelled after sale edit '
+                            . $lockedSale->invoice_no,
+                    ])->save();
                 }
             });
 
@@ -2411,7 +2455,8 @@ class SalesController extends Controller implements HasMiddleware
         Request $request,
         Sales $sale,
         StockService $stockService,
-        CustomerLedgerService $customerLedgerService
+        CustomerLedgerService $customerLedgerService,
+        MechanicLedgerService $mechanicLedgerService
     ): RedirectResponse {
         [$companyId, $storeId] = $this->context($request);
         $this->ensureSaleContext($sale, $companyId, $storeId);
@@ -2424,6 +2469,7 @@ class SalesController extends Controller implements HasMiddleware
                 $storeId,
                 $stockService,
                 $customerLedgerService,
+                $mechanicLedgerService,
                 $userId
             ) {
                 $lockedSale = Sales::query()
@@ -2509,6 +2555,23 @@ class SalesController extends Controller implements HasMiddleware
                     'Cancellation of sale ' . $lockedSale->invoice_no,
                     $userId
                 );
+
+                if ($lockedSale->mechanicCommission) {
+                    $mechanicLedgerService->reverseCommission(
+                        $lockedSale->mechanicCommission,
+                        $userId,
+                        'Reversal of mechanic commission for cancelled sale '
+                            . $lockedSale->invoice_no
+                    );
+
+                    $lockedSale->mechanicCommission->forceFill([
+                        'paid_amount' => 0,
+                        'balance_amount' => 0,
+                        'status' => MechanicCommission::STATUS_CANCELLED,
+                        'remarks' => 'Commission cancelled with sale '
+                            . $lockedSale->invoice_no,
+                    ])->save();
+                }
 
                 $lockedSale->update([
                     'status' => Sales::STATUS_CANCELLED,
