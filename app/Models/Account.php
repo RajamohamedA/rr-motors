@@ -57,6 +57,33 @@ class Account extends Model
         return $query->where('status', true);
     }
 
+    public function scopeSearch(
+        Builder $query,
+        ?string $search
+    ): Builder {
+        $search = trim((string) $search);
+
+        if ($search === '') {
+            return $query;
+        }
+
+        return $query->where(function (Builder $query) use ($search) {
+            $query
+                ->where('account_name', 'like', "%{$search}%")
+                ->orWhere('account_code', 'like', "%{$search}%")
+                ->orWhere('bank_name', 'like', "%{$search}%")
+                ->orWhere('account_number', 'like', "%{$search}%")
+                ->orWhere('upi_id', 'like', "%{$search}%");
+        });
+    }
+
+    public function scopeOfType(
+        Builder $query,
+        string $type
+    ): Builder {
+        return $query->where('account_type', $type);
+    }
+
     public function company(): BelongsTo
     {
         return $this->belongsTo(Company::class);
@@ -87,6 +114,16 @@ class Account extends Model
         return $this->hasMany(CustomerPayment::class);
     }
 
+    public function supplierPayments(): HasMany
+    {
+        return $this->hasMany(SupplierPayment::class);
+    }
+
+    public function mechanicPayments(): HasMany
+    {
+        return $this->hasMany(MechanicPayment::class);
+    }
+
     public function balanceUntil(?string $date = null): float
     {
         $transactions = $this->transactions();
@@ -103,5 +140,28 @@ class Account extends Model
             (float) $this->opening_balance + (float) $movement,
             2
         );
+    }
+
+    public static function types(): array
+    {
+        return [
+            self::TYPE_CASH => 'Cash in Hand',
+            self::TYPE_BANK => 'Bank Account',
+            self::TYPE_UPI => 'UPI / GPay',
+            self::TYPE_CARD => 'Card Collection',
+            self::TYPE_OTHER => 'Other Account',
+        ];
+    }
+
+    public static function paymentModes(): array
+    {
+        return [
+            'cash' => 'Cash',
+            'gpay' => 'GPay / UPI',
+            'bank_transfer' => 'Bank Transfer',
+            'card' => 'Card',
+            'cheque' => 'Cheque',
+            'other' => 'Other',
+        ];
     }
 }

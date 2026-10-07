@@ -27,13 +27,11 @@ class CustomerLedgerController extends Controller implements HasMiddleware
             new Middleware('permission:customer-ledger.view'),
         ];
     }
-
     /*
     |--------------------------------------------------------------------------
     | Ledger Register
     |--------------------------------------------------------------------------
     */
-
     public function index(Request $request): Response
     {
         [$companyId, $storeId] = $this->context();
@@ -43,13 +41,11 @@ class CustomerLedgerController extends Controller implements HasMiddleware
             $companyId,
             $storeId
         );
-
         $entries = null;
         $openingBalance = 0.0;
         $periodDebit = 0.0;
         $periodCredit = 0.0;
         $closingBalance = 0.0;
-
         if ($customer) {
             $openingBalance = $this->openingBalance(
                 $companyId,
@@ -57,21 +53,18 @@ class CustomerLedgerController extends Controller implements HasMiddleware
                 $customer->id,
                 $filters['from_date']
             );
-
             $query = $this->periodQuery(
                 $companyId,
                 $storeId,
                 $customer->id,
                 $filters
             );
-
             $periodDebit = (float) (clone $query)->sum('debit');
             $periodCredit = (float) (clone $query)->sum('credit');
             $closingBalance = round(
                 $openingBalance + $periodDebit - $periodCredit,
                 2
             );
-
             $entries = $query
                 ->with(['creator:id,name'])
                 ->select('customer_ledger_entries.*')
@@ -84,12 +77,10 @@ class CustomerLedgerController extends Controller implements HasMiddleware
                 ->orderBy('id')
                 ->paginate($filters['per_page'])
                 ->withQueryString();
-
             $entries->through(
                 fn(CustomerLedgerEntry $entry): array => $this->entryData($entry)
             );
         }
-
         return Inertia::render('CustomerLedgers/Index', [
             'entries' => $entries,
             'customer' => $customer
@@ -100,23 +91,22 @@ class CustomerLedgerController extends Controller implements HasMiddleware
                 'period_debit' => $periodDebit,
                 'period_credit' => $periodCredit,
                 'closing_balance' => $closingBalance,
+                'receivable_amount' => max(0, $closingBalance),
+                'advance_amount' => max(0, -$closingBalance),
             ],
             'filters' => $filters,
             'transaction_types' => $this->transactionTypes(),
         ]);
     }
-
     /*
     |--------------------------------------------------------------------------
     | AJAX Customer Search
     |--------------------------------------------------------------------------
     */
-
     public function searchCustomers(Request $request): JsonResponse
     {
         [$companyId, $storeId] = $this->context();
         $search = trim($request->string('search')->toString());
-
         $customers = $this->customerQuery($companyId, $storeId)
             ->when($search !== '', function (Builder $query) use ($search): void {
                 $query->where(function (Builder $inner) use ($search): void {
@@ -142,35 +132,28 @@ class CustomerLedgerController extends Controller implements HasMiddleware
                     $storeId,
                     $customer->id
                 );
-
                 return $this->customerData($customer, $balance);
             })
             ->values();
-
         return response()->json(['data' => $customers]);
     }
-
     /*
     |--------------------------------------------------------------------------
     | Print / PDF / CSV
     |--------------------------------------------------------------------------
     */
-
     public function print(Request $request): ViewContract
     {
         $report = $this->reportData($request);
-
         return view('customer_ledgers.print', [
             ...$report,
             'pdfMode' => false,
         ]);
     }
-
     public function pdf(Request $request): HttpResponse
     {
         $report = $this->reportData($request);
         $customerCode = $report['customer']->customer_code ?: $report['customer']->id;
-
         return Pdf::loadView('customer_ledgers.pdf', [
             ...$report,
             'pdfMode' => true,
@@ -178,16 +161,13 @@ class CustomerLedgerController extends Controller implements HasMiddleware
             ->setPaper('a4', 'portrait')
             ->download("customer-ledger-{$customerCode}.pdf");
     }
-
     public function excel(Request $request): StreamedResponse
     {
         $report = $this->reportData($request);
         $customerCode = $report['customer']->customer_code ?: $report['customer']->id;
         $filename = "customer-ledger-{$customerCode}.csv";
-
         return response()->streamDownload(function () use ($report): void {
             $handle = fopen('php://output', 'wb');
-
             // UTF-8 BOM keeps customer names readable in Microsoft Excel.
             fwrite($handle, "\xEF\xBB\xBF");
             fputcsv($handle, ['Customer Ledger']);
@@ -204,7 +184,6 @@ class CustomerLedgerController extends Controller implements HasMiddleware
                 'Credit',
                 'Running Balance',
             ]);
-
             fputcsv($handle, [
                 $report['filters']['from_date'],
                 'Opening Balance',
@@ -214,7 +193,6 @@ class CustomerLedgerController extends Controller implements HasMiddleware
                 '',
                 $this->balanceLabel($report['summary']['opening_balance']),
             ]);
-
             foreach ($report['entries'] as $entry) {
                 fputcsv($handle, [
                     $entry['transaction_date'],
@@ -226,7 +204,6 @@ class CustomerLedgerController extends Controller implements HasMiddleware
                     $entry['balance_label'],
                 ]);
             }
-
             fputcsv($handle, []);
             fputcsv($handle, ['Period Debit', number_format($report['summary']['period_debit'], 2, '.', '')]);
             fputcsv($handle, ['Period Credit', number_format($report['summary']['period_credit'], 2, '.', '')]);
@@ -236,13 +213,11 @@ class CustomerLedgerController extends Controller implements HasMiddleware
             'Content-Type' => 'text/csv; charset=UTF-8',
         ]);
     }
-
     /*
     |--------------------------------------------------------------------------
     | Report Builder
     |--------------------------------------------------------------------------
     */
-
     private function reportData(Request $request): array
     {
         [$companyId, $storeId] = $this->context();
@@ -252,16 +227,13 @@ class CustomerLedgerController extends Controller implements HasMiddleware
             $companyId,
             $storeId
         );
-
         abort_unless($customer, 422, 'Select a customer before exporting the ledger.');
-
         $openingBalance = $this->openingBalance(
             $companyId,
             $storeId,
             $customer->id,
             $filters['from_date']
         );
-
         $models = $this->periodQuery(
             $companyId,
             $storeId,
@@ -272,11 +244,9 @@ class CustomerLedgerController extends Controller implements HasMiddleware
             ->orderBy('transaction_date')
             ->orderBy('id')
             ->get();
-
         $runningBalance = $openingBalance;
         $periodDebit = 0.0;
         $periodCredit = 0.0;
-
         $entries = $models->map(function (CustomerLedgerEntry $entry) use (
             &$runningBalance,
             &$periodDebit,
@@ -287,10 +257,8 @@ class CustomerLedgerController extends Controller implements HasMiddleware
             $periodDebit += $debit;
             $periodCredit += $credit;
             $runningBalance = round($runningBalance + $debit - $credit, 2);
-
             return $this->entryData($entry, $runningBalance);
         });
-
         return [
             'company' => Company::query()->findOrFail($companyId),
             'store' => Store::query()->findOrFail($storeId),
@@ -302,10 +270,11 @@ class CustomerLedgerController extends Controller implements HasMiddleware
                 'period_debit' => round($periodDebit, 2),
                 'period_credit' => round($periodCredit, 2),
                 'closing_balance' => round($runningBalance, 2),
+                'receivable_amount' => max(0, round($runningBalance, 2)),
+                'advance_amount' => max(0, round(-$runningBalance, 2)),
             ],
         ];
     }
-
     private function periodQuery(
         int $companyId,
         int $storeId,
@@ -336,7 +305,6 @@ class CustomerLedgerController extends Controller implements HasMiddleware
                 }
             );
     }
-
     private function openingBalance(
         int $companyId,
         int $storeId,
@@ -350,7 +318,6 @@ class CustomerLedgerController extends Controller implements HasMiddleware
             ->selectRaw('COALESCE(SUM(debit - credit), 0) AS balance')
             ->value('balance'), 2);
     }
-
     private function currentBalance(
         int $companyId,
         int $storeId,
@@ -362,14 +329,12 @@ class CustomerLedgerController extends Controller implements HasMiddleware
             ->selectRaw('COALESCE(SUM(debit - credit), 0) AS balance')
             ->value('balance'), 2);
     }
-
     private function entryData(
         CustomerLedgerEntry $entry,
         ?float $runningBalance = null
     ): array {
         $balance = $runningBalance
             ?? (float) ($entry->getAttribute('running_balance') ?? 0);
-
         return [
             'id' => $entry->id,
             'transaction_date' => $entry->transaction_date?->format('Y-m-d'),
@@ -389,25 +354,23 @@ class CustomerLedgerController extends Controller implements HasMiddleware
             'reference_url' => $this->referenceUrl($entry),
         ];
     }
-
     private function referenceUrl(CustomerLedgerEntry $entry): ?string
     {
         if (!$entry->reference_id) {
             return null;
         }
-
         $routeName = match ($entry->reference_type) {
             'sale' => 'sales.show',
+            'sale_collection' => 'sales.show',
             'customer_payment' => 'customer-payments.show',
             'sales_return' => 'sales-returns.show',
+            'sales_return_refund' => 'sales-returns.show',
             default => null,
         };
-
         return $routeName && Route::has($routeName)
             ? route($routeName, $entry->reference_id)
             : null;
     }
-
     private function validatedFilters(
         Request $request,
         bool $customerRequired = false
@@ -420,15 +383,12 @@ class CustomerLedgerController extends Controller implements HasMiddleware
             'search' => ['nullable', 'string', 'max:100'],
             'per_page' => ['nullable', 'integer', 'in:20,50,100'],
         ]);
-
         $fromDate = (string) ($validated['from_date'] ?? now()->startOfMonth()->toDateString());
         $toDate = (string) ($validated['to_date'] ?? now()->toDateString());
         $type = (string) ($validated['transaction_type'] ?? '');
-
         if ($type !== '' && !array_key_exists($type, $this->transactionTypes())) {
             $type = '';
         }
-
         return [
             'customer_id' => isset($validated['customer_id'])
                 ? (int) $validated['customer_id']
@@ -440,7 +400,6 @@ class CustomerLedgerController extends Controller implements HasMiddleware
             'per_page' => (int) ($validated['per_page'] ?? 20),
         ];
     }
-
     private function selectedCustomer(
         ?int $customerId,
         int $companyId,
@@ -449,11 +408,9 @@ class CustomerLedgerController extends Controller implements HasMiddleware
         if (!$customerId) {
             return null;
         }
-
         return $this->customerQuery($companyId, $storeId)
             ->findOrFail($customerId);
     }
-
     private function customerQuery(
         int $companyId,
         int $storeId
@@ -465,7 +422,6 @@ class CustomerLedgerController extends Controller implements HasMiddleware
                 $query->where('stores.id', $storeId);
             });
     }
-
     private function customerData(Customer $customer, float $balance): array
     {
         return [
@@ -478,7 +434,6 @@ class CustomerLedgerController extends Controller implements HasMiddleware
             'balance_label' => $this->balanceLabel($balance),
         ];
     }
-
     private function transactionTypes(): array
     {
         return collect(CustomerLedgerEntry::transactionTypes())
@@ -487,7 +442,6 @@ class CustomerLedgerController extends Controller implements HasMiddleware
             ])
             ->all();
     }
-
     private function typeLabel(string $type): string
     {
         return match ($type) {
@@ -496,49 +450,46 @@ class CustomerLedgerController extends Controller implements HasMiddleware
             CustomerLedgerEntry::TYPE_SALE_REVERSAL => 'Sale Reversal',
             CustomerLedgerEntry::TYPE_SALES_RETURN => 'Sales Return',
             CustomerLedgerEntry::TYPE_SALES_RETURN_REVERSAL => 'Return Reversal',
+            CustomerLedgerEntry::TYPE_SALES_RETURN_REFUND => 'Sales Return Refund',
+            CustomerLedgerEntry::TYPE_SALES_RETURN_REFUND_REVERSAL =>
+            'Refund Reversal',
             CustomerLedgerEntry::TYPE_CUSTOMER_PAYMENT => 'Customer Payment',
             CustomerLedgerEntry::TYPE_PAYMENT_REVERSAL => 'Payment Reversal',
             CustomerLedgerEntry::TYPE_ADJUSTMENT => 'Ledger Adjustment',
+            CustomerLedgerEntry::TYPE_ADJUSTMENT_REVERSAL =>
+            'Adjustment Reversal',
             default => ucwords(str_replace('_', ' ', $type)),
         };
     }
-
     private function balanceLabel(float $balance): string
     {
         if ($balance > 0.009) {
             return number_format(abs($balance), 2) . ' Dr';
         }
-
         if ($balance < -0.009) {
             return number_format(abs($balance), 2) . ' Cr';
         }
-
         return '0.00';
     }
-
     private function context(): array
     {
         $companyId = (int) session('active_company_id');
         $storeId = (int) session('active_store_id');
-
         abort_if(
             !$companyId || !$storeId,
             403,
             'Select an active company and branch before accessing customer ledger.'
         );
-
         $validStore = Store::query()
             ->whereKey($storeId)
             ->where('company_id', $companyId)
             ->where('status', true)
             ->exists();
-
         abort_unless(
             $validStore,
             403,
             'The active branch is invalid or inactive.'
         );
-
         return [$companyId, $storeId];
     }
 }

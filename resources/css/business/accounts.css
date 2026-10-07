@@ -1,0 +1,2845 @@
+:root {
+    --rr-acc-navy-950: #10233f;
+    --rr-acc-navy-900: #17345d;
+    --rr-acc-navy-800: #1f477b;
+    --rr-acc-blue-700: #1769aa;
+    --rr-acc-blue-600: #1b7fc4;
+    --rr-acc-blue-100: #dceeff;
+    --rr-acc-green-700: #087a55;
+    --rr-acc-green-100: #dff7ed;
+    --rr-acc-red-700: #b52a38;
+    --rr-acc-red-100: #ffe6e9;
+    --rr-acc-amber-700: #a35b00;
+    --rr-acc-amber-100: #fff1d5;
+    --rr-acc-violet-700: #6640ad;
+    --rr-acc-violet-100: #eee5ff;
+    --rr-acc-slate-900: #172133;
+    --rr-acc-slate-700: #3f4d61;
+    --rr-acc-slate-600: #59677a;
+    --rr-acc-slate-500: #718096;
+    --rr-acc-slate-300: #c6cfda;
+    --rr-acc-slate-200: #dce2ea;
+    --rr-acc-slate-100: #edf1f5;
+    --rr-acc-slate-50: #f6f8fb;
+    --rr-acc-white: #ffffff;
+    --rr-acc-shadow: 0 5px 16px rgba(20, 42, 72, 0.11);
+    --rr-acc-shadow-soft: 0 2px 7px rgba(20, 42, 72, 0.08);
+    --rr-acc-radius: 5px;
+}
+
+.rr-acc-page,
+.rr-acc-page *,
+.rr-acc-page *::before,
+.rr-acc-page *::after {
+    box-sizing: border-box;
+}
+
+.rr-acc-page {
+    width: 100%;
+    min-width: 0;
+    padding: 8px 10px 18px;
+    color: var(--rr-acc-slate-900);
+    background:
+        linear-gradient(rgba(255, 255, 255, 0.76), rgba(255, 255, 255, 0.76)),
+        repeating-linear-gradient(0deg,
+            transparent,
+            transparent 23px,
+            rgba(25, 63, 104, 0.025) 24px);
+    font-family: Inter, "Segoe UI", Arial, sans-serif;
+    font-size: 13px;
+}
+
+.rr-acc-page button,
+.rr-acc-page input,
+.rr-acc-page select,
+.rr-acc-page textarea {
+    font: inherit;
+}
+
+.rr-acc-page button,
+.rr-acc-page select,
+.rr-acc-page input[type="date"],
+.rr-acc-page input[type="checkbox"],
+.rr-acc-page input[type="radio"] {
+    cursor: pointer;
+}
+
+.rr-acc-alert {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    min-height: 38px;
+    margin: 8px 0;
+    padding: 8px 12px;
+    border: 1px solid;
+    border-left-width: 4px;
+    border-radius: var(--rr-acc-radius);
+    font-weight: 700;
+    box-shadow: var(--rr-acc-shadow-soft);
+}
+
+.rr-acc-alert.success {
+    color: #075d40;
+    border-color: #6cc9a7;
+    background: #e6f8f0;
+}
+
+.rr-acc-alert.error {
+    color: #922130;
+    border-color: #e99aa5;
+    background: #fff0f2;
+}
+
+.rr-acc-commandbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    min-height: 76px;
+    margin-top: 8px;
+    padding: 10px 12px;
+    color: #fff;
+    border: 1px solid #0d294b;
+    border-radius: var(--rr-acc-radius);
+    background:
+        linear-gradient(105deg, rgba(19, 55, 94, 0.98), rgba(30, 79, 126, 0.95)),
+        #17345d;
+    box-shadow: var(--rr-acc-shadow);
+}
+
+.rr-acc-command-title {
+    display: flex;
+    align-items: center;
+    min-width: 0;
+    gap: 12px;
+}
+
+.rr-acc-command-icon {
+    display: grid;
+    flex: 0 0 46px;
+    width: 46px;
+    height: 46px;
+    place-items: center;
+    border: 1px solid rgba(255, 255, 255, 0.34);
+    border-radius: 5px;
+    background: rgba(255, 255, 255, 0.12);
+    box-shadow: inset 0 1px rgba(255, 255, 255, 0.2);
+    font-size: 21px;
+}
+
+.rr-acc-command-title h1 {
+    margin: 1px 0 2px;
+    font-size: 18px;
+    font-weight: 800;
+    line-height: 1.25;
+}
+
+.rr-acc-command-title p {
+    margin: 0;
+    color: #d9e7f5;
+    font-size: 12px;
+}
+
+.rr-acc-eyebrow {
+    display: block;
+    color: #9fcef4;
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 0.11em;
+}
+
+.rr-acc-command-actions,
+.rr-acc-filter-actions,
+.rr-acc-row-actions {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.rr-acc-btn {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    min-height: 34px;
+    padding: 7px 12px;
+    border: 1px solid transparent;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: 800;
+    line-height: 1;
+    text-decoration: none;
+    white-space: nowrap;
+    cursor: pointer;
+    transition:
+        border-color 0.15s ease,
+        background 0.15s ease,
+        transform 0.15s ease;
+}
+
+.rr-acc-btn:hover:not(:disabled) {
+    transform: translateY(-1px);
+}
+
+.rr-acc-btn:focus-visible,
+.rr-acc-icon-btn:focus-visible,
+.rr-acc-field input:focus,
+.rr-acc-field select:focus,
+.rr-acc-field textarea:focus {
+    outline: 2px solid #78b9ed;
+    outline-offset: 1px;
+}
+
+.rr-acc-btn:disabled {
+    cursor: not-allowed;
+    opacity: 0.55;
+}
+
+.rr-acc-btn.primary,
+.rr-acc-btn.apply {
+    color: #fff;
+    border-color: #07558b;
+    background: linear-gradient(#2387c8, #126aa8);
+    box-shadow: inset 0 1px rgba(255, 255, 255, 0.25);
+}
+
+.rr-acc-btn.primary:hover,
+.rr-acc-btn.apply:hover {
+    background: linear-gradient(#1c76b5, #0d5c96);
+}
+
+.rr-acc-btn.secondary {
+    color: var(--rr-acc-slate-700);
+    border-color: var(--rr-acc-slate-300);
+    background: linear-gradient(#fff, #e9eef4);
+}
+
+.rr-acc-btn.filter {
+    color: #e9f4ff;
+    border-color: rgba(255, 255, 255, 0.3);
+    background: rgba(255, 255, 255, 0.09);
+}
+
+.rr-acc-btn.filter.active,
+.rr-acc-btn.filter:hover {
+    color: #fff;
+    background: rgba(255, 255, 255, 0.18);
+}
+
+.rr-acc-filter-dot {
+    width: 7px;
+    height: 7px;
+    border: 1px solid #fff;
+    border-radius: 50%;
+    background: #ffbe3f;
+}
+
+.rr-acc-summary-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 8px;
+    margin: 8px 0;
+}
+
+.rr-acc-summary-card {
+    position: relative;
+    display: flex;
+    align-items: center;
+    min-width: 0;
+    min-height: 88px;
+    gap: 11px;
+    padding: 10px 11px;
+    overflow: hidden;
+    border: 1px solid;
+    border-radius: var(--rr-acc-radius);
+    background: #fff;
+    box-shadow: var(--rr-acc-shadow-soft);
+}
+
+.rr-acc-summary-card::after {
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 4px;
+    height: 100%;
+    content: "";
+    background: currentColor;
+}
+
+.rr-acc-summary-card.navy {
+    color: var(--rr-acc-navy-800);
+    border-color: #a9bfd7;
+    background: linear-gradient(110deg, #f2f7fc, #fff 72%);
+}
+
+.rr-acc-summary-card.green {
+    color: var(--rr-acc-green-700);
+    border-color: #a7d9c6;
+    background: linear-gradient(110deg, #edfaf5, #fff 72%);
+}
+
+.rr-acc-summary-card.blue {
+    color: var(--rr-acc-blue-700);
+    border-color: #acd1ec;
+    background: linear-gradient(110deg, #eef8ff, #fff 72%);
+}
+
+.rr-acc-summary-card.violet {
+    color: var(--rr-acc-violet-700);
+    border-color: #cabce8;
+    background: linear-gradient(110deg, #f7f2ff, #fff 72%);
+}
+
+.rr-acc-summary-card.red {
+    color: var(--rr-acc-red-700);
+    border-color: #e1a7af;
+    background: linear-gradient(110deg, #fff0f2, #fff 72%);
+}
+
+.rr-acc-summary-icon {
+    display: grid;
+    flex: 0 0 42px;
+    width: 42px;
+    height: 42px;
+    place-items: center;
+    border: 1px solid currentColor;
+    border-radius: 5px;
+    background: rgba(255, 255, 255, 0.76);
+    font-size: 19px;
+}
+
+.rr-acc-summary-card>div {
+    min-width: 0;
+}
+
+.rr-acc-summary-card small,
+.rr-acc-summary-card strong,
+.rr-acc-summary-card p {
+    display: block;
+}
+
+.rr-acc-summary-card small {
+    margin-bottom: 1px;
+    color: var(--rr-acc-slate-600);
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+}
+
+.rr-acc-summary-card strong {
+    overflow: hidden;
+    color: currentColor;
+    font-size: clamp(15px, 1.35vw, 20px);
+    line-height: 1.3;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.rr-acc-summary-card p {
+    margin: 2px 0 0;
+    overflow: hidden;
+    color: var(--rr-acc-slate-500);
+    font-size: 10px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.rr-acc-filter-panel,
+.rr-acc-register,
+.rr-acc-form-card,
+.rr-acc-detail-card {
+    border: 1px solid var(--rr-acc-slate-300);
+    border-radius: var(--rr-acc-radius);
+    background: #fff;
+    box-shadow: var(--rr-acc-shadow-soft);
+}
+
+.rr-acc-filter-panel {
+    margin-bottom: 8px;
+    padding: 9px 10px 10px;
+}
+
+.rr-acc-panel-heading,
+.rr-acc-register-head,
+.rr-acc-card-heading {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.rr-acc-panel-heading {
+    padding: 0 1px 7px;
+    border-bottom: 1px solid var(--rr-acc-slate-200);
+}
+
+.rr-acc-panel-heading>div {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    color: var(--rr-acc-navy-800);
+    font-weight: 800;
+}
+
+.rr-acc-panel-heading small {
+    color: var(--rr-acc-slate-500);
+    font-size: 10px;
+}
+
+.rr-acc-filter-grid {
+    display: grid;
+    grid-template-columns: minmax(220px, 2fr) repeat(3, minmax(135px, 1fr));
+    gap: 8px;
+    padding-top: 8px;
+}
+
+.rr-acc-field {
+    display: block;
+    min-width: 0;
+}
+
+.rr-acc-field>span {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    margin-bottom: 4px;
+    color: var(--rr-acc-slate-700);
+    font-size: 10px;
+    font-weight: 800;
+    text-transform: uppercase;
+}
+
+.rr-acc-field>span i {
+    color: var(--rr-acc-blue-700);
+}
+
+.rr-acc-input-shell {
+    position: relative;
+}
+
+.rr-acc-field input,
+.rr-acc-field select,
+.rr-acc-field textarea {
+    width: 100%;
+    min-height: 34px;
+    padding: 6px 9px;
+    color: var(--rr-acc-slate-900);
+    border: 1px solid #adb9c7;
+    border-radius: 3px;
+    background: #fff;
+    font-size: 12px;
+    transition:
+        border-color 0.15s ease,
+        box-shadow 0.15s ease;
+}
+
+.rr-acc-field textarea {
+    min-height: 76px;
+    resize: vertical;
+}
+
+.rr-acc-field input:hover,
+.rr-acc-field select:hover,
+.rr-acc-field textarea:hover {
+    border-color: #5598ca;
+}
+
+.rr-acc-field input:focus,
+.rr-acc-field select:focus,
+.rr-acc-field textarea:focus {
+    border-color: #277bb6;
+    box-shadow: 0 0 0 2px rgba(39, 123, 182, 0.12);
+}
+
+.rr-acc-field input::placeholder,
+.rr-acc-field textarea::placeholder {
+    color: #8995a5;
+}
+
+.rr-acc-field .error,
+.rr-acc-error {
+    display: block;
+    margin-top: 3px;
+    color: var(--rr-acc-red-700);
+    font-size: 10px;
+    font-weight: 700;
+}
+
+.rr-acc-filter-actions {
+    justify-content: flex-end;
+    margin-top: 8px;
+    padding-top: 8px;
+    border-top: 1px solid var(--rr-acc-slate-200);
+}
+
+.rr-acc-register {
+    overflow: hidden;
+}
+
+.rr-acc-register-head {
+    min-height: 52px;
+    padding: 8px 10px;
+    color: var(--rr-acc-slate-900);
+    border-bottom: 1px solid #afbccb;
+    background: linear-gradient(#fafdff, #e7edf4);
+}
+
+.rr-acc-register-head>div {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.rr-acc-register-head>div>i {
+    display: grid;
+    width: 30px;
+    height: 30px;
+    place-items: center;
+    color: #fff;
+    border-radius: 3px;
+    background: var(--rr-acc-navy-800);
+}
+
+.rr-acc-register-head h2 {
+    margin: 0;
+    font-size: 14px;
+    font-weight: 800;
+}
+
+.rr-acc-register-head p {
+    margin: 1px 0 0;
+    color: var(--rr-acc-slate-600);
+    font-size: 10px;
+}
+
+.rr-acc-live-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 4px 8px;
+    color: #08704f;
+    border: 1px solid #8bcfb7;
+    border-radius: 999px;
+    background: #e5f8f1;
+    font-size: 10px;
+    font-weight: 800;
+}
+
+.rr-acc-live-badge i {
+    font-size: 6px;
+}
+
+.rr-acc-table-wrap {
+    width: 100%;
+    overflow-x: auto;
+    scrollbar-color: #9cabbc #eef2f6;
+    scrollbar-width: thin;
+}
+
+.rr-acc-table {
+    width: 100%;
+    min-width: 1040px;
+    border-collapse: separate;
+    border-spacing: 0;
+    font-size: 11px;
+}
+
+.rr-acc-table th {
+    height: 34px;
+    padding: 7px 8px;
+    color: #fff;
+    border-right: 1px solid #45688e;
+    border-bottom: 1px solid #102b4c;
+    background: linear-gradient(#315c88, #23486f);
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 0.025em;
+    text-align: left;
+    text-transform: uppercase;
+    white-space: nowrap;
+}
+
+.rr-acc-table th:last-child {
+    border-right: 0;
+}
+
+.rr-acc-table td {
+    height: 46px;
+    padding: 6px 8px;
+    color: var(--rr-acc-slate-900);
+    border-right: 1px solid #e0e5eb;
+    border-bottom: 1px solid #d7dee7;
+    background: #fff;
+    vertical-align: middle;
+}
+
+.rr-acc-table tbody tr:nth-child(even) td {
+    background: #f4f7fa;
+}
+
+.rr-acc-table tbody tr:hover td {
+    background: #e5f3ff;
+}
+
+.rr-acc-table tbody tr.inactive td {
+    color: #707b89;
+    background: #f4f4f4;
+}
+
+.rr-acc-table tbody tr {
+    cursor: default;
+}
+
+.rr-acc-table th.amount,
+.rr-acc-table td.amount {
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+}
+
+.rr-acc-table th.actions,
+.rr-acc-table td:last-child {
+    text-align: center;
+}
+
+.rr-acc-table td.amount.muted {
+    color: var(--rr-acc-slate-600);
+}
+
+.rr-acc-table td.balance {
+    color: #08704f;
+    font-weight: 900;
+}
+
+.rr-acc-table td.balance.negative {
+    color: var(--rr-acc-red-700);
+}
+
+.rr-acc-code {
+    display: inline-block;
+    color: #125f99;
+    font-weight: 900;
+    text-decoration: none;
+}
+
+.rr-acc-code:hover,
+.rr-acc-account-cell a:hover {
+    color: #073f6a;
+    text-decoration: underline;
+}
+
+.rr-acc-system {
+    display: block;
+    width: max-content;
+    margin-top: 2px;
+    padding: 1px 4px;
+    color: #60408e;
+    border: 1px solid #c8b6e4;
+    border-radius: 2px;
+    background: #f3edfd;
+    font-size: 8px;
+    font-weight: 900;
+    letter-spacing: 0.05em;
+}
+
+.rr-acc-account-cell {
+    display: flex;
+    align-items: center;
+    min-width: 190px;
+    gap: 8px;
+}
+
+.rr-acc-account-cell>div {
+    min-width: 0;
+}
+
+.rr-acc-account-cell a {
+    display: block;
+    overflow: hidden;
+    color: var(--rr-acc-slate-900);
+    font-size: 11px;
+    font-weight: 800;
+    text-decoration: none;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.rr-acc-account-cell small {
+    display: block;
+    max-width: 230px;
+    margin-top: 2px;
+    overflow: hidden;
+    color: var(--rr-acc-slate-500);
+    font-size: 9px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.rr-acc-type-icon {
+    display: grid;
+    flex: 0 0 30px;
+    width: 30px;
+    height: 30px;
+    place-items: center;
+    border: 1px solid;
+    border-radius: 4px;
+    font-size: 13px;
+}
+
+.rr-acc-type-icon.cash,
+.rr-acc-type-badge.cash {
+    color: #08704f;
+    border-color: #8ccdb5;
+    background: #e5f7ef;
+}
+
+.rr-acc-type-icon.bank,
+.rr-acc-type-badge.bank {
+    color: #125f99;
+    border-color: #98c5e5;
+    background: #e8f5ff;
+}
+
+.rr-acc-type-icon.upi,
+.rr-acc-type-badge.upi {
+    color: #6842a5;
+    border-color: #c6b4e3;
+    background: #f1eafe;
+}
+
+.rr-acc-type-icon.card,
+.rr-acc-type-badge.card {
+    color: #9b5700;
+    border-color: #e4bd80;
+    background: #fff3df;
+}
+
+.rr-acc-type-icon.other,
+.rr-acc-type-badge.other {
+    color: #4c596a;
+    border-color: #bdc7d1;
+    background: #edf1f5;
+}
+
+.rr-acc-type-badge,
+.rr-acc-status,
+.rr-acc-channel {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    white-space: nowrap;
+}
+
+.rr-acc-type-badge {
+    padding: 3px 6px;
+    border: 1px solid;
+    border-radius: 3px;
+    font-size: 9px;
+    font-weight: 800;
+}
+
+.rr-acc-channel {
+    color: var(--rr-acc-slate-700);
+    font-size: 10px;
+    font-weight: 700;
+}
+
+.rr-acc-channel i {
+    color: var(--rr-acc-blue-700);
+}
+
+.rr-acc-status {
+    padding: 3px 7px;
+    border: 1px solid;
+    border-radius: 999px;
+    font-size: 9px;
+    font-weight: 900;
+}
+
+.rr-acc-status i {
+    font-size: 5px;
+}
+
+.rr-acc-status.active {
+    color: #08704f;
+    border-color: #8ccdb5;
+    background: #e5f7ef;
+}
+
+.rr-acc-status.inactive {
+    color: #6d3740;
+    border-color: #d6a8ae;
+    background: #f9eaec;
+}
+
+.rr-acc-row-actions {
+    justify-content: center;
+}
+
+.rr-acc-icon-btn {
+    display: inline-grid;
+    width: 28px;
+    height: 27px;
+    padding: 0;
+    place-items: center;
+    border: 1px solid;
+    border-radius: 3px;
+    background: #fff;
+    font-size: 11px;
+    text-decoration: none;
+    cursor: pointer;
+    transition:
+        transform 0.12s ease,
+        filter 0.12s ease;
+}
+
+.rr-acc-icon-btn:hover {
+    z-index: 1;
+    filter: brightness(0.94);
+    transform: translateY(-1px);
+}
+
+.rr-acc-icon-btn.view {
+    color: #145f98;
+    border-color: #8cbce0;
+    background: #eaf6ff;
+}
+
+.rr-acc-icon-btn.edit {
+    color: #875500;
+    border-color: #dcb876;
+    background: #fff3dc;
+}
+
+.rr-acc-icon-btn.disable {
+    color: #a32635;
+    border-color: #dda0a9;
+    background: #ffebee;
+}
+
+.rr-acc-icon-btn.enable {
+    color: #08704f;
+    border-color: #89c9b1;
+    background: #e3f7ef;
+}
+
+.rr-acc-empty {
+    display: flex;
+    min-height: 220px;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    padding: 26px;
+    text-align: center;
+}
+
+.rr-acc-empty>span {
+    display: grid;
+    width: 56px;
+    height: 56px;
+    place-items: center;
+    color: #1d659d;
+    border: 1px solid #9ec9e7;
+    border-radius: 50%;
+    background: #eaf6ff;
+    font-size: 23px;
+}
+
+.rr-acc-empty h3 {
+    margin: 10px 0 3px;
+    font-size: 14px;
+}
+
+.rr-acc-empty p {
+    margin: 0 0 12px;
+    color: var(--rr-acc-slate-600);
+    font-size: 11px;
+}
+
+.rr-acc-pagination {
+    display: flex;
+    justify-content: flex-end;
+    gap: 3px;
+    padding: 8px 10px;
+    border-top: 1px solid var(--rr-acc-slate-200);
+    background: #f4f7fa;
+}
+
+.rr-acc-pagination a {
+    display: grid;
+    min-width: 29px;
+    height: 28px;
+    padding: 0 7px;
+    place-items: center;
+    color: #29445f;
+    border: 1px solid #aebac8;
+    border-radius: 3px;
+    background: linear-gradient(#fff, #e8edf3);
+    font-size: 10px;
+    font-weight: 800;
+    text-decoration: none;
+}
+
+.rr-acc-pagination a:hover:not(.disabled),
+.rr-acc-pagination a.active {
+    color: #fff;
+    border-color: #174f7d;
+    background: linear-gradient(#2f78ae, #1b5a8c);
+}
+
+.rr-acc-pagination a.disabled {
+    pointer-events: none;
+    opacity: 0.45;
+}
+
+/* Shared Create / Edit styles */
+.rr-acc-form-layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1.6fr) minmax(260px, 0.7fr);
+    gap: 8px;
+    margin-top: 8px;
+}
+
+.rr-acc-form-card,
+.rr-acc-detail-card {
+    padding: 10px;
+}
+
+.rr-acc-card-heading {
+    margin: -10px -10px 10px;
+    padding: 8px 10px;
+    border-bottom: 1px solid #bec8d3;
+    background: linear-gradient(#fafcff, #e9eef4);
+}
+
+.rr-acc-card-heading>div {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+}
+
+.rr-acc-card-heading i {
+    color: var(--rr-acc-blue-700);
+}
+
+.rr-acc-card-heading h2 {
+    margin: 0;
+    font-size: 13px;
+    font-weight: 900;
+}
+
+.rr-acc-card-heading p {
+    margin: 2px 0 0;
+    color: var(--rr-acc-slate-600);
+    font-size: 10px;
+}
+
+.rr-acc-form-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 9px;
+}
+
+.rr-acc-form-grid .full {
+    grid-column: 1 / -1;
+}
+
+.rr-acc-form-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 6px;
+    margin-top: 10px;
+    padding-top: 9px;
+    border-top: 1px solid var(--rr-acc-slate-200);
+}
+
+.rr-acc-help-list {
+    display: grid;
+    gap: 7px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.rr-acc-help-list li {
+    display: flex;
+    gap: 7px;
+    padding: 7px;
+    color: var(--rr-acc-slate-700);
+    border: 1px solid #d9e0e8;
+    border-radius: 3px;
+    background: #f8fafc;
+    font-size: 10px;
+    line-height: 1.45;
+}
+
+.rr-acc-help-list i {
+    color: var(--rr-acc-blue-700);
+}
+
+.rr-acc-help-list strong,
+.rr-acc-help-list small {
+    display: block;
+}
+
+.rr-acc-help-list strong {
+    margin-bottom: 2px;
+    color: var(--rr-acc-slate-900);
+    font-size: 10px;
+}
+
+.rr-acc-help-list small {
+    color: var(--rr-acc-slate-600);
+    font-size: 9px;
+    line-height: 1.45;
+}
+
+.rr-acc-required {
+    color: var(--rr-acc-red-700);
+}
+
+.rr-acc-inline-note {
+    margin: 0 0 9px;
+    box-shadow: none;
+}
+
+.rr-acc-edit-state {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    min-height: 34px;
+    margin-top: 8px;
+    padding: 6px 9px;
+    color: #28506f;
+    border: 1px solid #a8c5da;
+    border-radius: 4px;
+    background: #edf7fe;
+    font-size: 10px;
+    font-weight: 700;
+}
+
+.rr-acc-status-switch {
+    display: grid;
+    grid-template-columns: auto auto minmax(0, 1fr);
+    align-items: center;
+    gap: 4px 8px;
+    min-height: 46px;
+    padding: 7px 9px;
+    border: 1px solid #b7c1cd;
+    border-radius: 3px;
+    background: #f8fafc;
+    cursor: pointer;
+}
+
+.rr-acc-status-switch>input {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    opacity: 0;
+    pointer-events: none;
+}
+
+.rr-acc-switch-track {
+    position: relative;
+    display: block;
+    width: 36px;
+    height: 19px;
+    border: 1px solid #8d99a8;
+    border-radius: 12px;
+    background: #b8c0ca;
+    transition: background 0.15s ease;
+}
+
+.rr-acc-switch-track>span {
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    width: 13px;
+    height: 13px;
+    border-radius: 50%;
+    background: #fff;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.28);
+    transition: transform 0.15s ease;
+}
+
+.rr-acc-status-switch>input:checked+.rr-acc-switch-track {
+    border-color: #08704f;
+    background: #15986d;
+}
+
+.rr-acc-status-switch>input:checked+.rr-acc-switch-track>span {
+    transform: translateX(17px);
+}
+
+.rr-acc-status-switch>input:focus-visible+.rr-acc-switch-track {
+    outline: 2px solid #78b9ed;
+    outline-offset: 2px;
+}
+
+.rr-acc-status-switch strong {
+    color: var(--rr-acc-slate-900);
+    font-size: 11px;
+}
+
+.rr-acc-status-switch small {
+    grid-column: 2 / -1;
+    color: var(--rr-acc-slate-600);
+    font-size: 9px;
+}
+
+/* Shared Show styles */
+.rr-acc-detail-grid {
+    display: grid;
+    grid-template-columns: minmax(260px, 0.75fr) minmax(0, 1.65fr);
+    gap: 8px;
+    margin-top: 8px;
+}
+
+.rr-acc-ledger-column {
+    min-width: 0;
+}
+
+.rr-acc-ledger-filter-grid {
+    display: grid;
+    grid-template-columns:
+        minmax(125px, 0.75fr) minmax(125px, 0.75fr) minmax(170px, 1fr) minmax(210px, 1.5fr) minmax(90px, 0.55fr);
+    gap: 7px;
+    padding-top: 8px;
+}
+
+.rr-acc-account-profile {
+    align-self: start;
+}
+
+.rr-acc-account-identity {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 6px;
+    padding: 8px;
+    border: 1px solid #c6d0dc;
+    border-radius: 4px;
+    background: linear-gradient(110deg, #f1f7fc, #fff);
+}
+
+.rr-acc-account-identity>div {
+    min-width: 0;
+}
+
+.rr-acc-account-identity strong,
+.rr-acc-account-identity small {
+    display: block;
+}
+
+.rr-acc-account-identity strong {
+    overflow: hidden;
+    font-size: 11px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.rr-acc-account-identity small {
+    margin-top: 2px;
+    color: var(--rr-acc-slate-600);
+    font-size: 9px;
+    font-weight: 800;
+}
+
+.rr-acc-profile-icon {
+    display: grid;
+    width: 38px;
+    height: 38px;
+    place-items: center;
+    color: #fff;
+    border-radius: 4px;
+    background: var(--rr-acc-navy-800);
+    font-size: 17px;
+}
+
+.rr-acc-profile-icon.cash {
+    background: var(--rr-acc-green-700);
+}
+
+.rr-acc-profile-icon.upi {
+    background: var(--rr-acc-violet-700);
+}
+
+.rr-acc-profile-icon.card {
+    background: var(--rr-acc-amber-700);
+}
+
+.rr-acc-definition-list dd.strong {
+    color: var(--rr-acc-green-700);
+    font-size: 13px;
+    font-weight: 900;
+}
+
+.rr-acc-ledger-register {
+    margin-top: 8px;
+}
+
+.rr-acc-period-label {
+    padding: 4px 7px;
+    color: #234766;
+    border: 1px solid #aac0d2;
+    border-radius: 3px;
+    background: #f7fbff;
+    font-size: 9px;
+    font-weight: 800;
+}
+
+.rr-acc-ledger-table {
+    min-width: 880px;
+}
+
+.rr-acc-ledger-table tr.reversal td {
+    background: #fff5f6;
+}
+
+.rr-acc-date-cell strong,
+.rr-acc-date-cell small,
+.rr-acc-reference-cell strong,
+.rr-acc-reference-cell small,
+.rr-acc-remarks-cell span,
+.rr-acc-remarks-cell small {
+    display: block;
+}
+
+.rr-acc-date-cell strong {
+    font-size: 10px;
+    white-space: nowrap;
+}
+
+.rr-acc-date-cell small,
+.rr-acc-reference-cell small,
+.rr-acc-remarks-cell small {
+    margin-top: 2px;
+    color: var(--rr-acc-slate-500);
+    font-size: 8px;
+}
+
+.rr-acc-reference-cell {
+    display: flex;
+    align-items: center;
+    min-width: 155px;
+    gap: 6px;
+}
+
+.rr-acc-entry-icon {
+    display: grid;
+    flex: 0 0 27px;
+    width: 27px;
+    height: 27px;
+    place-items: center;
+    color: #125f99;
+    border: 1px solid #9fc7e3;
+    border-radius: 3px;
+    background: #eaf6ff;
+}
+
+.rr-acc-entry-icon.reversal {
+    color: var(--rr-acc-red-700);
+    border-color: #dda0a8;
+    background: #ffeaed;
+}
+
+.rr-acc-remarks-cell {
+    max-width: 250px;
+}
+
+.rr-acc-remarks-cell span {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.rr-acc-ledger-table td.money-in {
+    color: var(--rr-acc-green-700);
+    font-weight: 800;
+}
+
+.rr-acc-ledger-table td.money-out {
+    color: var(--rr-acc-red-700);
+    font-weight: 800;
+}
+
+.rr-acc-ledger-empty {
+    min-height: 170px;
+}
+
+.rr-acc-definition-list {
+    display: grid;
+    grid-template-columns: 1fr;
+    margin: 0;
+}
+
+.rr-acc-definition-list>div {
+    display: grid;
+    grid-template-columns: 125px minmax(0, 1fr);
+    gap: 8px;
+    padding: 7px 2px;
+    border-bottom: 1px solid #e1e6ec;
+}
+
+.rr-acc-definition-list dt {
+    color: var(--rr-acc-slate-600);
+    font-size: 10px;
+    font-weight: 800;
+}
+
+.rr-acc-definition-list dd {
+    margin: 0;
+    color: var(--rr-acc-slate-900);
+    font-size: 11px;
+    font-weight: 700;
+    overflow-wrap: anywhere;
+}
+
+@media (max-width: 1180px) {
+    .rr-acc-summary-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .rr-acc-filter-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .rr-acc-field.wide {
+        grid-column: 1 / -1;
+    }
+
+    .rr-acc-ledger-filter-grid {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 820px) {
+    .rr-acc-page {
+        padding: 6px;
+    }
+
+    .rr-acc-commandbar,
+    .rr-acc-panel-heading,
+    .rr-acc-register-head {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .rr-acc-command-actions {
+        width: 100%;
+    }
+
+    .rr-acc-command-actions .rr-acc-btn {
+        flex: 1;
+    }
+
+    .rr-acc-form-layout,
+    .rr-acc-detail-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .rr-acc-ledger-filter-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 580px) {
+
+    .rr-acc-summary-grid,
+    .rr-acc-filter-grid,
+    .rr-acc-form-grid,
+    .rr-acc-ledger-filter-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .rr-acc-field.wide,
+    .rr-acc-form-grid .full {
+        grid-column: auto;
+    }
+
+    .rr-acc-command-title p,
+    .rr-acc-panel-heading small,
+    .rr-acc-live-badge {
+        display: none;
+    }
+
+    .rr-acc-pagination {
+        justify-content: center;
+        overflow-x: auto;
+    }
+}
+
+/* Professional application motion */
+.rr-acc-page {
+    animation: rrAccPageIn 0.25s ease-out both;
+}
+
+.rr-acc-summary-card {
+    animation: rrAccCardIn 0.34s cubic-bezier(0.2, 0.72, 0.32, 1) both;
+    transition:
+        transform 0.16s ease,
+        box-shadow 0.16s ease,
+        border-color 0.16s ease;
+}
+
+.rr-acc-summary-card:nth-child(1) {
+    animation-delay: 0.03s;
+}
+
+.rr-acc-summary-card:nth-child(2) {
+    animation-delay: 0.07s;
+}
+
+.rr-acc-summary-card:nth-child(3) {
+    animation-delay: 0.11s;
+}
+
+.rr-acc-summary-card:nth-child(4) {
+    animation-delay: 0.15s;
+}
+
+.rr-acc-summary-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 7px 17px rgba(20, 42, 72, 0.14);
+}
+
+.rr-acc-summary-card:hover .rr-acc-summary-icon {
+    transform: scale(1.06);
+}
+
+.rr-acc-summary-icon {
+    transition: transform 0.16s ease;
+}
+
+.rr-acc-filter-panel,
+.rr-acc-register {
+    animation: rrAccPanelIn 0.34s 0.12s ease-out both;
+}
+
+.rr-acc-table tbody tr {
+    transition:
+        background-color 0.12s ease,
+        box-shadow 0.12s ease;
+}
+
+.rr-acc-table tbody tr:hover {
+    box-shadow: inset 3px 0 #2e78b5;
+}
+
+@keyframes rrAccPageIn {
+    from {
+        opacity: 0.45;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes rrAccCardIn {
+    from {
+        opacity: 0;
+        transform: translateY(8px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes rrAccPanelIn {
+    from {
+        opacity: 0;
+        transform: translateY(6px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+
+    .rr-acc-page *,
+    .rr-acc-page *::before,
+    .rr-acc-page *::after {
+        scroll-behavior: auto !important;
+        transition: none !important;
+        animation: none !important;
+    }
+}
+
+/* ========================================================================== */
+/* Cash & Bank Account Edit — focused professional workspace                  */
+/* ========================================================================== */
+
+.rr-acc-edit-page {
+    min-height: 100vh;
+    padding: 7px 9px 22px;
+    background:
+        radial-gradient(circle at 5% 0, rgba(30, 111, 175, 0.11), transparent 26%),
+        radial-gradient(circle at 96% 6%, rgba(203, 143, 34, 0.09), transparent 24%),
+        linear-gradient(145deg, #e8eef5, #f7f9fb 46%, #e9eef4);
+}
+
+.rr-acc-edit-page .rr-acc-commandbar {
+    position: relative;
+    min-height: 77px;
+    margin-top: 6px;
+    padding: 10px 12px;
+    overflow: hidden;
+    border-color: #102f51;
+    border-radius: 7px;
+    background:
+        linear-gradient(108deg, rgba(12, 39, 70, 0.99), rgba(27, 77, 121, 0.97) 65%, rgba(55, 105, 143, 0.96)),
+        #173d66;
+    box-shadow:
+        0 7px 17px rgba(21, 47, 78, 0.2),
+        inset 0 1px rgba(255, 255, 255, 0.15);
+    animation: rrAccEditHeaderIn 0.4s cubic-bezier(0.2, 0.72, 0.32, 1) both;
+}
+
+.rr-acc-edit-page .rr-acc-commandbar::after {
+    position: absolute;
+    right: -42px;
+    bottom: -92px;
+    width: 220px;
+    height: 220px;
+    border: 30px solid rgba(255, 255, 255, 0.045);
+    border-radius: 50%;
+    content: "";
+    animation: rrAccEditRing 12s linear infinite;
+}
+
+.rr-acc-edit-page .rr-acc-command-title,
+.rr-acc-edit-page .rr-acc-command-actions {
+    position: relative;
+    z-index: 2;
+}
+
+.rr-acc-edit-page .rr-acc-command-icon {
+    width: 48px;
+    height: 48px;
+    flex-basis: 48px;
+    color: #fff;
+    border-color: rgba(255, 255, 255, 0.45);
+    border-radius: 10px;
+    background: linear-gradient(145deg, #db9d2c, #9e6810);
+    box-shadow:
+        inset 0 1px rgba(255, 255, 255, 0.34),
+        0 5px 11px rgba(0, 0, 0, 0.2);
+    animation: rrAccEditIcon 2.8s ease-in-out infinite;
+}
+
+.rr-acc-edit-page .rr-acc-eyebrow {
+    color: #a9d9fb;
+}
+
+.rr-acc-edit-page .rr-acc-command-title h1 {
+    font-size: 19px;
+}
+
+.rr-acc-edit-page .rr-acc-command-actions .rr-acc-btn.filter {
+    border-color: rgba(255, 255, 255, 0.4);
+    background: rgba(255, 255, 255, 0.12);
+    backdrop-filter: blur(3px);
+}
+
+.rr-acc-edit-page .rr-acc-command-actions .rr-acc-btn.primary {
+    border-color: #08795e;
+    background: linear-gradient(#1aa67c, #08765b);
+}
+
+/* Change state banner */
+
+.rr-acc-edit-page .rr-acc-edit-state {
+    min-height: 47px;
+    margin-top: 7px;
+    padding: 7px 10px;
+    border-left-width: 4px;
+    border-radius: 5px;
+    box-shadow: 0 3px 8px rgba(23, 47, 76, 0.08);
+    animation: rrAccEditStateIn 0.34s 0.08s ease-out both;
+}
+
+.rr-acc-edit-page .rr-acc-edit-state>i {
+    display: grid;
+    width: 29px;
+    height: 29px;
+    flex: 0 0 29px;
+    place-items: center;
+    border-radius: 6px;
+    font-size: 13px;
+}
+
+.rr-acc-edit-page .rr-acc-edit-state>span {
+    min-width: 0;
+}
+
+.rr-acc-edit-page .rr-acc-edit-state strong,
+.rr-acc-edit-page .rr-acc-edit-state small {
+    display: block;
+}
+
+.rr-acc-edit-page .rr-acc-edit-state strong {
+    font-size: 11px;
+}
+
+.rr-acc-edit-page .rr-acc-edit-state small {
+    margin-top: 2px;
+    font-size: 9px;
+    font-weight: 600;
+}
+
+.rr-acc-edit-page .rr-acc-edit-state.clean {
+    color: #185978;
+    border-color: #80b9d5;
+    background: linear-gradient(100deg, #e7f6fd, #f8fcff);
+}
+
+.rr-acc-edit-page .rr-acc-edit-state.clean>i {
+    color: #fff;
+    background: #2582ad;
+}
+
+.rr-acc-edit-page .rr-acc-edit-state.changed {
+    color: #81500b;
+    border-color: #d9a749;
+    background: linear-gradient(100deg, #fff2d8, #fffaf0);
+}
+
+.rr-acc-edit-page .rr-acc-edit-state.changed>i {
+    color: #fff;
+    background: #ce871c;
+    animation: rrAccEditPencilPulse 1.7s ease-in-out infinite;
+}
+
+/* Form workspace */
+
+.rr-acc-edit-page .rr-acc-form-layout {
+    grid-template-columns: minmax(0, 1.72fr) minmax(250px, 0.62fr);
+    gap: 7px;
+    margin-top: 7px;
+}
+
+.rr-acc-edit-page .rr-acc-form-card {
+    overflow: hidden;
+    padding: 10px;
+    border-color: #a5b5c6;
+    border-radius: 6px;
+    box-shadow: 0 5px 14px rgba(23, 47, 76, 0.11);
+    animation: rrAccEditPanelIn 0.38s 0.15s ease-out both;
+}
+
+.rr-acc-edit-page .rr-acc-form-layout>.rr-acc-form-card:first-child {
+    border-top: 3px solid #2875b3;
+}
+
+.rr-acc-edit-page .rr-acc-help-card {
+    border-top: 3px solid #7160b8;
+    animation-delay: 0.21s;
+}
+
+.rr-acc-edit-page .rr-acc-card-heading {
+    min-height: 48px;
+    margin: -10px -10px 10px;
+    padding: 7px 10px;
+    border-bottom-color: #c3cfdb;
+    background: linear-gradient(#fcfdff, #e8eef5);
+}
+
+.rr-acc-edit-page .rr-acc-card-heading>div>i {
+    display: grid;
+    width: 28px;
+    height: 28px;
+    place-items: center;
+    color: #fff;
+    border-radius: 6px;
+    background: linear-gradient(#408bc3, #286da6);
+    box-shadow: inset 0 1px rgba(255, 255, 255, 0.3);
+}
+
+.rr-acc-edit-page .rr-acc-help-card .rr-acc-card-heading>div>i {
+    background: linear-gradient(#856fca, #6450ad);
+}
+
+.rr-acc-edit-page .rr-acc-form-grid {
+    gap: 8px;
+}
+
+.rr-acc-edit-page .rr-acc-field>span {
+    margin-bottom: 4px;
+    color: #344a62;
+    letter-spacing: 0.035em;
+}
+
+.rr-acc-edit-page .rr-acc-field input,
+.rr-acc-edit-page .rr-acc-field select,
+.rr-acc-edit-page .rr-acc-field textarea {
+    min-height: 37px;
+    border-color: #a5b4c4;
+    border-radius: 4px;
+    background: linear-gradient(#fff, #f8fafc);
+    box-shadow: inset 0 1px 2px rgba(22, 43, 67, 0.04);
+}
+
+.rr-acc-edit-page .rr-acc-field input:hover,
+.rr-acc-edit-page .rr-acc-field select:hover,
+.rr-acc-edit-page .rr-acc-field textarea:hover {
+    border-color: #4d8bb9;
+    background: #fff;
+}
+
+.rr-acc-edit-page .rr-acc-field input:focus,
+.rr-acc-edit-page .rr-acc-field select:focus,
+.rr-acc-edit-page .rr-acc-field textarea:focus {
+    border-color: #2678b5;
+    box-shadow: 0 0 0 3px rgba(38, 120, 181, 0.12);
+}
+
+.rr-acc-edit-page .rr-acc-field input:disabled,
+.rr-acc-edit-page .rr-acc-field select:disabled {
+    color: #647184;
+    cursor: not-allowed;
+    border-color: #c7ced7;
+    background: #edf0f3;
+}
+
+.rr-acc-edit-page .rr-acc-field input[type="date"] {
+    position: relative;
+    padding-right: 34px;
+}
+
+.rr-acc-edit-page .rr-acc-field input[type="date"]::-webkit-calendar-picker-indicator {
+    position: absolute;
+    right: 7px;
+    width: 18px;
+    height: 18px;
+    padding: 2px;
+    border-radius: 4px;
+    cursor: pointer;
+    opacity: 0.85;
+    background-color: #dcecff;
+}
+
+.rr-acc-edit-page .rr-acc-status-switch {
+    border-color: #aebbc9;
+    border-radius: 4px;
+    background: linear-gradient(#fbfcfe, #f0f4f8);
+}
+
+.rr-acc-edit-page .rr-acc-help-list {
+    gap: 6px;
+}
+
+.rr-acc-edit-page .rr-acc-help-list li {
+    min-height: 52px;
+    padding: 7px;
+    border-color: #d5dce5;
+    border-left: 3px solid #7d69bf;
+    border-radius: 4px;
+    background: linear-gradient(105deg, #f5f2fd, #fbfcfe 48%);
+    transition: transform 0.15s ease, border-color 0.15s ease;
+}
+
+.rr-acc-edit-page .rr-acc-help-list li:hover {
+    border-color: #ab9bd3;
+    transform: translateX(2px);
+}
+
+.rr-acc-edit-page .rr-acc-help-list li>i {
+    display: grid;
+    width: 25px;
+    height: 25px;
+    flex: 0 0 25px;
+    place-items: center;
+    border-radius: 5px;
+    color: #fff;
+    background: #725db5;
+}
+
+.rr-acc-edit-page .rr-acc-form-footer {
+    min-height: 51px;
+    margin: 10px -10px -10px;
+    padding: 8px 10px;
+    border-top-color: #c5d0dc;
+    background: linear-gradient(#f7f9fb, #e9eef4);
+}
+
+.rr-acc-edit-page .rr-acc-form-footer .rr-acc-btn.primary {
+    min-width: 132px;
+    border-color: #14669e;
+    background: linear-gradient(#348bc6, #1a69a4);
+}
+
+@keyframes rrAccEditHeaderIn {
+    from {
+        opacity: 0;
+        transform: translateY(-8px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes rrAccEditRing {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+@keyframes rrAccEditIcon {
+
+    0%,
+    100% {
+        transform: translateY(0) rotate(0);
+    }
+
+    50% {
+        transform: translateY(-3px) rotate(-2deg);
+    }
+}
+
+@keyframes rrAccEditStateIn {
+    from {
+        opacity: 0;
+        transform: translateY(6px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes rrAccEditPencilPulse {
+
+    0%,
+    100% {
+        transform: scale(1);
+    }
+
+    50% {
+        transform: scale(1.08);
+    }
+}
+
+@keyframes rrAccEditPanelIn {
+    from {
+        opacity: 0;
+        transform: translateY(8px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@media (max-width: 820px) {
+    .rr-acc-edit-page {
+        padding: 5px;
+    }
+
+    .rr-acc-edit-page .rr-acc-form-layout {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+
+    .rr-acc-edit-page,
+    .rr-acc-edit-page *,
+    .rr-acc-edit-page *::before,
+    .rr-acc-edit-page *::after {
+        animation: none !important;
+        transition: none !important;
+    }
+}
+
+/* ========================================================================== */
+/* Cash & Bank Account Show — animated ledger workspace                       */
+/* ========================================================================== */
+
+.rr-acc-show-page {
+    min-height: 100vh;
+    padding: 7px 9px 20px;
+    background:
+        radial-gradient(circle at 4% 0, rgba(29, 111, 175, 0.12), transparent 26%),
+        radial-gradient(circle at 98% 8%, rgba(88, 61, 157, 0.08), transparent 24%),
+        linear-gradient(145deg, #e8eef5, #f7f9fb 46%, #e9eef4);
+}
+
+.rr-acc-show-page .rr-acc-commandbar {
+    position: relative;
+    min-height: 78px;
+    margin-top: 6px;
+    padding: 10px 12px;
+    overflow: hidden;
+    border-color: #102e50;
+    border-radius: 7px;
+    background:
+        linear-gradient(108deg, rgba(12, 39, 70, 0.99), rgba(25, 79, 127, 0.97) 62%, rgba(42, 112, 163, 0.96)),
+        #173d66;
+    box-shadow:
+        0 7px 17px rgba(21, 47, 78, 0.2),
+        inset 0 1px rgba(255, 255, 255, 0.15);
+    animation: rrAccShowHeaderIn 0.42s cubic-bezier(0.2, 0.72, 0.32, 1) both;
+}
+
+.rr-acc-show-page .rr-acc-commandbar::before,
+.rr-acc-show-page .rr-acc-commandbar::after {
+    position: absolute;
+    border: 24px solid rgba(255, 255, 255, 0.045);
+    border-radius: 50%;
+    content: "";
+    pointer-events: none;
+}
+
+.rr-acc-show-page .rr-acc-commandbar::before {
+    top: -88px;
+    right: 68px;
+    width: 190px;
+    height: 190px;
+    animation: rrAccHeaderOrbit 9s linear infinite;
+}
+
+.rr-acc-show-page .rr-acc-commandbar::after {
+    right: -60px;
+    bottom: -104px;
+    width: 230px;
+    height: 230px;
+    animation: rrAccHeaderOrbit 13s linear infinite reverse;
+}
+
+.rr-acc-show-page .rr-acc-command-title,
+.rr-acc-show-page .rr-acc-command-actions {
+    position: relative;
+    z-index: 2;
+}
+
+.rr-acc-show-page .rr-acc-command-icon {
+    width: 49px;
+    height: 49px;
+    flex-basis: 49px;
+    color: #fff;
+    border-color: rgba(255, 255, 255, 0.46);
+    border-radius: 10px;
+    background: linear-gradient(145deg, rgba(94, 175, 232, 0.48), rgba(255, 255, 255, 0.08));
+    box-shadow:
+        inset 0 1px rgba(255, 255, 255, 0.34),
+        0 5px 11px rgba(0, 0, 0, 0.19);
+    animation: rrAccAccountIconFloat 3s ease-in-out infinite;
+}
+
+.rr-acc-show-page .rr-acc-command-title h1 {
+    font-size: 19px;
+    text-shadow: 0 1px 1px rgba(0, 0, 0, 0.14);
+}
+
+.rr-acc-show-page .rr-acc-eyebrow {
+    color: #9ed8ff;
+}
+
+.rr-acc-show-page .rr-acc-command-actions .rr-acc-btn {
+    min-height: 35px;
+    backdrop-filter: blur(3px);
+}
+
+.rr-acc-show-page .rr-acc-command-actions .rr-acc-btn.filter {
+    border-color: rgba(255, 255, 255, 0.42);
+    background: rgba(255, 255, 255, 0.12);
+}
+
+.rr-acc-show-page .rr-acc-command-actions .rr-acc-btn.primary {
+    border-color: #b98a24;
+    background: linear-gradient(#e0aa3b, #ae7412);
+    box-shadow: inset 0 1px rgba(255, 255, 255, 0.3);
+}
+
+/* Period balance cards */
+
+.rr-acc-show-page .rr-acc-show-summary {
+    gap: 7px;
+    margin: 7px 0;
+}
+
+.rr-acc-show-page .rr-acc-summary-card {
+    isolation: isolate;
+    min-height: 94px;
+    padding: 10px 11px;
+    overflow: hidden;
+    border-radius: 7px;
+    box-shadow:
+        0 3px 10px rgba(23, 43, 68, 0.1),
+        inset 0 1px rgba(255, 255, 255, 0.84);
+    animation: rrAccShowCardIn 0.38s cubic-bezier(0.2, 0.72, 0.32, 1) both;
+}
+
+.rr-acc-show-page .rr-acc-summary-card:nth-child(1) {
+    animation-delay: 0.05s;
+}
+
+.rr-acc-show-page .rr-acc-summary-card:nth-child(2) {
+    animation-delay: 0.1s;
+}
+
+.rr-acc-show-page .rr-acc-summary-card:nth-child(3) {
+    animation-delay: 0.15s;
+}
+
+.rr-acc-show-page .rr-acc-summary-card:nth-child(4) {
+    animation-delay: 0.2s;
+}
+
+.rr-acc-show-page .rr-acc-summary-card::before {
+    position: absolute;
+    z-index: -1;
+    right: -30px;
+    bottom: -50px;
+    width: 120px;
+    height: 120px;
+    border: 20px solid currentColor;
+    border-radius: 50%;
+    content: "";
+    opacity: 0.045;
+    transition: transform 0.22s ease;
+}
+
+.rr-acc-show-page .rr-acc-summary-card::after {
+    top: auto;
+    right: 0;
+    bottom: 0;
+    width: 100%;
+    height: 4px;
+}
+
+.rr-acc-show-page .rr-acc-summary-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 18px rgba(23, 43, 68, 0.15);
+}
+
+.rr-acc-show-page .rr-acc-summary-card:hover::before {
+    transform: scale(1.15) rotate(7deg);
+}
+
+.rr-acc-show-page .rr-acc-summary-card.navy {
+    border-color: #94afca;
+    background: linear-gradient(128deg, #e6eef7, #fbfdff 65%);
+}
+
+.rr-acc-show-page .rr-acc-summary-card.green {
+    border-color: #8bcfb6;
+    background: linear-gradient(128deg, #dff6ec, #f9fefb 65%);
+}
+
+.rr-acc-show-page .rr-acc-summary-card.violet {
+    border-color: #baa7df;
+    background: linear-gradient(128deg, #ede6fb, #fcfaff 65%);
+}
+
+.rr-acc-show-page .rr-acc-summary-card.blue {
+    border-color: #8dbfe1;
+    background: linear-gradient(128deg, #e1f1fc, #f9fdff 65%);
+}
+
+.rr-acc-show-page .rr-acc-summary-card.red {
+    border-color: #dfa1a9;
+    background: linear-gradient(128deg, #ffe7e9, #fffafa 65%);
+}
+
+.rr-acc-show-page .rr-acc-summary-icon {
+    width: 44px;
+    height: 44px;
+    flex-basis: 44px;
+    color: #fff;
+    border: 0;
+    border-radius: 9px;
+    box-shadow:
+        inset 0 1px rgba(255, 255, 255, 0.34),
+        0 4px 9px rgba(20, 42, 69, 0.19);
+}
+
+.rr-acc-show-page .navy .rr-acc-summary-icon {
+    background: linear-gradient(145deg, #315f91, #183d68);
+}
+
+.rr-acc-show-page .green .rr-acc-summary-icon {
+    background: linear-gradient(145deg, #20ad7e, #087457);
+}
+
+.rr-acc-show-page .violet .rr-acc-summary-icon {
+    background: linear-gradient(145deg, #8a63ce, #5a379b);
+}
+
+.rr-acc-show-page .blue .rr-acc-summary-icon {
+    background: linear-gradient(145deg, #3494d2, #155f99);
+}
+
+.rr-acc-show-page .red .rr-acc-summary-icon {
+    background: linear-gradient(145deg, #e45e68, #aa2938);
+}
+
+.rr-acc-show-page .rr-acc-summary-card strong {
+    font-size: clamp(16px, 1.42vw, 21px);
+}
+
+/* Account detail and transaction filters */
+
+.rr-acc-show-page .rr-acc-detail-grid {
+    gap: 7px;
+    margin-top: 7px;
+}
+
+.rr-acc-show-page .rr-acc-detail-card,
+.rr-acc-show-page .rr-acc-filter-panel,
+.rr-acc-show-page .rr-acc-register {
+    border-color: #a7b6c7;
+    border-radius: 6px;
+    box-shadow: 0 4px 12px rgba(23, 47, 76, 0.1);
+}
+
+.rr-acc-show-page .rr-acc-account-profile {
+    border-top: 3px solid #2b74b1;
+    animation: rrAccShowPanelIn 0.4s 0.2s ease-out both;
+}
+
+.rr-acc-show-page .rr-acc-account-identity {
+    border-color: #b3c4d6;
+    background: linear-gradient(115deg, #eaf3fb, #fff);
+}
+
+.rr-acc-show-page .rr-acc-filter-panel {
+    padding: 0;
+    overflow: hidden;
+    border-top: 3px solid #6d55b5;
+    animation: rrAccShowPanelIn 0.4s 0.25s ease-out both;
+}
+
+.rr-acc-show-page .rr-acc-filter-panel .rr-acc-panel-heading {
+    min-height: 40px;
+    padding: 7px 10px;
+    border-bottom-color: #c7d1de;
+    background: linear-gradient(#fcfdff, #e9eef5);
+}
+
+.rr-acc-show-page .rr-acc-filter-panel .rr-acc-panel-heading>div>i {
+    display: grid;
+    width: 25px;
+    height: 25px;
+    place-items: center;
+    color: #fff;
+    border-radius: 5px;
+    background: linear-gradient(#846ac5, #6349aa);
+}
+
+.rr-acc-show-page .rr-acc-ledger-filter-grid {
+    gap: 7px;
+    padding: 9px 10px 8px;
+    background: #fff;
+}
+
+.rr-acc-show-page .rr-acc-field input,
+.rr-acc-show-page .rr-acc-field select {
+    min-height: 36px;
+    border-color: #a6b5c5;
+    border-radius: 4px;
+    background: linear-gradient(#fff, #f8fafc);
+}
+
+.rr-acc-show-page .rr-acc-field input[type="date"] {
+    position: relative;
+    padding-right: 34px;
+    color-scheme: light;
+}
+
+.rr-acc-show-page .rr-acc-field input[type="date"]::-webkit-calendar-picker-indicator {
+    position: absolute;
+    right: 7px;
+    width: 18px;
+    height: 18px;
+    padding: 2px;
+    border-radius: 4px;
+    cursor: pointer;
+    opacity: 0.82;
+    background-color: #dcecff;
+}
+
+.rr-acc-show-page .rr-acc-field input[type="date"]:hover::-webkit-calendar-picker-indicator {
+    opacity: 1;
+    background-color: #c5e0fb;
+}
+
+.rr-acc-show-page .rr-acc-field input:hover,
+.rr-acc-show-page .rr-acc-field select:hover {
+    border-color: #5a8fba;
+}
+
+.rr-acc-show-page .rr-acc-field input:focus,
+.rr-acc-show-page .rr-acc-field select:focus {
+    border-color: #5d48a8;
+    box-shadow: 0 0 0 3px rgba(93, 72, 168, 0.12);
+}
+
+.rr-acc-show-page .rr-acc-filter-actions {
+    min-height: 47px;
+    margin: 0;
+    padding: 7px 10px;
+    background: #eef2f7;
+}
+
+.rr-acc-show-page .rr-acc-ledger-register {
+    margin-top: 7px;
+    overflow: hidden;
+    border-top: 3px solid #18835f;
+    animation: rrAccShowPanelIn 0.4s 0.3s ease-out both;
+}
+
+.rr-acc-show-page .rr-acc-ledger-register .rr-acc-register-head {
+    color: #fff;
+    background: linear-gradient(105deg, #17416a, #285e8d 70%, #3477aa);
+}
+
+.rr-acc-show-page .rr-acc-ledger-register .rr-acc-register-head h2 {
+    color: #fff;
+}
+
+.rr-acc-show-page .rr-acc-ledger-register .rr-acc-register-head p {
+    color: #d7e6f3;
+}
+
+.rr-acc-show-page .rr-acc-ledger-table th {
+    position: sticky;
+    z-index: 3;
+    top: 0;
+    border-bottom: 2px solid #102e4d;
+    background: linear-gradient(#3b668f, #254d76);
+}
+
+.rr-acc-show-page .rr-acc-ledger-table th:nth-last-child(3) {
+    background: linear-gradient(#268063, #146248);
+}
+
+.rr-acc-show-page .rr-acc-ledger-table th:nth-last-child(2) {
+    background: linear-gradient(#b65a54, #8d3c3a);
+}
+
+.rr-acc-show-page .rr-acc-ledger-table th:last-child {
+    background: linear-gradient(#5e4d88, #47386a);
+}
+
+.rr-acc-show-page .rr-acc-ledger-table tbody tr {
+    animation: rrAccShowRowIn 0.28s ease-out both;
+}
+
+.rr-acc-show-page .rr-acc-ledger-table tbody tr:hover td {
+    background: #e2f1ff;
+}
+
+@keyframes rrAccShowHeaderIn {
+    from {
+        opacity: 0;
+        transform: translateY(-8px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes rrAccHeaderOrbit {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+@keyframes rrAccAccountIconFloat {
+
+    0%,
+    100% {
+        transform: translateY(0);
+    }
+
+    50% {
+        transform: translateY(-3px);
+    }
+}
+
+@keyframes rrAccShowCardIn {
+    from {
+        opacity: 0;
+        transform: translateY(9px) scale(0.985);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+@keyframes rrAccShowPanelIn {
+    from {
+        opacity: 0;
+        transform: translateY(7px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes rrAccShowRowIn {
+    from {
+        opacity: 0;
+        transform: translateX(-4px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+
+    .rr-acc-show-page,
+    .rr-acc-show-page *,
+    .rr-acc-show-page *::before,
+    .rr-acc-show-page *::after {
+        animation: none !important;
+        transition: none !important;
+    }
+}
+
+/* ========================================================================== */
+/* Cash & Bank Register — professional animated index design                  */
+/* ========================================================================== */
+
+.rr-acc-index-page {
+    position: relative;
+    min-height: 100vh;
+    padding: 7px 9px 20px;
+    background:
+        radial-gradient(circle at 6% 1%, rgba(40, 114, 184, 0.12), transparent 25%),
+        radial-gradient(circle at 96% 4%, rgba(93, 65, 171, 0.09), transparent 22%),
+        linear-gradient(145deg, #e8eef5 0%, #f5f7fa 42%, #e9eef4 100%);
+}
+
+.rr-acc-index-page::before {
+    position: fixed;
+    z-index: 0;
+    inset: 0;
+    pointer-events: none;
+    content: "";
+    opacity: 0.32;
+    background-image:
+        linear-gradient(rgba(24, 55, 91, 0.025) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(24, 55, 91, 0.025) 1px, transparent 1px);
+    background-size: 24px 24px;
+}
+
+.rr-acc-index-page>* {
+    position: relative;
+    z-index: 1;
+}
+
+.rr-acc-index-page .rr-acc-commandbar {
+    min-height: 72px;
+    margin-top: 6px;
+    padding: 9px 11px;
+    overflow: hidden;
+    border-color: #102f54;
+    border-radius: 6px;
+    background:
+        linear-gradient(112deg, rgba(11, 40, 73, 0.99), rgba(24, 82, 132, 0.97) 62%, rgba(30, 103, 154, 0.95)),
+        #153b65;
+    box-shadow:
+        0 6px 16px rgba(21, 49, 82, 0.2),
+        inset 0 1px rgba(255, 255, 255, 0.14);
+    animation: rrAccToolbarIn 0.36s cubic-bezier(0.2, 0.72, 0.32, 1) both;
+}
+
+.rr-acc-index-page .rr-acc-commandbar::after {
+    position: absolute;
+    top: -80px;
+    right: -35px;
+    width: 220px;
+    height: 220px;
+    border: 32px solid rgba(255, 255, 255, 0.045);
+    border-radius: 50%;
+    content: "";
+}
+
+.rr-acc-index-page .rr-acc-command-icon {
+    position: relative;
+    color: #fff;
+    border-color: rgba(255, 255, 255, 0.38);
+    background: linear-gradient(145deg, rgba(96, 177, 234, 0.42), rgba(255, 255, 255, 0.08));
+    box-shadow:
+        inset 0 1px rgba(255, 255, 255, 0.3),
+        0 4px 10px rgba(0, 0, 0, 0.17);
+}
+
+.rr-acc-index-page .rr-acc-command-actions {
+    z-index: 1;
+}
+
+.rr-acc-index-page .rr-acc-btn.filter {
+    border-color: rgba(255, 255, 255, 0.38);
+    background: rgba(255, 255, 255, 0.12);
+    backdrop-filter: blur(3px);
+}
+
+.rr-acc-index-page .rr-acc-btn.filter:hover,
+.rr-acc-index-page .rr-acc-btn.filter.active {
+    border-color: rgba(255, 255, 255, 0.58);
+    background: rgba(255, 255, 255, 0.22);
+}
+
+.rr-acc-index-page .rr-acc-btn.primary {
+    border-color: #087f63;
+    background: linear-gradient(#1ab083, #078265);
+    box-shadow:
+        inset 0 1px rgba(255, 255, 255, 0.28),
+        0 3px 8px rgba(2, 61, 48, 0.28);
+}
+
+.rr-acc-index-page .rr-acc-btn.primary:hover {
+    background: linear-gradient(#159a74, #066d56);
+}
+
+/* Balance cards */
+
+.rr-acc-index-page .rr-acc-summary-grid {
+    gap: 7px;
+    margin: 7px 0;
+    perspective: 900px;
+}
+
+.rr-acc-index-page .rr-acc-summary-card {
+    isolation: isolate;
+    min-height: 91px;
+    gap: 10px;
+    padding: 10px 11px;
+    border-width: 1px;
+    border-radius: 7px;
+    box-shadow:
+        0 3px 9px rgba(23, 43, 68, 0.1),
+        inset 0 1px rgba(255, 255, 255, 0.8);
+    transform-origin: bottom center;
+}
+
+.rr-acc-index-page .rr-acc-summary-card::before {
+    position: absolute;
+    z-index: -1;
+    top: -35px;
+    right: -35px;
+    width: 112px;
+    height: 112px;
+    border: 18px solid currentColor;
+    border-radius: 50%;
+    content: "";
+    opacity: 0.045;
+    transition: transform 0.25s ease;
+}
+
+.rr-acc-index-page .rr-acc-summary-card::after {
+    top: auto;
+    right: 0;
+    bottom: 0;
+    width: 100%;
+    height: 4px;
+    border-radius: 0 0 6px 6px;
+}
+
+.rr-acc-index-page .rr-acc-summary-card:hover {
+    transform: translateY(-3px) rotateX(1deg);
+}
+
+.rr-acc-index-page .rr-acc-summary-card:hover::before {
+    transform: scale(1.14) rotate(8deg);
+}
+
+.rr-acc-index-page .rr-acc-summary-card.navy {
+    border-color: #93aecb;
+    background: linear-gradient(128deg, #e5eef8 0%, #f8fbff 60%, #fff 100%);
+}
+
+.rr-acc-index-page .rr-acc-summary-card.green {
+    border-color: #86ceb3;
+    background: linear-gradient(128deg, #def5eb 0%, #f5fcf9 60%, #fff 100%);
+}
+
+.rr-acc-index-page .rr-acc-summary-card.blue {
+    border-color: #88bee4;
+    background: linear-gradient(128deg, #dff1ff 0%, #f5fbff 60%, #fff 100%);
+}
+
+.rr-acc-index-page .rr-acc-summary-card.violet {
+    border-color: #b9a1e2;
+    background: linear-gradient(128deg, #eee5ff 0%, #faf7ff 60%, #fff 100%);
+}
+
+.rr-acc-index-page .rr-acc-summary-icon {
+    width: 44px;
+    height: 44px;
+    flex-basis: 44px;
+    color: #fff;
+    border: 0;
+    border-radius: 9px;
+    box-shadow:
+        inset 0 1px rgba(255, 255, 255, 0.34),
+        0 4px 9px rgba(19, 40, 65, 0.18);
+}
+
+.rr-acc-index-page .navy .rr-acc-summary-icon {
+    background: linear-gradient(145deg, #315f91, #183d68);
+}
+
+.rr-acc-index-page .green .rr-acc-summary-icon {
+    background: linear-gradient(145deg, #20ad7e, #087457);
+}
+
+.rr-acc-index-page .blue .rr-acc-summary-icon {
+    background: linear-gradient(145deg, #3596d6, #17659f);
+}
+
+.rr-acc-index-page .violet .rr-acc-summary-icon {
+    background: linear-gradient(145deg, #8b64d0, #5c389e);
+}
+
+.rr-acc-index-page .rr-acc-summary-card strong {
+    font-size: clamp(16px, 1.42vw, 21px);
+    letter-spacing: -0.02em;
+}
+
+/* Filter workspace */
+
+.rr-acc-index-page .rr-acc-filter-panel {
+    position: relative;
+    margin-bottom: 7px;
+    padding: 0;
+    overflow: hidden;
+    border-color: #aab9c9;
+    border-top: 3px solid #2b75b4;
+    border-radius: 6px;
+    background: #fff;
+    box-shadow: 0 4px 12px rgba(24, 49, 79, 0.1);
+    animation: rrAccFilterOpen 0.28s cubic-bezier(0.2, 0.72, 0.32, 1) both;
+}
+
+.rr-acc-index-page .rr-acc-panel-heading {
+    min-height: 38px;
+    padding: 7px 10px;
+    border-bottom-color: #c7d2df;
+    background: linear-gradient(#fbfdff, #e8eff6);
+}
+
+.rr-acc-index-page .rr-acc-panel-heading>div>i {
+    display: grid;
+    width: 24px;
+    height: 24px;
+    place-items: center;
+    color: #fff;
+    border-radius: 5px;
+    background: linear-gradient(#428bc5, #286da6);
+    box-shadow: inset 0 1px rgba(255, 255, 255, 0.28);
+}
+
+.rr-acc-index-page .rr-acc-filter-grid {
+    gap: 7px;
+    padding: 9px 10px 8px;
+    background: linear-gradient(180deg, #fff, #fbfcfe);
+}
+
+.rr-acc-index-page .rr-acc-field>span {
+    margin-bottom: 4px;
+    color: #354b64;
+    letter-spacing: 0.035em;
+}
+
+.rr-acc-index-page .rr-acc-input-shell {
+    position: relative;
+}
+
+.rr-acc-index-page .rr-acc-field input,
+.rr-acc-index-page .rr-acc-field select {
+    min-height: 36px;
+    border-color: #a8b6c6;
+    border-radius: 4px;
+    background: linear-gradient(#fff, #f9fbfd);
+    box-shadow: inset 0 1px 2px rgba(24, 46, 70, 0.035);
+}
+
+.rr-acc-index-page .rr-acc-field input:hover,
+.rr-acc-index-page .rr-acc-field select:hover {
+    border-color: #438bc1;
+    background: #fff;
+}
+
+.rr-acc-index-page .rr-acc-field input:focus,
+.rr-acc-index-page .rr-acc-field select:focus {
+    border-color: #2274b2;
+    box-shadow:
+        0 0 0 3px rgba(34, 116, 178, 0.13),
+        inset 0 1px 2px rgba(24, 46, 70, 0.04);
+}
+
+.rr-acc-index-page .rr-acc-filter-actions {
+    min-height: 47px;
+    margin: 0;
+    padding: 7px 10px;
+    border-top-color: #cbd5e0;
+    background: #eef3f7;
+}
+
+.rr-acc-index-page .rr-acc-btn.apply {
+    border-color: #145c94;
+    background: linear-gradient(#348ac5, #1b69a3);
+    box-shadow: inset 0 1px rgba(255, 255, 255, 0.25);
+}
+
+/* Account register and table */
+
+.rr-acc-index-page .rr-acc-register {
+    border-color: #9eafc2;
+    border-radius: 6px;
+    box-shadow: 0 5px 14px rgba(24, 47, 76, 0.12);
+}
+
+.rr-acc-index-page .rr-acc-register-head {
+    min-height: 50px;
+    padding: 7px 10px;
+    color: #fff;
+    border-bottom-color: #122f50;
+    background: linear-gradient(105deg, #1a416d, #285d8d 72%, #3475a9);
+}
+
+.rr-acc-index-page .rr-acc-register-head>div>i {
+    color: #244f79;
+    border: 1px solid rgba(255, 255, 255, 0.62);
+    background: #fff;
+    box-shadow: 0 2px 5px rgba(3, 24, 46, 0.2);
+}
+
+.rr-acc-index-page .rr-acc-register-head h2 {
+    color: #fff;
+}
+
+.rr-acc-index-page .rr-acc-register-head p {
+    color: #d6e6f4;
+}
+
+.rr-acc-index-page .rr-acc-live-badge {
+    color: #075a41;
+    border-color: #99e0c4;
+    background: #e8fff6;
+    box-shadow: inset 0 1px #fff;
+}
+
+.rr-acc-index-page .rr-acc-live-badge i {
+    animation: rrAccLivePulse 1.7s ease-in-out infinite;
+}
+
+.rr-acc-index-page .rr-acc-table-wrap {
+    max-height: min(62vh, 680px);
+    background: #fff;
+}
+
+.rr-acc-index-page .rr-acc-table th {
+    position: sticky;
+    z-index: 3;
+    top: 0;
+    height: 36px;
+    padding: 7px 9px;
+    color: #f7fbff;
+    border-right-color: #496d91;
+    border-bottom: 2px solid #0e2d4c;
+    background: linear-gradient(#3b668f, #254d76);
+    box-shadow: inset 0 1px rgba(255, 255, 255, 0.13);
+}
+
+.rr-acc-index-page .rr-acc-table th:nth-child(1) {
+    box-shadow: inset 4px 0 #5fb1ea, inset 0 1px rgba(255, 255, 255, 0.13);
+}
+
+.rr-acc-index-page .rr-acc-table th:nth-child(5),
+.rr-acc-index-page .rr-acc-table th:nth-child(6) {
+    background: linear-gradient(#316c70, #205357);
+    border-right-color: #467a7d;
+}
+
+.rr-acc-index-page .rr-acc-table th:last-child {
+    background: linear-gradient(#655083, #4e3b6b);
+}
+
+.rr-acc-index-page .rr-acc-table td {
+    height: 49px;
+    padding: 6px 9px;
+    border-right-color: #dce3eb;
+    border-bottom-color: #d3dce6;
+}
+
+.rr-acc-index-page .rr-acc-table tbody tr:nth-child(odd) td {
+    background: #fff;
+}
+
+.rr-acc-index-page .rr-acc-table tbody tr:nth-child(even) td {
+    background: #f2f6fa;
+}
+
+.rr-acc-index-page .rr-acc-table tbody tr {
+    animation: rrAccRowIn 0.28s ease-out both;
+}
+
+.rr-acc-index-page .rr-acc-table tbody tr:nth-child(2) {
+    animation-delay: 0.025s;
+}
+
+.rr-acc-index-page .rr-acc-table tbody tr:nth-child(3) {
+    animation-delay: 0.05s;
+}
+
+.rr-acc-index-page .rr-acc-table tbody tr:nth-child(4) {
+    animation-delay: 0.075s;
+}
+
+.rr-acc-index-page .rr-acc-table tbody tr:nth-child(5) {
+    animation-delay: 0.1s;
+}
+
+.rr-acc-index-page .rr-acc-table tbody tr:nth-child(n + 6) {
+    animation-delay: 0.12s;
+}
+
+.rr-acc-index-page .rr-acc-table tbody tr:hover td {
+    background: #dff0ff;
+}
+
+.rr-acc-index-page .rr-acc-table tbody tr:hover td:first-child {
+    box-shadow: inset 4px 0 #2578ba;
+}
+
+.rr-acc-index-page .rr-acc-code {
+    padding: 2px 5px;
+    border: 1px solid #a5c6df;
+    border-radius: 3px;
+    background: #edf7ff;
+}
+
+.rr-acc-index-page .rr-acc-account-cell a {
+    font-size: 12px;
+}
+
+.rr-acc-index-page .rr-acc-table td.balance {
+    color: #06724f;
+    background-image: linear-gradient(90deg, transparent, rgba(20, 159, 108, 0.055));
+    font-size: 12px;
+}
+
+.rr-acc-index-page .rr-acc-table td.balance.negative {
+    color: #bd2d3b;
+    background-image: linear-gradient(90deg, transparent, rgba(207, 54, 69, 0.06));
+}
+
+.rr-acc-index-page .rr-acc-icon-btn {
+    width: 29px;
+    height: 28px;
+    border-radius: 4px;
+    box-shadow: inset 0 1px rgba(255, 255, 255, 0.66);
+}
+
+.rr-acc-index-page .rr-acc-icon-btn:hover {
+    box-shadow: 0 3px 7px rgba(22, 44, 70, 0.16);
+    transform: translateY(-2px);
+}
+
+.rr-acc-index-page .rr-acc-pagination {
+    min-height: 43px;
+    align-items: center;
+    background: linear-gradient(#f8fafc, #e9eef4);
+}
+
+@keyframes rrAccToolbarIn {
+    from {
+        opacity: 0;
+        transform: translateY(-7px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes rrAccFilterOpen {
+    from {
+        opacity: 0;
+        transform: translateY(-6px) scaleY(0.97);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0) scaleY(1);
+    }
+}
+
+@keyframes rrAccRowIn {
+    from {
+        opacity: 0;
+        transform: translateX(-5px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes rrAccLivePulse {
+
+    0%,
+    100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+
+    50% {
+        opacity: 0.45;
+        transform: scale(1.35);
+    }
+}
+
+@media (max-width: 820px) {
+    .rr-acc-index-page {
+        padding: 5px;
+    }
+
+    .rr-acc-index-page .rr-acc-commandbar {
+        gap: 9px;
+    }
+
+    .rr-acc-index-page .rr-acc-table-wrap {
+        max-height: none;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+
+    .rr-acc-index-page,
+    .rr-acc-index-page *,
+    .rr-acc-index-page *::before,
+    .rr-acc-index-page *::after {
+        animation: none !important;
+        transition: none !important;
+    }
+}

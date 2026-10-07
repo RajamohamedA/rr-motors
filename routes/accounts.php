@@ -1,5 +1,7 @@
 <?php
 
+use App\Http\Controllers\AccountController;
+use App\Http\Controllers\AccountDashboardController;
 use App\Http\Controllers\SupplierLedgerController;
 use App\Http\Controllers\SupplierPaymentController;
 use App\Http\Controllers\CustomerPaymentController;
@@ -8,11 +10,63 @@ use App\Http\Controllers\MechanicPaymentController;
 use App\Http\Controllers\MechanicLedgerController;
 use Illuminate\Support\Facades\Route;
 
-
 Route::middleware([
     'auth',
 ])->group(function () {
-
+    /*
+    |--------------------------------------------------------------------------
+    | Accounts Dashboard
+    |--------------------------------------------------------------------------
+    */
+    Route::get(
+        '/accounts/dashboard',
+        [AccountDashboardController::class, 'index']
+    )->name('accounts.dashboard');
+    /*
+    |--------------------------------------------------------------------------
+    | Cash / Bank Account Master
+    |--------------------------------------------------------------------------
+    |
+    | Fixed routes must remain above /accounts/{account}.
+    |
+    */
+    Route::get(
+        '/accounts',
+        [AccountController::class, 'index']
+    )->name('accounts.index');
+    Route::get(
+        '/accounts/create',
+        [AccountController::class, 'create']
+    )->name('accounts.create');
+    Route::post(
+        '/accounts',
+        [AccountController::class, 'store']
+    )->name('accounts.store');
+    Route::get(
+        '/accounts/{account}',
+        [AccountController::class, 'show']
+    )
+        ->whereNumber('account')
+        ->name('accounts.show');
+    Route::get(
+        '/accounts/{account}/edit',
+        [AccountController::class, 'edit']
+    )
+        ->whereNumber('account')
+        ->name('accounts.edit');
+    Route::match(
+        ['put', 'patch'],
+        '/accounts/{account}',
+        [AccountController::class, 'update']
+    )
+        ->whereNumber('account')
+        ->name('accounts.update');
+    Route::patch(
+        '/accounts/{account}/toggle-status',
+        [AccountController::class, 'toggleStatus']
+    )
+        ->whereNumber('account')
+        ->name('accounts.toggle-status');
     /*
     |--------------------------------------------------------------------------
     | Supplier Payments
@@ -21,14 +75,11 @@ Route::middleware([
     | All custom routes must remain above the dynamic show route.
     |
     */
-
-
     /*
     |--------------------------------------------------------------------------
     | AJAX Supplier Search
     |--------------------------------------------------------------------------
     */
-
     Route::get(
         '/supplier-payments/suppliers/search',
         [
@@ -38,14 +89,11 @@ Route::middleware([
     )->name(
         'supplier-payments.suppliers.search'
     );
-
-
     /*
     |--------------------------------------------------------------------------
     | Supplier Outstanding Purchases
     |--------------------------------------------------------------------------
     */
-
     Route::get(
         '/supplier-payments/suppliers/{supplier}/purchases',
         [
@@ -59,8 +107,6 @@ Route::middleware([
         ->name(
             'supplier-payments.suppliers.purchases'
         );
-
-
     /*
     |--------------------------------------------------------------------------
     | Cancel Supplier Payment
@@ -69,7 +115,6 @@ Route::middleware([
     | Cancellation creates account and supplier-ledger reversal entries.
     |
     */
-
     Route::patch(
         '/supplier-payments/{supplierPayment}/cancel',
         [
@@ -83,14 +128,11 @@ Route::middleware([
         ->name(
             'supplier-payments.cancel'
         );
-
-
     /*
     |--------------------------------------------------------------------------
     | Supplier Payment Print
     |--------------------------------------------------------------------------
     */
-
     Route::get(
         '/supplier-payments/{supplierPayment}/print',
         [
@@ -104,14 +146,11 @@ Route::middleware([
         ->name(
             'supplier-payments.print'
         );
-
-
     /*
     |--------------------------------------------------------------------------
     | Supplier Payment PDF
     |--------------------------------------------------------------------------
     */
-
     Route::get(
         '/supplier-payments/{supplierPayment}/pdf',
         [
@@ -125,14 +164,11 @@ Route::middleware([
         ->name(
             'supplier-payments.pdf'
         );
-
-
     /*
     |--------------------------------------------------------------------------
     | Supplier Payment Index
     |--------------------------------------------------------------------------
     */
-
     Route::get(
         '/supplier-payments',
         [
@@ -142,14 +178,11 @@ Route::middleware([
     )->name(
         'supplier-payments.index'
     );
-
-
     /*
     |--------------------------------------------------------------------------
     | Create Supplier Payment
     |--------------------------------------------------------------------------
     */
-
     Route::get(
         '/supplier-payments/create',
         [
@@ -159,14 +192,11 @@ Route::middleware([
     )->name(
         'supplier-payments.create'
     );
-
-
     /*
     |--------------------------------------------------------------------------
     | Store Supplier Payment
     |--------------------------------------------------------------------------
     */
-
     Route::post(
         '/supplier-payments',
         [
@@ -176,8 +206,6 @@ Route::middleware([
     )->name(
         'supplier-payments.store'
     );
-
-
     /*
     |--------------------------------------------------------------------------
     | Show Supplier Payment
@@ -186,7 +214,6 @@ Route::middleware([
     | Keep this route after all custom supplier-payment routes.
     |
     */
-
     Route::get(
         '/supplier-payments/{supplierPayment}',
         [
@@ -200,8 +227,6 @@ Route::middleware([
         ->name(
             'supplier-payments.show'
         );
-
-
     /*
     |--------------------------------------------------------------------------
     | Supplier Ledger
@@ -210,14 +235,11 @@ Route::middleware([
     | Keep search, print, PDF and Excel routes before the main ledger route.
     |
     */
-
-
     /*
     |--------------------------------------------------------------------------
     | AJAX Supplier Search
     |--------------------------------------------------------------------------
     */
-
     Route::get(
         '/supplier-ledger/suppliers/search',
         [
@@ -227,14 +249,11 @@ Route::middleware([
     )->name(
         'supplier-ledger.suppliers.search'
     );
-
-
     /*
     |--------------------------------------------------------------------------
     | Supplier Ledger Print
     |--------------------------------------------------------------------------
     */
-
     Route::get(
         '/supplier-ledger/print',
         [
@@ -244,14 +263,11 @@ Route::middleware([
     )->name(
         'supplier-ledger.print'
     );
-
-
     /*
     |--------------------------------------------------------------------------
     | Supplier Ledger PDF
     |--------------------------------------------------------------------------
     */
-
     Route::get(
         '/supplier-ledger/pdf',
         [
@@ -261,14 +277,11 @@ Route::middleware([
     )->name(
         'supplier-ledger.pdf'
     );
-
-
     /*
     |--------------------------------------------------------------------------
     | Supplier Ledger Excel
     |--------------------------------------------------------------------------
     */
-
     Route::get(
         '/supplier-ledger/excel',
         [
@@ -278,14 +291,11 @@ Route::middleware([
     )->name(
         'supplier-ledger.excel'
     );
-
-
     /*
     |--------------------------------------------------------------------------
     | Supplier Ledger Register
     |--------------------------------------------------------------------------
     */
-
     Route::get(
         '/supplier-ledger',
         [
@@ -295,7 +305,6 @@ Route::middleware([
     )->name(
         'supplier-ledger.index'
     );
-
     /*
     |--------------------------------------------------------------------------
     | Customer Payment AJAX Routes
@@ -304,7 +313,6 @@ Route::middleware([
     | These routes must stay above /customer-payments/{customerPayment}.
     |
     */
-
     Route::get(
         '/customer-payments/customers/search',
         [
@@ -314,7 +322,6 @@ Route::middleware([
     )->name(
         'customer-payments.customers.search'
     );
-
     Route::get(
         '/customer-payments/customers/{customer}/sales',
         [
@@ -326,13 +333,11 @@ Route::middleware([
         ->name(
             'customer-payments.customers.sales'
         );
-
     /*
     |--------------------------------------------------------------------------
     | Compatible Invoice Search Routes
     |--------------------------------------------------------------------------
     */
-
     Route::get(
         '/customer-payments/invoices/search',
         [
@@ -342,7 +347,6 @@ Route::middleware([
     )->name(
         'customer-payments.invoices.search'
     );
-
     Route::get(
         '/customer-payments/invoices/{sale}',
         [
@@ -354,7 +358,6 @@ Route::middleware([
         ->name(
             'customer-payments.invoices.show'
         );
-
     /*
     |--------------------------------------------------------------------------
     | Cancel Customer Payment
@@ -364,7 +367,6 @@ Route::middleware([
     | reversing account and customer-ledger entries.
     |
     */
-
     Route::patch(
         '/customer-payments/{customerPayment}/cancel',
         [
@@ -376,13 +378,11 @@ Route::middleware([
         ->name(
             'customer-payments.cancel'
         );
-
     /*
     |--------------------------------------------------------------------------
     | Print and PDF
     |--------------------------------------------------------------------------
     */
-
     Route::get(
         '/customer-payments/{customerPayment}/print',
         [
@@ -394,7 +394,6 @@ Route::middleware([
         ->name(
             'customer-payments.print'
         );
-
     Route::get(
         '/customer-payments/{customerPayment}/pdf',
         [
@@ -406,13 +405,11 @@ Route::middleware([
         ->name(
             'customer-payments.pdf'
         );
-
     /*
     |--------------------------------------------------------------------------
     | Main Customer Payment Routes
     |--------------------------------------------------------------------------
     */
-
     Route::get(
         '/customer-payments',
         [
@@ -422,7 +419,6 @@ Route::middleware([
     )->name(
         'customer-payments.index'
     );
-
     Route::get(
         '/customer-payments/create',
         [
@@ -432,7 +428,6 @@ Route::middleware([
     )->name(
         'customer-payments.create'
     );
-
     Route::post(
         '/customer-payments',
         [
@@ -442,7 +437,6 @@ Route::middleware([
     )->name(
         'customer-payments.store'
     );
-
     Route::get(
         '/customer-payments/{customerPayment}',
         [
@@ -454,24 +448,21 @@ Route::middleware([
         ->name(
             'customer-payments.show'
         );
-
     /*
-        |--------------------------------------------------------------------------
-        | Customer Ledger
-        |--------------------------------------------------------------------------
+    |--------------------------------------------------------------------------
+    | Customer Ledger
+    |--------------------------------------------------------------------------
         |
-        | Customer Ledger is a read-only accounting register. Entries are created
-        | by sales, sales returns, customer receipts and their reversing actions.
-        | They must never be created, edited or deleted directly through routes.
+    | Customer Ledger is a read-only accounting register. Entries are created
+    | by sales, sales returns, customer receipts and their reversing actions.
+    | They must never be created, edited or deleted directly through routes.
         |
         */
-
     /*
-        |--------------------------------------------------------------------------
-        | AJAX Customer Search
-        |--------------------------------------------------------------------------
+    |--------------------------------------------------------------------------
+    | AJAX Customer Search
+    |--------------------------------------------------------------------------
         */
-
     Route::get(
         '/customer-ledger/customers/search',
         [
@@ -481,13 +472,11 @@ Route::middleware([
     )->name(
         'customer-ledger.customers.search'
     );
-
     /*
-        |--------------------------------------------------------------------------
-        | Print Report
-        |--------------------------------------------------------------------------
+    |--------------------------------------------------------------------------
+    | Print Report
+    |--------------------------------------------------------------------------
         */
-
     Route::get(
         '/customer-ledger/print',
         [
@@ -497,13 +486,11 @@ Route::middleware([
     )->name(
         'customer-ledger.print'
     );
-
     /*
-        |--------------------------------------------------------------------------
-        | PDF Report
-        |--------------------------------------------------------------------------
+    |--------------------------------------------------------------------------
+    | PDF Report
+    |--------------------------------------------------------------------------
         */
-
     Route::get(
         '/customer-ledger/pdf',
         [
@@ -513,13 +500,11 @@ Route::middleware([
     )->name(
         'customer-ledger.pdf'
     );
-
     /*
-        |--------------------------------------------------------------------------
-        | Excel / CSV Report
-        |--------------------------------------------------------------------------
+    |--------------------------------------------------------------------------
+    | Excel / CSV Report
+    |--------------------------------------------------------------------------
         */
-
     Route::get(
         '/customer-ledger/excel',
         [
@@ -529,13 +514,11 @@ Route::middleware([
     )->name(
         'customer-ledger.excel'
     );
-
     /*
-        |--------------------------------------------------------------------------
-        | Customer Ledger Register
-        |--------------------------------------------------------------------------
+    |--------------------------------------------------------------------------
+    | Customer Ledger Register
+    |--------------------------------------------------------------------------
         */
-
     Route::get(
         '/customer-ledger',
         [
@@ -545,8 +528,6 @@ Route::middleware([
     )->name(
         'customer-ledger.index'
     );
-
-
     /*
     |--------------------------------------------------------------------------
     | Mechanic Payments
@@ -555,7 +536,6 @@ Route::middleware([
     | Keep search and commission lookup routes above the dynamic show route.
     |
     */
-
     Route::get(
         '/mechanic-payments/mechanics/search',
         [
@@ -565,7 +545,6 @@ Route::middleware([
     )->name(
         'mechanic-payments.mechanics.search'
     );
-
     Route::get(
         '/mechanic-payments/mechanics/{mechanic}/commissions',
         [
@@ -577,7 +556,6 @@ Route::middleware([
         ->name(
             'mechanic-payments.mechanics.commissions'
         );
-
     Route::patch(
         '/mechanic-payments/{mechanicPayment}/cancel',
         [
@@ -589,7 +567,6 @@ Route::middleware([
         ->name(
             'mechanic-payments.cancel'
         );
-
     Route::get(
         '/mechanic-payments/{mechanicPayment}/print',
         [
@@ -601,7 +578,6 @@ Route::middleware([
         ->name(
             'mechanic-payments.print'
         );
-
     Route::get(
         '/mechanic-payments/{mechanicPayment}/pdf',
         [
@@ -613,7 +589,6 @@ Route::middleware([
         ->name(
             'mechanic-payments.pdf'
         );
-
     Route::get(
         '/mechanic-payments',
         [
@@ -623,7 +598,6 @@ Route::middleware([
     )->name(
         'mechanic-payments.index'
     );
-
     Route::get(
         '/mechanic-payments/create',
         [
@@ -633,7 +607,6 @@ Route::middleware([
     )->name(
         'mechanic-payments.create'
     );
-
     Route::post(
         '/mechanic-payments',
         [
@@ -643,7 +616,6 @@ Route::middleware([
     )->name(
         'mechanic-payments.store'
     );
-
     Route::get(
         '/mechanic-payments/{mechanicPayment}',
         [
@@ -655,8 +627,6 @@ Route::middleware([
         ->name(
             'mechanic-payments.show'
         );
-
-
     /*
     |--------------------------------------------------------------------------
     | Mechanic Ledger
@@ -666,7 +636,6 @@ Route::middleware([
     | reversal services create its entries; routes only display/export them.
     |
     */
-
     /*
     |--------------------------------------------------------------------------
     | Mechanic Accounts Compatibility Route
@@ -675,7 +644,6 @@ Route::middleware([
     | Retains compatibility with sidebar links that use /mechanic-accounts.
     |
     */
-
     Route::get(
         '/mechanic-accounts',
         [
@@ -685,7 +653,6 @@ Route::middleware([
     )->name(
         'mechanic-accounts.index'
     );
-
     Route::get(
         '/mechanic-ledger/mechanics/search',
         [
@@ -695,7 +662,6 @@ Route::middleware([
     )->name(
         'mechanic-ledger.mechanics.search'
     );
-
     Route::get(
         '/mechanic-ledger/print',
         [
@@ -705,7 +671,6 @@ Route::middleware([
     )->name(
         'mechanic-ledger.print'
     );
-
     Route::get(
         '/mechanic-ledger/pdf',
         [
@@ -715,7 +680,6 @@ Route::middleware([
     )->name(
         'mechanic-ledger.pdf'
     );
-
     Route::get(
         '/mechanic-ledger/excel',
         [
@@ -725,7 +689,6 @@ Route::middleware([
     )->name(
         'mechanic-ledger.excel'
     );
-
     Route::get(
         '/mechanic-ledger',
         [

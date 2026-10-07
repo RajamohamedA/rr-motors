@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Models\Account;
-use App\Models\AccountTransaction;
 use App\Models\Customer;
 use App\Models\Godown;
 use App\Models\Mechanic;
@@ -16,6 +15,8 @@ use App\Models\SalePayment;
 use App\Models\Sales;
 use App\Models\StockLedger;
 use App\Models\Store;
+use App\Services\AccountTransactionService;
+use App\Services\CustomerLedgerService;
 use App\Services\MechanicLedgerService;
 use App\Services\StockService;
 use App\Support\AppResponse;
@@ -36,6 +37,10 @@ use Throwable;
 
 class QuotationController extends Controller implements HasMiddleware
 {
+    public function __construct(
+        private readonly AccountTransactionService $accountTransactionService
+    ) {}
+
     public static function middleware(): array
     {
         return [
@@ -1070,6 +1075,7 @@ class QuotationController extends Controller implements HasMiddleware
         Request $request,
         Quotation $quotation,
         StockService $stockService,
+        CustomerLedgerService $customerLedgerService,
         MechanicLedgerService $mechanicLedgerService
     ): RedirectResponse {
         [$companyId, $storeId] = $this->context($request);
@@ -1118,6 +1124,7 @@ class QuotationController extends Controller implements HasMiddleware
                 $companyId,
                 $storeId,
                 $stockService,
+                $customerLedgerService,
                 $mechanicLedgerService,
                 $userId
             ) {
@@ -1141,10 +1148,17 @@ class QuotationController extends Controller implements HasMiddleware
                     ]);
                 }
 
-                $this->validateCustomer(
+                $customer = $this->validateCustomer(
                     (int) $document->customer_id,
                     $companyId,
                     $storeId
+                );
+
+                $customerLedgerService->ensureOpeningBalance(
+                    $customer,
+                    $companyId,
+                    $storeId,
+                    $userId
                 );
 
                 $lines = $document->items->map(function (QuotationItem $item) use (
@@ -1212,15 +1226,37 @@ class QuotationController extends Controller implements HasMiddleware
                     $storeId
                 );
 
-                $paidAmount = count($paymentLines) > 0
+                $directPaidAmount = count($paymentLines) > 0
                     ? round(collect($paymentLines)->sum('amount'), 2)
                     : round((float) ($validated['paid_amount'] ?? 0), 2);
 
-                if ($paidAmount > $grandTotal) {
+                if ($directPaidAmount > $grandTotal) {
                     throw ValidationException::withMessages([
                         'paid_amount' => 'Paid amount cannot exceed the invoice amount.',
                     ]);
                 }
+
+                $availableAdvance = max(
+                    0,
+                    -$customerLedgerService->currentBalance(
+                        $companyId,
+                        $storeId,
+                        $customer->id
+                    )
+                );
+
+                $advanceUsed = round(
+                    min(
+                        $availableAdvance,
+                        max(0, $grandTotal - $directPaidAmount)
+                    ),
+                    2
+                );
+
+                $paidAmount = round(
+                    $directPaidAmount + $advanceUsed,
+                    2
+                );
 
                 $balanceAmount = round($grandTotal - $paidAmount, 2);
                 $paymentStatus = $this->paymentStatus(
@@ -1264,6 +1300,7 @@ class QuotationController extends Controller implements HasMiddleware
                     'final_discount' => $finalDiscount,
                     'round_off' => $roundOff,
                     'grand_total' => $grandTotal,
+                    'advance_used' => $advanceUsed,
                     'paid_amount' => $paidAmount,
                     'balance_amount' => $balanceAmount,
                     'payment_status' => $paymentStatus,
@@ -1323,11 +1360,22 @@ class QuotationController extends Controller implements HasMiddleware
                 $this->recordSalePayments(
                     $sale,
                     $paymentLines,
-                    $paidAmount,
+                    $directPaidAmount,
                     $companyId,
                     $storeId,
                     $userId,
                     $document->quotation_no
+                );
+
+                $customerLedgerService->postSale(
+                    $sale,
+                    $userId
+                );
+
+                $customerLedgerService->syncSaleCollection(
+                    $sale,
+                    $directPaidAmount,
+                    $userId
                 );
 
                 if (
@@ -2467,25 +2515,10 @@ class QuotationController extends Controller implements HasMiddleware
                 'created_by' => $userId,
             ]);
 
-            AccountTransaction::create([
-                'company_id' => $companyId,
-                'store_id' => $storeId,
-                'account_id' => $line['account_id'],
-                'transaction_date' => $sale->invoice_date,
-                'transaction_type' => AccountTransaction::TYPE_SALE,
-                'reference_type' => SalePayment::class,
-                'reference_id' => $payment->id,
-                'reference_no' => $sale->invoice_no,
-                'debit' => $line['amount'],
-                'credit' => 0,
-                'payment_mode' => $line['payment_mode'],
-                'external_reference' => $line['reference_no'],
-                'remarks' => 'Sales collection for '
-                    . $sale->invoice_no
-                    . ' converted from '
-                    . $quotationNo,
-                'created_by' => $userId,
-            ]);
+            $this->accountTransactionService->postSalePayment(
+                $payment,
+                $userId
+            );
         }
     }
 

@@ -10,20 +10,19 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 class CustomerLedgerEntry extends Model
 {
     public const TYPE_OPENING_BALANCE = 'opening_balance';
-
     public const TYPE_SALE = 'sale';
-
     public const TYPE_SALE_REVERSAL = 'sale_reversal';
-
     public const TYPE_SALES_RETURN = 'sales_return';
-
     public const TYPE_SALES_RETURN_REVERSAL = 'sales_return_reversal';
-
+    public const TYPE_SALES_RETURN_REFUND = 'sales_return_refund';
+    public const TYPE_SALES_RETURN_REFUND_REVERSAL =
+    'sales_return_refund_reversal';
     public const TYPE_CUSTOMER_PAYMENT = 'customer_payment';
-
     public const TYPE_PAYMENT_REVERSAL = 'payment_reversal';
-
     public const TYPE_ADJUSTMENT = 'adjustment';
+    public const TYPE_ADJUSTMENT_REVERSAL = 'adjustment_reversal';
+
+    protected $table = 'customer_ledger_entries';
 
     protected $fillable = [
         'company_id',
@@ -66,47 +65,37 @@ class CustomerLedgerEntry extends Model
 
     public function company(): BelongsTo
     {
-        return $this->belongsTo(
-            Company::class
-        );
+        return $this->belongsTo(Company::class);
     }
 
     public function store(): BelongsTo
     {
-        return $this->belongsTo(
-            Store::class
-        );
+        return $this->belongsTo(Store::class);
     }
 
     public function customer(): BelongsTo
     {
-        return $this->belongsTo(
-            Customer::class
-        );
+        return $this->belongsTo(Customer::class);
     }
 
     public function creator(): BelongsTo
     {
-        return $this->belongsTo(
-            User::class,
-            'created_by'
-        );
+        return $this->belongsTo(User::class, 'created_by');
     }
 
     public function reversalOf(): BelongsTo
     {
-        return $this->belongsTo(
-            self::class,
-            'reversal_of_id'
-        );
+        return $this->belongsTo(self::class, 'reversal_of_id');
+    }
+
+    public function reversedTransaction(): BelongsTo
+    {
+        return $this->reversalOf();
     }
 
     public function reversals(): HasMany
     {
-        return $this->hasMany(
-            self::class,
-            'reversal_of_id'
-        );
+        return $this->hasMany(self::class, 'reversal_of_id');
     }
 
     /*
@@ -121,24 +110,29 @@ class CustomerLedgerEntry extends Model
         int $storeId
     ): Builder {
         return $query
-            ->where(
-                'company_id',
-                $companyId
-            )
-            ->where(
-                'store_id',
-                $storeId
-            );
+            ->where('company_id', $companyId)
+            ->where('store_id', $storeId);
+    }
+
+    public function scopeForCompany(
+        Builder $query,
+        int $companyId
+    ): Builder {
+        return $query->where('company_id', $companyId);
+    }
+
+    public function scopeForStore(
+        Builder $query,
+        int $storeId
+    ): Builder {
+        return $query->where('store_id', $storeId);
     }
 
     public function scopeForCustomer(
         Builder $query,
         int $customerId
     ): Builder {
-        return $query->where(
-            'customer_id',
-            $customerId
-        );
+        return $query->where('customer_id', $customerId);
     }
 
     public function scopeBetweenDates(
@@ -146,13 +140,17 @@ class CustomerLedgerEntry extends Model
         string $fromDate,
         string $toDate
     ): Builder {
-        return $query->whereBetween(
-            'transaction_date',
-            [
-                $fromDate,
-                $toDate,
-            ]
-        );
+        return $query->whereBetween('transaction_date', [
+            $fromDate,
+            $toDate,
+        ]);
+    }
+
+    public function scopeAsOf(
+        Builder $query,
+        string $date
+    ): Builder {
+        return $query->whereDate('transaction_date', '<=', $date);
     }
 
     public function scopeForReference(
@@ -161,32 +159,32 @@ class CustomerLedgerEntry extends Model
         int $referenceId
     ): Builder {
         return $query
-            ->where(
-                'reference_type',
-                $referenceType
-            )
-            ->where(
-                'reference_id',
-                $referenceId
-            );
+            ->where('reference_type', $referenceType)
+            ->where('reference_id', $referenceId);
     }
 
-    public function scopeOriginal(
-        Builder $query
+    public function scopeOfType(
+        Builder $query,
+        string $transactionType
     ): Builder {
-        return $query->where(
-            'is_reversal',
-            false
-        );
+        return $query->where('transaction_type', $transactionType);
     }
 
-    public function scopeReversal(
-        Builder $query
-    ): Builder {
-        return $query->where(
-            'is_reversal',
-            true
-        );
+    public function scopeOriginal(Builder $query): Builder
+    {
+        return $query->where('is_reversal', false);
+    }
+
+    public function scopeReversal(Builder $query): Builder
+    {
+        return $query->where('is_reversal', true);
+    }
+
+    public function scopeChronological(Builder $query): Builder
+    {
+        return $query
+            ->orderBy('transaction_date')
+            ->orderBy('id');
     }
 
     /*
@@ -194,16 +192,15 @@ class CustomerLedgerEntry extends Model
     | Accounting Helpers
     |--------------------------------------------------------------------------
     |
-    | Positive balance means the customer owes the business (Dr).
-    | Negative balance means the business holds customer advance (Cr).
+    | A positive balance means the customer owes the business (Dr).
+    | A negative balance means customer advance is available (Cr).
     |
     */
 
     public function balanceEffect(): float
     {
         return round(
-            (float) $this->debit
-                - (float) $this->credit,
+            (float) $this->debit - (float) $this->credit,
             2
         );
     }
@@ -228,6 +225,31 @@ class CustomerLedgerEntry extends Model
         return $this->reversals()->exists();
     }
 
+    public function isOpeningBalance(): bool
+    {
+        return $this->transaction_type === self::TYPE_OPENING_BALANCE;
+    }
+
+    public function isSale(): bool
+    {
+        return $this->transaction_type === self::TYPE_SALE;
+    }
+
+    public function isCustomerPayment(): bool
+    {
+        return $this->transaction_type === self::TYPE_CUSTOMER_PAYMENT;
+    }
+
+    public function isSalesReturn(): bool
+    {
+        return $this->transaction_type === self::TYPE_SALES_RETURN;
+    }
+
+    public function isSalesReturnRefund(): bool
+    {
+        return $this->transaction_type === self::TYPE_SALES_RETURN_REFUND;
+    }
+
     public static function transactionTypes(): array
     {
         return [
@@ -236,9 +258,12 @@ class CustomerLedgerEntry extends Model
             self::TYPE_SALE_REVERSAL,
             self::TYPE_SALES_RETURN,
             self::TYPE_SALES_RETURN_REVERSAL,
+            self::TYPE_SALES_RETURN_REFUND,
+            self::TYPE_SALES_RETURN_REFUND_REVERSAL,
             self::TYPE_CUSTOMER_PAYMENT,
             self::TYPE_PAYMENT_REVERSAL,
             self::TYPE_ADJUSTMENT,
+            self::TYPE_ADJUSTMENT_REVERSAL,
         ];
     }
 }

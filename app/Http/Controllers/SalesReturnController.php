@@ -12,6 +12,7 @@ use App\Models\SaleItems;
 use App\Models\SaleReturnItem;
 use App\Models\Sales;
 use App\Models\SalesReturn;
+use App\Services\AccountTransactionService;
 use App\Services\CustomerLedgerService;
 use App\Services\MechanicLedgerService;
 use App\Services\MechanicPaymentService;
@@ -32,6 +33,10 @@ use Inertia\Response;
 
 class SalesReturnController extends Controller implements HasMiddleware
 {
+    public function __construct(
+        private readonly AccountTransactionService $accountTransactionService
+    ) {}
+
     public static function middleware(): array
     {
         return [
@@ -65,11 +70,9 @@ class SalesReturnController extends Controller implements HasMiddleware
             ),
         ];
     }
-
     public function index(Request $request): Response
     {
         [$companyId, $storeId] = $this->context($request);
-
         $filters = [
             'search' => trim((string) $request->input('search', '')),
             'quick_filter' => $request->input('quick_filter', 'today'),
@@ -77,7 +80,6 @@ class SalesReturnController extends Controller implements HasMiddleware
             'date_to' => $request->input('date_to'),
             'status' => $request->input('status', 'all'),
         ];
-
         $query = SalesReturn::query()
             ->forContext($companyId, $storeId)
             ->with([
@@ -98,48 +100,38 @@ class SalesReturnController extends Controller implements HasMiddleware
             })
             ->when($filters['status'] !== 'all', fn(Builder $query) =>
             $query->where('status', $filters['status']));
-
         $this->applyDateFilter($query, $filters);
-
         $returns = $query
             ->latest('return_date')
             ->latest('id')
             ->paginate(20)
             ->withQueryString();
-
         $todayAmount = SalesReturn::query()
             ->forContext($companyId, $storeId)
             ->completed()
             ->whereDate('return_date', today())
             ->sum('total_amount');
-
         return Inertia::render('SalesReturns/Index', [
             'returns' => $returns,
             'filters' => $filters,
             'todayAmount' => (float) $todayAmount,
         ]);
     }
-
     public function create(Request $request): Response
     {
         [$companyId, $storeId] = $this->context($request);
-
         return Inertia::render('SalesReturns/Create', [
             'returnNo' => SalesReturn::generateReturnNo(),
             'accounts' => $this->refundAccounts($companyId, $storeId),
         ]);
     }
-
     public function searchInvoice(Request $request): JsonResponse
     {
         [$companyId, $storeId] = $this->context($request);
-
         $validated = $request->validate([
             'search' => ['required', 'string', 'min:2', 'max:100'],
         ]);
-
         $search = trim($validated['search']);
-
         $sales = Sales::query()
             ->where('company_id', $companyId)
             ->where('store_id', $storeId)
@@ -165,10 +157,8 @@ class SalesReturnController extends Controller implements HasMiddleware
                 'grand_total',
                 'payment_status',
             ]);
-
         return response()->json(['sales' => $sales]);
     }
-
     public function getInvoice(
         Request $request,
         Sales $sale
@@ -176,12 +166,10 @@ class SalesReturnController extends Controller implements HasMiddleware
         [$companyId, $storeId] = $this->context($request);
         $this->ensureSaleContext($sale, $companyId, $storeId);
         $this->ensureSaleIsReturnable($sale);
-
         $sale->load([
             'customer:id,customer_name,mobile,customer_code,gst_number',
             'items.product.unit',
         ]);
-
         $sale->items->each(function (SaleItems $item) {
             $returned = SaleReturnItem::query()
                 ->where('sale_item_id', $item->id)
@@ -192,7 +180,6 @@ class SalesReturnController extends Controller implements HasMiddleware
                      COALESCE(SUM(free_quantity), 0) AS free_quantity'
                 )
                 ->first();
-
             $item->setAttribute('returned_qty', (float) $returned->quantity);
             $item->setAttribute(
                 'returned_free_qty',
@@ -211,10 +198,8 @@ class SalesReturnController extends Controller implements HasMiddleware
                 )
             );
         });
-
         return response()->json(['sale' => $sale]);
     }
-
     public function store(
         Request $request,
         StockService $stockService,
@@ -224,7 +209,6 @@ class SalesReturnController extends Controller implements HasMiddleware
     ): RedirectResponse {
         $validated = $this->validateReturnRequest($request);
         [$companyId, $storeId] = $this->context($request);
-
         $salesReturn = DB::transaction(function () use (
             $validated,
             $companyId,
@@ -241,7 +225,6 @@ class SalesReturnController extends Controller implements HasMiddleware
                 ])
                 ->lockForUpdate()
                 ->findOrFail($validated['sale_id']);
-
             $this->ensureSaleContext($sale, $companyId, $storeId);
             $this->ensureSaleIsReturnable($sale);
             $lines = $this->buildLines($sale, $validated);
@@ -250,17 +233,14 @@ class SalesReturnController extends Controller implements HasMiddleware
                 $sale,
                 $totals['total_amount']
             );
-
             $account = $this->refundAccount(
                 $validated,
                 $companyId,
                 $storeId
             );
-
             $refundAmount = $validated['refund_status'] === 'refunded'
                 ? $totals['total_amount']
                 : 0;
-
             $return = SalesReturn::create([
                 'company_id' => $companyId,
                 'store_id' => $storeId,
@@ -277,7 +257,6 @@ class SalesReturnController extends Controller implements HasMiddleware
                 'status' => 'completed',
                 'remarks' => $validated['remarks'] ?? null,
             ]);
-
             $return->update([
                 'return_no' => 'SRT' . str_pad(
                     (string) $return->id,
@@ -286,49 +265,39 @@ class SalesReturnController extends Controller implements HasMiddleware
                     STR_PAD_LEFT
                 ),
             ]);
-
             $this->saveLines($return, $lines, $stockService, 'CREATE');
-
             $customerLedgerService->postSalesReturn(
                 $return,
                 auth()->id()
             );
-
             $this->syncRefundAccounting(
                 $return,
                 $account,
                 $refundAmount,
                 $customerLedgerService
             );
-
             $this->postMechanicCommissionReturn(
                 $return,
                 $sale,
                 $totals['sub_total'],
                 $mechanicLedgerService
             );
-
             $this->refreshMechanicCommission(
                 $sale,
                 $mechanicPaymentService
             );
-
             $this->recalculateSaleBalance($sale);
-
             return $return;
         });
-
         return redirect()
             ->route('sales-returns.show', $salesReturn)
             ->with('success', 'Sales return created successfully.');
     }
-
     public function show(
         Request $request,
         SalesReturn $salesReturn
     ): Response {
         $this->ensureReturnContext($request, $salesReturn);
-
         $salesReturn->load([
             'company',
             'store',
@@ -340,9 +309,7 @@ class SalesReturnController extends Controller implements HasMiddleware
             'items.product.unit',
             'items.saleItem',
         ]);
-
         $refundReversal = null;
-
         if ($salesReturn->refundAccountTransaction) {
             $refundReversal = AccountTransaction::query()
                 ->where(
@@ -351,7 +318,6 @@ class SalesReturnController extends Controller implements HasMiddleware
                 )
                 ->first();
         }
-
         $ledgerEntries = CustomerLedgerEntry::query()
             ->forContext(
                 (int) $salesReturn->company_id,
@@ -366,9 +332,7 @@ class SalesReturnController extends Controller implements HasMiddleware
             ->orderBy('transaction_date')
             ->orderBy('id')
             ->get();
-
         $mechanicImpact = $this->mechanicImpact($salesReturn);
-
         return Inertia::render('SalesReturns/Show', [
             'salesReturn' => $salesReturn,
             'refundReversal' => $refundReversal,
@@ -376,21 +340,17 @@ class SalesReturnController extends Controller implements HasMiddleware
             'mechanicImpact' => $mechanicImpact,
         ]);
     }
-
     public function edit(
         Request $request,
         SalesReturn $salesReturn
     ): Response {
         $this->ensureReturnContext($request, $salesReturn);
-
         abort_if($salesReturn->isCancelled(), 422, 'Cancelled return cannot be edited.');
-
         $salesReturn->load([
             'sale.customer',
             'sale.items.product.unit',
             'items.product.unit',
         ]);
-
         return Inertia::render('SalesReturns/Edit', [
             'salesReturn' => $salesReturn,
             'accounts' => $this->refundAccounts(
@@ -399,7 +359,6 @@ class SalesReturnController extends Controller implements HasMiddleware
             ),
         ]);
     }
-
     public function update(
         Request $request,
         SalesReturn $salesReturn,
@@ -411,7 +370,6 @@ class SalesReturnController extends Controller implements HasMiddleware
         $validated = $this->validateReturnRequest($request);
         [$companyId, $storeId] = $this->context($request);
         $this->ensureReturnContext($request, $salesReturn);
-
         DB::transaction(function () use (
             $salesReturn,
             $validated,
@@ -431,29 +389,24 @@ class SalesReturnController extends Controller implements HasMiddleware
                 ])
                 ->lockForUpdate()
                 ->findOrFail($salesReturn->id);
-
             if ($return->isCancelled()) {
                 throw ValidationException::withMessages([
                     'sales_return' => 'Cancelled return cannot be edited.',
                 ]);
             }
-
             if ((int) $validated['sale_id'] !== (int) $return->sale_id) {
                 throw ValidationException::withMessages([
                     'sale_id' => 'The original invoice cannot be changed.',
                 ]);
             }
-
             $this->reverseMechanicCommissionReturn(
                 $return,
                 $mechanicLedgerService,
                 'Reversal before editing sales return '
                     . $return->return_no
             );
-
             $this->reverseStock($return, $stockService, 'EDIT_REVERSE');
             $return->items()->delete();
-
             $lines = $this->buildLines(
                 $return->sale,
                 $validated,
@@ -465,17 +418,14 @@ class SalesReturnController extends Controller implements HasMiddleware
                 $totals['total_amount'],
                 $return->id
             );
-
             $account = $this->refundAccount(
                 $validated,
                 $companyId,
                 $storeId
             );
-
             $refundAmount = $validated['refund_status'] === 'refunded'
                 ? $totals['total_amount']
                 : 0;
-
             $return->update([
                 'return_date' => $validated['return_date'],
                 'account_id' => $account?->id,
@@ -485,21 +435,17 @@ class SalesReturnController extends Controller implements HasMiddleware
                 'refund_status' => $validated['refund_status'],
                 'remarks' => $validated['remarks'] ?? null,
             ]);
-
             $this->saveLines($return, $lines, $stockService, 'UPDATE');
-
             $customerLedgerService->postSalesReturn(
                 $return->refresh(),
                 auth()->id()
             );
-
             $this->syncRefundAccounting(
                 $return,
                 $account,
                 $refundAmount,
                 $customerLedgerService
             );
-
             $this->postMechanicCommissionReturn(
                 $return,
                 $return->sale,
@@ -507,20 +453,16 @@ class SalesReturnController extends Controller implements HasMiddleware
                 $mechanicLedgerService,
                 $return->id
             );
-
             $this->refreshMechanicCommission(
                 $return->sale,
                 $mechanicPaymentService
             );
-
             $this->recalculateSaleBalance($return->sale);
         });
-
         return redirect()
             ->route('sales-returns.show', $salesReturn)
             ->with('success', 'Sales return updated successfully.');
     }
-
     public function cancel(
         Request $request,
         SalesReturn $salesReturn,
@@ -530,7 +472,6 @@ class SalesReturnController extends Controller implements HasMiddleware
         MechanicPaymentService $mechanicPaymentService
     ): RedirectResponse {
         $this->ensureReturnContext($request, $salesReturn);
-
         DB::transaction(function () use (
             $salesReturn,
             $stockService,
@@ -546,52 +487,42 @@ class SalesReturnController extends Controller implements HasMiddleware
                 ])
                 ->lockForUpdate()
                 ->findOrFail($salesReturn->id);
-
             if ($return->isCancelled()) {
                 throw ValidationException::withMessages([
                     'sales_return' => 'This return is already cancelled.',
                 ]);
             }
-
             $this->reverseStock($return, $stockService, 'CANCEL');
-
             $this->reverseRefundAccounting(
                 $return,
                 $customerLedgerService
             );
-
             $customerLedgerService->reverseSalesReturn(
                 $return,
                 now(),
                 'Cancellation of sales return ' . $return->return_no,
                 auth()->id()
             );
-
             $this->reverseMechanicCommissionReturn(
                 $return,
                 $mechanicLedgerService,
                 'Cancellation of mechanic commission adjustment for '
                     . $return->return_no
             );
-
             $return->update([
                 'status' => 'cancelled',
                 'refund_status' => 'cancelled',
             ]);
-
             $this->refreshMechanicCommission(
                 $return->sale,
                 $mechanicPaymentService
             );
-
             $this->recalculateSaleBalance($return->sale);
         });
-
         return redirect()
             ->route('sales-returns.show', $salesReturn)
             ->with('success', 'Sales return cancelled and stock reversed.');
     }
-
     public function print(
         Request $request,
         SalesReturn $salesReturn
@@ -600,17 +531,13 @@ class SalesReturnController extends Controller implements HasMiddleware
         $paper = $request->validate([
             'paper' => ['nullable', Rule::in(['a4', 'a5'])],
         ])['paper'] ?? 'a4';
-
         $this->loadForDocument($salesReturn);
-
         $mechanicImpact = $this->mechanicImpact($salesReturn);
-
         return view(
             'sales_returns.print',
             compact('salesReturn', 'paper', 'mechanicImpact')
         );
     }
-
     public function pdf(
         Request $request,
         SalesReturn $salesReturn
@@ -619,11 +546,8 @@ class SalesReturnController extends Controller implements HasMiddleware
         $paper = $request->validate([
             'paper' => ['nullable', Rule::in(['a4', 'a5'])],
         ])['paper'] ?? 'a4';
-
         $this->loadForDocument($salesReturn);
-
         $mechanicImpact = $this->mechanicImpact($salesReturn);
-
         return Pdf::loadView(
             'sales_returns.pdf',
             compact('salesReturn', 'paper', 'mechanicImpact')
@@ -637,7 +561,6 @@ class SalesReturnController extends Controller implements HasMiddleware
                     . '.pdf'
             );
     }
-
     private function validateReturnRequest(Request $request): array
     {
         $validated = $request->validate([
@@ -660,13 +583,11 @@ class SalesReturnController extends Controller implements HasMiddleware
             'free_qty' => ['nullable', 'array'],
             'free_qty.*' => ['nullable', 'numeric', 'min:0'],
         ]);
-
         $moneyRefundMethods = [
             'cash',
             'bank',
             'original_payment',
         ];
-
         if (
             $validated['refund_status'] === 'refunded'
             && !in_array(
@@ -680,7 +601,6 @@ class SalesReturnController extends Controller implements HasMiddleware
                 'Select Cash, Bank or Original Payment for a completed refund.',
             ]);
         }
-
         if (
             in_array(
                 $validated['refund_method'],
@@ -695,7 +615,6 @@ class SalesReturnController extends Controller implements HasMiddleware
                 'Select the cash or bank account used for the refund.',
             ]);
         }
-
         if (
             $validated['refund_method'] === 'customer_credit'
             && $validated['refund_status'] !== 'credited'
@@ -705,33 +624,26 @@ class SalesReturnController extends Controller implements HasMiddleware
                 'Customer Credit must use the Credited status.',
             ]);
         }
-
         return $validated;
     }
-
     private function buildLines(
         Sales $sale,
         array $validated,
         ?int $excludeReturnId = null
     ): array {
         $lines = [];
-
         foreach ($validated['sale_item_id'] as $index => $saleItemId) {
             $quantity = round((float) ($validated['qty'][$index] ?? 0), 2);
             $freeQuantity = round((float) ($validated['free_qty'][$index] ?? 0), 2);
-
             if ($quantity <= 0 && $freeQuantity <= 0) {
                 continue;
             }
-
             $saleItem = $sale->items->firstWhere('id', (int) $saleItemId);
-
             if (!$saleItem) {
                 throw ValidationException::withMessages([
                     "sale_item_id.{$index}" => 'Item does not belong to this invoice.',
                 ]);
             }
-
             $returned = SaleReturnItem::query()
                 ->where('sale_item_id', $saleItem->id)
                 ->when($excludeReturnId, fn(Builder $query) =>
@@ -743,21 +655,17 @@ class SalesReturnController extends Controller implements HasMiddleware
                      COALESCE(SUM(free_quantity), 0) AS free_quantity'
                 )
                 ->first();
-
             $quantityBalance = (float) $saleItem->quantity - (float) $returned->quantity;
             $freeBalance = (float) $saleItem->free_quantity - (float) $returned->free_quantity;
-
             if ($quantity > $quantityBalance || $freeQuantity > $freeBalance) {
                 throw ValidationException::withMessages([
                     "qty.{$index}" => 'Return quantity exceeds the remaining invoice quantity.',
                 ]);
             }
-
             $gross = round($quantity * (float) $saleItem->sale_price, 2);
             $discount = $this->returnDiscount($saleItem, $quantity, $gross);
             $taxable = round(max(0, $gross - $discount), 2);
             $gst = round($taxable * (float) $saleItem->gst_percent / 100, 2);
-
             $lines[] = [
                 'sale_item' => $saleItem,
                 'product' => $saleItem->product,
@@ -773,16 +681,13 @@ class SalesReturnController extends Controller implements HasMiddleware
                 'line_total' => round($taxable + $gst, 2),
             ];
         }
-
         if (!$lines) {
             throw ValidationException::withMessages([
                 'items' => 'Enter a return quantity for at least one item.',
             ]);
         }
-
         return $lines;
     }
-
     private function returnDiscount(
         SaleItems $saleItem,
         float $quantity,
@@ -794,15 +699,12 @@ class SalesReturnController extends Controller implements HasMiddleware
                 2
             );
         }
-
         $soldQuantity = max(0.01, (float) $saleItem->quantity);
-
         return round(
             min($gross, (float) $saleItem->discount * $quantity / $soldQuantity),
             2
         );
     }
-
     private function calculateTotals(array $lines): array
     {
         $subTotal = round(array_sum(array_column($lines, 'taxable_amount')), 2);
@@ -810,7 +712,6 @@ class SalesReturnController extends Controller implements HasMiddleware
         $gst = round(array_sum(array_column($lines, 'gst_amount')), 2);
         $unrounded = $subTotal + $gst;
         $total = round($unrounded);
-
         return [
             'sub_total' => $subTotal,
             'discount_total' => $discount,
@@ -819,7 +720,6 @@ class SalesReturnController extends Controller implements HasMiddleware
             'total_amount' => round($total, 2),
         ];
     }
-
     /*
     |--------------------------------------------------------------------------
     | Mechanic Commission Adjustment
@@ -833,7 +733,6 @@ class SalesReturnController extends Controller implements HasMiddleware
     |   from the mechanic or adjustable against a future commission.
     |
     */
-
     private function postMechanicCommissionReturn(
         SalesReturn $return,
         Sales $sale,
@@ -844,9 +743,7 @@ class SalesReturnController extends Controller implements HasMiddleware
         if (!$sale->isMechanicSale() || !$sale->mechanic_id) {
             return;
         }
-
         $commission = $sale->mechanicCommission;
-
         if (
             !$commission
             || $commission->isCancelled()
@@ -854,18 +751,15 @@ class SalesReturnController extends Controller implements HasMiddleware
         ) {
             return;
         }
-
         $amount = $this->mechanicReturnCommissionAmount(
             $return,
             $commission,
             $returnedCommissionBase,
             $excludeReturnId
         );
-
         if ($amount <= 0) {
             return;
         }
-
         $mechanicLedgerService->recordSalesReturnCommission(
             salesReturn: $return,
             mechanicId: (int) $sale->mechanic_id,
@@ -874,7 +768,6 @@ class SalesReturnController extends Controller implements HasMiddleware
             invoiceNo: $sale->invoice_no
         );
     }
-
     private function mechanicReturnCommissionAmount(
         SalesReturn $return,
         MechanicCommission $commission,
@@ -885,16 +778,13 @@ class SalesReturnController extends Controller implements HasMiddleware
             (float) $commission->commission_amount,
             2
         );
-
         $commissionBase = round(
             (float) $commission->commission_base,
             2
         );
-
         if ($commissionBase <= 0 || $commissionAmount <= 0) {
             return 0;
         }
-
         $previousReturnBase = (float) SalesReturn::query()
             ->where('company_id', $return->company_id)
             ->where('store_id', $return->store_id)
@@ -910,18 +800,15 @@ class SalesReturnController extends Controller implements HasMiddleware
                 )
             )
             ->sum('sub_total');
-
         $previouslyReduced = round(
             $commissionAmount
                 * min(1, max(0, $previousReturnBase) / $commissionBase),
             2
         );
-
         $remainingCommission = max(
             0,
             round($commissionAmount - $previouslyReduced, 2)
         );
-
         $currentReduction = round(
             $commissionAmount
                 * min(
@@ -930,10 +817,8 @@ class SalesReturnController extends Controller implements HasMiddleware
                 ),
             2
         );
-
         return min($currentReduction, $remainingCommission);
     }
-
     private function reverseMechanicCommissionReturn(
         SalesReturn $return,
         MechanicLedgerService $mechanicLedgerService,
@@ -949,7 +834,6 @@ class SalesReturnController extends Controller implements HasMiddleware
             transactionDate: now()->toDateString()
         );
     }
-
     private function refreshMechanicCommission(
         Sales $sale,
         MechanicPaymentService $mechanicPaymentService
@@ -957,23 +841,19 @@ class SalesReturnController extends Controller implements HasMiddleware
         if (!$sale->isMechanicSale() || !$sale->mechanic_id) {
             return;
         }
-
         $commission = MechanicCommission::query()
             ->where('company_id', $sale->company_id)
             ->where('store_id', $sale->store_id)
             ->where('sale_id', $sale->id)
             ->lockForUpdate()
             ->first();
-
         if (!$commission || $commission->isCancelled()) {
             return;
         }
-
         $mechanicPaymentService->refreshCommissionPaymentSummary(
             $commission
         );
     }
-
     private function saveLines(
         SalesReturn $return,
         array $lines,
@@ -996,7 +876,6 @@ class SalesReturnController extends Controller implements HasMiddleware
                 'gst_amount' => $line['gst_amount'],
                 'line_total' => $line['line_total'],
             ]);
-
             $stockService->increaseStock(
                 $line['product'],
                 $line['quantity'] + $line['free_quantity'],
@@ -1011,7 +890,6 @@ class SalesReturnController extends Controller implements HasMiddleware
             );
         }
     }
-
     private function reverseStock(
         SalesReturn $return,
         StockService $stockService,
@@ -1022,7 +900,6 @@ class SalesReturnController extends Controller implements HasMiddleware
                 ->where('company_id', $return->company_id)
                 ->where('store_id', $return->store_id)
                 ->findOrFail($item->product_id);
-
             $stockService->decreaseStock(
                 $product,
                 $item->totalStockQuantity(),
@@ -1037,7 +914,6 @@ class SalesReturnController extends Controller implements HasMiddleware
             );
         }
     }
-
     private function ensureReturnAmountAvailable(
         Sales $sale,
         float $newReturnAmount,
@@ -1054,7 +930,6 @@ class SalesReturnController extends Controller implements HasMiddleware
                 $query->where('id', '!=', $excludeReturnId)
             )
             ->sum('total_amount');
-
         if (
             round($previousReturnAmount + $newReturnAmount, 2)
             > round((float) $sale->grand_total, 2) + 0.009
@@ -1065,43 +940,36 @@ class SalesReturnController extends Controller implements HasMiddleware
             ]);
         }
     }
-
     private function recalculateSaleBalance(Sales $sale): void
     {
         $sale = Sales::query()
             ->lockForUpdate()
             ->findOrFail($sale->id);
-
         $returnedAmount = (float) SalesReturn::query()
             ->where('company_id', $sale->company_id)
             ->where('store_id', $sale->store_id)
             ->where('sale_id', $sale->id)
             ->where('status', 'completed')
             ->sum('total_amount');
-
         $netInvoiceAmount = max(
             0,
             round((float) $sale->grand_total - $returnedAmount, 2)
         );
-
         $paidAmount = round((float) $sale->paid_amount, 2);
         $balanceAmount = max(
             0,
             round($netInvoiceAmount - $paidAmount, 2)
         );
-
         $paymentStatus = match (true) {
             $balanceAmount <= 0.009 => Sales::PAYMENT_PAID,
             $paidAmount > 0.009 => Sales::PAYMENT_PARTIAL,
             default => Sales::PAYMENT_UNPAID,
         };
-
         $sale->update([
             'balance_amount' => $balanceAmount,
             'payment_status' => $paymentStatus,
         ]);
     }
-
     private function refundAccounts(
         int $companyId,
         int $storeId
@@ -1121,7 +989,6 @@ class SalesReturnController extends Controller implements HasMiddleware
                 'bank_name',
             ]);
     }
-
     private function refundAccount(
         array $validated,
         int $companyId,
@@ -1130,7 +997,6 @@ class SalesReturnController extends Controller implements HasMiddleware
         if ($validated['refund_status'] !== 'refunded') {
             return null;
         }
-
         return Account::query()
             ->where('company_id', $companyId)
             ->where('store_id', $storeId)
@@ -1138,7 +1004,6 @@ class SalesReturnController extends Controller implements HasMiddleware
             ->lockForUpdate()
             ->findOrFail((int) $validated['account_id']);
     }
-
     private function syncRefundAccounting(
         SalesReturn $return,
         ?Account $account,
@@ -1146,28 +1011,27 @@ class SalesReturnController extends Controller implements HasMiddleware
         CustomerLedgerService $customerLedgerService
     ): void {
         $existing = AccountTransaction::query()
-            ->where('company_id', $return->company_id)
-            ->where('store_id', $return->store_id)
+            ->forContext(
+                (int) $return->company_id,
+                (int) $return->store_id
+            )
             ->where('reference_type', 'sales_return_refund')
             ->where('reference_id', $return->id)
             ->where('is_reversal', false)
+            ->whereDoesntHave('reversals')
+            ->latest('id')
             ->lockForUpdate()
             ->first();
 
         if ($refundAmount <= 0 || !$account) {
             if ($existing) {
-                $wasReversed = AccountTransaction::query()
-                    ->where('reversal_of_id', $existing->id)
-                    ->exists();
-
-                if ($wasReversed) {
-                    throw ValidationException::withMessages([
-                        'refund_status' =>
-                        'A reversed refund transaction cannot be modified.',
-                    ]);
-                }
-
-                $existing->delete();
+                $this->accountTransactionService->reverse(
+                    transaction: $existing,
+                    remarks: 'Refund removed while editing sales return '
+                        . $return->return_no,
+                    createdBy: auth()->id(),
+                    transactionDate: now()->toDateString()
+                );
             }
 
             $customerLedgerService->syncSalesReturnRefund(
@@ -1179,44 +1043,42 @@ class SalesReturnController extends Controller implements HasMiddleware
             return;
         }
 
-        $values = [
-            'account_id' => $account->id,
-            'transaction_date' => $return->return_date,
-            'transaction_type' => 'sales_return_refund',
-            'reference_no' => $return->return_no,
-            'debit' => 0,
-            'credit' => round($refundAmount, 2),
-            'payment_mode' => $return->refund_method,
-            'external_reference' => null,
-            'remarks' => 'Refund paid for sales return ' . $return->return_no,
-            'is_reversal' => false,
-            'reversal_of_id' => null,
-            'created_by' => auth()->id(),
-        ];
+        $refundAmount = round($refundAmount, 2);
 
         if ($existing) {
-            $wasReversed = AccountTransaction::query()
-                ->where('reversal_of_id', $existing->id)
-                ->exists();
+            $existingDate = $existing->transaction_date?->format('Y-m-d')
+                ?? (string) $existing->transaction_date;
 
-            if ($wasReversed) {
-                throw ValidationException::withMessages([
-                    'refund_status' =>
-                    'A reversed refund transaction cannot be modified.',
-                ]);
+            $returnDate = $return->return_date?->format('Y-m-d')
+                ?? (string) $return->return_date;
+
+            $refundChanged =
+                (int) $existing->account_id !== (int) $account->id
+                || abs((float) $existing->credit - $refundAmount) > 0.009
+                || $existingDate !== $returnDate
+                || (string) $existing->payment_mode
+                !== (string) $return->refund_method;
+
+            if ($refundChanged) {
+                $this->accountTransactionService->reverse(
+                    transaction: $existing,
+                    remarks: 'Refund changed while editing sales return '
+                        . $return->return_no,
+                    createdBy: auth()->id(),
+                    transactionDate: now()->toDateString()
+                );
+
+                $existing = null;
             }
+        }
 
-            $existing->update($values);
-        } else {
-            AccountTransaction::create(array_merge(
-                [
-                    'company_id' => $return->company_id,
-                    'store_id' => $return->store_id,
-                    'reference_type' => 'sales_return_refund',
-                    'reference_id' => $return->id,
-                ],
-                $values
-            ));
+        if (!$existing) {
+            $this->accountTransactionService->postCustomerRefund(
+                $return,
+                (int) $account->id,
+                $refundAmount,
+                auth()->id()
+            );
         }
 
         $customerLedgerService->syncSalesReturnRefund(
@@ -1225,48 +1087,19 @@ class SalesReturnController extends Controller implements HasMiddleware
             auth()->id()
         );
     }
-
     private function reverseRefundAccounting(
         SalesReturn $return,
         CustomerLedgerService $customerLedgerService
     ): void {
-        $original = AccountTransaction::query()
-            ->where('company_id', $return->company_id)
-            ->where('store_id', $return->store_id)
-            ->where('reference_type', 'sales_return_refund')
-            ->where('reference_id', $return->id)
-            ->where('is_reversal', false)
-            ->lockForUpdate()
-            ->first();
-
-        if ($original) {
-            $reversal = AccountTransaction::query()
-                ->where('reversal_of_id', $original->id)
-                ->lockForUpdate()
-                ->first();
-
-            if (!$reversal) {
-                AccountTransaction::create([
-                    'company_id' => $return->company_id,
-                    'store_id' => $return->store_id,
-                    'account_id' => $original->account_id,
-                    'transaction_date' => now()->toDateString(),
-                    'transaction_type' => 'reversal',
-                    'reference_type' => 'sales_return_refund_reversal',
-                    'reference_id' => $return->id,
-                    'reference_no' => $return->return_no,
-                    'debit' => $original->credit,
-                    'credit' => $original->debit,
-                    'payment_mode' => $original->payment_mode,
-                    'external_reference' => $original->external_reference,
-                    'remarks' =>
-                    'Reversal of refund for ' . $return->return_no,
-                    'is_reversal' => true,
-                    'reversal_of_id' => $original->id,
-                    'created_by' => auth()->id(),
-                ]);
-            }
-        }
+        $this->accountTransactionService->reverseReference(
+            companyId: (int) $return->company_id,
+            storeId: (int) $return->store_id,
+            referenceType: 'sales_return_refund',
+            referenceId: (int) $return->id,
+            remarks: 'Reversal of refund for ' . $return->return_no,
+            createdBy: auth()->id(),
+            transactionDate: now()->toDateString()
+        );
 
         $customerLedgerService->reverseSalesReturnRefund(
             $return,
@@ -1275,17 +1108,13 @@ class SalesReturnController extends Controller implements HasMiddleware
             auth()->id()
         );
     }
-
     private function context(Request $request): array
     {
         $companyId = (int) $request->session()->get('active_company_id');
         $storeId = (int) $request->session()->get('active_store_id');
-
         abort_if(!$companyId || !$storeId, 403, 'Select an active company and branch.');
-
         return [$companyId, $storeId];
     }
-
     private function ensureSaleContext(
         Sales $sale,
         int $companyId,
@@ -1297,7 +1126,6 @@ class SalesReturnController extends Controller implements HasMiddleware
             404
         );
     }
-
     private function ensureSaleIsReturnable(Sales $sale): void
     {
         if ($sale->status !== 'Completed') {
@@ -1306,20 +1134,17 @@ class SalesReturnController extends Controller implements HasMiddleware
             ]);
         }
     }
-
     private function ensureReturnContext(
         Request $request,
         SalesReturn $return
     ): void {
         [$companyId, $storeId] = $this->context($request);
-
         abort_unless(
             (int) $return->company_id === $companyId
                 && (int) $return->store_id === $storeId,
             404
         );
     }
-
     private function applyDateFilter(Builder $query, array $filters): void
     {
         match ($filters['quick_filter']) {
@@ -1340,7 +1165,6 @@ class SalesReturnController extends Controller implements HasMiddleware
             default => null,
         };
     }
-
     private function loadForDocument(SalesReturn $return): void
     {
         $return->load([
@@ -1355,17 +1179,14 @@ class SalesReturnController extends Controller implements HasMiddleware
             'items.saleItem',
         ]);
     }
-
     private function mechanicImpact(
         SalesReturn $salesReturn
     ): ?array {
         $commission = $salesReturn->sale?->mechanicCommission;
         $mechanic = $salesReturn->sale?->mechanic;
-
         if (!$commission || !$mechanic) {
             return null;
         }
-
         $returnCommissionEntry = MechanicLedgerEntry::query()
             ->forContext(
                 (int) $salesReturn->company_id,
@@ -1381,7 +1202,6 @@ class SalesReturnController extends Controller implements HasMiddleware
                 (int) $salesReturn->id
             )
             ->first();
-
         $originalCommission = round(
             (float) $commission->commission_amount,
             2
@@ -1408,7 +1228,6 @@ class SalesReturnController extends Controller implements HasMiddleware
                 2
             )
         );
-
         return [
             'mechanic' => [
                 'id' => (int) $mechanic->id,

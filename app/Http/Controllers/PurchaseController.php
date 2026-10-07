@@ -2259,6 +2259,7 @@ class PurchaseController extends Controller implements HasMiddleware
                 'nullable',
                 'numeric',
                 'min:0',
+                'max:0',
             ],
 
 
@@ -2330,6 +2331,9 @@ class PurchaseController extends Controller implements HasMiddleware
                 'min:0',
                 'max:100',
             ],
+        ], [
+            'paid_amount.max' =>
+            'Record purchase payments from the Supplier Payments module so the supplier ledger and selected Cash/Bank account are updated together.',
         ]);
     }
 

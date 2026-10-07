@@ -48,18 +48,15 @@ class PurchaseReturnController extends Controller implements HasMiddleware
             ),
         ];
     }
-
     public function index(Request $request): Response
     {
         [$companyId, $storeId] = $this->context($request);
-
         $filters = [
             'search' => trim((string) $request->input('search', '')),
             'supplier_id' => $request->input('supplier_id'),
             'date_from' => $request->input('date_from'),
             'date_to' => $request->input('date_to'),
         ];
-
         $baseQuery = PurchaseReturn::query()
             ->where('company_id', $companyId)
             ->whereHas(
@@ -67,7 +64,6 @@ class PurchaseReturnController extends Controller implements HasMiddleware
                 fn(Builder $query) =>
                 $query->where('store_id', $storeId)
             );
-
         $returns = (clone $baseQuery)
             ->with([
                 'purchase:id,purchase_no,store_id,tax_type',
@@ -107,13 +103,11 @@ class PurchaseReturnController extends Controller implements HasMiddleware
             ->latest('id')
             ->paginate(15)
             ->withQueryString();
-
         $summary = [
             'total' => (clone $baseQuery)->count(),
             'return_value' => (float) (clone $baseQuery)->sum('total_amount'),
             'gst_value' => (float) (clone $baseQuery)->sum('gst_total'),
         ];
-
         $suppliers = Supplier::query()
             ->where('company_id', $companyId)
             ->where('status', true)
@@ -124,7 +118,6 @@ class PurchaseReturnController extends Controller implements HasMiddleware
             )
             ->orderBy('supplier_name')
             ->get(['id', 'supplier_name']);
-
         return Inertia::render('PurchaseReturns/Index', [
             'returns' => $returns,
             'suppliers' => $suppliers,
@@ -132,11 +125,9 @@ class PurchaseReturnController extends Controller implements HasMiddleware
             'filters' => $filters,
         ]);
     }
-
     public function create(Request $request): Response
     {
         [$companyId, $storeId] = $this->context($request);
-
         return Inertia::render('PurchaseReturns/Create', [
             'returnNo' => $this->previewReturnNumber(),
             'context' => [
@@ -145,18 +136,14 @@ class PurchaseReturnController extends Controller implements HasMiddleware
             ],
         ]);
     }
-
     public function search(Request $request)
     {
         $this->authorizeLookup($request);
-
         $validated = $request->validate([
             'search' => ['required', 'string', 'max:100'],
         ]);
-
         [$companyId, $storeId] = $this->context($request);
         $search = trim($validated['search']);
-
         $purchases = Purchase::query()
             ->with(['supplier:id,supplier_name'])
             ->where('company_id', $companyId)
@@ -186,15 +173,12 @@ class PurchaseReturnController extends Controller implements HasMiddleware
                 'tax_type',
                 'grand_total',
             ]);
-
         return response()->json($purchases);
     }
-
     public function getInvoice(Request $request, $id)
     {
         $this->authorizeLookup($request);
         [$companyId, $storeId] = $this->context($request);
-
         $purchase = Purchase::query()
             ->with([
                 'supplier:id,supplier_name',
@@ -204,14 +188,12 @@ class PurchaseReturnController extends Controller implements HasMiddleware
             ->where('company_id', $companyId)
             ->where('store_id', $storeId)
             ->findOrFail($id);
-
         foreach ($purchase->items as $item) {
             $returnedQty = $this->returnedQuantity(
                 $purchase->id,
                 $item->product_id,
                 $item->godown_id
             );
-
             $item->setAttribute('returned_qty', $returnedQty);
             $item->setAttribute(
                 'balance_qty',
@@ -226,10 +208,8 @@ class PurchaseReturnController extends Controller implements HasMiddleware
                 $this->returnUnitPrice($item)
             );
         }
-
         return response()->json($purchase);
     }
-
     public function store(
         Request $request,
         StockService $stockService,
@@ -237,7 +217,6 @@ class PurchaseReturnController extends Controller implements HasMiddleware
     ): RedirectResponse {
         [$companyId, $storeId] = $this->context($request);
         $validated = $this->validateRequest($request);
-
         try {
             $return = DB::transaction(function () use (
                 $validated,
@@ -252,19 +231,16 @@ class PurchaseReturnController extends Controller implements HasMiddleware
                     ->where('store_id', $storeId)
                     ->lockForUpdate()
                     ->findOrFail($validated['purchase_id']);
-
                 $lines = $this->buildValidatedLines(
                     $purchase,
                     $validated,
                     null
                 );
-
                 if (count($lines) === 0) {
                     throw ValidationException::withMessages([
                         'items' => 'Enter a return quantity for at least one product.',
                     ]);
                 }
-
                 $return = PurchaseReturn::create([
                     'company_id' => $companyId,
                     'purchase_id' => $purchase->id,
@@ -276,29 +252,24 @@ class PurchaseReturnController extends Controller implements HasMiddleware
                     'total_amount' => 0,
                     'remarks' => $validated['remarks'] ?? null,
                 ]);
-
                 $totals = $this->postReturnLines(
                     $return,
                     $purchase,
                     $lines,
                     $stockService
                 );
-
                 $return->update([
                     'sub_total' => $totals['sub_total'],
                     'gst_total' => $totals['gst_total'],
                     'total_amount' => $totals['total_amount'],
                 ]);
-
                 $supplierLedgerService
                     ->postPurchaseReturn(
                         $return->fresh('purchase'),
                         auth()->id()
                     );
-
                 return $return;
             });
-
             return AppResponse::successRoute(
                 'purchase-returns.show',
                 'Purchase return created successfully.',
@@ -308,26 +279,22 @@ class PurchaseReturnController extends Controller implements HasMiddleware
             throw $exception;
         } catch (Throwable $exception) {
             report($exception);
-
             return AppResponse::error(
                 $exception->getMessage() ?: 'Unable to create the purchase return.',
                 true
             );
         }
     }
-
     public function show(
         Request $request,
         PurchaseReturn $purchaseReturn
     ): Response {
         [$companyId, $storeId] = $this->context($request);
-
         $this->ensureReturnContext(
             $purchaseReturn,
             $companyId,
             $storeId
         );
-
         $purchaseReturn->load([
             'purchase.company',
             'purchase.store',
@@ -335,24 +302,20 @@ class PurchaseReturnController extends Controller implements HasMiddleware
             'items.product.unit',
             'items.godown',
         ]);
-
         return Inertia::render('PurchaseReturns/Show', [
             'purchaseReturn' => $purchaseReturn,
         ]);
     }
-
     public function edit(
         Request $request,
         PurchaseReturn $purchaseReturn
     ): Response {
         [$companyId, $storeId] = $this->context($request);
-
         $this->ensureReturnContext(
             $purchaseReturn,
             $companyId,
             $storeId
         );
-
         $purchaseReturn->load([
             'supplier',
             'purchase.company',
@@ -362,25 +325,21 @@ class PurchaseReturnController extends Controller implements HasMiddleware
             'items.product.unit',
             'items.godown',
         ]);
-
         foreach ($purchaseReturn->items as $item) {
             $purchaseItem = $this->findPurchaseItem(
                 $purchaseReturn->purchase,
                 $item->product_id,
                 $item->godown_id
             );
-
             if (!$purchaseItem) {
                 continue;
             }
-
             $alreadyReturned = $this->returnedQuantity(
                 $purchaseReturn->purchase_id,
                 $item->product_id,
                 $item->godown_id,
                 $purchaseReturn->id
             );
-
             $item->setAttribute('purchase_item', [
                 'quantity' => (float) $purchaseItem->quantity,
                 'returned_qty' => $alreadyReturned,
@@ -392,12 +351,10 @@ class PurchaseReturnController extends Controller implements HasMiddleware
                 'return_unit_price' => $this->returnUnitPrice($purchaseItem),
             ]);
         }
-
         return Inertia::render('PurchaseReturns/Edit', [
             'purchaseReturn' => $purchaseReturn,
         ]);
     }
-
     public function update(
         Request $request,
         PurchaseReturn $purchaseReturn,
@@ -405,15 +362,12 @@ class PurchaseReturnController extends Controller implements HasMiddleware
         SupplierLedgerService $supplierLedgerService
     ): RedirectResponse {
         [$companyId, $storeId] = $this->context($request);
-
         $this->ensureReturnContext(
             $purchaseReturn,
             $companyId,
             $storeId
         );
-
         $validated = $this->validateRequest($request, false);
-
         try {
             DB::transaction(function () use (
                 $purchaseReturn,
@@ -427,33 +381,27 @@ class PurchaseReturnController extends Controller implements HasMiddleware
                     ->with(['items', 'purchase.items.product'])
                     ->lockForUpdate()
                     ->findOrFail($purchaseReturn->id);
-
                 $purchase = $lockedReturn->purchase;
-
                 abort_unless(
                     (int) $purchase->company_id === $companyId
                         && (int) $purchase->store_id === $storeId,
                     404
                 );
-
                 $lines = $this->buildValidatedLines(
                     $purchase,
                     $validated,
                     $lockedReturn->id
                 );
-
                 if (count($lines) === 0) {
                     throw ValidationException::withMessages([
                         'items' => 'Enter a return quantity for at least one product.',
                     ]);
                 }
-
                 foreach ($lockedReturn->items as $oldItem) {
                     $product = Product::query()
                         ->where('company_id', $companyId)
                         ->where('store_id', $storeId)
                         ->findOrFail($oldItem->product_id);
-
                     $stockService->increaseStock(
                         $product,
                         (float) $oldItem->quantity,
@@ -467,16 +415,13 @@ class PurchaseReturnController extends Controller implements HasMiddleware
                         'Reverse old purchase return'
                     );
                 }
-
                 $lockedReturn->items()->delete();
-
                 $totals = $this->postReturnLines(
                     $lockedReturn,
                     $purchase,
                     $lines,
                     $stockService
                 );
-
                 $lockedReturn->update([
                     'return_date' => $validated['return_date'],
                     'sub_total' => $totals['sub_total'],
@@ -484,14 +429,12 @@ class PurchaseReturnController extends Controller implements HasMiddleware
                     'total_amount' => $totals['total_amount'],
                     'remarks' => $validated['remarks'] ?? null,
                 ]);
-
                 $supplierLedgerService
                     ->postPurchaseReturn(
                         $lockedReturn->fresh('purchase'),
                         auth()->id()
                     );
             });
-
             return AppResponse::successRoute(
                 'purchase-returns.show',
                 'Purchase return updated successfully.',
@@ -501,14 +444,12 @@ class PurchaseReturnController extends Controller implements HasMiddleware
             throw $exception;
         } catch (Throwable $exception) {
             report($exception);
-
             return AppResponse::error(
                 $exception->getMessage() ?: 'Unable to update the purchase return.',
                 true
             );
         }
     }
-
     public function destroy(
         Request $request,
         PurchaseReturn $purchaseReturn,
@@ -516,13 +457,11 @@ class PurchaseReturnController extends Controller implements HasMiddleware
         SupplierLedgerService $supplierLedgerService
     ): RedirectResponse {
         [$companyId, $storeId] = $this->context($request);
-
         $this->ensureReturnContext(
             $purchaseReturn,
             $companyId,
             $storeId
         );
-
         try {
             DB::transaction(function () use (
                 $purchaseReturn,
@@ -535,19 +474,16 @@ class PurchaseReturnController extends Controller implements HasMiddleware
                     ->with(['items', 'purchase'])
                     ->lockForUpdate()
                     ->findOrFail($purchaseReturn->id);
-
                 abort_unless(
                     (int) $lockedReturn->purchase->company_id === $companyId
                         && (int) $lockedReturn->purchase->store_id === $storeId,
                     404
                 );
-
                 foreach ($lockedReturn->items as $item) {
                     $product = Product::query()
                         ->where('company_id', $companyId)
                         ->where('store_id', $storeId)
                         ->findOrFail($item->product_id);
-
                     $stockService->increaseStock(
                         $product,
                         (float) $item->quantity,
@@ -561,7 +497,6 @@ class PurchaseReturnController extends Controller implements HasMiddleware
                         'Reverse deleted purchase return'
                     );
                 }
-
                 $supplierLedgerService
                     ->reversePurchaseReturn(
                         purchaseReturn: $lockedReturn,
@@ -569,28 +504,23 @@ class PurchaseReturnController extends Controller implements HasMiddleware
                         remarks: 'Purchase return deleted - supplier ledger reversal',
                         createdBy: auth()->id()
                     );
-
                 $lockedReturn->items()->delete();
                 $lockedReturn->delete();
             });
-
             return AppResponse::successRoute(
                 'purchase-returns.index',
                 'Purchase return deleted successfully.'
             );
         } catch (Throwable $exception) {
             report($exception);
-
             return AppResponse::error(
                 $exception->getMessage() ?: 'Unable to delete the purchase return.'
             );
         }
     }
-
     public function print(Request $request, $id)
     {
         [$companyId, $storeId] = $this->context($request);
-
         $purchaseReturn = PurchaseReturn::query()
             ->with([
                 'purchase.company',
@@ -606,17 +536,14 @@ class PurchaseReturnController extends Controller implements HasMiddleware
                 $query->where('store_id', $storeId)
             )
             ->findOrFail($id);
-
         return view(
             'purchase_returns.print',
             compact('purchaseReturn')
         );
     }
-
     public function pdf(Request $request, $id)
     {
         [$companyId, $storeId] = $this->context($request);
-
         $purchaseReturn = PurchaseReturn::query()
             ->with([
                 'purchase.company',
@@ -632,17 +559,14 @@ class PurchaseReturnController extends Controller implements HasMiddleware
                 $query->where('store_id', $storeId)
             )
             ->findOrFail($id);
-
         $pdf = Pdf::loadView(
             'purchase_returns.pdf',
             compact('purchaseReturn')
         )->setPaper('a4', 'landscape');
-
         return $pdf->download(
             'purchase-return-' . $purchaseReturn->return_no . '.pdf'
         );
     }
-
     private function validateRequest(
         Request $request,
         bool $requirePurchase = true
@@ -661,7 +585,6 @@ class PurchaseReturnController extends Controller implements HasMiddleware
             'gst' => ['nullable', 'array'],
             'gst.*' => ['nullable', 'numeric', 'min:0', 'max:100'],
         ];
-
         if ($requirePurchase) {
             $rules['purchase_id'] = [
                 'required',
@@ -669,60 +592,49 @@ class PurchaseReturnController extends Controller implements HasMiddleware
                 'exists:purchases,id',
             ];
         }
-
         return $request->validate($rules);
     }
-
     private function buildValidatedLines(
         Purchase $purchase,
         array $validated,
         ?int $excludeReturnId
     ): array {
         $lines = [];
-
         foreach ($validated['product_id'] as $index => $productId) {
             $qty = (float) ($validated['qty'][$index] ?? 0);
-
             if ($qty <= 0) {
                 continue;
             }
-
             $godownId = $validated['godown_id'][$index] ?? null;
             $godownId = filled($godownId) ? (int) $godownId : null;
-
             $purchaseItem = $this->findPurchaseItem(
                 $purchase,
                 (int) $productId,
                 $godownId
             );
-
             if (!$purchaseItem) {
                 throw ValidationException::withMessages([
                     "product_id.{$index}" =>
                     'This product/location does not belong to the selected purchase.',
                 ]);
             }
-
             $product = Product::query()
                 ->where('company_id', $purchase->company_id)
                 ->where('store_id', $purchase->store_id)
                 ->whereKey($productId)
                 ->first();
-
             if (!$product) {
                 throw ValidationException::withMessages([
                     "product_id.{$index}" =>
                     'This product is not available in the active branch.',
                 ]);
             }
-
             if ($godownId !== null) {
                 $godownExists = Godown::query()
                     ->where('company_id', $purchase->company_id)
                     ->where('store_id', $purchase->store_id)
                     ->whereKey($godownId)
                     ->exists();
-
                 if (!$godownExists) {
                     throw ValidationException::withMessages([
                         "godown_id.{$index}" =>
@@ -730,19 +642,16 @@ class PurchaseReturnController extends Controller implements HasMiddleware
                     ]);
                 }
             }
-
             $alreadyReturned = $this->returnedQuantity(
                 $purchase->id,
                 (int) $productId,
                 $godownId,
                 $excludeReturnId
             );
-
             $availableQty = max(
                 0,
                 (float) $purchaseItem->quantity - $alreadyReturned
             );
-
             if ($qty > $availableQty) {
                 throw ValidationException::withMessages([
                     "qty.{$index}" =>
@@ -750,20 +659,16 @@ class PurchaseReturnController extends Controller implements HasMiddleware
                         . number_format($availableQty, 2),
                 ]);
             }
-
             $unitPrice = $this->returnUnitPrice($purchaseItem);
-
             $gstPercent = $purchase->tax_type === 'gst'
                 ? (float) $purchaseItem->gst_percent
                 : 0;
-
             $basicAmount = round($qty * $unitPrice, 2);
             $gstAmount = round(
                 $basicAmount * $gstPercent / 100,
                 2
             );
             $lineTotal = round($basicAmount + $gstAmount, 2);
-
             $lines[] = [
                 'index' => $index,
                 'product' => $product,
@@ -777,10 +682,8 @@ class PurchaseReturnController extends Controller implements HasMiddleware
                 'line_total' => $lineTotal,
             ];
         }
-
         return $lines;
     }
-
     private function postReturnLines(
         PurchaseReturn $return,
         Purchase $purchase,
@@ -790,7 +693,6 @@ class PurchaseReturnController extends Controller implements HasMiddleware
         $subTotal = 0;
         $gstTotal = 0;
         $totalAmount = 0;
-
         foreach ($lines as $line) {
             PurchaseReturnItem::create([
                 'purchase_return_id' => $return->id,
@@ -802,7 +704,6 @@ class PurchaseReturnController extends Controller implements HasMiddleware
                 'gst_amount' => $line['gst_amount'],
                 'line_total' => $line['line_total'],
             ]);
-
             $stockService->decreaseStock(
                 $line['product'],
                 $line['quantity'],
@@ -815,28 +716,23 @@ class PurchaseReturnController extends Controller implements HasMiddleware
                 $line['purchase_price'],
                 'Purchase Return'
             );
-
             $subTotal += $line['basic_amount'];
             $gstTotal += $line['gst_amount'];
             $totalAmount += $line['line_total'];
         }
-
         return [
             'sub_total' => round($subTotal, 2),
             'gst_total' => round($gstTotal, 2),
             'total_amount' => round($totalAmount, 2),
         ];
     }
-
     private function returnUnitPrice(
         PurchaseItem $purchaseItem
     ): float {
         $quantity = (float) $purchaseItem->quantity;
-
         if ($quantity <= 0) {
             return 0;
         }
-
         if (array_key_exists(
             'taxable_amount',
             $purchaseItem->getAttributes()
@@ -846,16 +742,13 @@ class PurchaseReturnController extends Controller implements HasMiddleware
                 4
             );
         }
-
         $grossAmount = $quantity * (float) $purchaseItem->purchase_price;
         $taxableAmount = max(
             0,
             $grossAmount - (float) $purchaseItem->discount
         );
-
         return round($taxableAmount / $quantity, 4);
     }
-
     private function findPurchaseItem(
         Purchase $purchase,
         int $productId,
@@ -875,7 +768,6 @@ class PurchaseReturnController extends Controller implements HasMiddleware
             }
         );
     }
-
     private function returnedQuantity(
         int $purchaseId,
         int $productId,
@@ -901,7 +793,6 @@ class PurchaseReturnController extends Controller implements HasMiddleware
             )
             ->sum('quantity');
     }
-
     private function ensureReturnContext(
         PurchaseReturn $purchaseReturn,
         int $companyId,
@@ -916,15 +807,12 @@ class PurchaseReturnController extends Controller implements HasMiddleware
                 $query->where('store_id', $storeId)
             )
             ->exists();
-
         abort_unless($belongsToContext, 404);
     }
-
     private function authorizeLookup(
         Request $request
     ): void {
         $user = $request->user();
-
         abort_unless(
             $user
                 && (
@@ -935,63 +823,50 @@ class PurchaseReturnController extends Controller implements HasMiddleware
             403
         );
     }
-
     private function context(
         Request $request
     ): array {
         $user = $request->user();
-
         abort_unless(
             $user && (bool) $user->status,
             403
         );
-
         $companyId = (int) session('active_company_id');
         $storeId = (int) session('active_store_id');
-
         abort_unless(
             $companyId > 0 && $storeId > 0,
             403,
             'No active business branch selected.'
         );
-
         $store = Store::query()
             ->whereKey($storeId)
             ->where('company_id', $companyId)
             ->where('status', true)
             ->first();
-
         abort_unless(
             $store,
             403,
             'The active branch is unavailable.'
         );
-
         if (!$user->is_super_user) {
             abort_unless(
                 (int) $user->company_id === $companyId,
                 403
             );
-
             $isCompanyAdmin = $user->hasRole('Company Admin');
-
             if (!$isCompanyAdmin) {
                 $assigned = $user->stores()
                     ->where('stores.id', $storeId)
                     ->where('stores.status', true)
                     ->exists();
-
                 abort_unless($assigned, 403);
             }
         }
-
         return [$companyId, $storeId];
     }
-
     private function generateReturnNumber(): string
     {
         $nextId = (int) (PurchaseReturn::query()->max('id') ?? 0) + 1;
-
         return 'PR' . str_pad(
             (string) $nextId,
             6,
@@ -999,7 +874,6 @@ class PurchaseReturnController extends Controller implements HasMiddleware
             STR_PAD_LEFT
         );
     }
-
     private function previewReturnNumber(): string
     {
         return $this->generateReturnNumber();

@@ -6,7 +6,6 @@ use App\Models\Customer;
 use App\Models\CustomerPayment;
 use App\Models\CustomerPaymentAllocation;
 use App\Models\Account;
-use App\Models\AccountTransaction;
 use App\Models\Godown;
 use App\Models\Mechanic;
 use App\Models\MechanicCommission;
@@ -17,6 +16,7 @@ use App\Models\SalePayment;
 use App\Models\StockLedger;
 use App\Models\Store;
 use App\Services\StockService;
+use App\Services\AccountTransactionService;
 use App\Services\CustomerLedgerService;
 use App\Services\MechanicLedgerService;
 use App\Support\AppResponse;
@@ -36,6 +36,10 @@ use Throwable;
 
 class SalesController extends Controller implements HasMiddleware
 {
+    public function __construct(
+        private readonly AccountTransactionService $accountTransactionService
+    ) {}
+
     public static function middleware(): array
     {
         return [
@@ -3520,22 +3524,10 @@ class SalesController extends Controller implements HasMiddleware
                 'created_by' => $userId,
             ]);
 
-            AccountTransaction::create([
-                'company_id' => $companyId,
-                'store_id' => $storeId,
-                'account_id' => $line['account_id'],
-                'transaction_date' => $sale->invoice_date,
-                'transaction_type' => AccountTransaction::TYPE_SALE,
-                'reference_type' => SalePayment::class,
-                'reference_id' => $payment->id,
-                'reference_no' => $sale->invoice_no,
-                'debit' => $line['amount'],
-                'credit' => 0,
-                'payment_mode' => $line['payment_mode'],
-                'external_reference' => $line['reference_no'],
-                'remarks' => 'Sales collection for ' . $sale->invoice_no,
-                'created_by' => $userId,
-            ]);
+            $this->accountTransactionService->postSalePayment(
+                $payment,
+                $userId
+            );
         }
     }
 
@@ -3556,33 +3548,24 @@ class SalesController extends Controller implements HasMiddleware
 
         foreach ($payments as $payment) {
             if ($payment->account_id !== null) {
-                $originalTransaction = AccountTransaction::query()
-                    ->where('company_id', $companyId)
-                    ->where('store_id', $storeId)
-                    ->where('reference_type', SalePayment::class)
-                    ->where('reference_id', $payment->id)
-                    ->where('is_reversal', false)
-                    ->latest('id')
-                    ->first();
+                $reversals = $this->accountTransactionService
+                    ->reverseReference(
+                        companyId: $companyId,
+                        storeId: $storeId,
+                        referenceType: $payment->getMorphClass(),
+                        referenceId: (int) $payment->id,
+                        remarks: $reason,
+                        createdBy: $userId,
+                        transactionDate: now()->toDateString()
+                    );
 
-                AccountTransaction::create([
-                    'company_id' => $companyId,
-                    'store_id' => $storeId,
-                    'account_id' => $payment->account_id,
-                    'transaction_date' => now()->toDateString(),
-                    'transaction_type' => AccountTransaction::TYPE_REVERSAL,
-                    'reference_type' => SalePayment::class,
-                    'reference_id' => $payment->id,
-                    'reference_no' => $sale->invoice_no,
-                    'debit' => 0,
-                    'credit' => $payment->amount,
-                    'payment_mode' => $payment->payment_mode,
-                    'external_reference' => $payment->reference_no,
-                    'remarks' => $reason,
-                    'is_reversal' => true,
-                    'reversal_of_id' => $originalTransaction?->id,
-                    'created_by' => $userId,
-                ]);
+                if ($reversals === []) {
+                    throw ValidationException::withMessages([
+                        'payment' =>
+                        "The account transaction for sale payment {$payment->id} "
+                            . 'is missing or has already been reversed.',
+                    ]);
+                }
             }
 
             $payment->update([

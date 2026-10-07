@@ -24,7 +24,6 @@ class CustomerLedgerService
     | Call this service from inside the source document DB transaction.
     |
     */
-
     public function ensureOpeningBalance(
         Customer $customer,
         int $companyId,
@@ -36,7 +35,6 @@ class CustomerLedgerService
             $companyId,
             $storeId
         );
-
         $lockedCustomer = Customer::query()
             ->whereKey(
                 $customer->id
@@ -47,7 +45,6 @@ class CustomerLedgerService
             )
             ->lockForUpdate()
             ->firstOrFail();
-
         $existing = CustomerLedgerEntry::query()
             ->where(
                 'company_id',
@@ -63,18 +60,15 @@ class CustomerLedgerService
             )
             ->lockForUpdate()
             ->first();
-
         $amount = round(
             abs(
                 (float) $lockedCustomer->opening_balance
             ),
             2
         );
-
         $isCredit = strtoupper(
             (string) $lockedCustomer->balance_type
         ) === 'CR';
-
         if ($existing) {
             if ($existing->hasBeenReversed()) {
                 throw ValidationException::withMessages([
@@ -82,27 +76,21 @@ class CustomerLedgerService
                     'A reversed opening balance cannot be modified.',
                 ]);
             }
-
             if ($amount <= 0) {
                 $existing->delete();
-
                 return null;
             }
-
             $existing->update([
                 'reference_no' => $lockedCustomer->customer_code,
                 'debit' => $isCredit ? 0 : $amount,
                 'credit' => $isCredit ? $amount : 0,
                 'remarks' => 'Customer opening balance',
             ]);
-
             return $existing->refresh();
         }
-
         if ($amount <= 0) {
             return null;
         }
-
         return CustomerLedgerEntry::create([
             'company_id' => $companyId,
             'store_id' => $storeId,
@@ -130,13 +118,11 @@ class CustomerLedgerService
             'created_by' => $createdBy,
         ]);
     }
-
     /*
     |--------------------------------------------------------------------------
     | Sale — Debit
     |--------------------------------------------------------------------------
     */
-
     public function postSale(
         Sales $sale,
         ?int $createdBy = null
@@ -144,20 +130,17 @@ class CustomerLedgerService
         $this->assertSaleContext(
             $sale
         );
-
         $customer = $this->customer(
             $sale->customer_id,
             $sale->company_id,
             $sale->store_id
         );
-
         $this->ensureOpeningBalance(
             $customer,
             (int) $sale->company_id,
             (int) $sale->store_id,
             $createdBy
         );
-
         return $this->syncOriginalEntry(
             companyId: (int) $sale->company_id,
             storeId: (int) $sale->store_id,
@@ -174,7 +157,6 @@ class CustomerLedgerService
             createdBy: $createdBy
         );
     }
-
     public function reverseSale(
         Sales $sale,
         string|Carbon|null $reversalDate = null,
@@ -184,7 +166,6 @@ class CustomerLedgerService
         $this->assertSaleContext(
             $sale
         );
-
         $original = $this->originalEntry(
             (int) $sale->company_id,
             (int) $sale->store_id,
@@ -192,7 +173,6 @@ class CustomerLedgerService
             (int) $sale->id,
             CustomerLedgerEntry::TYPE_SALE
         );
-
         return $this->reverseEntry(
             original: $original,
             reversalType: CustomerLedgerEntry::TYPE_SALE_REVERSAL,
@@ -202,7 +182,6 @@ class CustomerLedgerService
             createdBy: $createdBy
         );
     }
-
     /*
     |--------------------------------------------------------------------------
     | Collection Received With Sale — Credit
@@ -213,16 +192,13 @@ class CustomerLedgerService
     | never be credited for a second time when it is applied to a sale.
     |
     */
-
     public function syncSaleCollection(
         Sales $sale,
         float $amount,
         ?int $createdBy = null
     ): ?CustomerLedgerEntry {
         $this->assertSaleContext($sale);
-
         $amount = round($amount, 2);
-
         $existing = CustomerLedgerEntry::query()
             ->forContext(
                 (int) $sale->company_id,
@@ -236,7 +212,6 @@ class CustomerLedgerService
             ->where('is_reversal', false)
             ->lockForUpdate()
             ->first();
-
         if ($amount <= 0) {
             if ($existing && $existing->hasBeenReversed()) {
                 throw ValidationException::withMessages([
@@ -244,25 +219,20 @@ class CustomerLedgerService
                     'A reversed sale collection cannot be modified.',
                 ]);
             }
-
             $existing?->delete();
-
             return null;
         }
-
         $customer = $this->customer(
             (int) $sale->customer_id,
             (int) $sale->company_id,
             (int) $sale->store_id
         );
-
         $this->ensureOpeningBalance(
             $customer,
             (int) $sale->company_id,
             (int) $sale->store_id,
             $createdBy
         );
-
         return $this->syncOriginalEntry(
             companyId: (int) $sale->company_id,
             storeId: (int) $sale->store_id,
@@ -278,7 +248,6 @@ class CustomerLedgerService
             createdBy: $createdBy
         );
     }
-
     public function reverseSaleCollection(
         Sales $sale,
         string|Carbon|null $reversalDate = null,
@@ -286,7 +255,6 @@ class CustomerLedgerService
         ?int $createdBy = null
     ): ?CustomerLedgerEntry {
         $this->assertSaleContext($sale);
-
         $original = CustomerLedgerEntry::query()
             ->forContext(
                 (int) $sale->company_id,
@@ -300,11 +268,9 @@ class CustomerLedgerService
             ->where('is_reversal', false)
             ->lockForUpdate()
             ->first();
-
         if (!$original) {
             return null;
         }
-
         return $this->reverseEntry(
             original: $original,
             reversalType: CustomerLedgerEntry::TYPE_PAYMENT_REVERSAL,
@@ -314,13 +280,11 @@ class CustomerLedgerService
             createdBy: $createdBy
         );
     }
-
     /*
     |--------------------------------------------------------------------------
     | Sales Return — Credit
     |--------------------------------------------------------------------------
     */
-
     public function postSalesReturn(
         SalesReturn $salesReturn,
         ?int $createdBy = null
@@ -328,20 +292,17 @@ class CustomerLedgerService
         $this->assertSalesReturnContext(
             $salesReturn
         );
-
         $customer = $this->customer(
             $salesReturn->customer_id,
             $salesReturn->company_id,
             $salesReturn->store_id
         );
-
         $this->ensureOpeningBalance(
             $customer,
             (int) $salesReturn->company_id,
             (int) $salesReturn->store_id,
             $createdBy
         );
-
         return $this->syncOriginalEntry(
             companyId: (int) $salesReturn->company_id,
             storeId: (int) $salesReturn->store_id,
@@ -358,7 +319,6 @@ class CustomerLedgerService
             createdBy: $createdBy
         );
     }
-
     public function reverseSalesReturn(
         SalesReturn $salesReturn,
         string|Carbon|null $reversalDate = null,
@@ -368,7 +328,6 @@ class CustomerLedgerService
         $this->assertSalesReturnContext(
             $salesReturn
         );
-
         $original = $this->originalEntry(
             (int) $salesReturn->company_id,
             (int) $salesReturn->store_id,
@@ -376,7 +335,6 @@ class CustomerLedgerService
             (int) $salesReturn->id,
             CustomerLedgerEntry::TYPE_SALES_RETURN
         );
-
         return $this->reverseEntry(
             original: $original,
             reversalType: CustomerLedgerEntry::TYPE_SALES_RETURN_REVERSAL,
@@ -386,7 +344,6 @@ class CustomerLedgerService
             createdBy: $createdBy
         );
     }
-
     /*
     |--------------------------------------------------------------------------
     | Sales Return Refund — Debit
@@ -397,16 +354,13 @@ class CustomerLedgerService
     | the cash/bank outflow.
     |
     */
-
     public function syncSalesReturnRefund(
         SalesReturn $salesReturn,
         float $amount,
         ?int $createdBy = null
     ): ?CustomerLedgerEntry {
         $this->assertSalesReturnContext($salesReturn);
-
         $amount = round($amount, 2);
-
         $existing = CustomerLedgerEntry::query()
             ->forContext(
                 (int) $salesReturn->company_id,
@@ -420,7 +374,6 @@ class CustomerLedgerService
             ->where('is_reversal', false)
             ->lockForUpdate()
             ->first();
-
         if ($amount <= 0) {
             if ($existing && $existing->hasBeenReversed()) {
                 throw ValidationException::withMessages([
@@ -428,12 +381,9 @@ class CustomerLedgerService
                     'A reversed sales return refund cannot be modified.',
                 ]);
             }
-
             $existing?->delete();
-
             return null;
         }
-
         return $this->syncOriginalEntry(
             companyId: (int) $salesReturn->company_id,
             storeId: (int) $salesReturn->store_id,
@@ -449,7 +399,6 @@ class CustomerLedgerService
             createdBy: $createdBy
         );
     }
-
     public function reverseSalesReturnRefund(
         SalesReturn $salesReturn,
         string|Carbon|null $reversalDate = null,
@@ -457,7 +406,6 @@ class CustomerLedgerService
         ?int $createdBy = null
     ): ?CustomerLedgerEntry {
         $this->assertSalesReturnContext($salesReturn);
-
         $original = CustomerLedgerEntry::query()
             ->forContext(
                 (int) $salesReturn->company_id,
@@ -471,11 +419,9 @@ class CustomerLedgerService
             ->where('is_reversal', false)
             ->lockForUpdate()
             ->first();
-
         if (!$original) {
             return null;
         }
-
         return $this->reverseEntry(
             original: $original,
             reversalType: 'sales_return_refund_reversal',
@@ -485,13 +431,11 @@ class CustomerLedgerService
             createdBy: $createdBy
         );
     }
-
     /*
     |--------------------------------------------------------------------------
     | Customer Payment — Credit
     |--------------------------------------------------------------------------
     */
-
     public function postCustomerPayment(
         CustomerPayment $payment,
         ?int $createdBy = null
@@ -499,20 +443,17 @@ class CustomerLedgerService
         $this->assertPaymentContext(
             $payment
         );
-
         $customer = $this->customer(
             $payment->customer_id,
             $payment->company_id,
             $payment->store_id
         );
-
         $this->ensureOpeningBalance(
             $customer,
             (int) $payment->company_id,
             (int) $payment->store_id,
             $createdBy
         );
-
         return $this->syncOriginalEntry(
             companyId: (int) $payment->company_id,
             storeId: (int) $payment->store_id,
@@ -529,7 +470,6 @@ class CustomerLedgerService
             createdBy: $createdBy
         );
     }
-
     public function reverseCustomerPayment(
         CustomerPayment $payment,
         string|Carbon|null $reversalDate = null,
@@ -539,7 +479,6 @@ class CustomerLedgerService
         $this->assertPaymentContext(
             $payment
         );
-
         $original = $this->originalEntry(
             (int) $payment->company_id,
             (int) $payment->store_id,
@@ -547,7 +486,6 @@ class CustomerLedgerService
             (int) $payment->id,
             CustomerLedgerEntry::TYPE_CUSTOMER_PAYMENT
         );
-
         return $this->reverseEntry(
             original: $original,
             reversalType: CustomerLedgerEntry::TYPE_PAYMENT_REVERSAL,
@@ -557,13 +495,11 @@ class CustomerLedgerService
             createdBy: $createdBy
         );
     }
-
     /*
     |--------------------------------------------------------------------------
     | Current Balance
     |--------------------------------------------------------------------------
     */
-
     public function currentBalance(
         int $companyId,
         int $storeId,
@@ -587,13 +523,11 @@ class CustomerLedgerService
             2
         );
     }
-
     /*
     |--------------------------------------------------------------------------
     | Internal Entry Synchronization
     |--------------------------------------------------------------------------
     */
-
     private function syncOriginalEntry(
         int $companyId,
         int $storeId,
@@ -612,19 +546,16 @@ class CustomerLedgerService
             $debit,
             2
         );
-
         $credit = round(
             $credit,
             2
         );
-
         if ($debit < 0 || $credit < 0) {
             throw ValidationException::withMessages([
                 'ledger' =>
                 'Ledger debit and credit cannot be negative.',
             ]);
         }
-
         if (
             ($debit > 0 && $credit > 0)
             || ($debit <= 0 && $credit <= 0)
@@ -634,7 +565,6 @@ class CustomerLedgerService
                 'A ledger entry must contain either a debit or a credit amount.',
             ]);
         }
-
         $existing = CustomerLedgerEntry::query()
             ->forContext(
                 $companyId,
@@ -650,7 +580,6 @@ class CustomerLedgerService
             )
             ->lockForUpdate()
             ->first();
-
         if (
             $existing
             && $existing->hasBeenReversed()
@@ -660,7 +589,6 @@ class CustomerLedgerService
                 'A reversed ledger transaction cannot be modified.',
             ]);
         }
-
         $values = [
             'customer_id' => $customerId,
             'transaction_date' =>
@@ -675,15 +603,12 @@ class CustomerLedgerService
             'remarks' => $remarks,
             'created_by' => $createdBy,
         ];
-
         if ($existing) {
             $existing->update(
                 $values
             );
-
             return $existing->refresh();
         }
-
         return CustomerLedgerEntry::create(
             array_merge(
                 [
@@ -700,7 +625,6 @@ class CustomerLedgerService
             )
         );
     }
-
     private function originalEntry(
         int $companyId,
         int $storeId,
@@ -728,7 +652,6 @@ class CustomerLedgerService
             ->lockForUpdate()
             ->firstOrFail();
     }
-
     private function reverseEntry(
         CustomerLedgerEntry $original,
         string $reversalType,
@@ -743,11 +666,9 @@ class CustomerLedgerService
             )
             ->lockForUpdate()
             ->first();
-
         if ($existing) {
             return $existing;
         }
-
         return CustomerLedgerEntry::create([
             'company_id' => $original->company_id,
             'store_id' => $original->store_id,
@@ -769,13 +690,11 @@ class CustomerLedgerService
             'created_by' => $createdBy,
         ]);
     }
-
     /*
     |--------------------------------------------------------------------------
     | Context Validation
     |--------------------------------------------------------------------------
     */
-
     private function customer(
         int $customerId,
         int $companyId,
@@ -800,7 +719,6 @@ class CustomerLedgerService
             ->lockForUpdate()
             ->firstOrFail();
     }
-
     private function assertCustomerContext(
         Customer $customer,
         int $companyId,
@@ -815,13 +733,11 @@ class CustomerLedgerService
                 $storeId
             )
             ->exists();
-
         abort_unless(
             $available,
             404
         );
     }
-
     private function assertSaleContext(
         Sales $sale
     ): void {
@@ -833,7 +749,6 @@ class CustomerLedgerService
             'The sale context is incomplete.'
         );
     }
-
     private function assertSalesReturnContext(
         SalesReturn $salesReturn
     ): void {
@@ -845,7 +760,6 @@ class CustomerLedgerService
             'The sales return context is incomplete.'
         );
     }
-
     private function assertPaymentContext(
         CustomerPayment $payment
     ): void {
@@ -857,7 +771,6 @@ class CustomerLedgerService
             'The customer payment context is incomplete.'
         );
     }
-
     private function dateString(
         string|Carbon $date
     ): string {
