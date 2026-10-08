@@ -9,6 +9,7 @@ use App\Http\Controllers\CustomerLedgerController;
 use App\Http\Controllers\MechanicPaymentController;
 use App\Http\Controllers\MechanicLedgerController;
 use App\Http\Controllers\ExpenseController;
+use App\Http\Controllers\OutstandingReportController;
 use App\Http\Controllers\VoucherController;
 use Illuminate\Support\Facades\Route;
 
@@ -24,6 +25,30 @@ Route::middleware([
         '/accounts/dashboard',
         [AccountDashboardController::class, 'index']
     )->name('accounts.dashboard');
+    /*
+    |--------------------------------------------------------------------------
+    | Customer / Supplier Outstanding Report
+    |--------------------------------------------------------------------------
+    |
+    | Export routes must remain above the report index and account bindings.
+    |
+    */
+    Route::get(
+        '/accounts/outstanding/print',
+        [OutstandingReportController::class, 'print']
+    )->name('accounts.outstanding.print');
+    Route::get(
+        '/accounts/outstanding/pdf',
+        [OutstandingReportController::class, 'pdf']
+    )->name('accounts.outstanding.pdf');
+    Route::get(
+        '/accounts/outstanding/excel',
+        [OutstandingReportController::class, 'excel']
+    )->name('accounts.outstanding.excel');
+    Route::get(
+        '/accounts/outstanding',
+        [OutstandingReportController::class, 'index']
+    )->name('accounts.outstanding.index');
     /*
     |--------------------------------------------------------------------------
     | Cash / Bank Account Master
