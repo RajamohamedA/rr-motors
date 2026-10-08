@@ -4,6 +4,12 @@ namespace App\Services;
 
 use App\Models\Account;
 use App\Models\AccountTransaction;
+use App\Models\CustomerPayment;
+use App\Models\MechanicPayment;
+use App\Models\SalePayment;
+use App\Models\SalesReturn;
+use App\Models\SupplierPayment;
+use App\Models\Voucher;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
@@ -100,6 +106,271 @@ class AccountTransactionService
 
     /*
     |--------------------------------------------------------------------------
+    | Business Document Posting Helpers
+    |--------------------------------------------------------------------------
+    |
+    | These methods keep controllers from deciding debit/credit direction or
+    | inventing transaction-type strings. Reference names intentionally retain
+    | compatibility with the existing payment and return controllers.
+    |
+    */
+
+    public function postSalePayment(
+        SalePayment $payment,
+        ?int $createdBy = null
+    ): AccountTransaction {
+        $this->requireAccountId(
+            $payment->account_id,
+            'A Cash/Bank account is required for this sale payment.'
+        );
+
+        return $this->debit(
+            companyId: (int) $payment->company_id,
+            storeId: (int) $payment->store_id,
+            accountId: (int) $payment->account_id,
+            transactionDate: $this->dateString($payment->payment_date),
+            transactionType: AccountTransaction::TYPE_SALE,
+            referenceType: $payment->getMorphClass(),
+            referenceId: (int) $payment->id,
+            amount: (float) $payment->amount,
+            referenceNo: $payment->reference_no,
+            paymentMode: $payment->payment_mode,
+            externalReference: $payment->reference_no,
+            remarks: $payment->remarks ?: 'Payment received against sales invoice',
+            createdBy: $createdBy ?? $payment->created_by
+        );
+    }
+
+    public function postCustomerReceipt(
+        CustomerPayment $payment,
+        ?int $createdBy = null
+    ): AccountTransaction {
+        $this->requireAccountId(
+            $payment->account_id,
+            'A Cash/Bank account is required for this customer receipt.'
+        );
+
+        return $this->debit(
+            companyId: (int) $payment->company_id,
+            storeId: (int) $payment->store_id,
+            accountId: (int) $payment->account_id,
+            transactionDate: $this->dateString($payment->payment_date),
+            transactionType: AccountTransaction::TYPE_CUSTOMER_RECEIPT,
+            referenceType: 'customer_payment',
+            referenceId: (int) $payment->id,
+            amount: (float) $payment->amount,
+            referenceNo: $payment->receipt_no,
+            paymentMode: $payment->payment_mode,
+            externalReference: $payment->reference_no,
+            remarks: $payment->remarks,
+            createdBy: $createdBy ?? $payment->created_by
+        );
+    }
+
+    public function postSupplierPayment(
+        SupplierPayment $payment,
+        ?int $createdBy = null
+    ): AccountTransaction {
+        $this->requireAccountId(
+            $payment->account_id,
+            'A Cash/Bank account is required for this supplier payment.'
+        );
+
+        return $this->credit(
+            companyId: (int) $payment->company_id,
+            storeId: (int) $payment->store_id,
+            accountId: (int) $payment->account_id,
+            transactionDate: $this->dateString($payment->payment_date),
+            transactionType: AccountTransaction::TYPE_SUPPLIER_PAYMENT,
+            referenceType: 'supplier_payment',
+            referenceId: (int) $payment->id,
+            amount: (float) $payment->amount,
+            referenceNo: $payment->payment_no,
+            paymentMode: $payment->payment_mode,
+            externalReference: $payment->reference_no,
+            remarks: $payment->remarks,
+            createdBy: $createdBy ?? $payment->created_by
+        );
+    }
+
+    public function postMechanicPayment(
+        MechanicPayment $payment,
+        ?int $createdBy = null
+    ): AccountTransaction {
+        $this->requireAccountId(
+            $payment->account_id,
+            'A Cash/Bank account is required for this mechanic payment.'
+        );
+
+        return $this->credit(
+            companyId: (int) $payment->company_id,
+            storeId: (int) $payment->store_id,
+            accountId: (int) $payment->account_id,
+            transactionDate: $this->dateString($payment->payment_date),
+            transactionType: AccountTransaction::TYPE_MECHANIC_PAYMENT,
+            referenceType: $payment->getMorphClass(),
+            referenceId: (int) $payment->id,
+            amount: (float) $payment->amount,
+            referenceNo: $payment->payment_no,
+            paymentMode: $payment->payment_mode,
+            externalReference: $payment->reference_no,
+            remarks: $payment->remarks,
+            createdBy: $createdBy ?? $payment->created_by
+        );
+    }
+
+    public function postCustomerRefund(
+        SalesReturn $return,
+        int $accountId,
+        float $amount,
+        ?int $createdBy = null
+    ): AccountTransaction {
+        return $this->credit(
+            companyId: (int) $return->company_id,
+            storeId: (int) $return->store_id,
+            accountId: $accountId,
+            transactionDate: $this->dateString($return->return_date),
+            transactionType: AccountTransaction::TYPE_CUSTOMER_REFUND,
+            referenceType: 'sales_return_refund',
+            referenceId: (int) $return->id,
+            amount: $amount,
+            referenceNo: $return->return_no,
+            paymentMode: $return->refund_method,
+            remarks: 'Refund paid for sales return ' . $return->return_no,
+            createdBy: $createdBy
+        );
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | Receipt and Payment Vouchers
+    |--------------------------------------------------------------------------
+    |
+    | Receipt voucher: debit increases the selected account.
+    | Payment voucher: credit decreases the selected account.
+    |
+    */
+
+    public function postVoucher(
+        Voucher $voucher,
+        ?int $createdBy = null
+    ): AccountTransaction {
+        if ($voucher->isReceipt()) {
+            return $this->postReceiptVoucher(
+                $voucher,
+                $createdBy
+            );
+        }
+
+        if ($voucher->isPayment()) {
+            return $this->postPaymentVoucher(
+                $voucher,
+                $createdBy
+            );
+        }
+
+        throw ValidationException::withMessages([
+            'voucher_type' => 'Invalid receipt or payment voucher type.',
+        ]);
+    }
+
+    public function postReceiptVoucher(
+        Voucher $voucher,
+        ?int $createdBy = null
+    ): AccountTransaction {
+        $this->requireAccountId(
+            $voucher->account_id,
+            'A Cash/Bank account is required for this receipt voucher.'
+        );
+
+        if (!$voucher->isReceipt()) {
+            throw ValidationException::withMessages([
+                'voucher_type' =>
+                'Only a receipt voucher can be posted as money received.',
+            ]);
+        }
+
+        return $this->debit(
+            companyId: (int) $voucher->company_id,
+            storeId: (int) $voucher->store_id,
+            accountId: (int) $voucher->account_id,
+            transactionDate: $this->dateString($voucher->voucher_date),
+            transactionType: AccountTransaction::TYPE_RECEIPT_VOUCHER,
+            referenceType: $voucher->getMorphClass(),
+            referenceId: (int) $voucher->id,
+            amount: (float) $voucher->amount,
+            referenceNo: $voucher->voucher_no,
+            paymentMode: $voucher->payment_mode,
+            externalReference: $voucher->reference_no,
+            remarks: $voucher->remarks
+                ?: 'Receipt voucher ' . $voucher->voucher_no,
+            createdBy: $createdBy ?? $voucher->created_by
+        );
+    }
+
+    public function postPaymentVoucher(
+        Voucher $voucher,
+        ?int $createdBy = null
+    ): AccountTransaction {
+        $this->requireAccountId(
+            $voucher->account_id,
+            'A Cash/Bank account is required for this payment voucher.'
+        );
+
+        if (!$voucher->isPayment()) {
+            throw ValidationException::withMessages([
+                'voucher_type' =>
+                'Only a payment voucher can be posted as money paid.',
+            ]);
+        }
+
+        $this->ensureSufficientBalance(
+            companyId: (int) $voucher->company_id,
+            storeId: (int) $voucher->store_id,
+            accountId: (int) $voucher->account_id,
+            requiredAmount: (float) $voucher->amount,
+            asOfDate: $this->dateString($voucher->voucher_date),
+            lock: true
+        );
+
+        return $this->credit(
+            companyId: (int) $voucher->company_id,
+            storeId: (int) $voucher->store_id,
+            accountId: (int) $voucher->account_id,
+            transactionDate: $this->dateString($voucher->voucher_date),
+            transactionType: AccountTransaction::TYPE_PAYMENT_VOUCHER,
+            referenceType: $voucher->getMorphClass(),
+            referenceId: (int) $voucher->id,
+            amount: (float) $voucher->amount,
+            referenceNo: $voucher->voucher_no,
+            paymentMode: $voucher->payment_mode,
+            externalReference: $voucher->reference_no,
+            remarks: $voucher->remarks
+                ?: 'Payment voucher ' . $voucher->voucher_no,
+            createdBy: $createdBy ?? $voucher->created_by
+        );
+    }
+
+    public function reverseVoucher(
+        Voucher $voucher,
+        ?int $createdBy = null,
+        ?string $transactionDate = null
+    ): array {
+        return $this->reverseReference(
+            companyId: (int) $voucher->company_id,
+            storeId: (int) $voucher->store_id,
+            referenceType: $voucher->getMorphClass(),
+            referenceId: (int) $voucher->id,
+            remarks: 'Cancellation of ' . $voucher->typeLabel()
+                . ' ' . $voucher->voucher_no,
+            createdBy: $createdBy,
+            transactionDate: $transactionDate
+                ?: now()->toDateString()
+        );
+    }
+
+    /*
+    |--------------------------------------------------------------------------
     | Record Transaction
     |--------------------------------------------------------------------------
     */
@@ -124,6 +395,7 @@ class AccountTransactionService
 
         $this->validateDirection($direction);
         $this->validateTransactionType($transactionType);
+        $this->validateReference($referenceType, $referenceId);
 
         return DB::transaction(function () use (
             $companyId,
@@ -598,5 +870,32 @@ class AccountTransactionService
                 'Invalid account transaction type.',
             ]);
         }
+    }
+
+    private function validateReference(
+        string $referenceType,
+        int $referenceId
+    ): void {
+        if (trim($referenceType) === '' || $referenceId <= 0) {
+            throw ValidationException::withMessages([
+                'reference' => 'A valid source document reference is required.',
+            ]);
+        }
+    }
+
+    private function requireAccountId(
+        mixed $accountId,
+        string $message
+    ): void {
+        if ((int) $accountId <= 0) {
+            throw ValidationException::withMessages([
+                'account_id' => $message,
+            ]);
+        }
+    }
+
+    private function dateString(mixed $date): string
+    {
+        return Carbon::parse($date)->toDateString();
     }
 }
