@@ -339,6 +339,10 @@ class PermissionSeeder extends Seeder
         |--------------------------------------------------------------------------
             */
             'expense.view',
+            'expense.show',
+            'expense.create',
+            'expense.delete',
+            'expense.print',
             /*
         |--------------------------------------------------------------------------
         | Accounts Reports
