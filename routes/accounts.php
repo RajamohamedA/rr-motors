@@ -11,6 +11,7 @@ use App\Http\Controllers\MechanicLedgerController;
 use App\Http\Controllers\ExpenseController;
 use App\Http\Controllers\OutstandingReportController;
 use App\Http\Controllers\CashBankBookController;
+use App\Http\Controllers\DayBookController;
 use App\Http\Controllers\VoucherController;
 use Illuminate\Support\Facades\Route;
 
@@ -78,6 +79,35 @@ Route::middleware([
         '/accounts/cash-bank-book',
         [CashBankBookController::class, 'index']
     )->name('accounts.cash-bank-book.index');
+
+    /*
+    |--------------------------------------------------------------------------
+    | Day Book
+    |--------------------------------------------------------------------------
+    |
+    | Daily/monthly business summary with profit and expense details.
+    | Export routes remain above the main route and account bindings.
+    |
+    */
+    Route::get(
+        '/accounts/day-book/print',
+        [DayBookController::class, 'print']
+    )->name('accounts.day-book.print');
+
+    Route::get(
+        '/accounts/day-book/pdf',
+        [DayBookController::class, 'pdf']
+    )->name('accounts.day-book.pdf');
+
+    Route::get(
+        '/accounts/day-book/excel',
+        [DayBookController::class, 'excel']
+    )->name('accounts.day-book.excel');
+
+    Route::get(
+        '/accounts/day-book',
+        [DayBookController::class, 'index']
+    )->name('accounts.day-book.index');
 
     /*
     |--------------------------------------------------------------------------
