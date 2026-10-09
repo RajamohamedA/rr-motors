@@ -1,0 +1,1442 @@
+:root {
+    --cbb-ink: #172f43;
+    --cbb-muted: #62798c;
+    --cbb-line: #c9d6e1;
+    --cbb-blue: #176fa8;
+    --cbb-cyan: #07899b;
+    --cbb-green: #14805d;
+    --cbb-red: #bf4052;
+    --cbb-orange: #d06b20;
+    --cbb-purple: #7252b5;
+    --cbb-shadow: 0 5px 17px rgba(23, 51, 75, 0.11);
+}
+
+.rr-cbb-page,
+.rr-cbb-page * {
+    box-sizing: border-box;
+}
+
+.rr-cbb-page {
+    width: 100%;
+    min-height: 100%;
+    padding: 10px 12px 22px;
+    color: var(--cbb-ink);
+    font-family: Inter, "Segoe UI", Arial, sans-serif;
+    font-size: 12px;
+    background:
+        linear-gradient(rgba(22, 77, 112, 0.025) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(22, 77, 112, 0.025) 1px, transparent 1px),
+        radial-gradient(circle at 5% 1%, rgba(35, 127, 180, 0.11), transparent 22%),
+        linear-gradient(180deg, #f8fbfd 0%, #edf3f8 100%);
+    background-size: 24px 24px, 24px 24px, auto, auto;
+}
+
+.rr-cbb-commandbar {
+    position: relative;
+    display: flex;
+    min-height: 104px;
+    align-items: center;
+    justify-content: space-between;
+    gap: 18px;
+    margin-top: 8px;
+    padding: 16px 18px 16px 22px;
+    overflow: hidden;
+    color: #fff;
+    border: 1px solid #183f60;
+    border-radius: 8px;
+    background: linear-gradient(118deg, #122e47 0%, #15577c 53%, #087d86 100%);
+    box-shadow: 0 8px 24px rgba(20, 53, 78, 0.21);
+    animation: cbbRise 0.38s ease both;
+}
+
+.rr-cbb-commandbar::before,
+.rr-cbb-commandbar::after {
+    position: absolute;
+    content: "";
+    pointer-events: none;
+    border-radius: 999px;
+}
+
+.rr-cbb-commandbar::before {
+    top: -105px;
+    right: 30%;
+    width: 240px;
+    height: 240px;
+    border: 42px solid rgba(255, 255, 255, 0.045);
+    animation: cbbOrbit 15s linear infinite;
+}
+
+.rr-cbb-commandbar::after {
+    right: -70px;
+    bottom: -120px;
+    width: 245px;
+    height: 245px;
+    background: rgba(255, 255, 255, 0.045);
+    animation: cbbDrift 8s ease-in-out infinite alternate;
+}
+
+.rr-cbb-command-copy::after {
+    display: block;
+    width: 54px;
+    height: 2px;
+    margin-top: 9px;
+    content: "";
+    border-radius: 3px;
+    background: linear-gradient(90deg, #6de0e5, transparent);
+    animation: cbbLine 2.8s ease-in-out infinite;
+}
+
+.rr-cbb-commandbar>* {
+    position: relative;
+    z-index: 1;
+}
+
+.rr-cbb-command-copy>span {
+    display: block;
+    margin-bottom: 4px;
+    color: #80e3e7;
+    font-size: 9.5px;
+    font-weight: 850;
+    letter-spacing: 1.5px;
+}
+
+.rr-cbb-command-copy h1 {
+    margin: 0;
+    color: #fff;
+    font-size: 23px;
+    font-weight: 780;
+    line-height: 1.15;
+}
+
+.rr-cbb-command-copy p {
+    max-width: 650px;
+    margin: 6px 0 0;
+    color: #d8e8f2;
+    font-size: 11.5px;
+}
+
+.rr-cbb-command-actions {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: 7px;
+}
+
+.rr-cbb-paper-toggle {
+    display: flex;
+    padding: 3px;
+    border: 1px solid rgba(255, 255, 255, 0.27);
+    border-radius: 5px;
+    background: rgba(8, 35, 54, 0.35);
+}
+
+.rr-cbb-paper-toggle button {
+    min-width: 34px;
+    height: 28px;
+    padding: 0 7px;
+    color: #d8e9f2;
+    font: inherit;
+    font-size: 10px;
+    font-weight: 800;
+    cursor: pointer;
+    border: 0;
+    border-radius: 3px;
+    background: transparent;
+}
+
+.rr-cbb-paper-toggle button:hover,
+.rr-cbb-paper-toggle button.active {
+    color: #17364f;
+    background: #fff;
+}
+
+.rr-cbb-action {
+    display: inline-flex;
+    height: 34px;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 0 12px;
+    color: #fff;
+    font-size: 10.5px;
+    font-weight: 800;
+    text-decoration: none;
+    cursor: pointer;
+    border: 1px solid transparent;
+    border-radius: 5px;
+    box-shadow: 0 3px 8px rgba(6, 25, 39, 0.16);
+    transition: transform 0.16s ease, filter 0.16s ease;
+}
+
+.rr-cbb-action:hover {
+    color: #fff;
+    filter: brightness(1.07);
+    transform: translateY(-1px);
+}
+
+.rr-cbb-action.print {
+    border-color: #55a0cc;
+    background: #2478aa;
+}
+
+.rr-cbb-action.pdf {
+    border-color: #df6c79;
+    background: #bd3b4c;
+}
+
+.rr-cbb-action.csv {
+    border-color: #48a384;
+    background: #167b59;
+}
+
+.rr-cbb-summary-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 9px;
+    margin: 10px 0;
+}
+
+.rr-cbb-summary {
+    --tone: var(--cbb-blue);
+    --soft: #e9f4fb;
+    position: relative;
+    display: flex;
+    min-width: 0;
+    min-height: 91px;
+    align-items: center;
+    gap: 11px;
+    padding: 12px 13px;
+    overflow: hidden;
+    border: 1px solid rgba(255, 255, 255, 0.24);
+    border-top: 0;
+    border-left: 0;
+    border-radius: 9px;
+    background: linear-gradient(130deg, color-mix(in srgb, var(--tone), white 12%), var(--tone));
+    box-shadow: 0 8px 20px color-mix(in srgb, var(--tone), transparent 70%), inset 0 1px 0 rgba(255, 255, 255, 0.22);
+    animation: cbbRise 0.4s ease both;
+    transition: transform 0.17s ease, box-shadow 0.17s ease;
+}
+
+.rr-cbb-summary:nth-child(2) {
+    animation-delay: 0.04s;
+}
+
+.rr-cbb-summary:nth-child(3) {
+    animation-delay: 0.08s;
+}
+
+.rr-cbb-summary:nth-child(4) {
+    animation-delay: 0.12s;
+}
+
+.rr-cbb-summary.opening {
+    --tone: #176fa8;
+    --soft: #e7f3fb;
+}
+
+.rr-cbb-summary.income {
+    --tone: #16805d;
+    --soft: #e7f6f0;
+}
+
+.rr-cbb-summary.outgoing {
+    --tone: #c64152;
+    --soft: #fff0f2;
+}
+
+.rr-cbb-summary.closing {
+    --tone: #7353b4;
+    --soft: #f1edfa;
+}
+
+.rr-cbb-summary:hover {
+    border-color: rgba(255, 255, 255, 0.56);
+    transform: translateY(-4px) scale(1.012);
+    box-shadow: 0 13px 27px rgba(24, 53, 79, 0.19), inset 0 1px 0 #fff;
+}
+
+.rr-cbb-summary::before {
+    position: absolute;
+    z-index: 0;
+    top: 0;
+    left: -55%;
+    width: 35%;
+    height: 100%;
+    content: "";
+    pointer-events: none;
+    transform: skewX(-18deg);
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.72), transparent);
+    animation: cbbCardShine 6s ease-in-out infinite;
+}
+
+.rr-cbb-summary::after {
+    position: absolute;
+    right: -27px;
+    bottom: -42px;
+    width: 100px;
+    height: 100px;
+    content: "";
+    border-radius: 50%;
+    border: 18px solid rgba(255, 255, 255, 0.10);
+    background: transparent;
+    opacity: 1;
+}
+
+.rr-cbb-summary>span {
+    position: relative;
+    z-index: 1;
+    display: grid;
+    flex: 0 0 43px;
+    width: 43px;
+    height: 43px;
+    place-items: center;
+    color: var(--tone);
+    font-size: 18px;
+    border: 1px solid rgba(255, 255, 255, 0.72);
+    border-radius: 10px;
+    background: #fff;
+    box-shadow: 0 5px 12px rgba(10, 35, 52, 0.18);
+    animation: cbbIconFloat 3.6s ease-in-out infinite;
+}
+
+.rr-cbb-summary:nth-child(2)>span {
+    animation-delay: 0.35s;
+}
+
+.rr-cbb-summary:nth-child(3)>span {
+    animation-delay: 0.7s;
+}
+
+.rr-cbb-summary:nth-child(4)>span {
+    animation-delay: 1.05s;
+}
+
+.rr-cbb-summary>div {
+    position: relative;
+    z-index: 1;
+    min-width: 0;
+}
+
+.rr-cbb-summary small {
+    display: block;
+    color: rgba(255, 255, 255, 0.82);
+    font-size: 9.5px;
+    font-weight: 800;
+}
+
+.rr-cbb-summary strong {
+    display: block;
+    margin-top: 2px;
+    color: #fff;
+    font-size: 19px;
+    letter-spacing: -0.25px;
+    text-shadow: 0 1px 2px rgba(8, 28, 42, 0.16);
+    white-space: nowrap;
+}
+
+.rr-cbb-summary p {
+    margin: 2px 0 0;
+    color: rgba(255, 255, 255, 0.76);
+    font-size: 9.5px;
+}
+
+.rr-cbb-account-strip {
+    display: block;
+    margin-bottom: 9px;
+    padding: 0;
+    overflow: hidden;
+    border: 1px solid var(--cbb-line);
+    border-radius: 7px;
+    background: #fff;
+    box-shadow: 0 3px 11px rgba(27, 53, 75, 0.07);
+}
+
+.rr-cbb-account-filter-head {
+    display: flex;
+    min-height: 45px;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 6px 10px;
+    border-bottom: 1px solid #cbd8e2;
+    background: linear-gradient(90deg, #edf5fa, #fafcfd);
+}
+
+.rr-cbb-account-filter-head>span {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.rr-cbb-account-filter-head>span>i {
+    display: grid;
+    width: 29px;
+    height: 29px;
+    place-items: center;
+    color: #fff;
+    border-radius: 5px;
+    background: linear-gradient(135deg, #176fa8, #07899b);
+}
+
+.rr-cbb-account-filter-head>span>span {
+    display: flex;
+    flex-direction: column;
+}
+
+.rr-cbb-account-filter-head strong {
+    color: #244158;
+    font-size: 10.5px;
+}
+
+.rr-cbb-account-filter-head small {
+    margin-top: 1px;
+    color: #748899;
+    font-size: 8.5px;
+}
+
+.rr-cbb-account-filter-head em {
+    padding: 3px 8px;
+    color: #176b54;
+    font-size: 8.5px;
+    font-style: normal;
+    font-weight: 850;
+    border: 1px solid #91cbb7;
+    border-radius: 10px;
+    background: #e8f6f0;
+}
+
+.rr-cbb-account-options {
+    display: flex;
+    gap: 8px;
+    padding: 7px;
+    overflow-x: auto;
+    background: linear-gradient(180deg, #dbe6ef, #eaf0f5);
+}
+
+.rr-cbb-account-strip button {
+    --account: #536d80;
+    display: flex;
+    flex: 0 0 auto;
+    min-width: 160px;
+    height: 50px;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 10px;
+    color: #40596d;
+    font-size: 12px !important;
+    text-align: left;
+    cursor: pointer;
+    border: 1px solid #c6d3de;
+    overflow: hidden;
+    border-left: 4px solid var(--account);
+    border-radius: 7px;
+    background: linear-gradient(130deg, #fff 62%, color-mix(in srgb, var(--account), white 91%));
+    transition: transform 0.16s ease, box-shadow 0.16s ease, color 0.16s ease;
+    animation: cbbAccountIn 0.42s ease both;
+}
+
+.rr-cbb-account-strip button::after {
+    position: relative;
+    z-index: 8;
+    display: block !important;
+    min-width: 108px;
+    max-width: 170px;
+    flex: 1 1 auto;
+    overflow: hidden;
+    color: #274358;
+    font-size: 10px;
+    font-weight: 850;
+    line-height: 1.45;
+    text-align: left;
+    text-overflow: ellipsis;
+    white-space: pre-line;
+    visibility: visible !important;
+    content: attr(data-label) !important;
+    opacity: 1 !important;
+}
+
+.rr-cbb-account-strip button.active::after,
+.rr-cbb-account-strip button:hover::after,
+.rr-cbb-account-strip button.all::after {
+    color: #fff;
+}
+
+.rr-cbb-account-strip button .rr-cbb-account-copy {
+    display: none !important;
+}
+
+.rr-cbb-account-strip button:nth-child(2) {
+    animation-delay: 0.035s;
+}
+
+.rr-cbb-account-strip button:nth-child(3) {
+    animation-delay: 0.07s;
+}
+
+.rr-cbb-account-strip button:nth-child(4) {
+    animation-delay: 0.105s;
+}
+
+.rr-cbb-account-strip button:nth-child(5) {
+    animation-delay: 0.14s;
+}
+
+.rr-cbb-account-strip button:nth-child(6) {
+    animation-delay: 0.175s;
+}
+
+.rr-cbb-account-strip button.cash {
+    --account: #16805d;
+}
+
+.rr-cbb-account-strip button.bank {
+    --account: #176fa8;
+}
+
+.rr-cbb-account-strip button.upi {
+    --account: #7353b4;
+}
+
+.rr-cbb-account-strip button.account-card {
+    --account: #d06b20;
+}
+
+.rr-cbb-account-strip button.all {
+    --account: #405d73;
+}
+
+.rr-cbb-account-strip button.all {
+    min-width: 220px;
+    color: #fff;
+    border-color: #28485f;
+    background: linear-gradient(135deg, #294b63, #176f91);
+    box-shadow: 0 5px 13px rgba(36, 74, 101, 0.19);
+}
+
+.rr-cbb-account-strip button.all small {
+    color: #cce0eb;
+}
+
+.rr-cbb-all-copy {
+    position: relative;
+    z-index: 2;
+    display: flex !important;
+    min-width: 0;
+    flex: 1;
+    flex-direction: column;
+    visibility: visible !important;
+    opacity: 1 !important;
+}
+
+.rr-cbb-account-strip button.all .rr-cbb-all-copy strong {
+    display: block !important;
+    overflow: visible;
+    color: #fff !important;
+    font-size: 11px;
+    font-weight: 850;
+    line-height: 1.2;
+    text-overflow: clip;
+    white-space: nowrap;
+}
+
+.rr-cbb-account-strip button.all .rr-cbb-all-copy small {
+    display: block !important;
+    margin-top: 3px;
+    overflow: visible;
+    color: #d3e8f2 !important;
+    font-size: 8.5px;
+    line-height: 1.2;
+    text-overflow: clip;
+    white-space: nowrap;
+}
+
+.rr-cbb-account-strip button.all>i {
+    color: #28546d;
+    background: #fff;
+    animation: cbbAllPulse 2.7s ease-in-out infinite;
+}
+
+.rr-cbb-account-strip button:hover,
+.rr-cbb-account-strip button.active {
+    color: #fff;
+    border-color: var(--account);
+    background: linear-gradient(135deg, color-mix(in srgb, var(--account), white 10%), var(--account));
+    transform: translateY(-1px);
+    box-shadow: 0 5px 11px rgba(24, 52, 76, 0.15);
+}
+
+.rr-cbb-account-strip button>i {
+    display: grid;
+    flex: 0 0 31px;
+    width: 31px;
+    height: 31px;
+    place-items: center;
+    color: var(--account);
+    font-size: 14px;
+    border-radius: 8px;
+    background: color-mix(in srgb, var(--account), white 88%);
+}
+
+.rr-cbb-account-strip button.active>i,
+.rr-cbb-account-strip button:hover>i {
+    color: var(--account);
+    background: #fff;
+}
+
+.rr-cbb-account-strip button span {
+    display: flex;
+    min-width: 0;
+    flex-direction: column;
+}
+
+.rr-cbb-account-strip button strong {
+    max-width: 150px;
+    overflow: hidden;
+    font-size: 10.5px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.rr-cbb-account-strip button small {
+    margin-top: 2px;
+    color: #768a99;
+    font-size: 8.5px;
+}
+
+.rr-cbb-account-strip button.active small,
+.rr-cbb-account-strip button:hover small {
+    color: rgba(255, 255, 255, 0.82);
+}
+
+.rr-cbb-account-copy {
+    position: relative;
+    z-index: 5;
+    display: flex !important;
+    width: auto !important;
+    min-width: 105px !important;
+    max-width: 170px;
+    flex: 1 1 auto !important;
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    justify-content: center !important;
+    overflow: visible !important;
+    color: #304b60 !important;
+    font-size: 11px !important;
+    line-height: 1.2 !important;
+    text-align: left !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+}
+
+.rr-cbb-account-copy strong {
+    display: block !important;
+    width: 100% !important;
+    margin: 0 !important;
+    overflow: hidden !important;
+    color: #274358 !important;
+    font-size: 10.5px !important;
+    font-weight: 850 !important;
+    line-height: 1.25 !important;
+    text-overflow: ellipsis !important;
+    white-space: nowrap !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+}
+
+.rr-cbb-account-copy small {
+    display: block !important;
+    width: 100% !important;
+    margin: 3px 0 0 !important;
+    overflow: hidden !important;
+    color: #708696 !important;
+    font-size: 8.5px !important;
+    font-weight: 650 !important;
+    line-height: 1.2 !important;
+    text-overflow: ellipsis !important;
+    white-space: nowrap !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+}
+
+.rr-cbb-account-strip button.active .rr-cbb-account-copy strong,
+.rr-cbb-account-strip button:hover .rr-cbb-account-copy strong,
+.rr-cbb-account-strip button.all .rr-cbb-account-copy strong {
+    color: #fff !important;
+}
+
+.rr-cbb-account-strip button.active .rr-cbb-account-copy small,
+.rr-cbb-account-strip button:hover .rr-cbb-account-copy small,
+.rr-cbb-account-strip button.all .rr-cbb-account-copy small {
+    color: rgba(255, 255, 255, 0.82) !important;
+}
+
+/* Text is rendered from data-label so global button styles cannot hide it. */
+.rr-cbb-account-strip button .rr-cbb-account-copy {
+    display: none !important;
+}
+
+.rr-cbb-filter,
+.rr-cbb-register {
+    margin-bottom: 9px;
+    overflow: hidden;
+    border: 1px solid var(--cbb-line);
+    border-radius: 7px;
+    background: #fff;
+    box-shadow: var(--cbb-shadow);
+    animation: cbbRise 0.45s ease both;
+}
+
+.rr-cbb-filter-head {
+    display: flex;
+    width: 100%;
+    min-height: 49px;
+    align-items: center;
+    justify-content: space-between;
+    padding: 7px 12px;
+    color: #244158;
+    text-align: left;
+    cursor: pointer;
+    border: 0;
+    border-bottom: 1px solid transparent;
+    background: linear-gradient(90deg, #edf5fa, #fbfcfd);
+}
+
+.rr-cbb-filter.open .rr-cbb-filter-head {
+    border-bottom-color: #d4e0e9;
+}
+
+.rr-cbb-filter-head>span {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+}
+
+.rr-cbb-filter-head>span:first-child>i {
+    display: grid;
+    width: 31px;
+    height: 31px;
+    place-items: center;
+    color: #fff;
+    border-radius: 5px;
+    background: linear-gradient(135deg, #176fa8, #07899b);
+}
+
+.rr-cbb-filter-head>span:first-child>span {
+    display: flex;
+    flex-direction: column;
+}
+
+.rr-cbb-filter-head strong {
+    font-size: 11px;
+}
+
+.rr-cbb-filter-head small {
+    color: #748899;
+    font-size: 9px;
+}
+
+.rr-cbb-filter-head em {
+    padding: 3px 7px;
+    color: #176c54;
+    font-size: 8.5px;
+    font-style: normal;
+    font-weight: 850;
+    border: 1px solid #91cdb8;
+    border-radius: 10px;
+    background: #e7f6f0;
+}
+
+.rr-cbb-filter-content {
+    animation: cbbReveal 0.2s ease both;
+}
+
+.rr-cbb-periods {
+    display: flex;
+    min-height: 42px;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 6px 12px;
+    border-bottom: 1px solid #dce5ec;
+    background: #f8fafc;
+}
+
+.rr-cbb-periods>span {
+    color: #526b7e;
+    font-size: 9px;
+    font-weight: 850;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+}
+
+.rr-cbb-periods>div {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+}
+
+.rr-cbb-periods button {
+    height: 27px;
+    padding: 0 10px;
+    color: #365269;
+    font: inherit;
+    font-size: 9.5px;
+    font-weight: 750;
+    cursor: pointer;
+    border: 1px solid #bdccd8;
+    border-radius: 4px;
+    background: #fff;
+}
+
+.rr-cbb-periods button:hover {
+    color: #fff;
+    border-color: #176fa8;
+    background: #176fa8;
+}
+
+.rr-cbb-filter-form {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(125px, 0.7fr)) minmax(165px, 1fr) minmax(210px, 1.4fr) minmax(90px, 0.5fr) auto;
+    gap: 8px;
+    align-items: end;
+    padding: 10px 12px 12px;
+    background: linear-gradient(180deg, #fff, #f8fbfd);
+}
+
+.rr-cbb-field {
+    display: flex;
+    min-width: 0;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.rr-cbb-field>span {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    color: #405b70;
+    font-size: 9px;
+    font-weight: 850;
+    text-transform: uppercase;
+    letter-spacing: 0.25px;
+}
+
+.rr-cbb-field>span i {
+    color: #1776ac;
+}
+
+.rr-cbb-field input,
+.rr-cbb-field select {
+    width: 100%;
+    height: 34px;
+    padding: 0 9px;
+    color: #213a4d;
+    font: inherit;
+    font-size: 10.5px;
+    cursor: pointer;
+    outline: none;
+    border: 1px solid #bccbd8;
+    border-radius: 4px;
+    background-color: #fff;
+    box-shadow: inset 0 1px 2px rgba(25, 50, 70, 0.04);
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.rr-cbb-field input[type="search"] {
+    cursor: text;
+}
+
+.rr-cbb-field input:hover,
+.rr-cbb-field select:hover {
+    border-color: #6fa9cc;
+}
+
+.rr-cbb-field input:focus,
+.rr-cbb-field select:focus {
+    border-color: #176fa8;
+    box-shadow: 0 0 0 3px rgba(23, 111, 168, 0.12);
+}
+
+.rr-cbb-filter-actions {
+    display: flex;
+    gap: 6px;
+}
+
+.rr-cbb-filter-actions button {
+    display: inline-flex;
+    height: 34px;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    padding: 0 11px;
+    font: inherit;
+    font-size: 10px;
+    font-weight: 800;
+    cursor: pointer;
+    border: 1px solid transparent;
+    border-radius: 4px;
+}
+
+.rr-cbb-filter-actions .apply {
+    color: #fff;
+    background: linear-gradient(135deg, #176fa8, #07899b);
+}
+
+.rr-cbb-filter-actions .reset {
+    color: #3d586d;
+    border-color: #bbcbd7;
+    background: #fff;
+}
+
+.rr-cbb-register {
+    border-top: 3px solid #176fa8;
+}
+
+.rr-cbb-register {
+    position: relative;
+    box-shadow: 0 8px 23px rgba(23, 52, 76, 0.13);
+}
+
+.rr-cbb-register::before {
+    position: absolute;
+    z-index: 3;
+    top: 0;
+    left: 0;
+    width: 35%;
+    height: 3px;
+    content: "";
+    background: linear-gradient(90deg, #176fa8, #13a08b, transparent);
+    animation: cbbRegisterLine 4s ease-in-out infinite alternate;
+}
+
+.rr-cbb-register>header {
+    display: flex;
+    min-height: 61px;
+    align-items: center;
+    justify-content: space-between;
+    gap: 15px;
+    padding: 8px 12px;
+    border-bottom: 1px solid var(--cbb-line);
+    background: linear-gradient(90deg, #eaf5fb, #fff);
+}
+
+.rr-cbb-register>header>div:first-child {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+}
+
+.rr-cbb-register>header>div:first-child>span {
+    display: grid;
+    width: 36px;
+    height: 36px;
+    place-items: center;
+    color: #fff;
+    font-size: 15px;
+    border-radius: 5px;
+    background: linear-gradient(135deg, #176fa8, #07899b);
+}
+
+.rr-cbb-register>header>div:first-child>div {
+    display: flex;
+    flex-direction: column;
+}
+
+.rr-cbb-register>header strong {
+    font-size: 11.5px;
+}
+
+.rr-cbb-register>header small {
+    margin-top: 2px;
+    color: #6e8293;
+    font-size: 9px;
+}
+
+.rr-cbb-register-balance {
+    text-align: right;
+}
+
+.rr-cbb-register-balance small {
+    display: block;
+    color: #62798b;
+    font-size: 8.5px;
+    font-weight: 800;
+    text-transform: uppercase;
+}
+
+.rr-cbb-register-balance strong {
+    display: block;
+    margin-top: 1px;
+    color: #176fa8;
+    font-size: 19px !important;
+}
+
+.rr-cbb-table-wrap {
+    width: 100%;
+    overflow-x: auto;
+}
+
+.rr-cbb-table {
+    width: 100%;
+    min-width: 1120px;
+    border-collapse: separate;
+    border-spacing: 0;
+}
+
+.rr-cbb-table th {
+    height: 36px;
+    padding: 7px 9px;
+    color: #dcecf5;
+    font-size: 9px;
+    font-weight: 850;
+    text-align: left;
+    text-transform: uppercase;
+    letter-spacing: 0.25px;
+    white-space: nowrap;
+    border-right: 1px solid rgba(255, 255, 255, 0.10);
+    background: #173c58;
+}
+
+.rr-cbb-table th:nth-child(7) {
+    color: #e8fff6;
+    background: #126b50;
+}
+
+.rr-cbb-table th:nth-child(8) {
+    color: #fff0f2;
+    background: #a93648;
+}
+
+.rr-cbb-table th:nth-child(9) {
+    color: #f1edff;
+    background: #56418f;
+}
+
+.rr-cbb-table td {
+    height: 43px;
+    padding: 6px 9px;
+    color: #2c465a;
+    font-size: 10px;
+    vertical-align: middle;
+    border-right: 1px solid #e4ebf1;
+    border-bottom: 1px solid #dce5ec;
+}
+
+.rr-cbb-table tbody tr:nth-child(even) td {
+    background: #f5f9fc;
+}
+
+.rr-cbb-table tbody tr:hover td {
+    background: #e8f4fb;
+}
+
+.rr-cbb-table tbody tr:hover td:first-child {
+    box-shadow: inset 3px 0 0 #176fa8;
+}
+
+.rr-cbb-table tbody tr.reversal td {
+    color: #8e4a52;
+    background: #fff4f5;
+}
+
+.rr-cbb-table .number {
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+}
+
+.rr-cbb-table td>small {
+    display: block;
+    margin-top: 2px;
+    color: #778b9a;
+    font-size: 8.5px;
+}
+
+.rr-cbb-account-name {
+    display: block;
+    color: #176fa8;
+    font-size: 10.5px;
+}
+
+.rr-cbb-account-name.cash {
+    color: #167956;
+}
+
+.rr-cbb-account-name.upi {
+    color: #7050ae;
+}
+
+.rr-cbb-account-name.account-card {
+    color: #c25e1b;
+}
+
+.rr-cbb-type {
+    display: inline-flex;
+    max-width: 145px;
+    padding: 3px 7px;
+    overflow: hidden;
+    font-size: 8.5px;
+    font-weight: 800;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    border: 1px solid;
+    border-radius: 10px;
+}
+
+.rr-cbb-type.receipt {
+    color: #176c52;
+    border-color: #8fc8b5;
+    background: #e8f6f0;
+}
+
+.rr-cbb-type.payment {
+    color: #ad3c4b;
+    border-color: #dfa2aa;
+    background: #fff0f2;
+}
+
+.rr-cbb-type.reversal {
+    color: #985124;
+    border-color: #dfae89;
+    background: #fff3e9;
+}
+
+.rr-cbb-type.neutral {
+    color: #526a7d;
+    border-color: #b6c5d1;
+    background: #f0f4f7;
+}
+
+.rr-cbb-table td.money-in {
+    color: #116d4d;
+    font-weight: 900;
+    background: #edf9f4;
+    box-shadow: inset 3px 0 0 rgba(20, 128, 93, 0.22);
+}
+
+.rr-cbb-table td.money-out {
+    color: #b13649;
+    font-weight: 900;
+    background: #fff1f3;
+    box-shadow: inset 3px 0 0 rgba(191, 64, 82, 0.22);
+}
+
+.rr-cbb-table td.running {
+    color: #6546a4;
+    font-size: 10.5px;
+    font-weight: 900;
+    background: #f5f2fc;
+}
+
+.rr-cbb-table tbody tr:nth-child(even) td.money-in {
+    background: #e5f6ef;
+}
+
+.rr-cbb-table tbody tr:nth-child(even) td.money-out {
+    background: #fdebed;
+}
+
+.rr-cbb-table tbody tr:nth-child(even) td.running {
+    background: #eee9fa;
+}
+
+.rr-cbb-table tbody tr:hover td.money-in {
+    background: #d9f2e8;
+}
+
+.rr-cbb-table tbody tr:hover td.money-out {
+    background: #f9dfe3;
+}
+
+.rr-cbb-table tbody tr:hover td.running {
+    background: #e6dff7;
+}
+
+.rr-cbb-table td.running.negative {
+    color: #c23e50;
+}
+
+.rr-cbb-empty {
+    display: flex;
+    min-height: 180px;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    color: #6b8192;
+}
+
+.rr-cbb-empty i {
+    margin-bottom: 8px;
+    color: #7792a7;
+    font-size: 28px;
+}
+
+.rr-cbb-empty strong {
+    color: #29475d;
+    font-size: 12px;
+}
+
+.rr-cbb-empty span {
+    margin-top: 3px;
+    font-size: 9.5px;
+}
+
+.rr-cbb-pagination {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: 4px;
+    padding: 9px 11px;
+    border-top: 1px solid #d8e2ea;
+    background: #f7fafc;
+}
+
+.rr-cbb-pagination a,
+.rr-cbb-pagination span {
+    display: grid;
+    min-width: 29px;
+    height: 28px;
+    padding: 0 7px;
+    place-items: center;
+    color: #3b566b;
+    font-size: 9.5px;
+    font-weight: 750;
+    text-decoration: none;
+    cursor: pointer;
+    border: 1px solid #c4d1dc;
+    border-radius: 4px;
+    background: #fff;
+}
+
+.rr-cbb-pagination a:hover,
+.rr-cbb-pagination a.active {
+    color: #fff;
+    border-color: #176fa8;
+    background: #176fa8;
+}
+
+.rr-cbb-pagination span.disabled {
+    color: #9babb8;
+    cursor: not-allowed;
+    background: #f0f4f7;
+}
+
+@keyframes cbbRise {
+    from {
+        opacity: 0;
+        transform: translateY(8px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes cbbReveal {
+    from {
+        opacity: 0;
+        transform: translateY(-4px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes cbbOrbit {
+    from {
+        transform: rotate(0deg);
+    }
+
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+@keyframes cbbDrift {
+    from {
+        transform: translate3d(0, 0, 0) scale(1);
+    }
+
+    to {
+        transform: translate3d(-24px, -10px, 0) scale(1.08);
+    }
+}
+
+@keyframes cbbLine {
+
+    0%,
+    100% {
+        width: 42px;
+        opacity: 0.65;
+    }
+
+    50% {
+        width: 78px;
+        opacity: 1;
+    }
+}
+
+@keyframes cbbIconFloat {
+
+    0%,
+    100% {
+        transform: translateY(0);
+    }
+
+    50% {
+        transform: translateY(-3px);
+    }
+}
+
+@keyframes cbbAccountIn {
+    from {
+        opacity: 0;
+        transform: translateX(-7px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes cbbCardShine {
+
+    0%,
+    55% {
+        left: -55%;
+        opacity: 0;
+    }
+
+    65% {
+        opacity: 0.75;
+    }
+
+    82%,
+    100% {
+        left: 125%;
+        opacity: 0;
+    }
+}
+
+@keyframes cbbAllPulse {
+
+    0%,
+    100% {
+        transform: scale(1);
+        box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.28);
+    }
+
+    50% {
+        transform: scale(1.06);
+        box-shadow: 0 0 0 5px rgba(255, 255, 255, 0);
+    }
+}
+
+@keyframes cbbRegisterLine {
+    from {
+        width: 22%;
+        opacity: 0.65;
+    }
+
+    to {
+        width: 58%;
+        opacity: 1;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+
+    .rr-cbb-page *,
+    .rr-cbb-page *::before,
+    .rr-cbb-page *::after {
+        animation: none !important;
+        transition: none !important;
+    }
+}
+
+@media (max-width: 1200px) {
+    .rr-cbb-summary-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .rr-cbb-filter-form {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .rr-cbb-field.wide {
+        grid-column: span 2;
+    }
+
+    .rr-cbb-filter-actions {
+        justify-content: flex-end;
+    }
+}
+
+@media (max-width: 760px) {
+    .rr-cbb-page {
+        padding: 7px 7px 18px;
+    }
+
+    .rr-cbb-commandbar {
+        align-items: flex-start;
+        flex-direction: column;
+        padding: 14px;
+    }
+
+    .rr-cbb-command-actions {
+        width: 100%;
+        justify-content: flex-start;
+    }
+
+    .rr-cbb-periods {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .rr-cbb-filter-form {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .rr-cbb-field.wide {
+        grid-column: span 2;
+    }
+
+    .rr-cbb-filter-actions {
+        grid-column: span 2;
+    }
+
+    .rr-cbb-filter-actions button {
+        flex: 1;
+    }
+}
+
+@media (max-width: 480px) {
+
+    .rr-cbb-summary-grid,
+    .rr-cbb-filter-form {
+        grid-template-columns: 1fr;
+    }
+
+    .rr-cbb-field.wide,
+    .rr-cbb-filter-actions {
+        grid-column: auto;
+    }
+
+    .rr-cbb-command-copy h1 {
+        font-size: 20px;
+    }
+
+    .rr-cbb-register>header {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .rr-cbb-register-balance {
+        text-align: left;
+    }
+}

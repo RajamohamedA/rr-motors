@@ -10,6 +10,7 @@ use App\Http\Controllers\MechanicPaymentController;
 use App\Http\Controllers\MechanicLedgerController;
 use App\Http\Controllers\ExpenseController;
 use App\Http\Controllers\OutstandingReportController;
+use App\Http\Controllers\CashBankBookController;
 use App\Http\Controllers\VoucherController;
 use Illuminate\Support\Facades\Route;
 
@@ -49,6 +50,35 @@ Route::middleware([
         '/accounts/outstanding',
         [OutstandingReportController::class, 'index']
     )->name('accounts.outstanding.index');
+
+    /*
+    |--------------------------------------------------------------------------
+    | Cash / Bank Book
+    |--------------------------------------------------------------------------
+    |
+    | Export routes remain above the main book route and account bindings.
+    |
+    */
+    Route::get(
+        '/accounts/cash-bank-book/print',
+        [CashBankBookController::class, 'print']
+    )->name('accounts.cash-bank-book.print');
+
+    Route::get(
+        '/accounts/cash-bank-book/pdf',
+        [CashBankBookController::class, 'pdf']
+    )->name('accounts.cash-bank-book.pdf');
+
+    Route::get(
+        '/accounts/cash-bank-book/excel',
+        [CashBankBookController::class, 'excel']
+    )->name('accounts.cash-bank-book.excel');
+
+    Route::get(
+        '/accounts/cash-bank-book',
+        [CashBankBookController::class, 'index']
+    )->name('accounts.cash-bank-book.index');
+
     /*
     |--------------------------------------------------------------------------
     | Cash / Bank Account Master
