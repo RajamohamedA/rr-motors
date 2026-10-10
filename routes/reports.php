@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\PurchaseReportController;
+use App\Http\Controllers\SalesReportController;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware(['auth'])->group(function (): void {
@@ -9,9 +10,7 @@ Route::middleware(['auth'])->group(function (): void {
     | Purchase Report
     |--------------------------------------------------------------------------
     |
-    | Keep the fixed export paths above the dynamic purchase route.
-    | Otherwise Laravel may interpret "print", "pdf", or "excel" as a
-    | purchase model identifier.
+    | Fixed export endpoints must remain above the dynamic purchase route.
     |
     */
 
@@ -41,4 +40,40 @@ Route::middleware(['auth'])->group(function (): void {
     )
         ->whereNumber('purchase')
         ->name('purchase-reports.show');
+
+    /*
+    |--------------------------------------------------------------------------
+    | Sales Report
+    |--------------------------------------------------------------------------
+    |
+    | Fixed export endpoints must remain above the dynamic sale route.
+    |
+    */
+
+    Route::get(
+        '/sales-reports',
+        [SalesReportController::class, 'index']
+    )->name('sales-reports.index');
+
+    Route::get(
+        '/sales-reports/print',
+        [SalesReportController::class, 'print']
+    )->name('sales-reports.print');
+
+    Route::get(
+        '/sales-reports/pdf',
+        [SalesReportController::class, 'pdf']
+    )->name('sales-reports.pdf');
+
+    Route::get(
+        '/sales-reports/excel',
+        [SalesReportController::class, 'excel']
+    )->name('sales-reports.excel');
+
+    Route::get(
+        '/sales-reports/{sale}',
+        [SalesReportController::class, 'show']
+    )
+        ->whereNumber('sale')
+        ->name('sales-reports.show');
 });

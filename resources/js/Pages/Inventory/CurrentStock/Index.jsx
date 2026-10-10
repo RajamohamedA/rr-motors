@@ -1,12 +1,8 @@
 import React, { useMemo, useState } from "react";
-
 import { Head, Link, router } from "@inertiajs/react";
-
 import BusinessLayout from "@/Layouts/BusinessLayout";
 import MasterNavigation from "../../../Components/Business/MasterNavigation";
-
 import "../../../../css/business/current-stock.css";
-
 export default function Index({
     stocks = { data: [], links: [] },
     filters = {},
@@ -25,12 +21,10 @@ export default function Index({
         stock_status: filters.stock_status ?? "all",
         per_page: String(filters.per_page ?? 25),
     });
-
     const queryString = useMemo(
         () => new URLSearchParams(cleanFilters(form)).toString(),
         [form],
     );
-
     const applyFilters = (next = form) => {
         router.get("/inventory/current-stock", cleanFilters(next), {
             preserveState: true,
@@ -38,18 +32,14 @@ export default function Index({
             replace: true,
         });
     };
-
     const update = (field, value, apply = false) => {
         const next = { ...form, [field]: value };
-
         if (field === "location" && value !== "godown") {
             next.godown_id = "";
         }
-
         setForm(next);
         if (apply) applyFilters(next);
     };
-
     const selectLocation = (location) => {
         const next = {
             ...form,
@@ -59,7 +49,6 @@ export default function Index({
         setForm(next);
         applyFilters(next);
     };
-
     const reset = () => {
         const next = {
             search: "",
@@ -73,7 +62,6 @@ export default function Index({
         setForm(next);
         applyFilters(next);
     };
-
     const openLedger = (stock) => {
         const params = new URLSearchParams({
             product_id: String(stock.product_id),
@@ -82,18 +70,15 @@ export default function Index({
         else params.set("location", "shop");
         router.visit(`/stock-ledgers?${params.toString()}`);
     };
-
     return (
         <>
             <Head title="Current Stock" />
-
             <div className="rr-current-stock-page">
                 <MasterNavigation
                     active="current-stock"
                     title="Inventory"
                     subtitle="Current Shop and Godown stock"
                 />
-
                 <header className="rr-current-stock-header">
                     <div className="rr-current-stock-heading">
                         <div className="rr-current-stock-heading-icon">
@@ -107,7 +92,6 @@ export default function Index({
                             </small>
                         </div>
                     </div>
-
                     <div className="rr-current-stock-actions">
                         <a
                             href={`/inventory/current-stock/print?${queryString}`}
@@ -134,7 +118,6 @@ export default function Index({
                         </a>
                     </div>
                 </header>
-
                 <section className="rr-current-stock-metrics">
                     <Metric
                         icon="bi-box-seam"
@@ -173,7 +156,6 @@ export default function Index({
                         tone="dark-red"
                     />
                 </section>
-
                 <section className="rr-current-stock-window rr-current-stock-filter-window">
                     <div className="rr-current-stock-window-title">
                         <div>
@@ -185,7 +167,6 @@ export default function Index({
                             Reset
                         </button>
                     </div>
-
                     <div className="rr-current-stock-filter-body">
                         <div className="rr-current-stock-location-tabs">
                             {[
@@ -204,7 +185,6 @@ export default function Index({
                                 </button>
                             ))}
                         </div>
-
                         <form
                             className="rr-current-stock-filter-grid"
                             onSubmit={(event) => {
@@ -232,7 +212,6 @@ export default function Index({
                                     )}
                                 </div>
                             </Field>
-
                             <Field label="Category">
                                 <select
                                     value={form.category_id}
@@ -246,7 +225,6 @@ export default function Index({
                                     ))}
                                 </select>
                             </Field>
-
                             <Field label="Brand">
                                 <select
                                     value={form.brand_id}
@@ -260,7 +238,6 @@ export default function Index({
                                     ))}
                                 </select>
                             </Field>
-
                             {form.location === "godown" && (
                                 <Field label="Godown">
                                     <select
@@ -277,7 +254,6 @@ export default function Index({
                                     </select>
                                 </Field>
                             )}
-
                             <Field label="Stock Status">
                                 <select
                                     value={form.stock_status}
@@ -290,7 +266,6 @@ export default function Index({
                                     <option value="negative">Negative Stock</option>
                                 </select>
                             </Field>
-
                             <Field label="Rows">
                                 <select
                                     value={form.per_page}
@@ -303,7 +278,6 @@ export default function Index({
                                     ))}
                                 </select>
                             </Field>
-
                             <button type="submit" className="rr-current-stock-apply">
                                 <i className="bi bi-search"></i>
                                 Apply
@@ -311,7 +285,6 @@ export default function Index({
                         </form>
                     </div>
                 </section>
-
                 <section className="rr-current-stock-window">
                     <div className="rr-current-stock-window-title">
                         <div>
@@ -323,7 +296,6 @@ export default function Index({
                             for ledger
                         </span>
                     </div>
-
                     <div className="rr-current-stock-table-wrap">
                         <table className="rr-current-stock-table">
                             <thead>
@@ -342,7 +314,6 @@ export default function Index({
                                     <th className="action">Action</th>
                                 </tr>
                             </thead>
-
                             <tbody>
                                 {records.length ? (
                                     records.map((stock, index) => (
@@ -420,17 +391,14 @@ export default function Index({
                             </tbody>
                         </table>
                     </div>
-
                     <Pagination links={stocks.links ?? []} />
                 </section>
             </div>
         </>
     );
 }
-
 function Metric({ icon, label, value, tone }) {
     const featured = ["slate", "violet"].includes(tone);
-
     return (
         <div
             className={`rr-current-stock-metric ${tone} ${featured ? "featured" : ""
@@ -446,7 +414,6 @@ function Metric({ icon, label, value, tone }) {
         </div>
     );
 }
-
 function Field({ label, children }) {
     return (
         <label className="rr-current-stock-field">
@@ -455,7 +422,6 @@ function Field({ label, children }) {
         </label>
     );
 }
-
 function LocationBadge({ stock }) {
     return (
         <span className={`rr-current-stock-location ${stock.location_type}`}>
@@ -464,7 +430,6 @@ function LocationBadge({ stock }) {
         </span>
     );
 }
-
 function StockBadge({ status }) {
     return (
         <span className={`rr-current-stock-status ${status}`}>
@@ -473,7 +438,6 @@ function StockBadge({ status }) {
         </span>
     );
 }
-
 function Pagination({ links }) {
     if (!Array.isArray(links) || links.length <= 3) return null;
     return (
@@ -492,20 +456,17 @@ function Pagination({ links }) {
         </nav>
     );
 }
-
 function cleanFilters(values) {
     return Object.fromEntries(
         Object.entries(values).filter(([, value]) => value !== "" && value != null),
     );
 }
-
 function ledgerUrl(stock) {
     const params = new URLSearchParams({ product_id: String(stock.product_id) });
     if (stock.godown_id) params.set("godown_id", String(stock.godown_id));
     else params.set("location", "shop");
     return `/stock-ledgers?${params.toString()}`;
 }
-
 function statusLabel(status) {
     return {
         in_stock: "In Stock",
@@ -514,7 +475,6 @@ function statusLabel(status) {
         negative: "Negative",
     }[status] ?? "Unknown";
 }
-
 function statusIcon(status) {
     return {
         in_stock: "bi-check-circle",
@@ -523,11 +483,9 @@ function statusIcon(status) {
         negative: "bi-dash-circle",
     }[status] ?? "bi-question-circle";
 }
-
 function transactionLabel(value) {
     return value ? String(value).replaceAll("_", " ") : "No activity";
 }
-
 function dateFormat(value) {
     if (!value) return "—";
     return new Intl.DateTimeFormat("en-IN", {
@@ -536,7 +494,6 @@ function dateFormat(value) {
         year: "numeric",
     }).format(new Date(`${String(value).slice(0, 10)}T00:00:00`));
 }
-
 function moneyFormat(value) {
     return new Intl.NumberFormat("en-IN", {
         style: "currency",
@@ -545,21 +502,17 @@ function moneyFormat(value) {
         maximumFractionDigits: 2,
     }).format(numberValue(value));
 }
-
 function quantityFormat(value) {
     return numberValue(value).toLocaleString("en-IN", {
         minimumFractionDigits: 0,
         maximumFractionDigits: 2,
     });
 }
-
 function numberFormat(value) {
     return Math.trunc(numberValue(value)).toLocaleString("en-IN");
 }
-
 function numberValue(value) {
     const number = Number(value ?? 0);
     return Number.isFinite(number) ? number : 0;
 }
-
 Index.layout = (page) => <BusinessLayout>{page}</BusinessLayout>;

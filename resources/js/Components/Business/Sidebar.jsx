@@ -100,6 +100,14 @@ export default function BusinessSidebar({
       */
     const getGroupFromUrl = (url) => {
         const path = String(url ?? "").split("?")[0];
+        /* Check reports first because /sales-reports begins with /sales. */
+        if (
+            path.startsWith("/reports") ||
+            path.startsWith("/purchase-reports") ||
+            path.startsWith("/sales-reports")
+        ) {
+            return "reports";
+        }
         if (
             path.startsWith("/company/") ||
             path.startsWith("/companies") ||
@@ -149,9 +157,6 @@ export default function BusinessSidebar({
             path.startsWith("/accounts")
         ) {
             return "accounts";
-        }
-        if (path.startsWith("/reports") || path.startsWith("/purchase-reports")) {
-            return "reports";
         }
         return null;
     };
@@ -381,7 +386,7 @@ export default function BusinessSidebar({
                         activeExclude: [
                             "/sales/create",
                             "/sales-returns",
-                            "/reports/sales",
+                            "/sales-reports",
                         ],
                         visible: can("sales.view"),
                     },
@@ -619,8 +624,8 @@ export default function BusinessSidebar({
                     {
                         label: "Sales Report",
                         icon: "bi-graph-up-arrow",
-                        href: "/reports/sales",
-                        activePrefix: "/reports/sales",
+                        href: "/sales-reports",
+                        activePrefix: "/sales-reports",
                         visible: can("sales-report.view"),
                     },
                     {
