@@ -1564,5 +1564,7 @@ Route::middleware([
 
     require __DIR__ . '/reports.php';
 
+    require __DIR__ . '/barcode_labels.php';
+
 
 });

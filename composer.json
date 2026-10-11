@@ -12,6 +12,7 @@
         "jeroennoten/laravel-adminlte": "*",
         "laravel/framework": "^13.8",
         "laravel/tinker": "^3.0",
+        "picqer/php-barcode-generator": "^3.3",
         "spatie/laravel-permission": "^8.3"
     },
     "require-dev": {
