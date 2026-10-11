@@ -1,852 +1,375 @@
-import {
-    Head,
-    Link,
-    router,
-    usePage,
-} from '@inertiajs/react';
+import React, { useMemo, useState } from 'react';
+import { Head, Link, router } from '@inertiajs/react';
 
-import BusinessLayout
-    from '../../Layouts/BusinessLayout';
+import BusinessLayout from '../../Layouts/BusinessLayout';
 
 import '../../../css/business/company-dashboard.css';
 
-
 export default function CompanyDashboard({
     company,
-    branchSummary,
-    userSummary,
+    activeBranch = null,
+    branchSummary = {},
+    userSummary = {},
     branches = [],
+    context = {},
 }) {
+    const [search, setSearch] = useState('');
+    const [status, setStatus] = useState('all');
+    const [switchingId, setSwitchingId] = useState(null);
 
-    const {
-        auth,
-    } = usePage().props;
+    const filteredBranches = useMemo(() => {
+        const needle = search.trim().toLowerCase();
 
+        return branches.filter((branch) => {
+            const matchesStatus = status === 'all'
+                || (status === 'active' && branch.status)
+                || (status === 'pending' && !branch.status);
+            const searchable = [
+                branch.store_name,
+                branch.store_code,
+                branch.city,
+                branch.state,
+            ].filter(Boolean).join(' ').toLowerCase();
 
-    /*
-    |--------------------------------------------------------------------------
-    | Enter Branch
-    |--------------------------------------------------------------------------
-    */
+            return matchesStatus && (!needle || searchable.includes(needle));
+        });
+    }, [branches, search, status]);
 
-    const enterBranch = (
-        storeId
-    ) => {
+    const selectBranch = (branch) => {
+        if (!branch?.id || !branch.status || Number(activeBranch?.id) === Number(branch.id)) {
+            return;
+        }
 
-        router.post(
-            `/select-branch/${storeId}`,
-            {},
-            {
-                preserveScroll:
-                    true,
-            }
-        );
+        setSwitchingId(branch.id);
+        router.post(`/select-branch/${branch.id}`, {}, {
+            preserveScroll: false,
+            preserveState: false,
+            onFinish: () => setSwitchingId(null),
+        });
     };
 
-
-    /*
-    |--------------------------------------------------------------------------
-    | Helpers
-    |--------------------------------------------------------------------------
-    */
-
-    const locationText =
-        [
-            company?.city,
-            company?.state,
-        ]
-            .filter(Boolean)
-            .join(', ');
-
-
     return (
-        <BusinessLayout>
+        <BusinessLayout
+            title="Company Dashboard"
+            subtitle={company?.company_name ?? 'Company Workspace'}
+        >
+            <Head title={`${company?.company_name ?? 'Company'} Dashboard`} />
 
-            <Head title="Company Dashboard" />
+            <main className="rr-company-dashboard">
+                <section className="rr-company-hero">
+                    <div className="rr-company-hero-orb orb-one" />
+                    <div className="rr-company-hero-orb orb-two" />
 
-
-            <div className="rr-company-dashboard">
-
-
-                {/* =========================================================
-                    HEADER
-                   ========================================================= */}
-
-                <section className="rr-company-dashboard-hero">
-
-                    <div className="rr-company-dashboard-hero-content">
-
-                        <div className="rr-company-dashboard-company-icon">
-
-                            {getInitials(
-                                company?.company_name
-                            )}
-
+                    <div className="rr-company-hero-content">
+                        <div className="rr-company-hero-icon">
+                            <i className="bi bi-buildings-fill" />
                         </div>
 
-
-                        <div className="rr-company-dashboard-company-info">
-
-                            <div className="rr-company-dashboard-eyebrow">
-
-                                Company Workspace
-
+                        <div>
+                            <span className="rr-company-eyebrow">
+                                <i className="bi bi-shield-check" />
+                                {context.is_super_admin ? 'Super Admin Workspace' : 'Company Administration'}
+                            </span>
+                            <h1>{company?.company_name ?? 'Company Dashboard'}</h1>
+                            <p>
+                                Monitor branches and users, then enter the branch you want to operate.
+                            </p>
+                            <div className="rr-company-identity">
+                                <span><i className="bi bi-upc-scan" /> {company?.company_code || 'No code'}</span>
+                                <span><i className="bi bi-geo-alt" /> {[company?.city, company?.state].filter(Boolean).join(', ') || 'Location not set'}</span>
                             </div>
-
-
-                            <h1>
-
-                                {company?.company_name
-                                    ?? 'Company'}
-
-                            </h1>
-
-
-                            <div className="rr-company-dashboard-meta">
-
-                                {company?.company_code && (
-
-                                    <span>
-
-                                        <i className="bi bi-upc-scan"></i>
-
-                                        {
-                                            company.company_code
-                                        }
-
-                                    </span>
-                                )}
-
-
-                                {company?.owner_name && (
-
-                                    <span>
-
-                                        <i className="bi bi-person"></i>
-
-                                        {
-                                            company.owner_name
-                                        }
-
-                                    </span>
-                                )}
-
-
-                                {locationText && (
-
-                                    <span>
-
-                                        <i className="bi bi-geo-alt"></i>
-
-                                        {
-                                            locationText
-                                        }
-
-                                    </span>
-                                )}
-
-                            </div>
-
                         </div>
-
                     </div>
 
-
-                    <div className="rr-company-dashboard-actions">
-
-                        <Link
-                            href="/company/profile"
-                            className="rr-company-btn rr-company-btn-secondary"
-                        >
-
-                            <i className="bi bi-building-gear"></i>
-
-                            Company Profile
-
+                    <div className="rr-company-hero-actions">
+                        <Link className="rr-company-action light" href="/company/branches">
+                            <i className="bi bi-diagram-3" />
+                            Manage Branches
                         </Link>
-
-
-                        <Link
-                            href="/company/branches/create"
-                            className="rr-company-btn rr-company-btn-primary"
-                        >
-
-                            <i className="bi bi-plus-circle"></i>
-
-                            Add Branch
-
+                        <Link className="rr-company-action accent" href="/company/users">
+                            <i className="bi bi-people" />
+                            Manage Users
                         </Link>
-
                     </div>
-
                 </section>
 
-
-                {/* =========================================================
-                    SUMMARY
-                   ========================================================= */}
-
-                <section className="rr-company-dashboard-summary-grid">
-
-
-                    <SummaryCard
+                <section className="rr-company-metrics" aria-label="Company summary">
+                    <MetricCard
+                        tone="blue"
                         icon="bi-shop-window"
                         label="Total Branches"
-                        value={
-                            branchSummary?.total
-                            ?? 0
-                        }
+                        value={branchSummary.total}
+                        note="Registered locations"
                     />
-
-
-                    <SummaryCard
-                        icon="bi-check-circle"
+                    <MetricCard
+                        tone="green"
+                        icon="bi-patch-check"
                         label="Active Branches"
-                        value={
-                            branchSummary?.active
-                            ?? 0
-                        }
-                        tone="success"
+                        value={branchSummary.active}
+                        note="Ready for operation"
                     />
-
-
-                    <SummaryCard
+                    <MetricCard
+                        tone="amber"
                         icon="bi-hourglass-split"
-                        label="Pending Approval"
-                        value={
-                            branchSummary?.pending
-                            ?? 0
-                        }
-                        tone="warning"
+                        label="Pending Branches"
+                        value={branchSummary.pending}
+                        note="Awaiting activation"
                     />
-
-
-                    <SummaryCard
-                        icon="bi-people"
+                    <MetricCard
+                        tone="violet"
+                        icon="bi-people-fill"
                         label="Company Users"
-                        value={
-                            userSummary?.total
-                            ?? 0
-                        }
+                        value={userSummary.total}
+                        note={`${number(userSummary.active)} active • ${number(userSummary.inactive)} inactive`}
                     />
-
-
-                    <SummaryCard
-                        icon="bi-person-check"
-                        label="Active Users"
-                        value={
-                            userSummary?.active
-                            ?? 0
-                        }
-                        tone="success"
-                    />
-
                 </section>
 
-
-                {/* =========================================================
-                    NO ACTIVE BRANCH ALERT
-                   ========================================================= */}
-
-                {(
-                    branchSummary?.active
-                    ?? 0
-                ) === 0 && (
-
-                        <section className="rr-company-empty-alert">
-
-                            <div className="rr-company-empty-alert-icon">
-
-                                <i className="bi bi-shop-window"></i>
-
+                <section className="rr-company-command-grid">
+                    <article className="rr-company-active-card">
+                        <div className="rr-company-section-heading">
+                            <div className="rr-company-heading-icon cyan">
+                                <i className="bi bi-pin-map-fill" />
                             </div>
-
-
                             <div>
-
-                                <h2>
-                                    No active branch available
-                                </h2>
-
-
-                                <p>
-
-                                    You can create a new branch.
-                                    The branch will remain pending
-                                    until Super Admin activates it.
-
-                                </p>
-
+                                <span>ACTIVE CONTEXT</span>
+                                <h2>Current Branch</h2>
                             </div>
-
-
-                            <Link
-                                href="/company/branches/create"
-                                className="rr-company-btn rr-company-btn-primary"
-                            >
-
-                                <i className="bi bi-plus-lg"></i>
-
-                                Create Branch
-
-                            </Link>
-
-                        </section>
-                    )}
-
-
-                {/* =========================================================
-                    MAIN GRID
-                   ========================================================= */}
-
-                <div className="rr-company-dashboard-main-grid">
-
-
-                    {/* =====================================================
-                        BRANCHES
-                       ===================================================== */}
-
-                    <section className="rr-company-dashboard-panel rr-company-dashboard-branches-panel">
-
-
-                        <div className="rr-company-dashboard-panel-header">
-
-                            <div>
-
-                                <span className="rr-company-dashboard-section-label">
-
-                                    Branch Management
-
-                                </span>
-
-
-                                <h2>
-
-                                    Your Branches
-
-                                </h2>
-
-
-                                <p>
-
-                                    Enter an active branch to access
-                                    sales, purchase, inventory and
-                                    other branch operations.
-
-                                </p>
-
-                            </div>
-
-
-                            <Link
-                                href="/company/branches"
-                                className="rr-company-text-link"
-                            >
-
-                                View All
-
-                                <i className="bi bi-arrow-right"></i>
-
-                            </Link>
-
                         </div>
 
-
-                        {branches.length > 0 ? (
-
-                            <div className="rr-company-branch-list">
-
-                                {branches.map(
-                                    (
-                                        branch
-                                    ) => (
-
-                                        <BranchCard
-                                            key={
-                                                branch.id
-                                            }
-
-                                            branch={
-                                                branch
-                                            }
-
-                                            onEnter={
-                                                enterBranch
-                                            }
-                                        />
-
-                                    )
-                                )}
-
-                            </div>
-
-                        ) : (
-
-                            <div className="rr-company-no-data">
-
-                                <div className="rr-company-no-data-icon">
-
-                                    <i className="bi bi-building-add"></i>
-
+                        {activeBranch ? (
+                            <div className="rr-company-current-branch">
+                                <div className="rr-company-current-mark">
+                                    <i className="bi bi-shop" />
                                 </div>
-
-
-                                <h3>
-                                    No branches created yet
-                                </h3>
-
-
-                                <p>
-
-                                    Create your first branch to
-                                    start using the business workspace.
-
-                                </p>
-
-
-                                <Link
-                                    href="/company/branches/create"
-                                    className="rr-company-btn rr-company-btn-primary"
-                                >
-
-                                    <i className="bi bi-plus-circle"></i>
-
-                                    Add First Branch
-
-                                </Link>
-
+                                <div className="rr-company-current-info">
+                                    <small>{activeBranch.store_code || 'BRANCH'}</small>
+                                    <strong>{activeBranch.store_name}</strong>
+                                    <span>
+                                        <i className="bi bi-geo-alt" />
+                                        {[activeBranch.city, activeBranch.state].filter(Boolean).join(', ') || 'Location not set'}
+                                    </span>
+                                </div>
+                                <span className={`rr-company-live ${activeBranch.status ? '' : 'offline'}`}>
+                                    <i />
+                                    {activeBranch.status ? 'Active' : 'Inactive'}
+                                </span>
+                            </div>
+                        ) : (
+                            <div className="rr-company-no-context">
+                                <i className="bi bi-shop-window" />
+                                <div>
+                                    <strong>No branch selected</strong>
+                                    <span>Select an active branch below to enter its business workspace.</span>
+                                </div>
                             </div>
                         )}
 
-                    </section>
+                        {activeBranch && (
+                            <Link className="rr-company-enter-button" href="/business/dashboard">
+                                <span>
+                                    <small>CONTINUE WORKING</small>
+                                    Open Business Dashboard
+                                </span>
+                                <i className="bi bi-arrow-right" />
+                            </Link>
+                        )}
+                    </article>
 
-
-                    {/* =====================================================
-                        QUICK ACCESS
-                       ===================================================== */}
-
-                    <aside className="rr-company-dashboard-side-column">
-
-
-                        <section className="rr-company-dashboard-panel">
-
-                            <div className="rr-company-dashboard-panel-header">
-
-                                <div>
-
-                                    <span className="rr-company-dashboard-section-label">
-
-                                        Administration
-
-                                    </span>
-
-
-                                    <h2>
-
-                                        Company Management
-
-                                    </h2>
-
-                                </div>
-
+                    <article className="rr-company-profile-card">
+                        <div className="rr-company-section-heading">
+                            <div className="rr-company-heading-icon violet">
+                                <i className="bi bi-building-gear" />
                             </div>
-
-
-                            <div className="rr-company-quick-links">
-
-                                <QuickLink
-                                    href="/company/profile"
-                                    icon="bi-building-gear"
-                                    title="Company Profile"
-                                    description="Update company information"
-                                />
-
-
-                                <QuickLink
-                                    href="/company/branches"
-                                    icon="bi-shop-window"
-                                    title="Branches"
-                                    description="Manage company branches"
-                                />
-
-
-                                <QuickLink
-                                    href="/company/branches/create"
-                                    icon="bi-building-add"
-                                    title="Add Branch"
-                                    description="Create a new business branch"
-                                />
-
-
-                                <QuickLink
-                                    href="/company/users"
-                                    icon="bi-people"
-                                    title="Users & Access"
-                                    description="Manage company users"
-                                />
-
-
-                                <QuickLink
-                                    href="/company/users/create"
-                                    icon="bi-person-plus"
-                                    title="Add User"
-                                    description="Create a company user"
-                                />
-
+                            <div>
+                                <span>COMPANY PROFILE</span>
+                                <h2>Business Information</h2>
                             </div>
+                        </div>
 
-                        </section>
+                        <div className="rr-company-profile-list">
+                            <ProfileItem icon="bi-person-badge" label="Owner" value={company?.owner_name} />
+                            <ProfileItem icon="bi-telephone" label="Phone" value={company?.phone} />
+                            <ProfileItem icon="bi-envelope" label="Email" value={company?.email} />
+                            <ProfileItem
+                                icon="bi-shield-check"
+                                label="Company Status"
+                                value={company?.status ? 'Active' : 'Inactive'}
+                                status={company?.status}
+                            />
+                        </div>
+                    </article>
+                </section>
 
-
-                        {/* =================================================
-                            USER
-                           ================================================= */}
-
-                        <section className="rr-company-dashboard-panel">
-
-                            <div className="rr-company-account-card">
-
-                                <div className="rr-company-account-avatar">
-
-                                    {getInitials(
-                                        auth?.user?.name
-                                    )}
-
-                                </div>
-
-
-                                <div>
-
-                                    <span>
-                                        Signed in as
-                                    </span>
-
-
-                                    <strong>
-
-                                        {
-                                            auth?.user?.name
-                                            ?? 'Company Admin'
-                                        }
-
-                                    </strong>
-
-
-                                    <small>
-                                        Company Admin
-                                    </small>
-
-                                </div>
-
+                <section className="rr-company-branches-panel">
+                    <header className="rr-company-panel-header">
+                        <div className="rr-company-section-heading">
+                            <div className="rr-company-heading-icon blue">
+                                <i className="bi bi-diagram-3-fill" />
                             </div>
+                            <div>
+                                <span>BRANCH DIRECTORY</span>
+                                <h2>Company Branches</h2>
+                                <p>Select an active branch to switch the current workspace.</p>
+                            </div>
+                        </div>
+                        <Link href="/company/branches/create" className="rr-company-add-button">
+                            <i className="bi bi-plus-lg" />
+                            Add Branch
+                        </Link>
+                    </header>
 
-                        </section>
+                    <div className="rr-company-filterbar">
+                        <label className="rr-company-search">
+                            <i className="bi bi-search" />
+                            <input
+                                value={search}
+                                onChange={(event) => setSearch(event.target.value)}
+                                placeholder="Search branch, code or location..."
+                            />
+                            {search && (
+                                <button type="button" onClick={() => setSearch('')} aria-label="Clear search">
+                                    <i className="bi bi-x-lg" />
+                                </button>
+                            )}
+                        </label>
 
-                    </aside>
+                        <div className="rr-company-status-tabs" role="group" aria-label="Branch status filter">
+                            {[
+                                ['all', 'All', branchSummary.total],
+                                ['active', 'Active', branchSummary.active],
+                                ['pending', 'Pending', branchSummary.pending],
+                            ].map(([value, label, count]) => (
+                                <button
+                                    type="button"
+                                    key={value}
+                                    className={status === value ? 'active' : ''}
+                                    onClick={() => setStatus(value)}
+                                >
+                                    {label}
+                                    <span>{number(count)}</span>
+                                </button>
+                            ))}
+                        </div>
+                    </div>
 
-                </div>
+                    <div className="rr-company-table-wrap">
+                        <table className="rr-company-table">
+                            <thead>
+                                <tr>
+                                    <th>Branch</th>
+                                    <th>Code</th>
+                                    <th>Location</th>
+                                    <th>Created</th>
+                                    <th>Status</th>
+                                    <th className="action">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {filteredBranches.length > 0 ? filteredBranches.map((branch) => {
+                                    const current = Number(activeBranch?.id) === Number(branch.id);
+                                    const switching = Number(switchingId) === Number(branch.id);
 
-            </div>
+                                    return (
+                                        <tr key={branch.id} className={current ? 'current' : ''}>
+                                            <td>
+                                                <div className="rr-company-branch-cell">
+                                                    <span className={`rr-company-branch-avatar ${branch.status ? '' : 'pending'}`}>
+                                                        <i className="bi bi-shop" />
+                                                    </span>
+                                                    <div>
+                                                        <strong>{branch.store_name}</strong>
+                                                        <small>{current ? 'Current workspace' : 'Company branch'}</small>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td><code>{branch.store_code || '—'}</code></td>
+                                            <td>{[branch.city, branch.state].filter(Boolean).join(', ') || '—'}</td>
+                                            <td>{branch.created_at || '—'}</td>
+                                            <td>
+                                                <span className={`rr-company-status ${branch.status ? 'active' : 'pending'}`}>
+                                                    <i />
+                                                    {branch.status_label || (branch.status ? 'Active' : 'Pending')}
+                                                </span>
+                                            </td>
+                                            <td className="action">
+                                                {current ? (
+                                                    <Link className="rr-company-row-action current" href="/business/dashboard">
+                                                        Open <i className="bi bi-arrow-right" />
+                                                    </Link>
+                                                ) : (
+                                                    <button
+                                                        type="button"
+                                                        className="rr-company-row-action"
+                                                        disabled={!branch.status || switching}
+                                                        onClick={() => selectBranch(branch)}
+                                                    >
+                                                        {switching ? (
+                                                            <><span className="spinner-border spinner-border-sm" /> Switching</>
+                                                        ) : branch.status ? (
+                                                            <>Select <i className="bi bi-arrow-right" /></>
+                                                        ) : (
+                                                            <>Unavailable <i className="bi bi-lock" /></>
+                                                        )}
+                                                    </button>
+                                                )}
+                                            </td>
+                                        </tr>
+                                    );
+                                }) : (
+                                    <tr>
+                                        <td colSpan="6">
+                                            <div className="rr-company-empty">
+                                                <i className="bi bi-search" />
+                                                <strong>No branches found</strong>
+                                                <span>Change the search text or status filter.</span>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                )}
+                            </tbody>
+                        </table>
+                    </div>
 
+                    <footer className="rr-company-panel-footer">
+                        Showing <strong>{filteredBranches.length}</strong> of <strong>{branches.length}</strong> branches
+                    </footer>
+                </section>
+            </main>
         </BusinessLayout>
     );
 }
 
-
-/*
-|--------------------------------------------------------------------------
-| Summary Card
-|--------------------------------------------------------------------------
-*/
-
-function SummaryCard({
-    icon,
-    label,
-    value,
-    tone = 'default',
-}) {
-
+function MetricCard({ tone, icon, label, value, note }) {
     return (
-
-        <div
-            className={
-                `rr-company-summary-card ` +
-                `rr-company-summary-card-${tone}`
-            }
-        >
-
-            <div className="rr-company-summary-icon">
-
-                <i className={`bi ${icon}`}></i>
-
-            </div>
-
-
+        <article className={`rr-company-metric ${tone}`}>
+            <div className="rr-company-metric-icon"><i className={`bi ${icon}`} /></div>
             <div>
-
-                <span>
-                    {label}
-                </span>
-
-
-                <strong>
-                    {value}
-                </strong>
-
+                <span>{label}</span>
+                <strong>{number(value)}</strong>
+                <small>{note}</small>
             </div>
-
-        </div>
-    );
-}
-
-
-/*
-|--------------------------------------------------------------------------
-| Branch Card
-|--------------------------------------------------------------------------
-*/
-
-function BranchCard({
-    branch,
-    onEnter,
-}) {
-
-    const active =
-        Boolean(
-            branch?.status
-        );
-
-
-    const branchLocation =
-        [
-            branch?.city,
-            branch?.state,
-        ]
-            .filter(Boolean)
-            .join(', ');
-
-
-    return (
-
-        <article className="rr-company-branch-card">
-
-
-            <div className="rr-company-branch-card-main">
-
-                <div className="rr-company-branch-icon">
-
-                    <i className="bi bi-shop"></i>
-
-                </div>
-
-
-                <div className="rr-company-branch-info">
-
-                    <div className="rr-company-branch-title-row">
-
-                        <h3>
-
-                            {
-                                branch?.store_name
-                                ?? 'Branch'
-                            }
-
-                        </h3>
-
-
-                        <span
-                            className={
-                                active
-                                    ? 'rr-company-status rr-company-status-active'
-                                    : 'rr-company-status rr-company-status-pending'
-                            }
-                        >
-
-                            <i
-                                className={
-                                    active
-                                        ? 'bi bi-check-circle-fill'
-                                        : 'bi bi-clock-fill'
-                                }
-                            ></i>
-
-
-                            {
-                                branch?.status_label
-                                ?? (
-                                    active
-                                        ? 'Active'
-                                        : 'Pending Approval'
-                                )
-                            }
-
-                        </span>
-
-                    </div>
-
-
-                    <div className="rr-company-branch-meta">
-
-                        {branch?.store_code && (
-
-                            <span>
-
-                                <i className="bi bi-upc-scan"></i>
-
-                                {
-                                    branch.store_code
-                                }
-
-                            </span>
-                        )}
-
-
-                        {branchLocation && (
-
-                            <span>
-
-                                <i className="bi bi-geo-alt"></i>
-
-                                {
-                                    branchLocation
-                                }
-
-                            </span>
-                        )}
-
-
-                        {branch?.created_at && (
-
-                            <span>
-
-                                <i className="bi bi-calendar3"></i>
-
-                                Created {
-                                    branch.created_at
-                                }
-
-                            </span>
-                        )}
-
-                    </div>
-
-                </div>
-
-            </div>
-
-
-            <div className="rr-company-branch-actions">
-
-                {active ? (
-
-                    <button
-                        type="button"
-                        className="rr-company-btn rr-company-btn-enter"
-                        onClick={
-                            () =>
-                                onEnter(
-                                    branch.id
-                                )
-                        }
-                    >
-
-                        Enter Branch
-
-                        <i className="bi bi-arrow-right"></i>
-
-                    </button>
-
-                ) : (
-
-                    <span className="rr-company-pending-message">
-
-                        <i className="bi bi-shield-lock"></i>
-
-                        Waiting for Super Admin approval
-
-                    </span>
-
-                )}
-
-            </div>
-
+            <i className={`bi ${icon} rr-company-metric-watermark`} />
         </article>
     );
 }
 
-
-/*
-|--------------------------------------------------------------------------
-| Quick Link
-|--------------------------------------------------------------------------
-*/
-
-function QuickLink({
-    href,
-    icon,
-    title,
-    description,
-}) {
-
+function ProfileItem({ icon, label, value, status = null }) {
     return (
-
-        <Link
-            href={href}
-            className="rr-company-quick-link"
-        >
-
-            <div className="rr-company-quick-link-icon">
-
-                <i className={`bi ${icon}`}></i>
-
-            </div>
-
-
+        <div className="rr-company-profile-item">
+            <i className={`bi ${icon}`} />
             <div>
-
-                <strong>
-                    {title}
-                </strong>
-
-
-                <span>
-                    {description}
-                </span>
-
+                <span>{label}</span>
+                {status === null ? (
+                    <strong>{value || '—'}</strong>
+                ) : (
+                    <strong className={status ? 'positive' : 'negative'}>{value}</strong>
+                )}
             </div>
-
-
-            <i className="bi bi-chevron-right rr-company-quick-arrow"></i>
-
-        </Link>
+        </div>
     );
 }
 
-
-/*
-|--------------------------------------------------------------------------
-| Initials
-|--------------------------------------------------------------------------
-*/
-
-function getInitials(
-    value
-) {
-
-    if (!value) {
-        return 'CO';
-    }
-
-
-    return value
-        .trim()
-        .split(/\s+/)
-        .slice(0, 2)
-        .map(
-            word =>
-                word
-                    .charAt(0)
-                    .toUpperCase()
-        )
-        .join('');
+function number(value) {
+    return new Intl.NumberFormat('en-IN').format(Number(value ?? 0));
 }
+
