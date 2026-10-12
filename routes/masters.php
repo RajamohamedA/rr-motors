@@ -12,6 +12,8 @@ use App\Http\Controllers\StoreController;
 
 use App\Http\Controllers\SupplierController;
 
+use App\Http\Controllers\SupplierImportController;
+
 use App\Http\Controllers\CustomerController;
 
 use App\Http\Controllers\CustomerImportController;
@@ -159,6 +161,80 @@ Route::resource(
 |--------------------------------------------------------------------------
 
 */
+
+
+
+/*
+
+|--------------------------------------------------------------------------
+
+| Supplier Import
+
+|--------------------------------------------------------------------------
+
+|
+
+| Fixed import routes must stay before /suppliers/{supplier}.
+
+|
+
+*/
+
+
+
+Route::get(
+
+    '/suppliers/import',
+
+    [SupplierImportController::class, 'create']
+
+)->name(
+
+    'suppliers.import.create'
+
+);
+
+
+
+Route::get(
+
+    '/suppliers/import/template',
+
+    [SupplierImportController::class, 'downloadTemplate']
+
+)->name(
+
+    'suppliers.import.template'
+
+);
+
+
+
+Route::post(
+
+    '/suppliers/import/preview',
+
+    [SupplierImportController::class, 'preview']
+
+)->name(
+
+    'suppliers.import.preview'
+
+);
+
+
+
+Route::post(
+
+    '/suppliers/import',
+
+    [SupplierImportController::class, 'store']
+
+)->name(
+
+    'suppliers.import.store'
+
+);
 
 
 
