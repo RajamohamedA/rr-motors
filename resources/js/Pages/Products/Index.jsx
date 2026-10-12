@@ -1380,6 +1380,54 @@ export default function Index({
 
 
 
+                        <a
+
+                            href="/products/import/template"
+
+                            className="rr-product-primary-btn rr-product-template-btn"
+
+                            title="Download the product import template"
+
+                        >
+
+
+
+                            <i className="bi bi-file-earmark-arrow-down"></i>
+
+
+
+                            Download Template
+
+
+
+                        </a>
+
+
+
+                        <Link
+
+                            href="/products/import"
+
+                            className="rr-product-primary-btn rr-product-import-btn"
+
+                            title="Import products from an Excel or CSV file"
+
+                        >
+
+
+
+                            <i className="bi bi-file-earmark-spreadsheet"></i>
+
+
+
+                            Import Excel / CSV
+
+
+
+                        </Link>
+
+
+
                         <Link
 
                             href="/products/create"
