@@ -14,6 +14,8 @@ use App\Http\Controllers\SupplierController;
 
 use App\Http\Controllers\CustomerController;
 
+use App\Http\Controllers\CustomerImportController;
+
 use App\Http\Controllers\CategoryController;
 
 use App\Http\Controllers\BrandController;
@@ -375,6 +377,80 @@ Route::resource(
 |--------------------------------------------------------------------------
 
 */
+
+
+
+/*
+
+|--------------------------------------------------------------------------
+
+| Customer Import
+
+|--------------------------------------------------------------------------
+
+|
+
+| Fixed import routes must stay before /customers/{customer}.
+
+|
+
+*/
+
+
+
+Route::get(
+
+    '/customers/import',
+
+    [CustomerImportController::class, 'create']
+
+)->name(
+
+    'customers.import.create'
+
+);
+
+
+
+Route::get(
+
+    '/customers/import/template',
+
+    [CustomerImportController::class, 'downloadTemplate']
+
+)->name(
+
+    'customers.import.template'
+
+);
+
+
+
+Route::post(
+
+    '/customers/import/preview',
+
+    [CustomerImportController::class, 'preview']
+
+)->name(
+
+    'customers.import.preview'
+
+);
+
+
+
+Route::post(
+
+    '/customers/import',
+
+    [CustomerImportController::class, 'store']
+
+)->name(
+
+    'customers.import.store'
+
+);
 
 
 

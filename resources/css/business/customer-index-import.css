@@ -1,0 +1,130 @@
+/*
+|--------------------------------------------------------------------------
+| Customer Index - Import Actions
+|--------------------------------------------------------------------------
+*/
+
+.rr-customers-header-actions {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    flex-wrap: wrap;
+    gap: 7px;
+}
+
+
+.rr-customer-import-action {
+    position: relative;
+    display: inline-flex;
+    min-height: 35px;
+    padding: 7px 11px;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    border: 1px solid;
+    border-radius: 5px;
+    font-size: 11px;
+    font-weight: 800;
+    line-height: 1;
+    text-decoration: none;
+    white-space: nowrap;
+    cursor: pointer;
+    overflow: hidden;
+    transition:
+        transform 0.17s ease,
+        box-shadow 0.17s ease,
+        filter 0.17s ease;
+}
+
+
+.rr-customer-import-action::after {
+    position: absolute;
+    top: -30%;
+    left: -45%;
+    width: 30%;
+    height: 160%;
+    background: rgba(255, 255, 255, 0.24);
+    transform: rotate(18deg);
+    transition: left 0.42s ease;
+    pointer-events: none;
+    content: '';
+}
+
+
+.rr-customer-import-action:hover::after {
+    left: 120%;
+}
+
+
+.rr-customer-import-action:hover {
+    text-decoration: none;
+    transform: translateY(-1px);
+    filter: saturate(1.08);
+}
+
+
+.rr-customer-import-action:focus-visible {
+    outline: 3px solid rgba(38, 119, 184, 0.24);
+    outline-offset: 2px;
+}
+
+
+.rr-customer-import-action.template {
+    border-color: #97702d;
+    color: #fff;
+    background: linear-gradient(180deg, #d6a94f, #aa7823);
+    box-shadow: 0 4px 9px rgba(146, 98, 25, 0.22);
+}
+
+
+.rr-customer-import-action.template:hover {
+    color: #fff;
+    box-shadow: 0 7px 14px rgba(146, 98, 25, 0.29);
+}
+
+
+.rr-customer-import-action.import {
+    border-color: #146b54;
+    color: #fff;
+    background: linear-gradient(180deg, #229777, #156b55);
+    box-shadow: 0 4px 9px rgba(20, 107, 84, 0.22);
+}
+
+
+.rr-customer-import-action.import:hover {
+    color: #fff;
+    box-shadow: 0 7px 14px rgba(20, 107, 84, 0.3);
+}
+
+
+.rr-customer-import-action i {
+    font-size: 13px;
+}
+
+
+@media (max-width: 900px) {
+    .rr-customers-header-actions {
+        width: 100%;
+        justify-content: flex-start;
+    }
+}
+
+
+@media (max-width: 560px) {
+
+    .rr-customer-import-action,
+    .rr-customers-header-actions .rr-customer-toolbar-btn,
+    .rr-customers-header-actions .rr-customer-primary-btn {
+        flex: 1 1 calc(50% - 5px);
+        min-width: 135px;
+    }
+}
+
+
+@media (prefers-reduced-motion: reduce) {
+
+    .rr-customer-import-action,
+    .rr-customer-import-action::after {
+        transition: none;
+    }
+}
