@@ -536,6 +536,11 @@ $priceSize = $isRoll40 ? '8px' : ($isRoll50 ? '9px' : '10px');
             box-shadow: none;
         }
 
+        .pdf-mode .paper-a4,
+        .pdf-mode .paper-a5 {
+            padding: 5mm;
+        }
+
         /* DomPDF uses slightly different millimetre rounding than browsers. */
         .pdf-mode .paper-a4 .label-card {
             width: 45mm;
@@ -547,8 +552,8 @@ $priceSize = $isRoll40 ? '8px' : ($isRoll50 ? '9px' : '10px');
         }
 
         .pdf-mode .paper-a5 .label-card {
-            width: 62mm;
-            margin-right: 1.5mm;
+            width: 60mm;
+            margin-right: 1mm;
         }
 
         .pdf-mode .paper-a5 .label-card:nth-child(2n) {
