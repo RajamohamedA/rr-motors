@@ -1,4 +1,4 @@
-:root {
+.rr-company-dashboard {
     --rr-company-navy: #0b1f3a;
     --rr-company-blue: #1769e0;
     --rr-company-border: #d6e0ec;
@@ -694,7 +694,6 @@
 
 .rr-company-table-wrap {
     width: 100%;
-    overflow-x: auto;
 }
 
 .rr-company-table {
@@ -992,5 +991,638 @@
     .rr-company-add-button,
     .rr-company-row-action {
         transition: none !important;
+    }
+}
+
+/* Refined dashboard surfaces and interaction states. */
+.rr-company-dashboard {
+    --rr-company-navy: #172b4d;
+    --rr-company-blue: #315fce;
+    --rr-company-border: #dce4f0;
+    --rr-company-text: #20334f;
+    --rr-company-muted: #526580;
+    --rr-company-bg: #f1f5fb;
+    padding: clamp(12px, 2vw, 24px);
+    background: radial-gradient(ellipse at 100% 0, #e6edfc, transparent 48%), #f1f5fb;
+    line-height: 1.55;
+}
+
+.rr-company-dashboard *,
+.rr-company-dashboard *::before,
+.rr-company-dashboard *::after {
+    box-sizing: border-box;
+}
+
+.rr-company-dashboard button,
+.rr-company-dashboard a {
+    -webkit-tap-highlight-color: transparent;
+}
+
+.rr-company-dashboard :is(a, button):focus-visible {
+    outline: 3px solid #7fa6ff;
+    outline-offset: 3px;
+}
+
+.rr-company-hero {
+    min-height: 190px;
+    padding: 30px;
+    border-radius: 18px;
+    background: linear-gradient(115deg, #162e55, #234b91 65%, #3068ab);
+    box-shadow: 0 12px 28px #17365c1c;
+}
+
+.rr-company-hero-content {
+    min-width: 0;
+}
+
+.rr-company-hero h1 {
+    font-weight: 750;
+    overflow-wrap: anywhere;
+}
+
+.rr-company-hero p {
+    font-size: 13px;
+    line-height: 1.7;
+}
+
+.rr-company-eyebrow {
+    width: fit-content;
+    padding: 4px 9px;
+    margin-bottom: 10px;
+    border: 1px solid #ffffff26;
+    border-radius: 20px;
+    color: #e1ecff;
+    background: #ffffff0d;
+    font-size: 11px;
+}
+
+.rr-company-identity span {
+    font-size: 12px;
+}
+
+.rr-company-hero-icon {
+    border-radius: 16px;
+}
+
+.rr-company-action {
+    font-size: 12px;
+    font-weight: 650;
+    min-height: 40px;
+}
+
+.rr-company-action.accent {
+    color: #17345b;
+    border-color: #d5e8ff;
+    background: #e6f1ff;
+}
+
+.rr-company-action.accent:hover {
+    background: #fff;
+}
+
+.rr-company-metrics {
+    gap: 16px;
+    margin-top: 20px;
+}
+
+.rr-company-metric {
+    min-height: 120px;
+    padding: 20px;
+    border-radius: 14px;
+    align-items: flex-start;
+    box-shadow: 0 3px 10px #243b5d06;
+}
+
+.rr-company-metric::before {
+    width: 3px;
+    inset: 18px auto 18px 0;
+    border-radius: 3px;
+}
+
+.rr-company-metric-icon {
+    width: 42px;
+    height: 42px;
+    flex-basis: 42px;
+}
+
+.rr-company-metric span {
+    font-size: 11px;
+    color: #4d607c;
+    letter-spacing: .3px;
+}
+
+.rr-company-metric strong {
+    margin: 6px 0;
+    font-size: 30px;
+    font-variant-numeric: tabular-nums;
+    font-weight: 750;
+}
+
+.rr-company-metric small {
+    font-size: 11px;
+    color: #526580;
+}
+
+.rr-company-metric-watermark {
+    right: 9px;
+    bottom: -10px;
+    font-size: 68px;
+    opacity: .045;
+}
+
+.rr-company-command-grid {
+    margin-top: 20px;
+    gap: 16px;
+    grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr);
+}
+
+.rr-company-active-card,
+.rr-company-profile-card {
+    padding: 22px;
+    border-radius: 14px;
+    box-shadow: 0 3px 10px #243b5d06;
+}
+
+.rr-company-section-heading span {
+    font-size: 10px;
+    color: #526580;
+}
+
+.rr-company-section-heading h2 {
+    font-size: 16px;
+    font-weight: 700;
+}
+
+.rr-company-section-heading p {
+    font-size: 12px;
+    color: #526580;
+}
+
+.rr-company-current-branch {
+    margin-top: 20px;
+    padding: 16px;
+    border-color: #d1e0f5;
+    background: #f4f8ff;
+}
+
+.rr-company-current-info small {
+    font-size: 11px;
+}
+
+.rr-company-current-info strong {
+    font-size: 16px;
+    overflow-wrap: anywhere;
+}
+
+.rr-company-current-info span {
+    font-size: 12px;
+    color: #526580;
+}
+
+.rr-company-live {
+    font-size: 10px;
+    white-space: nowrap;
+}
+
+.rr-company-enter-button {
+    padding: 13px 16px;
+    margin-top: 14px;
+    background: #2455a7;
+}
+
+.rr-company-enter-button span {
+    font-size: 13px;
+    font-weight: 650;
+}
+
+.rr-company-enter-button small {
+    font-size: 10px;
+    color: #d5e7ff;
+}
+
+.rr-company-enter-button>i {
+    transition: transform .2s ease;
+}
+
+.rr-company-enter-button:hover>i {
+    transform: translateX(4px);
+}
+
+.rr-company-no-context {
+    margin-top: 20px;
+    min-height: 94px;
+}
+
+.rr-company-no-context span {
+    font-size: 12px;
+}
+
+.rr-company-profile-list {
+    margin-top: 20px;
+    gap: 10px;
+}
+
+.rr-company-profile-item {
+    padding: 11px;
+    background: #f8faff;
+}
+
+.rr-company-profile-item span {
+    font-size: 10px;
+    color: #526580;
+}
+
+.rr-company-profile-item strong {
+    font-size: 12px;
+    white-space: normal;
+    overflow-wrap: anywhere;
+}
+
+.rr-company-branches-panel {
+    margin-top: 20px;
+    border-radius: 14px;
+    box-shadow: 0 3px 10px #243b5d06;
+}
+
+.rr-company-panel-header {
+    padding: 22px;
+    background: #fff;
+}
+
+.rr-company-add-button {
+    min-height: 38px;
+    font-size: 12px;
+    font-weight: 650;
+    background: #315fce;
+}
+
+.rr-company-filterbar {
+    padding: 14px 22px;
+    background: #f8faff;
+}
+
+.rr-company-search {
+    min-height: 40px;
+}
+
+.rr-company-search input {
+    min-width: 0;
+    font-size: 13px;
+}
+
+.rr-company-search input::placeholder {
+    color: #526580;
+}
+
+.rr-company-status-tabs {
+    background: #edf2f9;
+    border-color: #dce4f0;
+}
+
+.rr-company-status-tabs button {
+    min-height: 32px;
+    font-size: 12px;
+    font-weight: 650;
+    transition: color .16s, background .16s;
+}
+
+.rr-company-status-tabs button:hover:not(.active) {
+    background: #dfe8f7;
+    color: #204678;
+}
+
+.rr-company-status-tabs button span {
+    font-size: 10px;
+}
+
+.rr-company-status-tabs button.active {
+    background: #315fce;
+}
+
+.rr-company-table th {
+    padding: 13px 18px;
+    font-size: 11px;
+    color: #425573;
+    background: #edf2f9;
+    border-bottom-color: #d6e0ed;
+}
+
+.rr-company-table td {
+    padding: 14px 18px;
+    font-size: 13px;
+    transition: background .18s ease;
+}
+
+.rr-company-table tbody tr.current td:first-child {
+    box-shadow: inset 3px 0 #315fce;
+}
+
+.rr-company-branch-cell strong {
+    font-size: 13px;
+    font-weight: 650;
+}
+
+.rr-company-branch-cell small {
+    font-size: 11px;
+    color: #526580;
+}
+
+.rr-company-branch-avatar {
+    width: 38px;
+    height: 38px;
+    flex-basis: 38px;
+}
+
+.rr-company-table code {
+    font-size: 11px;
+    font-weight: 650;
+}
+
+.rr-company-status {
+    font-size: 10px;
+    text-transform: none;
+    font-weight: 650;
+}
+
+.rr-company-row-action {
+    min-height: 34px;
+    min-width: 94px;
+    font-size: 12px;
+    font-weight: 650;
+}
+
+.rr-company-row-action:disabled {
+    color: #59677a;
+}
+
+.rr-company-row-action .spinner-border {
+    width: 12px;
+    height: 12px;
+    border-width: 2px;
+}
+
+.rr-company-empty {
+    min-height: 180px;
+    gap: 6px;
+}
+
+.rr-company-empty strong {
+    font-size: 14px;
+}
+
+.rr-company-empty span {
+    font-size: 12px;
+    color: #526580;
+}
+
+.rr-company-panel-footer {
+    padding: 12px 22px;
+    font-size: 12px;
+    color: #526580;
+    text-align: left;
+}
+
+.rr-company-switch-error {
+    display: flex;
+    gap: 9px;
+    align-items: center;
+    margin: 14px 22px;
+    padding: 12px 14px;
+    border: 1px solid #efc4c4;
+    border-radius: 8px;
+    background: #fff3f3;
+    color: #962d2d;
+}
+
+@media (max-width: 1150px) {
+    .rr-company-hero {
+        align-items: flex-start;
+        flex-direction: column;
+        gap: 20px;
+    }
+
+    .rr-company-hero-actions {
+        justify-content: flex-start;
+    }
+
+    .rr-company-metrics {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .rr-company-command-grid {
+        grid-template-columns: minmax(0, 1fr);
+    }
+}
+
+@media (max-width: 760px) {
+    .rr-company-dashboard {
+        padding: 12px;
+    }
+
+    .rr-company-hero {
+        padding: 24px;
+    }
+
+    .rr-company-filterbar {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .rr-company-search {
+        width: 100%;
+    }
+
+    .rr-company-hero h1 {
+        font-size: 25px;
+    }
+}
+
+@media (max-width: 520px) {
+    .rr-company-metrics {
+        gap: 10px;
+    }
+
+    .rr-company-metric {
+        gap: 10px;
+        padding: 14px;
+        min-height: 112px;
+    }
+
+    .rr-company-metric-icon {
+        display: none;
+    }
+
+    .rr-company-metric span {
+        font-size: 10px;
+    }
+
+    .rr-company-metric strong {
+        font-size: 26px;
+    }
+
+    .rr-company-metric small {
+        font-size: 11px;
+    }
+
+    .rr-company-panel-header {
+        padding: 16px;
+    }
+
+    .rr-company-active-card,
+    .rr-company-profile-card {
+        padding: 16px;
+    }
+
+    .rr-company-profile-list {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .rr-company-filterbar {
+        padding: 12px 16px;
+    }
+
+    .rr-company-status-tabs {
+        width: 100%;
+    }
+
+    .rr-company-status-tabs button {
+        justify-content: center;
+        flex: 1;
+        padding: 0 6px;
+    }
+
+    .rr-company-current-branch {
+        padding: 12px;
+    }
+
+    .rr-company-live {
+        margin-left: 0;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+
+    .rr-company-dashboard *,
+    .rr-company-dashboard *::before,
+    .rr-company-dashboard *::after {
+        animation: none !important;
+        transition: none !important;
+    }
+
+    .rr-company-dashboard :is(a, article):hover {
+        transform: none;
+    }
+}
+
+/* Compact company header. */
+.rr-company-hero {
+    min-height: 112px;
+    padding: 18px 22px;
+    gap: 18px;
+    border-radius: 12px;
+    flex-direction: row;
+    align-items: center;
+    box-shadow: 0 5px 16px #17365c14;
+}
+
+.rr-company-hero-content {
+    gap: 13px;
+}
+
+.rr-company-hero-icon {
+    flex-basis: 46px;
+    width: 46px;
+    height: 46px;
+    border-radius: 11px;
+    font-size: 22px;
+}
+
+.rr-company-eyebrow {
+    padding: 0;
+    margin-bottom: 5px;
+    border: 0;
+    background: transparent;
+    font-size: 10px;
+    letter-spacing: .7px;
+}
+
+.rr-company-hero h1 {
+    font-size: clamp(19px, 1.7vw, 23px);
+    line-height: 1.25;
+    letter-spacing: -.3px;
+}
+
+.rr-company-hero p {
+    margin: 5px 0 7px;
+    font-size: 12px;
+    line-height: 1.5;
+}
+
+.rr-company-identity {
+    gap: 6px 14px;
+}
+
+.rr-company-identity span {
+    font-size: 11px;
+}
+
+.rr-company-hero-actions {
+    gap: 7px;
+    flex-shrink: 0;
+}
+
+.rr-company-action {
+    min-height: 34px;
+    padding: 0 11px;
+    border-radius: 7px;
+    gap: 6px;
+    font-size: 11px;
+}
+
+.rr-company-hero-orb.orb-one {
+    width: 150px;
+    height: 150px;
+    top: -105px;
+}
+
+.rr-company-hero-orb.orb-two {
+    width: 95px;
+    height: 95px;
+    bottom: -65px;
+}
+
+@media (max-width: 1050px) {
+    .rr-company-hero {
+        align-items: flex-start;
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    .rr-company-hero-actions {
+        padding-left: 59px;
+    }
+}
+
+@media (max-width: 575px) {
+    .rr-company-hero {
+        padding: 16px;
+    }
+
+    .rr-company-hero-icon {
+        display: none;
+    }
+
+    .rr-company-hero h1 {
+        font-size: 19px;
+    }
+
+    .rr-company-hero-actions {
+        padding-left: 0;
+        width: 100%;
+    }
+
+    .rr-company-action {
+        justify-content: center;
+        flex: 1;
     }
 }

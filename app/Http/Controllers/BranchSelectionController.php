@@ -3,53 +3,67 @@
 namespace App\Http\Controllers;
 
 use Inertia\Inertia;
+use Inertia\Response;
 
 class BranchSelectionController extends Controller
 {
-    public function index()
+    public function index(): Response
     {
         $user = auth()->user();
 
+        abort_if(
+            ! $user,
+            401,
+            'Please log in to continue.'
+        );
+
+        $company = $user->company;
+
+        abort_if(
+            ! $company,
+            403,
+            'No company is assigned to your account.'
+        );
+
         /*
         |--------------------------------------------------------------------------
-        | Company Owner
+        | Company Admin / Company Owner
         |--------------------------------------------------------------------------
         |
-        | Company owner can access every active branch belonging
-        | to their own company.
+        | Access all active branches belonging to their company.
         |
         */
 
-        if ($user->hasRole('company-owner')) {
-
-            $stores = $user->company
-                ->stores()
-                ->where('status', 1)
-                ->orderBy('store_name')
+        if ($user->hasAnyRole(['Company Admin', 'company-owner'])) {
+            $stores = $company->stores()
+                ->where('stores.status', 1)
+                ->orderBy('stores.store_name')
                 ->get();
         } else {
-
             /*
             |--------------------------------------------------------------------------
             | Normal User
             |--------------------------------------------------------------------------
             |
-            | Normal users can only access branches assigned through
-            | user_stores.
+            | Access only assigned active branches within their company.
             |
             */
 
             $stores = $user->stores()
+                ->where('stores.company_id', $company->id)
                 ->where('stores.status', 1)
-                ->where('stores.company_id', $user->company_id)
-                ->orderBy('store_name')
+                ->orderBy('stores.store_name')
                 ->get();
         }
 
-        abort_if($stores->isEmpty(), 403, 'No active branch is available.');
+        abort_if(
+            $stores->isEmpty(),
+            403,
+            'No active branch is available for your account.'
+        );
 
         return Inertia::render('Branch/Select', [
-            'company' => $user->company,
+            'company' => $company,
             'stores' => $stores,
         ]);
     }

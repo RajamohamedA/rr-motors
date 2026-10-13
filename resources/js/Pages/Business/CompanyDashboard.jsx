@@ -1,10 +1,7 @@
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useRef, useState } from 'react';
 import { Head, Link, router } from '@inertiajs/react';
-
 import BusinessLayout from '../../Layouts/BusinessLayout';
-
 import '../../../css/business/company-dashboard.css';
-
 export default function CompanyDashboard({
     company,
     activeBranch = null,
@@ -16,55 +13,55 @@ export default function CompanyDashboard({
     const [search, setSearch] = useState('');
     const [status, setStatus] = useState('all');
     const [switchingId, setSwitchingId] = useState(null);
-
+    const [switchError, setSwitchError] = useState('');
+    const pendingRequest = useRef(false);
+    const isActive = (value) => value === true || value === 1 || value === '1';
     const filteredBranches = useMemo(() => {
         const needle = search.trim().toLowerCase();
-
         return branches.filter((branch) => {
             const matchesStatus = status === 'all'
-                || (status === 'active' && branch.status)
-                || (status === 'pending' && !branch.status);
+                || (status === 'active' && isActive(branch.status))
+                || (status === 'pending' && !isActive(branch.status));
             const searchable = [
                 branch.store_name,
                 branch.store_code,
                 branch.city,
                 branch.state,
             ].filter(Boolean).join(' ').toLowerCase();
-
             return matchesStatus && (!needle || searchable.includes(needle));
         });
     }, [branches, search, status]);
-
     const selectBranch = (branch) => {
-        if (!branch?.id || !branch.status || Number(activeBranch?.id) === Number(branch.id)) {
+        if (pendingRequest.current || !branch?.id || !isActive(branch.status) || Number(activeBranch?.id) === Number(branch.id)) {
             return;
         }
-
+        pendingRequest.current = true;
+        setSwitchError('');
         setSwitchingId(branch.id);
         router.post(`/select-branch/${branch.id}`, {}, {
             preserveScroll: false,
             preserveState: false,
-            onFinish: () => setSwitchingId(null),
+            onError: () => setSwitchError('Unable to switch branches. Please try again.'),
+            onFinish: () => {
+                pendingRequest.current = false;
+                setSwitchingId(null);
+            },
         });
     };
-
     return (
         <BusinessLayout
             title="Company Dashboard"
             subtitle={company?.company_name ?? 'Company Workspace'}
         >
             <Head title={`${company?.company_name ?? 'Company'} Dashboard`} />
-
             <main className="rr-company-dashboard">
                 <section className="rr-company-hero">
                     <div className="rr-company-hero-orb orb-one" />
                     <div className="rr-company-hero-orb orb-two" />
-
                     <div className="rr-company-hero-content">
                         <div className="rr-company-hero-icon">
                             <i className="bi bi-buildings-fill" />
                         </div>
-
                         <div>
                             <span className="rr-company-eyebrow">
                                 <i className="bi bi-shield-check" />
@@ -80,7 +77,6 @@ export default function CompanyDashboard({
                             </div>
                         </div>
                     </div>
-
                     <div className="rr-company-hero-actions">
                         <Link className="rr-company-action light" href="/company/branches">
                             <i className="bi bi-diagram-3" />
@@ -92,27 +88,26 @@ export default function CompanyDashboard({
                         </Link>
                     </div>
                 </section>
-
                 <section className="rr-company-metrics" aria-label="Company summary">
                     <MetricCard
                         tone="blue"
                         icon="bi-shop-window"
                         label="Total Branches"
-                        value={branchSummary.total}
+                        value={branchSummary.total ?? branches.length}
                         note="Registered locations"
                     />
                     <MetricCard
                         tone="green"
                         icon="bi-patch-check"
                         label="Active Branches"
-                        value={branchSummary.active}
+                        value={branchSummary.active ?? branches.filter((branch) => isActive(branch.status)).length}
                         note="Ready for operation"
                     />
                     <MetricCard
                         tone="amber"
                         icon="bi-hourglass-split"
                         label="Pending Branches"
-                        value={branchSummary.pending}
+                        value={branchSummary.pending ?? branches.filter((branch) => !isActive(branch.status)).length}
                         note="Awaiting activation"
                     />
                     <MetricCard
@@ -123,7 +118,6 @@ export default function CompanyDashboard({
                         note={`${number(userSummary.active)} active • ${number(userSummary.inactive)} inactive`}
                     />
                 </section>
-
                 <section className="rr-company-command-grid">
                     <article className="rr-company-active-card">
                         <div className="rr-company-section-heading">
@@ -135,7 +129,6 @@ export default function CompanyDashboard({
                                 <h2>Current Branch</h2>
                             </div>
                         </div>
-
                         {activeBranch ? (
                             <div className="rr-company-current-branch">
                                 <div className="rr-company-current-mark">
@@ -149,9 +142,9 @@ export default function CompanyDashboard({
                                         {[activeBranch.city, activeBranch.state].filter(Boolean).join(', ') || 'Location not set'}
                                     </span>
                                 </div>
-                                <span className={`rr-company-live ${activeBranch.status ? '' : 'offline'}`}>
+                                <span className={`rr-company-live ${isActive(activeBranch.status) ? '' : 'offline'}`}>
                                     <i />
-                                    {activeBranch.status ? 'Active' : 'Inactive'}
+                                    {isActive(activeBranch.status) ? 'Active' : 'Inactive'}
                                 </span>
                             </div>
                         ) : (
@@ -163,8 +156,7 @@ export default function CompanyDashboard({
                                 </div>
                             </div>
                         )}
-
-                        {activeBranch && (
+                        {activeBranch && isActive(activeBranch.status) && (
                             <Link className="rr-company-enter-button" href="/business/dashboard">
                                 <span>
                                     <small>CONTINUE WORKING</small>
@@ -174,7 +166,6 @@ export default function CompanyDashboard({
                             </Link>
                         )}
                     </article>
-
                     <article className="rr-company-profile-card">
                         <div className="rr-company-section-heading">
                             <div className="rr-company-heading-icon violet">
@@ -185,7 +176,6 @@ export default function CompanyDashboard({
                                 <h2>Business Information</h2>
                             </div>
                         </div>
-
                         <div className="rr-company-profile-list">
                             <ProfileItem icon="bi-person-badge" label="Owner" value={company?.owner_name} />
                             <ProfileItem icon="bi-telephone" label="Phone" value={company?.phone} />
@@ -193,13 +183,12 @@ export default function CompanyDashboard({
                             <ProfileItem
                                 icon="bi-shield-check"
                                 label="Company Status"
-                                value={company?.status ? 'Active' : 'Inactive'}
-                                status={company?.status}
+                                value={isActive(company?.status) ? 'Active' : 'Inactive'}
+                                status={isActive(company?.status)}
                             />
                         </div>
                     </article>
                 </section>
-
                 <section className="rr-company-branches-panel">
                     <header className="rr-company-panel-header">
                         <div className="rr-company-section-heading">
@@ -217,11 +206,12 @@ export default function CompanyDashboard({
                             Add Branch
                         </Link>
                     </header>
-
                     <div className="rr-company-filterbar">
                         <label className="rr-company-search">
                             <i className="bi bi-search" />
                             <input
+                                type="search"
+                                aria-label="Search company branches"
                                 value={search}
                                 onChange={(event) => setSearch(event.target.value)}
                                 placeholder="Search branch, code or location..."
@@ -232,17 +222,17 @@ export default function CompanyDashboard({
                                 </button>
                             )}
                         </label>
-
                         <div className="rr-company-status-tabs" role="group" aria-label="Branch status filter">
                             {[
-                                ['all', 'All', branchSummary.total],
-                                ['active', 'Active', branchSummary.active],
-                                ['pending', 'Pending', branchSummary.pending],
+                                ['all', 'All', branchSummary.total ?? branches.length],
+                                ['active', 'Active', branchSummary.active ?? branches.filter((branch) => isActive(branch.status)).length],
+                                ['pending', 'Pending', branchSummary.pending ?? branches.filter((branch) => !isActive(branch.status)).length],
                             ].map(([value, label, count]) => (
                                 <button
                                     type="button"
                                     key={value}
                                     className={status === value ? 'active' : ''}
+                                    aria-pressed={status === value}
                                     onClick={() => setStatus(value)}
                                 >
                                     {label}
@@ -251,29 +241,34 @@ export default function CompanyDashboard({
                             ))}
                         </div>
                     </div>
-
+                    {switchError && (
+                        <div className="rr-company-switch-error" role="alert">
+                            <i className="bi bi-exclamation-triangle" aria-hidden="true" />
+                            {switchError}
+                        </div>
+                    )}
                     <div className="rr-company-table-wrap">
                         <table className="rr-company-table">
+                            <caption className="visually-hidden">Company branches and workspace actions</caption>
                             <thead>
                                 <tr>
-                                    <th>Branch</th>
-                                    <th>Code</th>
-                                    <th>Location</th>
-                                    <th>Created</th>
-                                    <th>Status</th>
-                                    <th className="action">Action</th>
+                                    <th scope="col">Branch</th>
+                                    <th scope="col">Code</th>
+                                    <th scope="col">Location</th>
+                                    <th scope="col">Created</th>
+                                    <th scope="col">Status</th>
+                                    <th scope="col" className="action">Action</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 {filteredBranches.length > 0 ? filteredBranches.map((branch) => {
                                     const current = Number(activeBranch?.id) === Number(branch.id);
                                     const switching = Number(switchingId) === Number(branch.id);
-
                                     return (
-                                        <tr key={branch.id} className={current ? 'current' : ''}>
+                                        <tr key={branch.id} className={current ? 'current' : ''} aria-busy={switching}>
                                             <td>
                                                 <div className="rr-company-branch-cell">
-                                                    <span className={`rr-company-branch-avatar ${branch.status ? '' : 'pending'}`}>
+                                                    <span className={`rr-company-branch-avatar ${isActive(branch.status) ? '' : 'pending'}`}>
                                                         <i className="bi bi-shop" />
                                                     </span>
                                                     <div>
@@ -286,13 +281,13 @@ export default function CompanyDashboard({
                                             <td>{[branch.city, branch.state].filter(Boolean).join(', ') || '—'}</td>
                                             <td>{branch.created_at || '—'}</td>
                                             <td>
-                                                <span className={`rr-company-status ${branch.status ? 'active' : 'pending'}`}>
+                                                <span className={`rr-company-status ${isActive(branch.status) ? 'active' : 'pending'}`}>
                                                     <i />
-                                                    {branch.status_label || (branch.status ? 'Active' : 'Pending')}
+                                                    {branch.status_label || (isActive(branch.status) ? 'Active' : 'Pending')}
                                                 </span>
                                             </td>
                                             <td className="action">
-                                                {current ? (
+                                                {current && isActive(branch.status) ? (
                                                     <Link className="rr-company-row-action current" href="/business/dashboard">
                                                         Open <i className="bi bi-arrow-right" />
                                                     </Link>
@@ -300,12 +295,12 @@ export default function CompanyDashboard({
                                                     <button
                                                         type="button"
                                                         className="rr-company-row-action"
-                                                        disabled={!branch.status || switching}
+                                                        disabled={!isActive(branch.status) || switchingId !== null}
                                                         onClick={() => selectBranch(branch)}
                                                     >
                                                         {switching ? (
                                                             <><span className="spinner-border spinner-border-sm" /> Switching</>
-                                                        ) : branch.status ? (
+                                                        ) : isActive(branch.status) ? (
                                                             <>Select <i className="bi bi-arrow-right" /></>
                                                         ) : (
                                                             <>Unavailable <i className="bi bi-lock" /></>
@@ -329,8 +324,7 @@ export default function CompanyDashboard({
                             </tbody>
                         </table>
                     </div>
-
-                    <footer className="rr-company-panel-footer">
+                    <footer className="rr-company-panel-footer" role="status" aria-live="polite">
                         Showing <strong>{filteredBranches.length}</strong> of <strong>{branches.length}</strong> branches
                     </footer>
                 </section>
@@ -338,7 +332,6 @@ export default function CompanyDashboard({
         </BusinessLayout>
     );
 }
-
 function MetricCard({ tone, icon, label, value, note }) {
     return (
         <article className={`rr-company-metric ${tone}`}>
@@ -352,7 +345,6 @@ function MetricCard({ tone, icon, label, value, note }) {
         </article>
     );
 }
-
 function ProfileItem({ icon, label, value, status = null }) {
     return (
         <div className="rr-company-profile-item">
@@ -368,8 +360,6 @@ function ProfileItem({ icon, label, value, status = null }) {
         </div>
     );
 }
-
 function number(value) {
     return new Intl.NumberFormat('en-IN').format(Number(value ?? 0));
 }
-

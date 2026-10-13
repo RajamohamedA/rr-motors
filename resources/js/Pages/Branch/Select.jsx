@@ -1,201 +1,942 @@
 import { Head, Link, router } from '@inertiajs/react';
-import { useState } from 'react';
+import { useMemo, useRef, useState } from 'react';
 
-export default function Select({ company, stores }) {
-
+export default function Select({ company, stores = [] }) {
     const [loadingStore, setLoadingStore] = useState(null);
+    const [search, setSearch] = useState('');
+    const [error, setError] = useState('');
+    const requestPending = useRef(false);
+
+    const filteredStores = useMemo(() => {
+        const query = search.trim().toLowerCase();
+
+        return stores.filter((store) =>
+            [
+                store.store_name,
+                store.store_code,
+                store.contact_person,
+                store.phone,
+                store.city,
+                store.state,
+            ]
+                .filter(Boolean)
+                .join(' ')
+                .toLowerCase()
+                .includes(query)
+        );
+    }, [search, stores]);
 
     const selectBranch = (storeId) => {
+        if (requestPending.current) {
+            return;
+        }
 
+        requestPending.current = true;
         setLoadingStore(storeId);
+        setError('');
 
         router.post(
             `/select-branch/${storeId}`,
             {},
             {
+                onError: () => {
+                    setError(
+                        'Unable to open this branch. Please try again.'
+                    );
+                },
                 onFinish: () => {
+                    requestPending.current = false;
                     setLoadingStore(null);
                 },
             }
         );
     };
 
+    const busy = loadingStore !== null;
+
     return (
         <>
             <Head title="Select Branch" />
 
-            <div
-                className="min-vh-100 d-flex align-items-center"
-                style={{
-                    background: '#f4f6f9',
-                }}
-            >
+            <style>{`
+                .branch-page {
+                    --branch-primary: #2456c7;
+                    --branch-text: #172b4d;
+                    --branch-secondary: #52627a;
+                    min-height: 100vh;
+                    color: var(--branch-text);
+                    font-size: 13px;
+                    background:
+                        radial-gradient(
+                            ellipse at 8% 0%,
+                            rgba(66, 115, 222, 0.12),
+                            transparent 42%
+                        ),
+                        radial-gradient(
+                            ellipse at 100% 90%,
+                            rgba(26, 157, 143, 0.08),
+                            transparent 38%
+                        ),
+                        #f3f6fb;
+                }
 
-                <div className="container py-5">
+                .branch-shell {
+                    max-width: 1180px;
+                    margin: 0 auto;
+                    padding: 30px 24px 24px;
+                }
 
-                    {/* Header */}
+                .branch-topbar {
+                    display: flex;
+                    align-items: center;
+                    justify-content: space-between;
+                    gap: 16px;
+                    margin-bottom: 26px;
+                }
 
-                    <div className="text-center mb-5">
+                .branch-brand {
+                    display: flex;
+                    align-items: center;
+                    gap: 12px;
+                    min-width: 0;
+                }
 
-                        <div
-                            className="mx-auto mb-3 rounded-circle bg-primary bg-opacity-10 text-primary d-flex align-items-center justify-content-center"
-                            style={{
-                                width: '70px',
-                                height: '70px',
-                            }}
-                        >
-                            <i className="bi bi-building fs-2"></i>
-                        </div>
+                .branch-brand-icon {
+                    display: grid;
+                    place-items: center;
+                    flex-shrink: 0;
+                    width: 44px;
+                    height: 44px;
+                    border-radius: 12px;
+                    color: #fff;
+                    background: linear-gradient(135deg, #3269db, #173b91);
+                    box-shadow: 0 6px 15px rgba(36, 86, 199, 0.18);
+                    font-size: 21px;
+                }
 
-                        <h1 className="h3 fw-bold mb-2">
-                            {company.company_name}
-                        </h1>
+                .branch-company {
+                    margin: 0;
+                    font-size: 16px;
+                    font-weight: 750;
+                    overflow-wrap: anywhere;
+                }
 
-                        <p className="text-muted mb-0">
-                            Select the branch you want to work with
-                        </p>
+                .branch-brand-caption {
+                    margin-top: 3px;
+                    color: var(--branch-secondary);
+                    font-size: 12px;
+                }
 
-                    </div>
+                .branch-logout {
+                    display: inline-flex;
+                    align-items: center;
+                    gap: 8px;
+                    flex-shrink: 0;
+                    padding: 9px 13px;
+                    border: 1px solid #d6dfed;
+                    border-radius: 8px;
+                    background: #fff;
+                    color: #34445d;
+                    font-size: 13px;
+                    font-weight: 600;
+                    transition: background 160ms, border-color 160ms;
+                }
 
+                .branch-logout:hover:not(:disabled) {
+                    background: #fff3f3;
+                    border-color: #edb9b9;
+                    color: #ab2929;
+                }
 
-                    {/* Branches */}
+                .branch-hero {
+                    position: relative;
+                    overflow: hidden;
+                    display: flex;
+                    align-items: center;
+                    justify-content: space-between;
+                    gap: 24px;
+                    padding: 30px;
+                    border-radius: 16px;
+                    color: #fff;
+                    background: linear-gradient(115deg, #15366e, #2456a9);
+                    box-shadow: 0 12px 30px rgba(22, 53, 109, 0.14);
+                    animation: branch-enter 450ms ease-out both;
+                }
 
-                    <div className="row g-4 justify-content-center">
+                .branch-hero::after {
+                    position: absolute;
+                    right: -70px;
+                    top: -110px;
+                    width: 330px;
+                    height: 330px;
+                    border: 45px solid rgba(255, 255, 255, 0.045);
+                    border-radius: 50%;
+                    content: '';
+                    pointer-events: none;
+                }
 
-                        {stores.map((store) => {
+                .branch-hero-content,
+                .branch-stat {
+                    position: relative;
+                    z-index: 1;
+                }
 
-                            const loading = loadingStore === store.id;
+                .branch-eyebrow {
+                    display: inline-flex;
+                    align-items: center;
+                    gap: 7px;
+                    margin-bottom: 12px;
+                    color: #dbe9ff;
+                    font-size: 11px;
+                    font-weight: 700;
+                    letter-spacing: 1.2px;
+                    text-transform: uppercase;
+                }
 
-                            return (
-                                <div
-                                    className="col-xl-4 col-lg-6 col-md-6"
-                                    key={store.id}
-                                >
+                .branch-hero h1 {
+                    margin: 0 0 9px;
+                    font-size: clamp(23px, 3vw, 30px);
+                    font-weight: 750;
+                    letter-spacing: -0.6px;
+                }
 
-                                    <div className="card border-0 shadow-sm h-100">
+                .branch-hero p {
+                    margin: 0;
+                    color: #e0eaff;
+                    line-height: 1.7;
+                }
 
-                                        <div className="card-body p-4">
+                .branch-stat {
+                    flex-shrink: 0;
+                    min-width: 140px;
+                    padding: 17px 23px;
+                    border: 1px solid rgba(255, 255, 255, 0.22);
+                    border-radius: 12px;
+                    background: rgba(255, 255, 255, 0.09);
+                    text-align: center;
+                }
 
-                                            <div className="d-flex align-items-start">
+                .branch-stat-number {
+                    font-size: 33px;
+                    font-weight: 750;
+                    line-height: 1.2;
+                }
 
-                                                <div
-                                                    className="rounded-3 bg-primary bg-opacity-10 text-primary d-flex align-items-center justify-content-center me-3"
-                                                    style={{
-                                                        width: '55px',
-                                                        height: '55px',
-                                                        flexShrink: 0,
-                                                    }}
-                                                >
-                                                    <i className="bi bi-shop fs-4"></i>
-                                                </div>
+                .branch-stat-label {
+                    margin-top: 5px;
+                    color: #e0eaff;
+                    font-size: 12px;
+                }
 
-                                                <div className="flex-grow-1">
+                .branch-toolbar {
+                    display: flex;
+                    align-items: center;
+                    justify-content: space-between;
+                    gap: 16px;
+                    margin: 28px 0 18px;
+                }
 
-                                                    <h5 className="fw-bold mb-1">
-                                                        {store.store_name}
-                                                    </h5>
+                .branch-section-title {
+                    margin: 0;
+                    font-size: 16px;
+                    font-weight: 750;
+                }
 
-                                                    <div className="text-muted small">
-                                                        {store.store_code}
-                                                    </div>
+                .branch-section-caption {
+                    margin: 5px 0 0;
+                    color: var(--branch-secondary);
+                    font-size: 12px;
+                }
 
-                                                </div>
+                .branch-search {
+                    display: flex;
+                    align-items: center;
+                    gap: 10px;
+                    width: 340px;
+                    max-width: 100%;
+                    padding: 0 12px;
+                    border: 1px solid #cbd6e6;
+                    border-radius: 9px;
+                    background: #fff;
+                    transition: border-color 160ms, box-shadow 160ms;
+                }
 
-                                                <span className="badge bg-success">
-                                                    Active
-                                                </span>
+                .branch-search:focus-within {
+                    border-color: #4674d5;
+                    box-shadow: 0 0 0 3px rgba(36, 86, 199, 0.1);
+                }
 
-                                            </div>
+                .branch-search > i {
+                    color: #526b92;
+                }
 
+                .branch-search input {
+                    width: 100%;
+                    min-width: 0;
+                    height: 42px;
+                    border: 0;
+                    outline: 0;
+                    background: transparent;
+                    color: var(--branch-text);
+                    font-size: 13px;
+                }
 
-                                            <hr className="my-4" />
+                .branch-search input::placeholder {
+                    color: #65738a;
+                }
 
+                .branch-search-clear {
+                    display: grid;
+                    place-items: center;
+                    padding: 4px;
+                    border: 0;
+                    border-radius: 4px;
+                    background: transparent;
+                    color: #52627a;
+                }
 
-                                            <div className="text-muted small">
+                .branch-search-clear:hover {
+                    background: #edf2fb;
+                }
 
-                                                {store.contact_person && (
-                                                    <div className="mb-2">
-                                                        <i className="bi bi-person me-2"></i>
-                                                        {store.contact_person}
-                                                    </div>
-                                                )}
+                .branch-grid {
+                    display: grid;
+                    grid-template-columns: repeat(3, minmax(0, 1fr));
+                    gap: 18px;
+                }
 
-                                                {store.phone && (
-                                                    <div className="mb-2">
-                                                        <i className="bi bi-telephone me-2"></i>
-                                                        {store.phone}
-                                                    </div>
-                                                )}
+                .branch-card {
+                    position: relative;
+                    display: flex;
+                    flex-direction: column;
+                    min-width: 0;
+                    overflow: hidden;
+                    border: 1px solid #d9e2ef;
+                    border-radius: 12px;
+                    background: #fff;
+                    box-shadow: 0 3px 10px rgba(28, 49, 84, 0.035);
+                    transition:
+                        transform 180ms ease,
+                        box-shadow 180ms ease,
+                        border-color 180ms ease;
+                    animation: branch-enter 450ms ease-out both;
+                    animation-delay: var(--branch-delay);
+                }
 
-                                                {store.city && (
-                                                    <div>
-                                                        <i className="bi bi-geo-alt me-2"></i>
-                                                        {store.city}
-                                                        {store.state
-                                                            ? `, ${store.state}`
-                                                            : ''
-                                                        }
-                                                    </div>
-                                                )}
+                .branch-card::before {
+                    height: 4px;
+                    background: var(--branch-accent);
+                    content: '';
+                }
 
-                                            </div>
+                .branch-card:hover {
+                    transform: translateY(-4px);
+                    border-color: #b4c6e2;
+                    box-shadow: 0 12px 24px rgba(28, 49, 84, 0.09);
+                }
 
+                .branch-card.is-opening {
+                    border-color: #4674d5;
+                    box-shadow: 0 0 0 3px rgba(36, 86, 199, 0.1);
+                }
 
-                                            <button
-                                                type="button"
-                                                className="btn btn-primary w-100 mt-4"
-                                                disabled={loading}
-                                                onClick={() => selectBranch(store.id)}
-                                            >
+                .branch-card-content {
+                    display: flex;
+                    flex-direction: column;
+                    flex: 1;
+                    padding: 20px;
+                }
 
-                                                {loading ? (
-                                                    <>
-                                                        <span
-                                                            className="spinner-border spinner-border-sm me-2"
-                                                        ></span>
+                .branch-card-header {
+                    display: flex;
+                    align-items: flex-start;
+                    gap: 11px;
+                }
 
-                                                        Opening...
-                                                    </>
-                                                ) : (
-                                                    <>
-                                                        Enter Branch
+                .branch-store-icon {
+                    display: grid;
+                    place-items: center;
+                    flex-shrink: 0;
+                    width: 43px;
+                    height: 43px;
+                    border: 1px solid #dce6f6;
+                    border-radius: 10px;
+                    background: #edf3ff;
+                    color: #2456b5;
+                    font-size: 20px;
+                }
 
-                                                        <i className="bi bi-arrow-right ms-2"></i>
-                                                    </>
-                                                )}
+                .branch-store-heading {
+                    flex: 1;
+                    min-width: 0;
+                }
 
-                                            </button>
+                .branch-store-name {
+                    margin: 1px 0 5px;
+                    font-size: 15px;
+                    font-weight: 750;
+                    line-height: 1.45;
+                    overflow-wrap: anywhere;
+                }
 
-                                        </div>
+                .branch-store-code {
+                    display: inline-block;
+                    padding: 3px 7px;
+                    border-radius: 4px;
+                    background: #f0f3f8;
+                    color: #405371;
+                    font-size: 11px;
+                    font-weight: 650;
+                    overflow-wrap: anywhere;
+                }
 
-                                    </div>
+                .branch-status {
+                    display: inline-flex;
+                    align-items: center;
+                    gap: 5px;
+                    flex-shrink: 0;
+                    margin-top: 3px;
+                    color: #147044;
+                    font-size: 11px;
+                    font-weight: 700;
+                }
 
+                .branch-status-dot {
+                    width: 6px;
+                    height: 6px;
+                    border-radius: 50%;
+                    background: #229b62;
+                }
+
+                .branch-details {
+                    display: grid;
+                    gap: 11px;
+                    flex: 1;
+                    align-content: start;
+                    margin: 18px 0;
+                    padding-top: 16px;
+                    border-top: 1px solid #e7edf5;
+                }
+
+                .branch-detail {
+                    display: flex;
+                    align-items: flex-start;
+                    gap: 9px;
+                    color: #405371;
+                    line-height: 1.5;
+                    overflow-wrap: anywhere;
+                }
+
+                .branch-detail i {
+                    flex-shrink: 0;
+                    color: #526b92;
+                }
+
+                .branch-detail-label {
+                    display: block;
+                    margin-bottom: 1px;
+                    color: #617088;
+                    font-size: 11px;
+                }
+
+                .branch-enter-button {
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    gap: 9px;
+                    width: 100%;
+                    min-height: 40px;
+                    padding: 9px 13px;
+                    border: 1px solid #2456c7;
+                    border-radius: 7px;
+                    background: #2456c7;
+                    color: #fff;
+                    font-size: 13px;
+                    font-weight: 650;
+                    transition: background 160ms, box-shadow 160ms;
+                }
+
+                .branch-enter-button:hover:not(:disabled) {
+                    background: #1946aa;
+                    box-shadow: 0 4px 10px rgba(36, 86, 199, 0.2);
+                }
+
+                .branch-enter-button .branch-arrow {
+                    transition: transform 160ms;
+                }
+
+                .branch-enter-button:hover:not(:disabled) .branch-arrow {
+                    transform: translateX(3px);
+                }
+
+                .branch-page button:disabled {
+                    cursor: wait;
+                    opacity: 0.65;
+                }
+
+                .branch-page button:focus-visible {
+                    outline: 3px solid #80aaff;
+                    outline-offset: 3px;
+                }
+
+                .branch-empty {
+                    grid-column: 1 / -1;
+                    padding: 42px 20px;
+                    border: 1px dashed #bccce1;
+                    border-radius: 12px;
+                    background: rgba(255, 255, 255, 0.8);
+                    text-align: center;
+                }
+
+                .branch-empty > i {
+                    display: block;
+                    margin-bottom: 12px;
+                    color: #526b92;
+                    font-size: 30px;
+                }
+
+                .branch-empty h3 {
+                    margin-bottom: 7px;
+                    font-size: 16px;
+                    font-weight: 700;
+                }
+
+                .branch-empty p {
+                    margin: 0;
+                    color: var(--branch-secondary);
+                }
+
+                .branch-error {
+                    display: flex;
+                    align-items: center;
+                    gap: 9px;
+                    margin-bottom: 16px;
+                    padding: 12px 15px;
+                    border: 1px solid #efc5c5;
+                    border-radius: 8px;
+                    background: #fff1f1;
+                    color: #982c2c;
+                }
+
+                .branch-footer {
+                    margin-top: 27px;
+                    color: #52627a;
+                    font-size: 12px;
+                    text-align: center;
+                }
+
+                @keyframes branch-enter {
+                    from {
+                        opacity: 0;
+                        transform: translateY(12px);
+                    }
+
+                    to {
+                        opacity: 1;
+                        transform: translateY(0);
+                    }
+                }
+
+                @media (max-width: 991px) {
+                    .branch-grid {
+                        grid-template-columns: repeat(2, minmax(0, 1fr));
+                    }
+                }
+
+                @media (max-width: 575px) {
+                    .branch-shell {
+                        padding: 20px 14px;
+                    }
+
+                    .branch-topbar {
+                        margin-bottom: 20px;
+                    }
+
+                    .branch-company {
+                        font-size: 14px;
+                    }
+
+                    .branch-brand-icon {
+                        width: 38px;
+                        height: 38px;
+                    }
+
+                    .branch-logout {
+                        padding: 8px 10px;
+                    }
+
+                    .branch-hero {
+                        align-items: flex-start;
+                        flex-direction: column;
+                        gap: 18px;
+                        padding: 23px;
+                    }
+
+                    .branch-stat {
+                        display: flex;
+                        align-items: center;
+                        gap: 12px;
+                        min-width: 0;
+                        padding: 10px 16px;
+                        text-align: left;
+                    }
+
+                    .branch-stat-number {
+                        font-size: 25px;
+                    }
+
+                    .branch-stat-label {
+                        margin: 0;
+                    }
+
+                    .branch-toolbar {
+                        align-items: stretch;
+                        flex-direction: column;
+                    }
+
+                    .branch-search {
+                        width: 100%;
+                    }
+
+                    .branch-grid {
+                        grid-template-columns: minmax(0, 1fr);
+                    }
+                }
+
+                @media (prefers-reduced-motion: reduce) {
+                    .branch-page *,
+                    .branch-page *::before,
+                    .branch-page *::after {
+                        animation: none !important;
+                        transition: none !important;
+                    }
+
+                    .branch-card:hover {
+                        transform: none;
+                    }
+                }
+            `}</style>
+
+            <main className="branch-page">
+                <div className="branch-shell">
+                    <header className="branch-topbar">
+                        <div className="branch-brand">
+                            <div className="branch-brand-icon">
+                                <i
+                                    className="bi bi-buildings"
+                                    aria-hidden="true"
+                                />
+                            </div>
+
+                            <div>
+                                <h2 className="branch-company">
+                                    {company.company_name}
+                                </h2>
+
+                                <div className="branch-brand-caption">
+                                    Branch workspace
                                 </div>
-                            );
-                        })}
-
-                    </div>
-
-
-                    {/* Logout */}
-
-                    <div className="text-center mt-5">
+                            </div>
+                        </div>
 
                         <Link
                             href="/logout"
                             method="post"
                             as="button"
-                            className="btn btn-link text-muted text-decoration-none"
+                            type="button"
+                            className="branch-logout"
+                            disabled={busy}
                         >
-                            <i className="bi bi-box-arrow-left me-2"></i>
+                            <i
+                                className="bi bi-box-arrow-right"
+                                aria-hidden="true"
+                            />
                             Logout
                         </Link>
+                    </header>
 
+                    <section className="branch-hero">
+                        <div className="branch-hero-content">
+                            <div className="branch-eyebrow">
+                                <i
+                                    className="bi bi-grid-1x2"
+                                    aria-hidden="true"
+                                />
+                                Your workspace
+                            </div>
+
+                            <h1>Select your branch</h1>
+
+                            <p>
+                                Choose a branch to continue with billing,
+                                inventory and daily operations.
+                            </p>
+                        </div>
+
+                        <div className="branch-stat">
+                            <div className="branch-stat-number">
+                                {stores.length}
+                            </div>
+
+                            <div className="branch-stat-label">
+                                Available {stores.length === 1
+                                    ? 'branch'
+                                    : 'branches'}
+                            </div>
+                        </div>
+                    </section>
+
+                    <div className="branch-toolbar">
+                        <div>
+                            <h2 className="branch-section-title">
+                                Available branches
+                            </h2>
+
+                            <p
+                                className="branch-section-caption"
+                                role="status"
+                                aria-live="polite"
+                            >
+                                {search.trim()
+                                    ? `${filteredStores.length} of ${stores.length} branches match your search`
+                                    : 'Select Enter Branch to open your workspace'}
+                            </p>
+                        </div>
+
+                        <div className="branch-search">
+                            <i
+                                className="bi bi-search"
+                                aria-hidden="true"
+                            />
+
+                            <input
+                                type="search"
+                                value={search}
+                                onChange={(event) =>
+                                    setSearch(event.target.value)
+                                }
+                                placeholder="Search branch, code or city..."
+                                aria-label="Search branches"
+                            />
+
+                            {search && (
+                                <button
+                                    type="button"
+                                    className="branch-search-clear"
+                                    onClick={() => setSearch('')}
+                                    aria-label="Clear branch search"
+                                >
+                                    <i
+                                        className="bi bi-x-lg"
+                                        aria-hidden="true"
+                                    />
+                                </button>
+                            )}
+                        </div>
                     </div>
 
-                </div>
+                    {error && (
+                        <div
+                            className="branch-error"
+                            role="alert"
+                        >
+                            <i
+                                className="bi bi-exclamation-triangle"
+                                aria-hidden="true"
+                            />
+                            {error}
+                        </div>
+                    )}
 
-            </div>
+                    <div className="branch-grid">
+                        {filteredStores.map((store, index) => {
+                            const loading = loadingStore === store.id;
+                            const location = [store.city, store.state]
+                                .filter(Boolean)
+                                .join(', ');
+
+                            const accents = [
+                                '#3269cf',
+                                '#168578',
+                                '#7756bb',
+                            ];
+
+                            return (
+                                <article
+                                    key={store.id}
+                                    className={`branch-card ${loading ? 'is-opening' : ''
+                                        }`}
+                                    style={{
+                                        '--branch-accent':
+                                            accents[index % accents.length],
+                                        '--branch-delay':
+                                            `${Math.min(index, 8) * 55}ms`,
+                                    }}
+                                    aria-busy={loading}
+                                >
+                                    <div className="branch-card-content">
+                                        <div className="branch-card-header">
+                                            <div className="branch-store-icon">
+                                                <i
+                                                    className="bi bi-shop"
+                                                    aria-hidden="true"
+                                                />
+                                            </div>
+
+                                            <div className="branch-store-heading">
+                                                <h3 className="branch-store-name">
+                                                    {store.store_name}
+                                                </h3>
+
+                                                {store.store_code && (
+                                                    <span className="branch-store-code">
+                                                        {store.store_code}
+                                                    </span>
+                                                )}
+                                            </div>
+
+                                            <span className="branch-status">
+                                                <span className="branch-status-dot" />
+                                                Active
+                                            </span>
+                                        </div>
+
+                                        <div className="branch-details">
+                                            {store.contact_person && (
+                                                <div className="branch-detail">
+                                                    <i
+                                                        className="bi bi-person"
+                                                        aria-hidden="true"
+                                                    />
+
+                                                    <div>
+                                                        <span className="branch-detail-label">
+                                                            Contact person
+                                                        </span>
+                                                        {store.contact_person}
+                                                    </div>
+                                                </div>
+                                            )}
+
+                                            {store.phone && (
+                                                <div className="branch-detail">
+                                                    <i
+                                                        className="bi bi-telephone"
+                                                        aria-hidden="true"
+                                                    />
+
+                                                    <div>
+                                                        <span className="branch-detail-label">
+                                                            Phone
+                                                        </span>
+                                                        {store.phone}
+                                                    </div>
+                                                </div>
+                                            )}
+
+                                            {location && (
+                                                <div className="branch-detail">
+                                                    <i
+                                                        className="bi bi-geo-alt"
+                                                        aria-hidden="true"
+                                                    />
+
+                                                    <div>
+                                                        <span className="branch-detail-label">
+                                                            Location
+                                                        </span>
+                                                        {location}
+                                                    </div>
+                                                </div>
+                                            )}
+
+                                            {!store.contact_person &&
+                                                !store.phone &&
+                                                !location && (
+                                                    <div className="branch-detail">
+                                                        <i
+                                                            className="bi bi-info-circle"
+                                                            aria-hidden="true"
+                                                        />
+                                                        Contact details have
+                                                        not been added.
+                                                    </div>
+                                                )}
+                                        </div>
+
+                                        <button
+                                            type="button"
+                                            className="branch-enter-button"
+                                            disabled={busy}
+                                            onClick={() =>
+                                                selectBranch(store.id)
+                                            }
+                                            aria-label={
+                                                loading
+                                                    ? `Opening ${store.store_name}`
+                                                    : `Enter ${store.store_name}`
+                                            }
+                                        >
+                                            {loading ? (
+                                                <>
+                                                    <span
+                                                        className="spinner-border spinner-border-sm"
+                                                        aria-hidden="true"
+                                                    />
+                                                    Opening branch...
+                                                </>
+                                            ) : (
+                                                <>
+                                                    Enter Branch
+                                                    <i
+                                                        className="bi bi-arrow-right branch-arrow"
+                                                        aria-hidden="true"
+                                                    />
+                                                </>
+                                            )}
+                                        </button>
+                                    </div>
+                                </article>
+                            );
+                        })}
+
+                        {filteredStores.length === 0 && (
+                            <div className="branch-empty">
+                                <i
+                                    className={
+                                        stores.length === 0
+                                            ? 'bi bi-shop'
+                                            : 'bi bi-search'
+                                    }
+                                    aria-hidden="true"
+                                />
+
+                                <h3>
+                                    {stores.length === 0
+                                        ? 'No branches available'
+                                        : 'No matching branches'}
+                                </h3>
+
+                                <p>
+                                    {stores.length === 0
+                                        ? 'Contact your administrator for branch access.'
+                                        : 'Try another branch name, code or city.'}
+                                </p>
+                            </div>
+                        )}
+                    </div>
+
+                    <footer className="branch-footer">
+                        <i
+                            className="bi bi-building me-2"
+                            aria-hidden="true"
+                        />
+                        {company.company_name}
+                        {' · '}
+                        Branch selection
+                    </footer>
+                </div>
+            </main>
         </>
     );
 }
