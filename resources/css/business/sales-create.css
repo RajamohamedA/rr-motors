@@ -1,0 +1,278 @@
+/* Counter billing refinement; keep after the existing sales styles. */
+.rr-sale-page {
+    padding: 16px;
+    background: #f1f5fb;
+    color: #172f50;
+    font-size: 13px;
+}
+
+.rr-sale-page .rr-sale-header {
+    padding: 16px 19px;
+    border: 1px solid #234d85;
+    border-radius: 11px;
+    background: linear-gradient(110deg, #17345d, #285a9d);
+    color: #fff;
+    box-shadow: 0 6px 18px #17355518;
+}
+
+.rr-sale-header h1 {
+    margin: 3px 0 5px;
+    font-size: 23px;
+    color: #fff;
+}
+
+.rr-sale-header .rr-sale-eyebrow,
+.rr-sale-header .rr-sale-header-meta {
+    color: #e2edff;
+}
+
+.rr-sale-header .rr-sale-header-icon {
+    width: 43px;
+    height: 43px;
+    border-radius: 10px;
+    background: #ffffff18;
+    color: #fff;
+}
+
+.rr-sale-header .rr-sale-back-btn {
+    background: #ffffff12;
+    color: #fff;
+    border-color: #ffffff30;
+}
+
+.rr-sale-header-actions {
+    gap: 8px;
+}
+
+.rr-sale-page .rr-sale-btn {
+    min-height: 36px;
+    font-size: 12px;
+    border-radius: 6px;
+    transition: box-shadow .15s, transform .15s;
+}
+
+.rr-sale-page .rr-sale-btn:hover:not(:disabled) {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 10px #17355518;
+}
+
+.rr-sale-page .rr-sale-window {
+    border: 1px solid #c9d8eb;
+    border-radius: 9px;
+    background: #fff;
+    box-shadow: 0 3px 10px #17355506;
+}
+
+.rr-sale-page .rr-sale-window-title {
+    padding: 11px 14px;
+    background: #edf3fc;
+    border-bottom: 1px solid #c9d8eb;
+    color: #244e81;
+}
+
+.rr-sale-page .rr-sale-window-body {
+    padding: 14px;
+}
+
+.rr-sale-page .rr-sale-customer-window {
+    border-top: 3px solid #3c73c4;
+}
+
+.rr-sale-customer-window label {
+    font-size: 11px;
+    font-weight: 650;
+    color: #36516f;
+    margin-bottom: 5px;
+}
+
+.rr-sale-customer-window :is(input, select) {
+    min-height: 36px;
+    font-size: 13px;
+    border-color: #b9cce3;
+    border-radius: 5px;
+    color: #193b60;
+}
+
+.rr-sale-customer-window :is(input, select):focus {
+    border-color: #4279d1;
+    box-shadow: 0 0 0 2px #4279d118;
+}
+
+.rr-sale-page .rr-sale-items-table th {
+    padding: 9px 6px;
+    color: #2b4f7c;
+    background: #edf3fb;
+    border-color: #c4d3e8;
+    font-size: 11px;
+}
+
+.rr-sale-page .rr-sale-items-table td {
+    padding: 7px 6px;
+    border-color: #dce5f1;
+    font-size: 12px;
+}
+
+.rr-sale-page .rr-sale-items-table tbody tr:nth-child(even):not(.rr-sale-draft-row) td {
+    background: #f8faff;
+}
+
+.rr-sale-page .rr-sale-items-table tbody tr:hover:not(.rr-sale-draft-row) td {
+    background: #edf4ff;
+}
+
+.rr-sale-page .rr-sale-product-cell strong {
+    font-size: 13px;
+    color: #193b60;
+}
+
+.rr-sale-page .rr-sale-product-cell span {
+    font-size: 10px;
+    color: #506885;
+}
+
+.rr-sale-page .rr-sale-grid-input {
+    min-height: 32px;
+    border: 1px solid #bacce3;
+    border-radius: 4px;
+    font-size: 13px;
+}
+
+.rr-sale-page .rr-sale-line-total {
+    color: #204f8e;
+    font-weight: 750;
+    font-variant-numeric: tabular-nums;
+}
+
+.rr-sale-page .rr-sale-shortcut-notes {
+    margin: 9px 12px;
+    border-radius: 7px;
+    border-color: #c7d6ea;
+    background: #f8faff;
+}
+
+.rr-sale-shortcut-notes summary {
+    padding: 9px 12px;
+    background: #f0f5fd;
+    border-radius: 7px;
+    font-size: 12px;
+}
+
+.rr-sale-shortcut-notes[open] summary {
+    border-bottom: 1px solid #d4dff0;
+    border-radius: 7px 7px 0 0;
+}
+
+.rr-sale-shortcut-grid {
+    padding: 12px;
+    gap: 10px;
+}
+
+.rr-sale-shortcut-grid>span {
+    padding: 7px 8px;
+    border: 1px solid #e0e7f2;
+    border-radius: 5px;
+    background: #fff;
+    font-size: 11px;
+}
+
+.rr-sale-shortcut-grid kbd {
+    padding: 3px 6px;
+    border-color: #a9c4ef;
+    background: #eaf2ff;
+    color: #244f92;
+}
+
+.rr-sale-shortcut-grid>span:nth-child(2n) kbd {
+    border-color: #9ed1bc;
+    background: #e6f6ef;
+    color: #176649;
+}
+
+.rr-sale-shortcut-grid>span:nth-child(3n) kbd {
+    border-color: #ddc591;
+    background: #fff4dc;
+    color: #785016;
+}
+
+.rr-sale-shortcut-grid>span:nth-last-child(-n+2) kbd {
+    border-color: #baa8df;
+    background: #f1ebff;
+    color: #5e3d9e;
+}
+
+.rr-sale-page .rr-sale-total-panel {
+    border-radius: 9px;
+    overflow: hidden;
+    border: 1px solid #c9d8eb;
+}
+
+.rr-sale-page .rr-sale-command-bar {
+    border-radius: 8px;
+    padding: 12px 14px;
+    background: #fff;
+    border: 1px solid #c9d8eb;
+}
+
+.rr-sale-busy-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 20000;
+    display: grid;
+    place-items: center;
+    padding: 20px;
+    background: #152d4d66;
+    backdrop-filter: blur(2px);
+}
+
+.rr-sale-busy-panel {
+    display: grid;
+    justify-items: center;
+    gap: 13px;
+    width: min(390px, 100%);
+    padding: 30px 25px;
+    border-radius: 12px;
+    background: #fff;
+    border: 1px solid #cbd9ed;
+    color: #234c82;
+    box-shadow: 0 15px 40px #152d4d30;
+    text-align: center;
+}
+
+.rr-sale-busy-panel strong {
+    font-size: 16px;
+}
+
+.rr-sale-busy-panel>span:last-child {
+    font-size: 12px;
+    color: #506580;
+}
+
+.rr-sale-page :is(button, a):focus-visible {
+    outline: 3px solid #7da5e9;
+    outline-offset: 2px;
+}
+
+@media(max-width:575px) {
+    .rr-sale-page {
+        padding: 10px;
+    }
+
+    .rr-sale-page .rr-sale-header {
+        padding: 13px;
+    }
+
+    .rr-sale-header h1 {
+        font-size: 20px;
+    }
+}
+
+@media(prefers-reduced-motion:reduce) {
+    .rr-sale-page * {
+        animation: none !important;
+        transition: none !important;
+    }
+
+    .rr-sale-busy-panel .spinner-border {
+        animation: none;
+    }
+}

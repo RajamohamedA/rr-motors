@@ -27,6 +27,7 @@ use Illuminate\Http\Request;
 use Illuminate\Routing\Controllers\HasMiddleware;
 use Illuminate\Routing\Controllers\Middleware;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Route;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
@@ -47,6 +48,7 @@ class SalesController extends Controller implements HasMiddleware
                 'permission:sales.view',
                 only: [
                     'index',
+                    'searchRegisterParties',
                     'show',
                     'print',
                     'pdf',
@@ -104,6 +106,8 @@ class SalesController extends Controller implements HasMiddleware
             'mechanic_id' => $request->input('mechanic_id'),
             'sale_source' => $request->input('sale_source'),
             'status' => $request->input('status'),
+            'payment_status' => $request->input('payment_status'),
+            'billing_type' => $request->input('billing_type'),
             'date_from' => $request->input('date_from'),
             'date_to' => $request->input('date_to'),
         ];
@@ -189,6 +193,8 @@ class SalesController extends Controller implements HasMiddleware
             $q->where('sale_source', $source))
             ->when($filters['status'], fn(Builder $q, $status) =>
             $q->where('status', $status))
+            ->when(in_array($filters['payment_status'], ['Paid', 'Unpaid', 'Partially Paid'], true), fn(Builder $q) => $q->where('payment_status', $filters['payment_status']))
+            ->when(in_array($filters['billing_type'], ['gst', 'non_gst'], true), fn(Builder $q) => $q->where('billing_type', $filters['billing_type']))
             ->when($filters['date_from'], fn(Builder $q, $date) =>
             $q->whereDate('invoice_date', '>=', $date))
             ->when($filters['date_to'], fn(Builder $q, $date) =>
@@ -290,9 +296,40 @@ class SalesController extends Controller implements HasMiddleware
             'sales' => $sales,
             'filters' => $filters,
             'summary' => $summary,
-            'customers' => $this->customersForStore($companyId, $storeId),
-            'mechanics' => $this->mechanicsForStore($companyId, $storeId),
+            'customers' => empty($filters['customer_id']) ? [] : Customer::query()
+                ->where('company_id', $companyId)
+                ->whereHas('stores', fn(Builder $q) => $q->where('stores.id', $storeId))
+                ->whereKey($filters['customer_id'])->get(['id', 'customer_name', 'mobile']),
+            'mechanics' => empty($filters['mechanic_id']) ? [] : Mechanic::query()
+                ->where('company_id', $companyId)->where('store_id', $storeId)
+                ->whereKey($filters['mechanic_id'])->get(['id', 'mechanic_name', 'mobile']),
         ]);
+    }
+
+    public function searchRegisterParties(Request $request)
+    {
+        [$companyId, $storeId] = $this->context($request);
+        $validated = $request->validate([
+            'type' => ['required', Rule::in(['customer', 'mechanic'])],
+            'search' => ['nullable', 'string', 'max:100'],
+        ]);
+        $search = trim($validated['search'] ?? '');
+        $customer = $validated['type'] === 'customer';
+        $name = $customer ? 'customer_name' : 'mechanic_name';
+        $code = $customer ? 'customer_code' : 'mechanic_code';
+        $query = $customer ? Customer::query() : Mechanic::query();
+        $query->where('company_id', $companyId);
+        if ($customer) {
+            $query->whereHas('stores', fn(Builder $q) => $q->where('stores.id', $storeId));
+        } else {
+            $query->where('store_id', $storeId);
+        }
+        $query->when($search !== '', fn(Builder $q) => $q->where(function (Builder $nested) use ($search, $name, $code) {
+            $nested->where($name, 'like', '%' . $search . '%')
+                ->orWhere($code, 'like', '%' . $search . '%')
+                ->orWhere('mobile', 'like', '%' . $search . '%');
+        }));
+        return response()->json(['items' => $query->orderBy($name)->limit(20)->get(['id', $name, $code, 'mobile'])]);
     }
 
     public function create(Request $request): Response
@@ -559,6 +596,7 @@ class SalesController extends Controller implements HasMiddleware
         $this->authorizeLookup($request);
 
         $validated = $request->validate([
+            'sale_id' => ['nullable', 'integer', 'exists:sales,id'],
             'product_id' => [
                 'required',
                 'integer',
@@ -599,6 +637,21 @@ class SalesController extends Controller implements HasMiddleware
                 $product->id
             );
 
+
+        if (! empty($validated['sale_id'])) {
+            abort_unless($request->user()->can('sales.edit'), 403);
+            $editingSale = Sales::query()
+                ->where('company_id', $companyId)
+                ->where('store_id', $storeId)
+                ->findOrFail($validated['sale_id']);
+            $this->ensureSaleContext($editingSale, $companyId, $storeId);
+            $originalQuantity = $editingSale->items()
+                ->where('product_id', $product->id)
+                ->whereNull('godown_id')
+                ->get(['quantity', 'free_quantity'])
+                ->sum(fn($item) => (float) $item->quantity + (float) $item->free_quantity);
+            $shopStock += $originalQuantity;
+        }
 
         $shortage =
             max(
@@ -1514,6 +1567,19 @@ class SalesController extends Controller implements HasMiddleware
     ): RedirectResponse {
         [$companyId, $storeId] = $this->context($request);
         $validated = $this->validateSaleRequest($request);
+        $printAfterSave = $request->boolean('print_after_save');
+
+        // Check the print route and its existing permission before saving.
+        if ($printAfterSave) {
+            abort_unless($request->user()->can('sales.view'), 403);
+
+            if (! Route::has('sales.print')) {
+                throw ValidationException::withMessages([
+                    'print_after_save' => 'The sales.print route is not configured.',
+                ]);
+            }
+        }
+
         $userId = (int) $request->user()->id;
 
         try {
@@ -1876,11 +1942,16 @@ class SalesController extends Controller implements HasMiddleware
                 return $sale;
             });
 
+            // The transaction has committed. Print only the saved invoice.
+            $printUrl = $printAfterSave
+                ? route('sales.print', [$sale, 'auto_print' => 1])
+                : null;
+
             return AppResponse::successRoute(
                 'sales.show',
                 'Sale created successfully.',
                 $sale
-            );
+            )->with('sale_print_url', $printUrl);
         } catch (ValidationException $exception) {
             throw $exception;
         } catch (Throwable $exception) {
@@ -1911,6 +1982,8 @@ class SalesController extends Controller implements HasMiddleware
 
         return Inertia::render('Sales/Show', [
             'sale' => $sale,
+            // Read once, so later visits cannot print an old invoice.
+            'salePrintUrl' => $request->session()->pull('sale_print_url'),
         ]);
     }
 
@@ -1966,6 +2039,15 @@ class SalesController extends Controller implements HasMiddleware
         [$companyId, $storeId] = $this->context($request);
         $this->ensureSaleContext($sale, $companyId, $storeId);
         $validated = $this->validateSaleRequest($request);
+        $printAfterSave = $request->boolean('print_after_save');
+        if ($printAfterSave) {
+            abort_unless($request->user()->can('sales.view'), 403);
+            if (! Route::has('sales.print')) {
+                throw ValidationException::withMessages([
+                    'print_after_save' => 'The sales.print route is not configured.',
+                ]);
+            }
+        }
         $userId = (int) $request->user()->id;
 
         try {
@@ -2438,11 +2520,15 @@ class SalesController extends Controller implements HasMiddleware
                 }
             });
 
+            $printUrl = $printAfterSave
+                ? route('sales.print', [$sale, 'auto_print' => 1])
+                : null;
+
             return AppResponse::successRoute(
                 'sales.show',
                 'Sale updated successfully.',
                 $sale
-            );
+            )->with('sale_print_url', $printUrl);
         } catch (ValidationException $exception) {
             throw $exception;
         } catch (Throwable $exception) {
@@ -2611,7 +2697,10 @@ class SalesController extends Controller implements HasMiddleware
             'items.godown',
         ]);
 
-        return view('sales.print', compact('sale'));
+        return view('sales.print', [
+            'sale' => $sale,
+            'autoPrint' => $request->boolean('auto_print'),
+        ]);
     }
 
     public function pdf(
@@ -2668,6 +2757,8 @@ class SalesController extends Controller implements HasMiddleware
     private function validateSaleRequest(Request $request): array
     {
         return $request->validate([
+            'print_after_save' => ['nullable', 'boolean'],
+            'price_includes_gst' => ['nullable', 'boolean'],
             'invoice_date' => ['required', 'date'],
 
             'billing_type' => [
@@ -3131,34 +3222,33 @@ class SalesController extends Controller implements HasMiddleware
             |--------------------------------------------------------------------------
             */
 
-            $taxableAmount =
-                round(
-                    $grossAmount
-                        -
-                        $discountAmount,
-                    2
-                );
+            $inclusivePricing = (bool) ($validated['price_includes_gst'] ?? false);
+            $isGstBill = ($validated['billing_type'] ?? 'gst') === 'gst';
+            if (! $isGstBill) {
+                $gstPercent = 0.0;
+            }
 
+            if ($inclusivePricing) {
+                $gstPercent = $isGstBill ? ($gstPercent > 0 ? $gstPercent : 18.0) : 0.0;
+                $divisor = 1 + $gstPercent / 100;
+                $lineTotal = round($grossAmount - $discountAmount, 2);
+                $taxableAmount = round($lineTotal / $divisor, 2);
+                $gstAmount = round($lineTotal - $taxableAmount, 2);
 
-            $gstAmount =
-                round(
-                    $taxableAmount
-                        *
-                        $gstPercent
-                        /
-                        100,
-                    2
-                );
-
-
-            $lineTotal =
-                round(
-                    $taxableAmount
-                        +
-                        $gstAmount,
-                    2
-                );
-
+                // Existing item/print/edit fields use tax-exclusive rates.
+                // Normalize inclusive input before storing those fields.
+                $salePrice = round($salePrice / $divisor, 2);
+                $grossAmount = round($grossAmount / $divisor, 2);
+                $discountAmount = round($grossAmount - $taxableAmount, 2);
+                if ($discountType === 'fixed') {
+                    $discountValue = $discountAmount;
+                }
+            } else {
+                // Legacy forms submit tax-exclusive rates.
+                $taxableAmount = round($grossAmount - $discountAmount, 2);
+                $gstAmount = round($taxableAmount * $gstPercent / 100, 2);
+                $lineTotal = round($taxableAmount + $gstAmount, 2);
+            }
 
             $lines[] = [
                 'product' =>

@@ -1,6 +1,7 @@
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 
 import axios from "axios";
+import { createPortal } from "react-dom";
 
 import { Head, Link, useForm, usePage } from "@inertiajs/react";
 
@@ -9,6 +10,7 @@ import MasterNavigation from "../../Components/Business/MasterNavigation";
 
 import "../../../css/business/sales.css";
 import "../../../css/business/sales-payment-split.css";
+import "../../../css/business/sales-create.css";
 
 export default function Create({
     invoiceNo = "",
@@ -41,6 +43,18 @@ export default function Create({
     const [productSearching, setProductSearching] = useState(false);
 
     const [rows, setRows] = useState([]);
+    const [quickQuantity, setQuickQuantity] = useState(false);
+    const [selectedResult, setSelectedResult] = useState(0);
+    const [productSearchError, setProductSearchError] = useState('');
+    const [searchPopup, setSearchPopup] = useState({ top: 0, left: 0, width: 640, maxHeight: 320 });
+    const [submitting, setSubmitting] = useState(false);
+    const [submitIntent, setSubmitIntent] = useState('save');
+    const [submitError, setSubmitError] = useState('');
+    const submitLock = useRef(false);
+    const printWindow = useRef(null);
+    const searchVersion = useRef(0);
+    const pendingSearchEnter = useRef(null);
+    const billingFormRef = useRef(null);
 
     const [stockAssist, setStockAssist] = useState({
         show: false,
@@ -53,13 +67,12 @@ export default function Create({
         error: "",
     });
 
-    const searchTimer = useRef(null);
     const customerSearchTimer = useRef(null);
     const customerSearchBoxRef = useRef(null);
     const productSearchBoxRef = useRef(null);
     const searchInputRef = useRef(null);
 
-    const { data, setData, post, processing, errors, clearErrors } = useForm({
+    const { data, setData, post, processing, errors, clearErrors, transform } = useForm({
         invoice_date: today(),
         customer_id: "",
         billing_type: "gst",
@@ -102,10 +115,10 @@ export default function Create({
             discount_value: rows.map((row) => row.item_discount),
             // Retained for legacy backend compatibility. The new controller
             // uses discount_type + discount_value first.
-            item_discount: rows.map((row) => String(calculateRow(row).discount)),
+            item_discount: rows.map((row) => String(calculateRow(row, data.billing_type).discount)),
             gst: rows.map((row) => row.gst),
         }));
-    }, [rows]);
+    }, [rows, data.billing_type]);
 
     /* ---------------------------------------------------------------------
              Customer Search
@@ -218,60 +231,204 @@ export default function Create({
              --------------------------------------------------------------------- */
 
     useEffect(() => {
-        if (searchTimer.current) {
-            window.clearTimeout(searchTimer.current);
-        }
-
+        const controller = new AbortController();
+        const version = ++searchVersion.current;
         const value = productSearch.trim();
-
-        if (value.length < 1) {
-            setProductResults([]);
+        setSelectedResult(0);
+        setProductResults([]);
+        setProductSearchError('');
+        if (!value) {
+            setProductSearching(false);
             setProductSearchOpen(false);
-            return;
+            return () => controller.abort();
         }
-
-        searchTimer.current = window.setTimeout(async () => {
-            setProductSearching(true);
-
+        setProductSearching(true);
+        setProductSearchOpen(true);
+        const timer = window.setTimeout(async () => {
             try {
-                const response = await axios.get("/sales/search", {
+                const response = await axios.get('/sales/search', {
                     params: { search: value },
+                    signal: controller.signal,
                 });
-
+                if (controller.signal.aborted || version !== searchVersion.current) return;
                 setProductResults(Array.isArray(response.data) ? response.data : []);
-                setProductSearchOpen(true);
             } catch (error) {
-                console.error(error);
-                setProductResults([]);
-                setProductSearchOpen(true);
+                if (controller.signal.aborted || version !== searchVersion.current) return;
+                setProductSearchError('Search failed. Try again or check your connection.');
             } finally {
-                setProductSearching(false);
+                if (!controller.signal.aborted && version === searchVersion.current) {
+                    setProductSearching(false);
+                }
             }
-        }, 260);
-
+        }, 180);
         return () => {
-            if (searchTimer.current) {
-                window.clearTimeout(searchTimer.current);
-            }
+            window.clearTimeout(timer);
+            controller.abort();
         };
     }, [productSearch]);
 
+    useLayoutEffect(() => {
+        if (!productSearchOpen) return;
+        const positionPopup = () => {
+            const rect = searchInputRef.current?.getBoundingClientRect();
+            if (!rect) return;
+            const width = Math.min(760, window.innerWidth - 24);
+            const below = window.innerHeight - rect.bottom - 16;
+            const above = rect.top - 16;
+            const openAbove = below < 220 && above > below;
+            const maxHeight = Math.max(100, Math.min(380, openAbove ? above : below));
+            setSearchPopup({
+                top: openAbove ? Math.max(12, rect.top - maxHeight - 4) : rect.bottom + 4,
+                left: Math.max(12, Math.min(rect.left, window.innerWidth - width - 12)),
+                width,
+                maxHeight,
+            });
+        };
+        positionPopup();
+        window.addEventListener('resize', positionPopup);
+        window.addEventListener('scroll', positionPopup, true);
+        return () => {
+            window.removeEventListener('resize', positionPopup);
+            window.removeEventListener('scroll', positionPopup, true);
+        };
+    }, [productSearchOpen]);
+
+    useEffect(() => {
+        if (productSearchOpen) {
+            document.getElementById(`sale-product-option-${selectedResult}`)
+                ?.scrollIntoView({ block: 'nearest' });
+        }
+    }, [selectedResult, productSearchOpen]);
+
     useEffect(() => {
         const closeProductSearch = (event) => {
-            if (
-                productSearchBoxRef.current &&
-                !productSearchBoxRef.current.contains(event.target)
-            ) {
+            if (!productSearchBoxRef.current?.contains(event.target)
+                && !event.target.closest?.('.rr-sale-counter-results')) {
                 setProductSearchOpen(false);
             }
         };
-
-        document.addEventListener("mousedown", closeProductSearch);
-
-        return () => {
-            document.removeEventListener("mousedown", closeProductSearch);
-        };
+        document.addEventListener('mousedown', closeProductSearch);
+        return () => document.removeEventListener('mousedown', closeProductSearch);
     }, []);
+
+    useEffect(() => {
+        if (stockAssist.show || customerModal || mechanicModal) setProductSearchOpen(false);
+    }, [stockAssist.show, customerModal, mechanicModal]);
+
+    const focusProductSearch = () => {
+        requestAnimationFrame(() => {
+            searchInputRef.current?.focus();
+            searchInputRef.current?.select();
+        });
+    };
+
+    const changeProductSearch = (value) => {
+        // Invalidate the previous response immediately, before the next effect.
+        searchVersion.current += 1;
+        pendingSearchEnter.current = null;
+        setProductResults([]);
+        setSelectedResult(0);
+        setProductSearching(Boolean(value.trim()));
+        setProductSearch(value);
+        setProductSearchOpen(Boolean(value.trim()));
+    };
+
+    const handleProductSearchKey = (event) => {
+        if (event.nativeEvent.isComposing) return;
+        if (event.key === 'ArrowLeft' && (!productSearch || event.target.selectionStart === 0)) {
+            const previousFields = Array.from(billingFormRef.current.querySelectorAll(
+                `[data-sale-row="${rows.length - 1}"][data-sale-field]`
+            ));
+            const previous = previousFields.at(-1);
+            if (previous) {
+                event.preventDefault();
+                setProductSearchOpen(false);
+                previous.focus(); previous.select?.();
+            }
+        } else if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
+            event.preventDefault();
+            setProductSearchOpen(true);
+            setSelectedResult((previous) => {
+                const count = productResults.length;
+                if (!count) return 0;
+                return (previous + (event.key === 'ArrowDown' ? 1 : -1) + count) % count;
+            });
+        } else if (event.key === 'Enter') {
+            event.preventDefault();
+            if (event.repeat) return;
+            if (event.ctrlKey || event.metaKey) {
+                if (rows.length) {
+                    document.querySelector(`[data-sale-row="${rows.length - 1}"][data-sale-field="qty"]`)?.focus();
+                }
+                return;
+            }
+            if (productSearching) {
+                pendingSearchEnter.current = productSearch.trim();
+            } else if (productResults[selectedResult]) {
+                addProduct(productResults[selectedResult]);
+            }
+        } else if (event.key === 'Escape') {
+            event.preventDefault();
+            changeProductSearch('');
+        }
+    };
+
+    useEffect(() => {
+        if (productSearching || !pendingSearchEnter.current) return;
+        const query = pendingSearchEnter.current;
+        pendingSearchEnter.current = null;
+        // Scanner Enter can arrive before the AJAX response. Auto-add only
+        // when that same search has exactly one unambiguous result.
+        if (query === productSearch.trim() && productResults.length === 1) {
+            addProduct(productResults[0]);
+        }
+    }, [productSearching, productResults, productSearch]);
+
+    const handleBillingKeys = (event) => {
+        if (event.defaultPrevented || event.nativeEvent.isComposing || stockAssist.show) return;
+        if (event.key === 'F2') {
+            event.preventDefault();
+            focusProductSearch();
+            return;
+        }
+        const input = event.target;
+        const rowIndex = input.dataset.saleRow;
+        if (rowIndex === undefined) {
+            // Avoid completing a bill accidentally while entering customer/payment data.
+            if (event.key === 'Enter' && input.tagName === 'INPUT') event.preventDefault();
+            return;
+        }
+        const fields = Array.from(billingFormRef.current.querySelectorAll(
+            `[data-sale-row="${rowIndex}"][data-sale-field]`
+        ));
+        const position = fields.indexOf(input);
+        const last = position === fields.length - 1;
+        if (event.key === 'Enter' || event.key === 'Escape'
+            || event.key === 'ArrowRight' || event.key === 'ArrowLeft'
+            || (event.key === 'Tab' && !event.shiftKey && last)) {
+            event.preventDefault();
+            if ((event.ctrlKey || event.metaKey) && event.key === 'Enter') {
+                focusProductSearch();
+                return;
+            }
+            const backwards = event.key === 'ArrowLeft' || (event.key === 'Enter' && event.shiftKey);
+            const next = fields[position + (backwards ? -1 : 1)];
+            if (next) {
+                next.focus(); next.select?.();
+            } else if (backwards && Number(rowIndex) > 0) {
+                const previousFields = Array.from(billingFormRef.current.querySelectorAll(
+                    `[data-sale-row="${Number(rowIndex) - 1}"][data-sale-field]`
+                ));
+                const previous = previousFields.at(-1);
+                previous?.focus(); previous?.select?.();
+            } else if (event.key === 'ArrowRight' && Number(rowIndex) < rows.length - 1) {
+                const nextRow = billingFormRef.current.querySelector(
+                    `[data-sale-row="${Number(rowIndex) + 1}"][data-sale-field="qty"]`
+                );
+                nextRow?.focus(); nextRow?.select?.();
+            } else focusProductSearch();
+        }
+    };
 
     /* ---------------------------------------------------------------------
              Validation auto focus
@@ -328,8 +485,12 @@ export default function Create({
                 "qty",
                 String(numberValue(rows[existingIndex].qty) + 1),
             );
-            setProductSearch("");
+            changeProductSearch("");
             setProductSearchOpen(false);
+            if (quickQuantity) focusProductSearch();
+            else requestAnimationFrame(() => {
+                document.querySelector(`[data-sale-row="${existingIndex}"][data-sale-field="qty"]`)?.focus();
+            });
             return;
         }
 
@@ -359,22 +520,26 @@ export default function Create({
                 sale_price: String(salePrice),
                 item_discount_type: "fixed",
                 item_discount: "0",
-                gst: String(gst),
+                gst: String(gst > 0 ? gst : 18),
                 shop_stock: numberValue(product.shop_stock),
                 stock_state: numberValue(product.shop_stock) >= 1 ? "enough" : "low",
             },
         ]);
 
-        setProductSearch("");
+        changeProductSearch("");
         setProductSearchOpen(false);
 
-        window.setTimeout(() => {
-            const input = document.querySelector(
-                `[data-sale-row="${rows.length}"][data-sale-field="qty"]`,
-            );
-            input?.focus();
-            input?.select?.();
-        }, 50);
+        if (quickQuantity) {
+            focusProductSearch();
+        } else {
+            requestAnimationFrame(() => {
+                const input = document.querySelector(
+                    `[data-sale-row="${rows.length}"][data-sale-field="qty"]`,
+                );
+                input?.focus();
+                input?.select?.();
+            });
+        }
     };
 
     const updateRow = (index, field, value) => {
@@ -685,7 +850,7 @@ export default function Create({
         rows.forEach((row) => {
             const qty = numberValue(row.qty);
             const price = numberValue(row.sale_price);
-            const calculated = calculateRow(row);
+            const calculated = calculateRow(row, data.billing_type);
             const safeDiscount = calculated.discount;
             const taxable = calculated.taxable;
             const gstAmount = calculated.gstAmount;
@@ -754,6 +919,7 @@ export default function Create({
         };
     }, [
         rows,
+        data.billing_type,
         data.final_discount,
         data.payments,
         data.sale_source,
@@ -771,34 +937,152 @@ export default function Create({
              Submit
              --------------------------------------------------------------------- */
 
-    const submit = async (event) => {
+    const submit = async (event, requestedIntent = null) => {
         event.preventDefault();
-
-        if (!rows.length) {
-            searchInputRef.current?.focus();
-            return;
-        }
-
-        // Final client-side stock refresh before backend validation.
-        for (let index = 0; index < rows.length; index += 1) {
-            const row = rows[index];
-            const required = numberValue(row.qty) + numberValue(row.free_quantity);
-
-            if (required > numberValue(row.shop_stock)) {
-                await checkRowStock(index);
+        if (submitLock.current || processing || stockAssist.show) return;
+        if (!rows.length) { focusProductSearch(); return; }
+        const intent = requestedIntent ?? event.nativeEvent?.submitter?.value ?? 'save';
+        submitLock.current = true;
+        setSubmitIntent(intent);
+        setSubmitting(true);
+        setSubmitError('');
+        if (intent === 'print') {
+            printWindow.current = window.open('about:blank', '_blank');
+            if (!printWindow.current) {
+                setSubmitError('Allow pop-ups for this application, then use Complete & Print.');
+                submitLock.current = false;
+                setSubmitting(false);
                 return;
             }
+            printWindow.current.document.write(`<!doctype html><html><head><title>Preparing invoice</title><style>
+                body{margin:0;min-height:100vh;display:grid;place-items:center;background:#edf3fc;font:14px Arial;color:#193b67}
+                .box{padding:32px 40px;border:1px solid #cddbed;border-radius:12px;background:white;text-align:center;box-shadow:0 8px 25px #193b6712}
+                .spinner{width:34px;height:34px;border:3px solid #dce7f6;border-top-color:#315fce;border-radius:50%;margin:0 auto 16px;animation:spin .8s linear infinite}
+                h1{font-size:18px}p{color:#526580;line-height:1.6}@keyframes spin{to{transform:rotate(360deg)}}
+                @media(prefers-reduced-motion:reduce){.spinner{animation:none}}
+                </style></head><body><div class="box" role="status"><div class="spinner"></div><h1>Completing your invoice</h1><p>Saving the sale and preparing the print layout.<br>Please keep this tab open.</p></div></body></html>`);
+            printWindow.current.document.close();
         }
-
-        post("/sales", {
-            preserveScroll: true,
-        });
+        const cancelPrint = () => {
+            printWindow.current?.close();
+            printWindow.current = null;
+        };
+        try {
+            for (let index = 0; index < rows.length; index += 1) {
+                const row = rows[index];
+                if (numberValue(row.qty) + numberValue(row.free_quantity) > numberValue(row.shop_stock)) {
+                    cancelPrint();
+                    await checkRowStock(index);
+                    submitLock.current = false;
+                    setSubmitting(false);
+                    return;
+                }
+            }
+            // Build arrays from the current rows to avoid a form synchronization race.
+            transform((formData) => ({
+                ...formData,
+                print_after_save: intent === 'print',
+                price_includes_gst: true,
+                product_id: rows.map((row) => row.product_id),
+                godown_id: rows.map(() => ''),
+                qty: rows.map((row) => row.qty),
+                free_quantity: rows.map((row) => row.free_quantity),
+                sale_price: rows.map((row) => row.sale_price),
+                discount_type: rows.map((row) => row.item_discount_type ?? 'fixed'),
+                discount_value: rows.map((row) => row.item_discount),
+                item_discount: rows.map((row) => String(calculateRow(row, data.billing_type).discount)),
+                gst: rows.map((row) => row.gst),
+            }));
+            post('/sales', {
+                preserveScroll: true,
+                onSuccess: async (page) => {
+                    if (intent !== 'print') return;
+                    const url = page.props.salePrintUrl ?? page.props.flash?.sale_print_url;
+                    if (!url) {
+                        cancelPrint();
+                        window.alert('Sale saved. The print URL was not returned. Open this invoice from Sales and print it. Do not submit it again.');
+                        return;
+                    }
+                    const target = new URL(url, window.location.origin);
+                    if (target.origin !== window.location.origin) {
+                        cancelPrint();
+                        window.alert('Sale saved. The print URL must belong to this application.');
+                        return;
+                    }
+                    if (printWindow.current && !printWindow.current.closed) {
+                        const popup = printWindow.current;
+                        printWindow.current = null;
+                        try {
+                            const response = await fetch(target.href, { credentials: 'same-origin' });
+                            if (!response.ok || new URL(response.url).pathname !== target.pathname) {
+                                throw new Error('Sale saved, but the print layout could not be loaded. Open the saved invoice to print; do not save it again.');
+                            }
+                            const html = await response.text();
+                            if (!popup.closed) {
+                                popup.history.replaceState(null, '', target.href);
+                                popup.document.open();
+                                popup.document.write(html);
+                                popup.document.close();
+                            }
+                        } catch (error) {
+                            if (!popup.closed) {
+                                popup.document.querySelector('h1').textContent = 'Invoice saved';
+                                popup.document.querySelector('p').textContent = error.message || 'Unable to load printing. Open the saved invoice to print.';
+                                popup.document.querySelector('.spinner')?.remove();
+                            }
+                        }
+                    } else {
+                        window.alert('Sale saved. The print window was closed. Open the saved invoice to print.');
+                    }
+                    printWindow.current = null;
+                },
+                onError: cancelPrint,
+                onCancel: cancelPrint,
+                onFinish: () => {
+                    submitLock.current = false;
+                    setSubmitting(false);
+                },
+            });
+        } catch (error) {
+            cancelPrint();
+            submitLock.current = false;
+            setSubmitting(false);
+            setSubmitError('Unable to complete the request. Check whether the invoice was saved before retrying.');
+        }
     };
+
+    useEffect(() => {
+        const completeFromKeyboard = (event) => {
+            if (!['F9', 'F10'].includes(event.key)) return;
+            event.preventDefault();
+            if (event.repeat || processing || submitting || stockAssist.show || customerModal || mechanicModal) return;
+            // Always bring the invoice grid into focus before validation/save.
+            const item = billingFormRef.current?.querySelector(
+                `[data-sale-row="${Math.max(0, rows.length - 1)}"][data-sale-field="qty"]`
+            );
+            if (item) { item.focus(); item.select?.(); }
+            else searchInputRef.current?.focus();
+            if (billingFormRef.current?.reportValidity()) {
+                submit(event, event.key === 'F10' ? 'print' : 'save');
+            }
+        };
+        document.addEventListener('keydown', completeFromKeyboard);
+        return () => document.removeEventListener('keydown', completeFromKeyboard);
+    });
 
     return (
         <>
             <Head title="Create Sale" />
 
+            {(processing || submitting) && (
+                <div className="rr-sale-busy-overlay" role="status" aria-live="polite">
+                    <div className="rr-sale-busy-panel">
+                        <span className="spinner-border" aria-hidden="true" />
+                        <strong>{submitIntent === 'print' ? 'Completing & preparing print' : 'Completing your sale'}</strong>
+                        <span>Please wait. Your invoice is being processed.</span>
+                    </div>
+                </div>
+            )}
             <div className="rr-sale-page">
                 <MasterNavigation
                     active="sales"
@@ -806,7 +1090,7 @@ export default function Create({
                     subtitle="Fast counter billing, customer accounts and mechanic referrals"
                 />
 
-                <form onSubmit={submit}>
+                <form ref={billingFormRef} onSubmit={submit} onKeyDown={handleBillingKeys} aria-busy={processing || submitting}>
                     {/* =========================================================
                         HEADER
                        ========================================================= */}
@@ -852,10 +1136,12 @@ export default function Create({
                             </Link>
                             <button
                                 type="submit"
+                                name="sale_action"
+                                value="save"
                                 className="rr-sale-btn primary"
-                                disabled={processing || rows.length === 0 || hasStockProblem}
+                                disabled={processing || submitting || rows.length === 0 || hasStockProblem}
                             >
-                                {processing ? (
+                                {processing || submitting ? (
                                     <>
                                         <span className="spinner-border spinner-border-sm"></span>{" "}
                                         Saving...
@@ -865,6 +1151,17 @@ export default function Create({
                                         <i className="bi bi-check-lg"></i> Complete Sale
                                     </>
                                 )}
+                            </button>
+                            <button
+                                type="submit"
+                                name="sale_action"
+                                value="print"
+                                className="rr-sale-btn print"
+                                disabled={processing || submitting || rows.length === 0 || hasStockProblem}
+                                title="Save invoice and print (F10)"
+                            >
+                                {processing || submitting ? <><span className="spinner-border spinner-border-sm" aria-hidden="true" /> Preparing…</>
+                                    : <><i className="bi bi-printer" aria-hidden="true" /> Complete &amp; Print</>}
                             </button>
                         </div>
                     </section>
@@ -1255,156 +1552,7 @@ export default function Create({
                     {/* =========================================================
                         PRODUCT SEARCH
                        ========================================================= */}
-                    <section className="rr-sale-window rr-sale-search-window">
-                        <div className="rr-sale-window-title rr-sale-add-products-title">
-                            <div>
-                                <i className="bi bi-cart-plus"></i>
-                                <span>
-                                    <strong>Add Products</strong>
-                                    <small>
-                                        Search and select an item to add it to this invoice
-                                    </small>
-                                </span>
-                            </div>
-                            <span className="rr-sale-search-shortcut">
-                                <i className="bi bi-keyboard"></i> Type name, code or barcode
-                            </span>
-                        </div>
 
-                        <div className="rr-sale-window-body">
-                            <div
-                                ref={productSearchBoxRef}
-                                className="rr-sale-product-search"
-                            >
-                                <div
-                                    className={`rr-sale-product-search-input ${productSearchOpen ? "open" : ""}`}
-                                >
-                                    <i className="bi bi-search"></i>
-                                    <input
-                                        ref={searchInputRef}
-                                        type="search"
-                                        value={productSearch}
-                                        placeholder="Search product name, code, barcode, part number or OEM..."
-                                        autoComplete="off"
-                                        onFocus={() => {
-                                            if (productSearch.trim()) setProductSearchOpen(true);
-                                        }}
-                                        onChange={(event) => setProductSearch(event.target.value)}
-                                    />
-
-                                    {productSearching ? (
-                                        <span className="spinner-border spinner-border-sm"></span>
-                                    ) : productSearch ? (
-                                        <button
-                                            type="button"
-                                            onClick={() => {
-                                                setProductSearch("");
-                                                setProductSearchOpen(false);
-                                            }}
-                                        >
-                                            <i className="bi bi-x-lg"></i>
-                                        </button>
-                                    ) : null}
-                                </div>
-
-                                {productSearchOpen && (
-                                    <div
-                                        className="rr-sale-search-results"
-                                        role="listbox"
-                                        aria-label="Product search results"
-                                    >
-                                        <div className="rr-sale-search-results-header">
-                                            <strong>Product Search</strong>
-                                            <div>
-                                                <span>{productResults.length} result(s)</span>
-                                                <button
-                                                    type="button"
-                                                    className="rr-sale-search-clear"
-                                                    onClick={() => {
-                                                        setProductSearch("");
-                                                        setProductResults([]);
-                                                        setProductSearchOpen(false);
-                                                        searchInputRef.current?.focus();
-                                                    }}
-                                                >
-                                                    <i className="bi bi-x-circle"></i> Clear
-                                                </button>
-                                            </div>
-                                        </div>
-
-                                        <div className="rr-sale-search-results-list">
-                                            {productResults.length ? (
-                                                productResults.map((product) => (
-                                                    <button
-                                                        type="button"
-                                                        key={product.id}
-                                                        className="rr-sale-search-result"
-                                                        onClick={() => addProduct(product)}
-                                                        role="option"
-                                                        aria-selected="false"
-                                                    >
-                                                        <div className="rr-sale-search-result-icon">
-                                                            <i className="bi bi-box-seam"></i>
-                                                        </div>
-                                                        <div className="rr-sale-search-result-name">
-                                                            <strong>{product.product_name}</strong>
-                                                            <span>
-                                                                {product.product_code ?? ""}
-                                                                {product.part_number
-                                                                    ? ` • ${product.part_number}`
-                                                                    : ""}
-                                                                {product.brand?.brand_name
-                                                                    ? ` • ${product.brand.brand_name}`
-                                                                    : ""}
-                                                            </span>
-                                                        </div>
-                                                        <div className="rr-sale-search-result-stock">
-                                                            <span>Shop Stock</span>
-                                                            <strong
-                                                                className={
-                                                                    numberValue(product.shop_stock) > 0
-                                                                        ? "ok"
-                                                                        : "low"
-                                                                }
-                                                            >
-                                                                {formatQty(product.shop_stock)}
-                                                            </strong>
-                                                        </div>
-                                                        <div className="rr-sale-search-result-price">
-                                                            <span>Sale Rate</span>
-                                                            <strong>
-                                                                {formatMoney(
-                                                                    firstNumber(
-                                                                        product.sale_price,
-                                                                        product.selling_price,
-                                                                        product.price,
-                                                                        product.mrp,
-                                                                        0,
-                                                                    ),
-                                                                )}
-                                                            </strong>
-                                                        </div>
-                                                        <i className="bi bi-plus-circle"></i>
-                                                    </button>
-                                                ))
-                                            ) : !productSearching ? (
-                                                <div className="rr-sale-search-empty">
-                                                    <i className="bi bi-search"></i>
-                                                    <strong>No products found</strong>
-                                                    <span>
-                                                        Try another product name, code, barcode or part
-                                                        number.
-                                                    </span>
-                                                </div>
-                                            ) : null}
-                                        </div>
-                                    </div>
-                                )}
-                            </div>
-
-                            <ErrorText message={errors.product_id || errors.items} />
-                        </div>
-                    </section>
 
                     {/* =========================================================
                         PRODUCT GRID
@@ -1418,6 +1566,41 @@ export default function Create({
                             <span>{rows.length} item(s)</span>
                         </div>
 
+                        <div className="rr-sale-price-note">
+                            Selling prices already include GST. {data.billing_type === 'gst'
+                                ? 'The rate excluding GST is shown separately; GST is extracted, never added on top. Default GST: 18%.'
+                                : 'Without GST: the selling rate is used directly. No GST is added.'}
+                        </div>
+                        <div className="rr-sale-counter-toolbar">
+                            <label className="rr-sale-quick-quantity">
+                                <input type="checkbox" checked={quickQuantity}
+                                    onChange={(event) => setQuickQuantity(event.target.checked)} />
+                                Qty 1 mode
+                                <small>Return directly to product search</small>
+                            </label>
+                            <span><kbd>↑ ↓</kbd> Choose <kbd>Enter</kbd> Add / Next
+                                <kbd>Ctrl + Enter</kbd> Next product <kbd>F2</kbd> Search</span>
+                        </div>
+                        <details className="rr-sale-shortcut-notes">
+                            <summary><i className="bi bi-keyboard" aria-hidden="true" /> Billing shortcuts</summary>
+                            <div className="rr-sale-shortcut-grid">
+                                <span><kbd>↑ / ↓</kbd> Choose a search result</span>
+                                <span><kbd>Enter</kbd> Add product / Next field</span>
+                                <span><kbd>Esc</kbd> Next item field / Clear search</span>
+                                <span><kbd>Shift + Enter</kbd> Previous item field</span>
+                                <span><kbd>→ / ←</kbd> Next / Previous item field</span>
+                                <span><kbd>Ctrl + Enter</kbd> Next product search</span>
+                                <span><kbd>F2</kbd> Focus product search</span>
+                                <span><kbd>F9</kbd> Complete Sale</span>
+                                <span><kbd>F10</kbd> Complete &amp; Print</span>
+                            </div>
+                            <p>Item entry: Qty → Free → Rate → Discount → GST → next product.
+                                GST is skipped for non-GST bills. Left Arrow from Qty moves to the previous row.
+                                F9/F10 focus the item grid before completing the sale. Enable <strong>Qty 1 mode</strong> to add single-unit items continuously.
+                                In search, <kbd>Ctrl + Enter</kbd> edits the last item's quantity.
+                                Esc keeps the current field value. F9/F10 work across this page when dialogs are closed.</p>
+                        </details>
+                        <ErrorText message={errors.product_id || errors.items} />
                         <div className="rr-sale-items-wrap">
                             <table className="rr-sale-items-table">
                                 <thead>
@@ -1427,7 +1610,10 @@ export default function Create({
                                         <th className="number">Shop Stock</th>
                                         <th className="number">Qty</th>
                                         <th className="number">Free</th>
-                                        <th className="number">Rate</th>
+                                        <th className="number">Selling Rate<br /><small>GST inclusive</small></th>
+                                        {data.billing_type === 'gst' && (
+                                            <th className="number">Rate excl. GST</th>
+                                        )}
                                         <th className="number rr-sale-discount-heading">
                                             Discount
                                         </th>
@@ -1439,157 +1625,318 @@ export default function Create({
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {rows.length ? (
-                                        rows.map((row, index) => {
-                                            const calc = calculateRow(row);
-                                            const required =
-                                                numberValue(row.qty) + numberValue(row.free_quantity);
-                                            const short = Math.max(
-                                                0,
-                                                required - numberValue(row.shop_stock),
-                                            );
+                                    {rows.map((row, index) => {
+                                        const calc = calculateRow(row, data.billing_type);
+                                        const required =
+                                            numberValue(row.qty) + numberValue(row.free_quantity);
+                                        const short = Math.max(
+                                            0,
+                                            required - numberValue(row.shop_stock),
+                                        );
 
-                                            return (
-                                                <tr key={row.key}>
-                                                    <td className="serial">{index + 1}</td>
-                                                    <td>
-                                                        <div className="rr-sale-product-cell">
-                                                            <div className="rr-sale-product-icon">
-                                                                <i className="bi bi-box-seam"></i>
-                                                            </div>
+                                        return (
+                                            <tr key={row.key}>
+                                                <td className="serial">{index + 1}</td>
+                                                <td>
+                                                    <div className="rr-sale-product-cell">
+                                                        <div className="rr-sale-product-icon">
+                                                            <i className="bi bi-box-seam"></i>
+                                                        </div>
+                                                        <div>
+                                                            <strong>
+                                                                {row.product?.product_name ?? "Product"}
+                                                            </strong>
+                                                            <span>
+                                                                {row.product?.product_code ?? ""}
+                                                                {row.product?.part_number
+                                                                    ? ` • ${row.product.part_number}`
+                                                                    : ""}
+                                                                {row.product?.unit?.short_name
+                                                                    ? ` • ${row.product.unit.short_name}`
+                                                                    : ""}
+                                                            </span>
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                                <td className="number">
+                                                    <button
+                                                        type="button"
+                                                        className={`rr-sale-stock-pill ${required <= numberValue(row.shop_stock) ? "enough" : row.stock_state === "insufficient" ? "danger" : "transfer"}`}
+                                                        title="Check stock"
+                                                        onClick={() => checkRowStock(index)}
+                                                    >
+                                                        <i
+                                                            className={`bi ${required <= numberValue(row.shop_stock) ? "bi-check-circle" : "bi-box-arrow-in-down"}`}
+                                                        ></i>
+                                                        {formatQty(row.shop_stock)}
+                                                        {short > 0 && (
+                                                            <small>Short {formatQty(short)}</small>
+                                                        )}
+                                                    </button>
+                                                </td>
+                                                <td className="number">
+                                                    <GridInput
+                                                        index={index}
+                                                        field="qty"
+                                                        value={row.qty}
+                                                        min="1"
+                                                        step="1"
+                                                        error={errors[`qty.${index}`]}
+                                                        onChange={(value) =>
+                                                            updateRow(index, "qty", value)
+                                                        }
+                                                        onBlur={() => checkRowStock(index)}
+                                                    />
+                                                </td>
+                                                <td className="number">
+                                                    <GridInput
+                                                        index={index}
+                                                        field="free_quantity"
+                                                        value={row.free_quantity}
+                                                        min="0"
+                                                        step="1"
+                                                        error={errors[`free_quantity.${index}`]}
+                                                        onChange={(value) =>
+                                                            updateRow(index, "free_quantity", value)
+                                                        }
+                                                        onBlur={() => checkRowStock(index)}
+                                                    />
+                                                </td>
+                                                <td className="number">
+                                                    <GridInput
+                                                        index={index}
+                                                        field="sale_price"
+                                                        value={row.sale_price}
+                                                        min="0"
+                                                        step="1"
+                                                        error={errors[`sale_price.${index}`]}
+                                                        onChange={(value) =>
+                                                            updateRow(index, "sale_price", value)
+                                                        }
+                                                    />
+                                                </td>
+                                                {data.billing_type === 'gst' && (
+                                                    <td className="number rr-sale-exclusive-rate" title="Selling rate divided by 1 + GST percentage">
+                                                        {formatMoney(calc.exclusiveRate)}
+                                                    </td>
+                                                )}
+                                                <td className="number">
+                                                    <DiscountInput
+                                                        index={index}
+                                                        type={row.item_discount_type}
+                                                        value={row.item_discount}
+                                                        gross={calc.gross}
+                                                        error={errors[`item_discount.${index}`]}
+                                                        onTypeChange={(value) =>
+                                                            updateRow(index, "item_discount_type", value)
+                                                        }
+                                                        onChange={(value) =>
+                                                            updateRow(index, "item_discount", value)
+                                                        }
+                                                    />
+                                                </td>
+                                                {data.billing_type === "gst" && (
+                                                    <td className="number">
+                                                        <GridInput
+                                                            index={index}
+                                                            field="gst"
+                                                            value={row.gst}
+                                                            min="0"
+                                                            max="100"
+                                                            step="1"
+                                                            onBlur={() => {
+                                                                if (numberValue(row.gst) <= 0) updateRow(index, 'gst', '18');
+                                                            }}
+                                                            error={errors[`gst.${index}`]}
+                                                            onChange={(value) =>
+                                                                updateRow(index, "gst", value)
+                                                            }
+                                                        />
+                                                    </td>
+                                                )}
+                                                <td className="number rr-sale-line-total">
+                                                    {formatMoney(calc.total)}
+                                                </td>
+                                                <td className="center">
+                                                    <button
+                                                        type="button"
+                                                        className="rr-sale-row-delete"
+                                                        title="Remove product"
+                                                        onClick={() => removeRow(index)}
+                                                    >
+                                                        <i className="bi bi-trash3"></i>
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                        );
+                                    })}
+                                    <tr className="rr-sale-draft-row">
+                                        <td className="serial">{rows.length + 1}</td>
+                                        <td className="rr-sale-draft-product">
+                                            <div
+                                                ref={productSearchBoxRef}
+                                                className="rr-sale-product-search"
+                                            >
+                                                <div
+                                                    className={`rr-sale-product-search-input ${productSearchOpen ? "open" : ""}`}
+                                                >
+                                                    <i className="bi bi-search"></i>
+                                                    <input
+                                                        ref={searchInputRef}
+                                                        type="search"
+                                                        value={productSearch}
+                                                        role="combobox"
+                                                        aria-label="Search product for next invoice item"
+                                                        aria-expanded={productSearchOpen}
+                                                        aria-controls={productSearchOpen ? 'sale-product-listbox' : undefined}
+                                                        aria-activedescendant={productSearchOpen && productResults.length ? `sale-product-option-${selectedResult}` : undefined}
+                                                        onKeyDown={handleProductSearchKey}
+                                                        placeholder="Search product name, code, barcode, part number or OEM..."
+                                                        autoComplete="off"
+                                                        onFocus={() => {
+                                                            if (productSearch.trim()) setProductSearchOpen(true);
+                                                        }}
+                                                        onChange={(event) => changeProductSearch(event.target.value)}
+                                                    />
+
+                                                    {productSearching ? (
+                                                        <span className="spinner-border spinner-border-sm"></span>
+                                                    ) : productSearch ? (
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => {
+                                                                changeProductSearch("");
+                                                                setProductSearchOpen(false);
+                                                            }}
+                                                        >
+                                                            <i className="bi bi-x-lg"></i>
+                                                        </button>
+                                                    ) : null}
+                                                </div>
+
+                                                {productSearchOpen && createPortal(
+                                                    <div
+                                                        className="rr-sale-search-results rr-sale-counter-results"
+                                                        style={{
+                                                            '--counter-top': `${searchPopup.top}px`,
+                                                            '--counter-left': `${searchPopup.left}px`,
+                                                            '--counter-width': `${searchPopup.width}px`,
+                                                            '--counter-height': `${searchPopup.maxHeight}px`,
+                                                        }}
+                                                        id="sale-product-listbox"
+                                                        role="listbox"
+                                                        aria-label="Product search results"
+                                                    >
+                                                        <div className="rr-sale-search-results-header">
+                                                            <strong>Product Search</strong>
                                                             <div>
-                                                                <strong>
-                                                                    {row.product?.product_name ?? "Product"}
-                                                                </strong>
-                                                                <span>
-                                                                    {row.product?.product_code ?? ""}
-                                                                    {row.product?.part_number
-                                                                        ? ` • ${row.product.part_number}`
-                                                                        : ""}
-                                                                    {row.product?.unit?.short_name
-                                                                        ? ` • ${row.product.unit.short_name}`
-                                                                        : ""}
-                                                                </span>
+                                                                <span>{productResults.length} result(s)</span>
+                                                                <button
+                                                                    type="button"
+                                                                    className="rr-sale-search-clear"
+                                                                    onClick={() => {
+                                                                        changeProductSearch("");
+                                                                        setProductResults([]);
+                                                                        setProductSearchOpen(false);
+                                                                        searchInputRef.current?.focus();
+                                                                    }}
+                                                                >
+                                                                    <i className="bi bi-x-circle"></i> Clear
+                                                                </button>
                                                             </div>
                                                         </div>
-                                                    </td>
-                                                    <td className="number">
-                                                        <button
-                                                            type="button"
-                                                            className={`rr-sale-stock-pill ${required <= numberValue(row.shop_stock) ? "enough" : row.stock_state === "insufficient" ? "danger" : "transfer"}`}
-                                                            title="Check stock"
-                                                            onClick={() => checkRowStock(index)}
-                                                        >
-                                                            <i
-                                                                className={`bi ${required <= numberValue(row.shop_stock) ? "bi-check-circle" : "bi-box-arrow-in-down"}`}
-                                                            ></i>
-                                                            {formatQty(row.shop_stock)}
-                                                            {short > 0 && (
-                                                                <small>Short {formatQty(short)}</small>
-                                                            )}
-                                                        </button>
-                                                    </td>
-                                                    <td className="number">
-                                                        <GridInput
-                                                            index={index}
-                                                            field="qty"
-                                                            value={row.qty}
-                                                            min="1"
-                                                            step="1"
-                                                            error={errors[`qty.${index}`]}
-                                                            onChange={(value) =>
-                                                                updateRow(index, "qty", value)
-                                                            }
-                                                            onBlur={() => checkRowStock(index)}
-                                                        />
-                                                    </td>
-                                                    <td className="number">
-                                                        <GridInput
-                                                            index={index}
-                                                            field="free_quantity"
-                                                            value={row.free_quantity}
-                                                            min="0"
-                                                            step="1"
-                                                            error={errors[`free_quantity.${index}`]}
-                                                            onChange={(value) =>
-                                                                updateRow(index, "free_quantity", value)
-                                                            }
-                                                            onBlur={() => checkRowStock(index)}
-                                                        />
-                                                    </td>
-                                                    <td className="number">
-                                                        <GridInput
-                                                            index={index}
-                                                            field="sale_price"
-                                                            value={row.sale_price}
-                                                            min="0"
-                                                            step="1"
-                                                            error={errors[`sale_price.${index}`]}
-                                                            onChange={(value) =>
-                                                                updateRow(index, "sale_price", value)
-                                                            }
-                                                        />
-                                                    </td>
-                                                    <td className="number">
-                                                        <DiscountInput
-                                                            index={index}
-                                                            type={row.item_discount_type}
-                                                            value={row.item_discount}
-                                                            gross={calc.gross}
-                                                            error={errors[`item_discount.${index}`]}
-                                                            onTypeChange={(value) =>
-                                                                updateRow(index, "item_discount_type", value)
-                                                            }
-                                                            onChange={(value) =>
-                                                                updateRow(index, "item_discount", value)
-                                                            }
-                                                        />
-                                                    </td>
-                                                    {data.billing_type === "gst" && (
-                                                        <td className="number">
-                                                            <GridInput
-                                                                index={index}
-                                                                field="gst"
-                                                                value={row.gst}
-                                                                min="0"
-                                                                max="100"
-                                                                step="1"
-                                                                error={errors[`gst.${index}`]}
-                                                                onChange={(value) =>
-                                                                    updateRow(index, "gst", value)
-                                                                }
-                                                            />
-                                                        </td>
-                                                    )}
-                                                    <td className="number rr-sale-line-total">
-                                                        {formatMoney(calc.total)}
-                                                    </td>
-                                                    <td className="center">
-                                                        <button
-                                                            type="button"
-                                                            className="rr-sale-row-delete"
-                                                            title="Remove product"
-                                                            onClick={() => removeRow(index)}
-                                                        >
-                                                            <i className="bi bi-trash3"></i>
-                                                        </button>
-                                                    </td>
-                                                </tr>
-                                            );
-                                        })
-                                    ) : (
-                                        <tr>
-                                            <td colSpan={data.billing_type === "gst" ? 10 : 9}>
-                                                <div className="rr-sale-items-empty">
-                                                    <i className="bi bi-cart-plus"></i>
-                                                    <strong>No products added</strong>
-                                                    <span>
-                                                        Use the product search above to start billing.
-                                                    </span>
-                                                </div>
-                                            </td>
-                                        </tr>
-                                    )}
+
+                                                        <div className="rr-sale-search-results-list">
+                                                            {productSearching ? (
+                                                                <div className="rr-sale-search-empty" role="status">
+                                                                    <span className="spinner-border spinner-border-sm" aria-hidden="true" />
+                                                                    <strong>Searching products…</strong>
+                                                                </div>
+                                                            ) : productResults.length ? (
+                                                                productResults.map((product, resultIndex) => (
+                                                                    <button
+                                                                        type="button"
+                                                                        key={product.id}
+                                                                        className={`rr-sale-search-result ${selectedResult === resultIndex ? "keyboard-selected" : ""}`}
+                                                                        id={`sale-product-option-${resultIndex}`}
+                                                                        tabIndex={-1}
+                                                                        onMouseDown={(event) => event.preventDefault()}
+                                                                        onMouseEnter={() => setSelectedResult(resultIndex)}
+                                                                        onClick={() => addProduct(product)}
+                                                                        role="option"
+                                                                        aria-selected={selectedResult === resultIndex}
+                                                                    >
+                                                                        <div className="rr-sale-search-result-icon">
+                                                                            <i className="bi bi-box-seam"></i>
+                                                                        </div>
+                                                                        <div className="rr-sale-search-result-name">
+                                                                            <strong>{product.product_name}</strong>
+                                                                            <span>
+                                                                                {product.product_code ?? ""}
+                                                                                {product.part_number
+                                                                                    ? ` • ${product.part_number}`
+                                                                                    : ""}
+                                                                                {product.brand?.brand_name
+                                                                                    ? ` • ${product.brand.brand_name}`
+                                                                                    : ""}
+                                                                            </span>
+                                                                        </div>
+                                                                        <div className="rr-sale-search-result-stock">
+                                                                            <span>Shop Stock</span>
+                                                                            <strong
+                                                                                className={
+                                                                                    numberValue(product.shop_stock) > 0
+                                                                                        ? "ok"
+                                                                                        : "low"
+                                                                                }
+                                                                            >
+                                                                                {formatQty(product.shop_stock)}
+                                                                            </strong>
+                                                                        </div>
+                                                                        <div className="rr-sale-search-result-price">
+                                                                            <span>Sale Rate</span>
+                                                                            <strong>
+                                                                                {formatMoney(
+                                                                                    firstNumber(
+                                                                                        product.sale_price,
+                                                                                        product.selling_price,
+                                                                                        product.price,
+                                                                                        product.mrp,
+                                                                                        0,
+                                                                                    ),
+                                                                                )}
+                                                                            </strong>
+                                                                        </div>
+                                                                        <i className="bi bi-plus-circle"></i>
+                                                                    </button>
+                                                                ))
+                                                            ) : !productSearching ? (
+                                                                <div className="rr-sale-search-empty">
+                                                                    <i className="bi bi-search"></i>
+                                                                    <strong>{productSearchError || "No products found"}</strong>
+                                                                    <span>
+                                                                        Try another product name, code, barcode or part
+                                                                        number.
+                                                                    </span>
+                                                                </div>
+                                                            ) : null}
+                                                        </div>
+                                                    </div>,
+                                                    document.body
+                                                )}
+                                            </div>
+
+                                        </td>
+                                        <td className="number">—</td>
+                                        <td className="number"><span className="rr-sale-draft-value">1</span></td>
+                                        <td className="number">0</td>
+                                        <td className="number">—</td>
+                                        {data.billing_type === 'gst' && <td className="number">—</td>}
+                                        <td className="number">—</td>
+                                        {data.billing_type === 'gst' && <td className="number">—</td>}
+                                        <td className="number">—</td>
+                                        <td className="center"><i className="bi bi-plus-circle" aria-hidden="true" /></td>
+                                    </tr>
                                 </tbody>
                             </table>
                         </div>
@@ -1732,6 +2079,11 @@ export default function Create({
                         </section>
                     </div>
 
+                    {(submitError || errors.print_after_save) && (
+                        <div className="rr-sale-submit-error" role="alert">
+                            {submitError || errors.print_after_save}
+                        </div>
+                    )}
                     <div className="rr-sale-command-bar">
                         <div>
                             {hasStockProblem ? (
@@ -1756,10 +2108,12 @@ export default function Create({
                             </Link>
                             <button
                                 type="submit"
+                                name="sale_action"
+                                value="save"
                                 className="rr-sale-btn primary"
-                                disabled={processing || rows.length === 0 || hasStockProblem}
+                                disabled={processing || submitting || rows.length === 0 || hasStockProblem}
                             >
-                                {processing ? (
+                                {processing || submitting ? (
                                     <>
                                         <span className="spinner-border spinner-border-sm"></span>{" "}
                                         Saving...
@@ -1769,6 +2123,17 @@ export default function Create({
                                         <i className="bi bi-receipt"></i> Complete Sale
                                     </>
                                 )}
+                            </button>
+                            <button
+                                type="submit"
+                                name="sale_action"
+                                value="print"
+                                className="rr-sale-btn print"
+                                disabled={processing || submitting || rows.length === 0 || hasStockProblem}
+                                title="Save invoice and print (F10)"
+                            >
+                                {processing || submitting ? <><span className="spinner-border spinner-border-sm" aria-hidden="true" /> Preparing…</>
+                                    : <><i className="bi bi-printer" aria-hidden="true" /> Complete &amp; Print</>}
                             </button>
                         </div>
                     </div>
@@ -2478,7 +2843,7 @@ function ModalArea({ label, value, onChange, error }) {
    Helpers
    ========================================================================== */
 
-function calculateRow(row) {
+function calculateRow(row, billingType = "gst") {
     const qty = numberValue(row.qty);
     const price = numberValue(row.sale_price);
     const gross = round2(qty * price);
@@ -2487,15 +2852,20 @@ function calculateRow(row) {
         row.item_discount_type === "percentage"
             ? Math.min(round2((gross * Math.min(enteredDiscount, 100)) / 100), gross)
             : Math.min(enteredDiscount, gross);
-    const taxable = round2(gross - discount);
-    const gstAmount = round2((taxable * numberValue(row.gst)) / 100);
+    const total = round2(gross - discount);
+    const gstPercent = billingType === 'gst' ? (numberValue(row.gst) || 18) : 0;
+    const divisor = 1 + gstPercent / 100;
+    const taxable = round2(total / divisor);
+    const gstAmount = round2(total - taxable);
 
     return {
         gross,
         discount,
         taxable,
         gstAmount,
-        total: round2(taxable + gstAmount),
+        total,
+        exclusiveRate: price / divisor,
+        gstPercent,
     };
 }
 

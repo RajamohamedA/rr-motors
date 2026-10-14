@@ -3,654 +3,539 @@
 
 <head>
     <meta charset="UTF-8">
-
     <title>Invoice {{ $sale->invoice_no }}</title>
-
-    <style>
-        @page {
-            margin: {
-                    {
-                    ($paper ?? 'a4')==='a5' ? '7mm': '10mm'
-                }
-            }
-
-            ;
-        }
-
-        * {
-            box-sizing: border-box;
-        }
-
-        body {
-            margin: 0;
-            color: #172033;
-            font-family: DejaVu Sans, sans-serif;
-
-            font-size: {
-                    {
-                    ($paper ?? 'a4')==='a5' ? '9px': '10px'
-                }
-            }
-
-            ;
-            line-height: 1.35;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-
-        .header td {
-            vertical-align: top;
-        }
-
-        .company-name {
-            margin: 0 0 4px;
-            color: #0c548c;
-
-            font-size: {
-                    {
-                    ($paper ?? 'a4')==='a5' ? '18px': '22px'
-                }
-            }
-
-            ;
-            font-weight: bold;
-            text-transform: uppercase;
-        }
-
-        .company-line {
-            margin: 1px 0;
-            color: #3f5063;
-        }
-
-        .invoice-heading {
-            color: #17324d;
-
-            font-size: {
-                    {
-                    ($paper ?? 'a4')==='a5' ? '16px': '20px'
-                }
-            }
-
-            ;
-            font-weight: bold;
-            text-align: right;
-            text-transform: uppercase;
-        }
-
-        .bill-type {
-            display: inline-block;
-            margin: 5px 0;
-            padding: 3px 8px;
-            color: #fff;
-            background: #0c609e;
-            font-size: 8px;
-            font-weight: bold;
-        }
-
-        .invoice-meta {
-            margin-left: auto;
-            width: 75%;
-        }
-
-        .invoice-meta td {
-            padding: 2px 0 2px 7px;
-            text-align: right;
-        }
-
-        .invoice-meta td:first-child {
-            color: #64748b;
-        }
-
-        .blue-rule {
-            margin: 8px 0;
-            border: 0;
-            border-top: 3px solid #1769aa;
-        }
-
-        .party-table {
-            margin-bottom: 9px;
-        }
-
-        .party-table td {
-            width: 50%;
-            padding: 7px;
-            border: 1px solid #bdc8d4;
-            vertical-align: top;
-        }
-
-        .party-title {
-            margin-bottom: 4px;
-            color: #607086;
-            font-size: 8px;
-            font-weight: bold;
-            text-transform: uppercase;
-        }
-
-        .party-name {
-            margin-bottom: 3px;
-            color: #172033;
-            font-size: 11px;
-            font-weight: bold;
-        }
-
-        .party-line {
-            margin: 1px 0;
-            color: #405166;
-        }
-
-        .items {
-            table-layout: fixed;
-        }
-
-        .items th {
-            padding: 5px 4px;
-            border: 1px solid #0d568e;
-            color: #fff;
-            background: #1769aa;
-            font-size: 8px;
-            text-transform: uppercase;
-        }
-
-        .items td {
-            padding: 5px 4px;
-            border: 1px solid #ccd5df;
-            vertical-align: top;
-        }
-
-        .items tbody tr:nth-child(even) {
-            background: #f4f7fa;
-        }
-
-        .serial {
-            width: 5%;
-            text-align: center;
-        }
-
-        .product-column {
-            width: {
-                    {
-                    ($sale->billing_type ?? 'gst')==='gst' ? '35%': '43%'
-                }
-            }
-
-            ;
-        }
-
-        .quantity-column {
-            width: 9%;
-        }
-
-        .rate-column {
-            width: 14%;
-        }
-
-        .discount-column {
-            width: 13%;
-        }
-
-        .gst-column {
-            width: 11%;
-        }
-
-        .amount-column {
-            width: 16%;
-        }
-
-        .number {
-            text-align: right;
-            white-space: nowrap;
-        }
-
-        .product-name {
-            display: block;
-            font-weight: bold;
-        }
-
-        .product-meta,
-        .item-note {
-            display: block;
-            margin-top: 2px;
-            color: #68778a;
-            font-size: 8px;
-        }
-
-        .bottom-table {
-            margin-top: 10px;
-        }
-
-        .bottom-table>tbody>tr>td {
-            width: 50%;
-            vertical-align: top;
-        }
-
-        .notes {
-            padding-right: 12px;
-            color: #526175;
-        }
-
-        .notes-box {
-            min-height: 55px;
-            padding: 7px;
-            border: 1px solid #ccd5df;
-        }
-
-        .notes-title {
-            margin-bottom: 4px;
-            color: #344256;
-            font-weight: bold;
-        }
-
-        .totals td {
-            padding: 4px 6px;
-            border-bottom: 1px dotted #b6c0cc;
-        }
-
-        .totals td:last-child {
-            text-align: right;
-            font-weight: bold;
-            white-space: nowrap;
-        }
-
-        .totals .grand td {
-            padding: 7px 6px;
-            border: 0;
-            color: #fff;
-            background: #0d568e;
-            font-size: 13px;
-            font-weight: bold;
-        }
-
-        .totals .balance td {
-            font-size: 11px;
-            font-weight: bold;
-        }
-
-        .tax-heading {
-            margin: 11px 0 4px;
-            color: #344256;
-            font-size: 9px;
-            font-weight: bold;
-            text-transform: uppercase;
-        }
-
-        .tax-table th,
-        .tax-table td {
-            padding: 4px;
-            border: 1px solid #b9c4d0;
-            font-size: 8px;
-            text-align: right;
-        }
-
-        .tax-table th {
-            color: #344256;
-            background: #edf2f6;
-        }
-
-        .tax-table th:first-child,
-        .tax-table td:first-child {
-            text-align: left;
-        }
-
-        .footer {
-            margin-top: 18px;
-            padding-top: 7px;
-            border-top: 1px solid #ccd5df;
-            color: #6b7889;
-            font-size: 8px;
-            text-align: center;
-        }
-    </style>
-</head>
-
-<body>
     @php
     $isGstBill = ($sale->billing_type ?? 'gst') === 'gst';
-    $company = $sale->company;
-    $store = $sale->store;
-    $customer = $sale->customer;
-    $items = $sale->items ?? collect();
+    $smallWords = ['Zero','One','Two','Three','Four','Five','Six','Seven','Eight','Nine','Ten','Eleven','Twelve','Thirteen','Fourteen','Fifteen','Sixteen','Seventeen','Eighteen','Nineteen'];
+    $tensWords = ['', '', 'Twenty','Thirty','Forty','Fifty','Sixty','Seventy','Eighty','Ninety'];
+    $integerWords = function ($number) use (&$integerWords, $smallWords, $tensWords) {
+    $number = (int) $number;
+    if ($number < 20) return $smallWords[$number];
+        if ($number < 100) return $tensWords[intdiv($number, 10)] . ($number % 10 ? ' ' . $smallWords[$number % 10] : '' );
+        foreach ([10000000=> 'Crore', 100000 => 'Lakh', 1000 => 'Thousand', 100 => 'Hundred'] as $divisor => $label) {
+        if ($number >= $divisor) return $integerWords(intdiv($number, $divisor)) . ' ' . $label . ($number % $divisor ? ' ' . $integerWords($number % $divisor) : '');
+        }
+        return '';
+        };
+        $totalPaise = (int) round(abs((float) $sale->grand_total) * 100);
+        $amountWords = ((float) $sale->grand_total < 0 ? 'Minus ' : '' ) . 'INR ' . $integerWords(intdiv($totalPaise, 100))
+            . ($totalPaise % 100 ? ' and ' . $integerWords($totalPaise % 100) . ' Paise' : '' ) . ' Only' ;
+            $company=$sale->company;
+            $store = $sale->store;
+            $customer = $sale->customer;
+            $items = $sale->items ?? collect();
+            $totalQuantity = $items->sum(
+            fn ($item) =>
+            (float) $item->quantity
+            + (float) $item->free_quantity
+            );
+            $taxSummary = $items
+            ->groupBy(
+            fn ($item) => number_format(
+            (float) $item->gst_percent,
+            2,
+            '.',
+            ''
+            )
+            )
+            ->map(function ($group, $rate) {
+            $taxable = $group->sum(fn ($item) => round(
+            (float) $item->line_total - (float) $item->gst_amount, 2
+            ));
+            $gst = $group->sum(
+            fn ($item) => (float) $item->gst_amount
+            );
+            return [
+            'rate' => (float) $rate,
+            'taxable' => $taxable,
+            'gst' => $gst,
+            ];
+            });
+            $isA5 = strtolower($paper ?? 'a4') === 'a5';
+            // Dompdf does not run the browser's JavaScript page-fitting function.
+            // Reserve a ruled blank area for short invoices, decreasing as items grow.
+            $rowHeightMm = $items->sum(function ($item) use ($isA5) {
+            $charactersPerLine = $isA5 ? 19 : 31;
+            $lines = max(1, (int) ceil(mb_strlen($item->product?->product_name ?? 'Product') / $charactersPerLine));
+            $lines += $item->product?->product_code ? 1 : 0;
+            $lines += (float) $item->free_quantity > 0 ? 1 : 0;
+            $lines += (float) $item->discount > 0 ? 1 : 0;
+            return $lines * ($isA5 ? 3.3 : 3.8) + 3;
+            });
+            $headerExtraLines = max(0, (int) ceil(mb_strlen(($store?->address ?? '') . ' ' . ($store?->city ?? '')) / ($isA5 ? 38 : 55)) - 1);
+            $headerExtraLines += max(0, (int) ceil(mb_strlen($customer?->billing_address ?? '') / ($isA5 ? 38 : 55)) - 1);
+            $headerExtraLines += max(0, (int) ceil(mb_strlen($sale->remarks ?? '') / ($isA5 ? 22 : 35)) - 1);
+            $fillHeightMm = max(0, ($isA5 ? 92 : 165) - $rowHeightMm - $headerExtraLines * 4);
+            @endphp
+            <style>
+                @page invoice-a4 {
+                    margin: 10mm;
+                }
 
-    $totalQuantity = $items->sum(
-    fn ($item) =>
-    (float) $item->quantity
-    + (float) $item->free_quantity
-    );
+                @page invoice-a5 {
+                    margin: 7mm;
+                }
 
-    $taxSummary = $items
-    ->groupBy(
-    fn ($item) => number_format(
-    (float) $item->gst_percent,
-    2,
-    '.',
-    ''
-    )
-    )
-    ->map(function ($group, $rate) {
-    $taxable = $group->sum(function ($item) {
-    $gross =
-    (float) $item->quantity
-    * (float) $item->sale_price;
+                body.a4 {
+                    page: invoice-a4;
+                }
 
-    return max(
-    0,
-    $gross - (float) $item->discount
-    );
-    });
+                body.a5 {
+                    page: invoice-a5;
+                }
 
-    $gst = $group->sum(
-    fn ($item) => (float) $item->gst_amount
-    );
+                body {
+                    margin: 0;
+                    font-family: DejaVu Sans, sans-serif;
+                    font-size: 10px;
+                    line-height: 1.3;
+                    color: #000;
+                }
 
-    return [
-    'rate' => (float) $rate,
-    'taxable' => $taxable,
-    'cgst' => $gst / 2,
-    'sgst' => $gst / 2,
-    'gst' => $gst,
-    ];
-    });
-    @endphp
+                table {
+                    width: 100%;
+                    border-collapse: collapse;
+                    table-layout: fixed;
+                }
 
-    <table class="header">
-        <tr>
-            <td>
-                <div class="company-name">
-                    {{ $company->company_name ?? 'RR Motors' }}
-                </div>
+                .classic-title {
+                    margin: 0 0 6px;
+                    text-align: center;
+                    font-size: 14px;
+                    letter-spacing: .6px;
+                }
 
-                @if($store?->store_name)
-                <div class="company-line">
-                    <strong>{{ $store->store_name }}</strong>
-                </div>
-                @endif
+                .classic-header {
+                    border: 1px solid #555;
+                }
 
-                @if($store?->address || $store?->city || $store?->pincode)
-                <div class="company-line">
-                    {{ $store->address }}
-                    {{ $store->city ? ', ' . $store->city : '' }}
-                    {{ $store->pincode ? ' - ' . $store->pincode : '' }}
-                </div>
-                @endif
+                .classic-header>tbody>tr>td {
+                    border: 1px solid #555;
+                    vertical-align: top;
+                }
 
-                @if($store?->phone ?? $company?->phone)
-                <div class="company-line">
-                    Phone: {{ $store->phone ?? $company->phone }}
-                </div>
-                @endif
+                .classic-party {
+                    width: 58%;
+                    padding: 5px 7px;
+                    word-wrap: break-word;
+                }
 
-                @if($isGstBill && $company?->gst_number)
-                <div class="company-line">
-                    <strong>GSTIN: {{ $company->gst_number }}</strong>
-                </div>
-                @endif
-            </td>
+                .classic-party strong,
+                .classic-caption {
+                    display: block;
+                }
 
-            <td>
-                <div class="invoice-heading">
-                    {{ $isGstBill ? 'Tax Invoice' : 'Invoice' }}
-                </div>
+                .classic-business {
+                    font-size: 14px;
+                    text-transform: uppercase;
+                }
 
-                <div style="text-align: right">
-                    <span class="bill-type">
-                        {{ $isGstBill ? 'GST BILL' : 'WITHOUT GST' }}
-                    </span>
-                </div>
+                .classic-caption {
+                    margin-bottom: 2px;
+                    font-size: 9px;
+                }
 
-                <table class="invoice-meta">
-                    <tr>
-                        <td>Invoice</td>
-                        <td><strong>{{ $sale->invoice_no }}</strong></td>
-                    </tr>
-                    <tr>
-                        <td>Date</td>
-                        <td>
-                            {{ optional($sale->invoice_date)->format('d M Y') }}
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>Status</td>
-                        <td>{{ $sale->payment_status }}</td>
-                    </tr>
-                </table>
-            </td>
-        </tr>
-    </table>
+                .classic-invoice-meta {
+                    padding: 0;
+                }
 
-    <hr class="blue-rule">
+                .classic-invoice-meta td {
+                    border-bottom: 1px solid #777;
+                    border-right: 1px solid #777;
+                    padding: 4px 5px;
+                    vertical-align: top;
+                    word-wrap: break-word;
+                }
 
-    <table class="party-table">
-        <tr>
-            <td>
-                <div class="party-title">Bill To</div>
-                <div class="party-name">
-                    {{ $customer->customer_name ?? 'Customer' }}
-                </div>
+                .classic-invoice-meta td:last-child {
+                    border-right: 0;
+                }
 
-                @if($customer?->customer_code)
-                <div class="party-line">
-                    Code: {{ $customer->customer_code }}
-                </div>
-                @endif
+                .classic-invoice-meta tr:last-child td {
+                    border-bottom: 0;
+                }
 
-                @if($customer?->mobile ?? $customer?->phone)
-                <div class="party-line">
-                    Phone: {{ $customer->mobile ?? $customer->phone }}
-                </div>
-                @endif
+                .classic-invoice-meta span,
+                .classic-invoice-meta strong {
+                    display: block;
+                }
 
-                @if($isGstBill && $customer?->gst_number)
-                <div class="party-line">
-                    GSTIN: {{ $customer->gst_number }}
-                </div>
-                @endif
+                .classic-invoice-meta strong {
+                    margin-top: 2px;
+                }
 
-                @if($customer?->billing_address)
-                <div class="party-line">
-                    {{ $customer->billing_address }}
-                </div>
-                @endif
-            </td>
+                .classic-items {
+                    border: 1px solid #555;
+                    margin-top: -1px;
+                }
 
-            <td>
-                <div class="party-title">Sale Information</div>
-                <div class="party-name">
-                    {{ $sale->sale_source === 'mechanic'
-                        ? 'Mechanic Referral'
-                        : 'Direct Customer' }}
-                </div>
+                .classic-items th {
+                    border: 1px solid #555;
+                    padding: 5px 3px;
+                    font-weight: normal;
+                    font-size: 9px;
+                }
 
-                @if($sale->mechanic)
-                <div class="party-line">
-                    Mechanic: {{ $sale->mechanic->mechanic_name }}
-                </div>
-                @endif
+                .classic-items tbody td {
+                    border-right: 1px solid #777;
+                    padding: 4px 3px;
+                    vertical-align: top;
+                    word-wrap: break-word;
+                }
 
-                <div class="party-line">
-                    Items: {{ $items->count() }}
-                </div>
+                .c-serial {
+                    width: 4%;
+                    text-align: center;
+                }
 
-                <div class="party-line">
-                    Quantity: {{ number_format($totalQuantity, 2) }}
-                </div>
-            </td>
-        </tr>
-    </table>
+                .c-description {
+                    text-align: left;
+                }
 
-    <table class="items">
-        <thead>
+                .c-description small {
+                    display: block;
+                    font-size: 8px;
+                    margin-top: 2px;
+                }
+
+                .c-hsn {
+                    width: 11%;
+                    text-align: center;
+                }
+
+                .c-qty {
+                    width: 9%;
+                    text-align: right;
+                }
+
+                .c-rate {
+                    width: 13%;
+                    text-align: right;
+                }
+
+                .c-unit {
+                    width: 7%;
+                    text-align: center;
+                }
+
+                .c-amount {
+                    width: 18%;
+                    text-align: right;
+                }
+
+                .gst-invoice .c-hsn {
+                    width: 9%;
+                }
+
+                .gst-invoice .c-qty {
+                    width: 7%;
+                }
+
+                .gst-invoice .c-rate {
+                    width: 11%;
+                }
+
+                .gst-invoice .c-unit {
+                    width: 5%;
+                }
+
+                .c-gst-percent {
+                    width: 8%;
+                    text-align: right;
+                }
+
+                .c-gst {
+                    width: 11%;
+                    text-align: right;
+                }
+
+                .gst-invoice .c-amount {
+                    width: 14%;
+                }
+
+                .classic-items tbody .classic-fill-row td {
+                    padding: 0;
+                    font-size: 0;
+                    line-height: 0;
+                }
+
+                .classic-items tfoot td {
+                    border: 1px solid #777;
+                    padding: 6px 5px;
+                }
+
+                .classic-items tfoot {
+                    display: table-row-group;
+                }
+
+                .classic-compact-total {
+                    text-align: left;
+                }
+
+                .classic-compact-total>span {
+                    display: inline-block;
+                    margin-right: 7px;
+                    font-size: 9px;
+                }
+
+                .classic-total-word {
+                    float: right;
+                    font-size: 11px;
+                }
+
+                .classic-compact-amount {
+                    text-align: right;
+                    font-weight: bold;
+                    font-size: 13px;
+                }
+
+                .classic-grand td {
+                    border-top: 2px solid #333 !important;
+                    border-bottom: 2px solid #333 !important;
+                }
+
+                .classic-payment-strip {
+                    border: 1px solid #555;
+                    margin-top: -1px;
+                }
+
+                .classic-payment-strip td {
+                    padding: 5px 6px;
+                    font-size: 9px;
+                }
+
+                .number {
+                    text-align: right;
+                }
+
+                .classic-bottom {
+                    border: 1px solid #555;
+                    margin-top: -1px;
+                }
+
+                .classic-bottom td {
+                    padding: 6px 7px;
+                    width: 55%;
+                    vertical-align: top;
+                }
+
+                .classic-bottom td:last-child {
+                    width: 45%;
+                    border-left: 1px solid #777;
+                }
+
+                .classic-bottom strong,
+                .classic-bottom span {
+                    display: block;
+                }
+
+                .classic-bottom strong {
+                    margin-top: 4px;
+                }
+
+                .classic-signature {
+                    text-align: right;
+                }
+
+                .signature-space {
+                    height: 12mm;
+                }
+
+                .classic-footer {
+                    text-align: center;
+                    margin: 5px 0 0;
+                    font-size: 9px;
+                }
+
+                .classic-items tbody tr,
+                .classic-items tfoot tr,
+                .classic-bottom,
+                .classic-payment-strip {
+                    page-break-inside: avoid;
+                }
+
+                thead {
+                    display: table-header-group;
+                }
+
+
+
+                /* A5 typography overrides */
+                body.a5 {
+                    font-size: 8px;
+                }
+
+                body.a5 .classic-title {
+                    font-size: 11px;
+                }
+
+                body.a5 .classic-business {
+                    font-size: 11px;
+                }
+
+                body.a5 .classic-caption {
+                    font-size: 8px;
+                }
+
+                body.a5 .classic-items th {
+                    font-size: 7px;
+                }
+
+                body.a5 .c-description small {
+                    font-size: 7px;
+                }
+
+                body.a5 .classic-compact-total>span {
+                    font-size: 7px;
+                }
+
+                body.a5 .classic-total-word {
+                    font-size: 9px;
+                }
+
+                body.a5 .classic-compact-amount {
+                    font-size: 10px;
+                }
+
+                body.a5 .classic-payment-strip td {
+                    font-size: 7px;
+                }
+
+                body.a5 .signature-space {
+                    height: 9mm;
+                }
+
+                body.a5 .classic-footer {
+                    font-size: 7px;
+                }
+            </style>
+</head>
+
+<body class="{{ $isA5 ? 'a5' : 'a4' }}">
+    <div class="classic-invoice {{ $isGstBill ? 'gst-invoice' : 'cash-invoice' }} {{ $isA5 ? 'a5' : 'a4' }}">
+        <h1 class="classic-title">{{ $isGstBill ? 'TAX INVOICE' : 'CASH BILL' }}</h1>
+        <table class="classic-header">
+            <tbody>
+                <tr>
+                    <td class="classic-party">
+                        <strong class="classic-business">{{ $company->company_name ?? 'Company' }}</strong>
+                        @if($store?->store_name)<div>{{ $store->store_name }}</div>@endif
+                        <div>{{ $store?->address }} {{ $store?->city }} {{ $store?->state }} {{ $store?->pincode }}</div>
+                        @if($store?->phone ?? $company?->phone)<div>Phone: {{ $store->phone ?? $company->phone }}</div>@endif
+                        @if($isGstBill && $company?->gst_number)<div>GSTIN: {{ $company->gst_number }}</div>@endif
+                    </td>
+                    <td class="classic-invoice-meta" rowspan="2">
+                        <table>
+                            <tbody>
+                                <tr>
+                                    <td><span>Invoice No.</span><strong>{{ $sale->invoice_no }}</strong></td>
+                                    <td><span>Dated</span><strong>{{ optional($sale->invoice_date)->format('d-M-Y') }}</strong></td>
+                                </tr>
+                                <tr>
+                                    <td><span>Payment Status</span><strong>{{ $sale->payment_status ?? '—' }}</strong></td>
+                                    <td><span>Bill Type</span><strong>{{ $isGstBill ? 'GST' : 'Cash Bill' }}</strong></td>
+                                </tr>
+                                <tr>
+                                    <td colspan="2"><span>Remarks</span>
+                                        <div>{{ $sale->remarks ?: '—' }}</div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="classic-party">
+                        <span class="classic-caption">Buyer (Bill to)</span>
+                        <strong>{{ $customer?->customer_name ?? 'Walk-in Customer' }}</strong>
+                        @if($customer?->billing_address)<div>{{ $customer->billing_address }}</div>@endif
+                        <div>{{ $customer?->city }} {{ $customer?->state }} {{ $customer?->pincode }}</div>
+                        @if($customer?->mobile ?? $customer?->phone)<div>Phone: {{ $customer->mobile ?? $customer->phone }}</div>@endif
+                        @if($isGstBill && $customer?->gst_number)<div>GSTIN: {{ $customer->gst_number }}</div>@endif
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+        <table class="classic-items">
+            <thead>
+                <tr>
+                    <th class="c-serial">Sl.</th>
+                    <th class="c-description">Description of Goods</th>
+                    <th class="c-hsn">HSN/SAC</th>
+                    <th class="c-qty">Qty</th>
+                    <th class="c-rate">Rate{{ $isGstBill ? ' excl.' : '' }}</th>
+                    <th class="c-unit">Per</th>
+                    @if($isGstBill)<th class="c-gst-percent">GST %</th>
+                    <th class="c-gst">GST Amt</th>@endif
+                    <th class="c-amount">Amount</th>
+                </tr>
+            </thead>
+            <tbody>
+                @forelse($items as $index => $item)
+                <tr>
+                    <td class="c-serial">{{ $index + 1 }}</td>
+                    <td class="c-description"><strong>{{ $item->product?->product_name ?? 'Product' }}</strong>
+                        @if($item->product?->product_code)<small>{{ $item->product->product_code }}</small>@endif
+                        @if((float) $item->free_quantity > 0)<small>Free: {{ number_format((float) $item->free_quantity, 2) }}</small>@endif
+                        @if((float) $item->discount > 0)<small>Discount: {{ $item->discount_type === 'percentage' ? number_format((float) $item->discount_value, 2) . '%' : number_format((float) $item->discount, 2) }}{{ $isGstBill && $item->discount_type !== 'percentage' ? ' excl. GST' : '' }}</small>@endif
+                    </td>
+                    <td class="c-hsn">{{ $item->product?->hsn_code ?? $item->product?->hsn_sac ?? '—' }}</td>
+                    <td class="c-qty">{{ number_format((float) $item->quantity, 2) }}</td>
+                    <td class="c-rate">{{ number_format((float) $item->sale_price, 2) }}</td>
+                    <td class="c-unit">{{ $item->product?->unit?->short_name ?? '—' }}</td>
+                    @if($isGstBill)<td class="c-gst-percent">{{ number_format((float) $item->gst_percent, 2) }}%</td>
+                    <td class="c-gst">{{ number_format((float) $item->gst_amount, 2) }}</td>@endif
+                    <td class="c-amount"><strong>{{ number_format((float) $item->line_total, 2) }}</strong></td>
+                </tr>
+                @empty
+                <tr>
+                    <td colspan="{{ $isGstBill ? 9 : 7 }}">No items</td>
+                </tr>
+                @endforelse
+                <tr class="classic-fill-row" aria-hidden="true" style="height: {{ $fillHeightMm }}mm">
+                    <td style="height: {{ $fillHeightMm }}mm;"></td>
+                    <td style="height: {{ $fillHeightMm }}mm;"></td>
+                    <td style="height: {{ $fillHeightMm }}mm;"></td>
+                    <td style="height: {{ $fillHeightMm }}mm;"></td>
+                    <td style="height: {{ $fillHeightMm }}mm;"></td>
+                    <td style="height: {{ $fillHeightMm }}mm;"></td>
+                    @if($isGstBill)<td style="height: {{ $fillHeightMm }}mm;"></td>
+                    <td style="height: {{ $fillHeightMm }}mm;"></td>@endif
+                    <td style="height: {{ $fillHeightMm }}mm;"></td>
+                </tr>
+            </tbody>
+            <tfoot>
+                <tr class="classic-grand">
+                    <td colspan="{{ $isGstBill ? 8 : 6 }}" class="classic-compact-total">
+                        <span class="classic-count">{{ $items->count() }} items · Qty {{ number_format($totalQuantity, 2) }}</span>
+                        @if($isGstBill)<span>Taxable {{ number_format((float) $sale->sub_total, 2) }} · GST {{ number_format((float) $sale->gst_total, 2) }}</span>@endif
+                        @if((float) $sale->final_discount > 0)<span>Discount −{{ number_format((float) $sale->final_discount, 2) }}</span>@endif
+                        @if((float) $sale->round_off != 0)<span>Round {{ number_format((float) $sale->round_off, 2) }}</span>@endif
+                        <strong class="classic-total-word">TOTAL Rs.</strong>
+                    </td>
+                    <td class="classic-compact-amount">{{ number_format((float) $sale->grand_total, 2) }}</td>
+                </tr>
+            </tfoot>
+        </table>
+        <table class="classic-payment-strip">
             <tr>
-                <th class="serial">#</th>
-                <th class="product-column">Product</th>
-                <th class="quantity-column number">Qty</th>
-                <th class="rate-column number">Rate</th>
-                <th class="discount-column number">Discount</th>
-
-                @if($isGstBill)
-                <th class="gst-column number">GST</th>
-                @endif
-
-                <th class="amount-column number">Amount</th>
+                <td>Paid Amount</td>
+                <td class="number"><strong>Rs. {{ number_format((float) $sale->paid_amount, 2) }}</strong></td>
+                <td>Due Balance</td>
+                <td class="number"><strong>Rs. {{ number_format((float) $sale->balance_amount, 2) }}</strong></td>
             </tr>
-        </thead>
-
-        <tbody>
-            @foreach($items as $index => $item)
+        </table>
+        <table class="classic-bottom">
             <tr>
-                <td class="serial">{{ $index + 1 }}</td>
-                <td>
-                    <span class="product-name">
-                        {{ $item->product->product_name ?? 'Product' }}
-                    </span>
-                    <span class="product-meta">
-                        {{ $item->product->product_code ?? '' }}
-                        {{ $item->product?->part_number
-                                ? ' / ' . $item->product->part_number
-                                : '' }}
-                    </span>
-
-                    @if((float) $item->free_quantity > 0)
-                    <span class="item-note">
-                        Free: {{ number_format((float) $item->free_quantity, 2) }}
-                    </span>
-                    @endif
-                </td>
-                <td class="number">
-                    {{ number_format((float) $item->quantity, 2) }}
-                </td>
-                <td class="number">
-                    {{ number_format((float) $item->sale_price, 2) }}
-                </td>
-                <td class="number">
-                    {{ number_format((float) $item->discount, 2) }}
-                    @if($item->discount_type === 'percentage')
-                    <span class="item-note">
-                        {{ number_format((float) $item->discount_value, 2) }}%
-                    </span>
-                    @endif
-                </td>
-
-                @if($isGstBill)
-                <td class="number">
-                    {{ number_format((float) $item->gst_percent, 2) }}%
-                    <span class="item-note">
-                        {{ number_format((float) $item->gst_amount, 2) }}
-                    </span>
-                </td>
-                @endif
-
-                <td class="number">
-                    <strong>
-                        {{ number_format((float) $item->line_total, 2) }}
-                    </strong>
+                <td><span>Amount Chargeable (in words)</span><strong>{{ $amountWords }}</strong></td>
+                <td class="classic-signature"><strong>For {{ $company->company_name ?? 'Company' }}</strong>
+                    <div class="signature-space"></div><span>Authorised Signatory</span>
                 </td>
             </tr>
-            @endforeach
-        </tbody>
-    </table>
-
-    <table class="bottom-table">
-        <tr>
-            <td class="notes">
-                <div class="notes-box">
-                    <div class="notes-title">Remarks</div>
-                    {{ $sale->remarks ?: 'Thank you for your business.' }}
-                </div>
-            </td>
-
-            <td>
-                <table class="totals">
-                    <tr>
-                        <td>
-                            {{ $isGstBill ? 'Taxable Amount' : 'Subtotal' }}
-                        </td>
-                        <td>
-                            {{ number_format((float) $sale->sub_total, 2) }}
-                        </td>
-                    </tr>
-
-                    @if($isGstBill)
-                    <tr>
-                        <td>GST Total</td>
-                        <td>
-                            {{ number_format((float) $sale->gst_total, 2) }}
-                        </td>
-                    </tr>
-                    @endif
-
-                    @if((float) $sale->final_discount > 0)
-                    <tr>
-                        <td>Discount</td>
-                        <td>
-                            -{{ number_format((float) $sale->final_discount, 2) }}
-                        </td>
-                    </tr>
-                    @endif
-
-                    @if((float) $sale->round_off !== 0.0)
-                    <tr>
-                        <td>Round Off</td>
-                        <td>
-                            {{ (float) $sale->round_off >= 0 ? '+' : '-' }}
-                            {{ number_format(abs((float) $sale->round_off), 2) }}
-                        </td>
-                    </tr>
-                    @endif
-
-                    <tr class="grand">
-                        <td>Net Amount</td>
-                        <td>
-                            Rs.{{ number_format((float) $sale->grand_total, 2) }}
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>Paid Amount</td>
-                        <td>
-                            Rs.{{ number_format((float) $sale->paid_amount, 2) }}
-                        </td>
-                    </tr>
-                    <tr class="balance">
-                        <td>Due Balance</td>
-                        <td>
-                            Rs.{{ number_format((float) $sale->balance_amount, 2) }}
-                        </td>
-                    </tr>
-                </table>
-            </td>
-        </tr>
-    </table>
-
-    @if($isGstBill && (float) $sale->gst_total > 0)
-    <div class="tax-heading">GST Summary</div>
-    <table class="tax-table">
-        <thead>
-            <tr>
-                <th>Tax Rate</th>
-                <th>Taxable Amount</th>
-                <th>CGST</th>
-                <th>SGST</th>
-                <th>Total GST</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach($taxSummary as $tax)
-            <tr>
-                <td>{{ number_format($tax['rate'], 2) }}%</td>
-                <td>{{ number_format($tax['taxable'], 2) }}</td>
-                <td>{{ number_format($tax['cgst'], 2) }}</td>
-                <td>{{ number_format($tax['sgst'], 2) }}</td>
-                <td>{{ number_format($tax['gst'], 2) }}</td>
-            </tr>
-            @endforeach
-        </tbody>
-    </table>
-    @endif
-
-    <div class="footer">
-        Thank you for your business. This is a computer-generated invoice.
+        </table>
+        <p class="classic-footer">This is a computer-generated invoice.</p>
     </div>
+
 </body>
 
 </html>

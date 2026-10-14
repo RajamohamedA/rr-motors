@@ -13110,3 +13110,369 @@
     visibility: visible !important;
     opacity: 1 !important;
 }
+
+/* ========================================================================
+   FAST COUNTER BILLING — keep these overrides after the existing sales rules.
+   ======================================================================== */
+.rr-sale-counter-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 10px;
+    padding: 10px 12px;
+    border-bottom: 1px solid #b9c8dc;
+    background: linear-gradient(180deg, #f9fbff, #eef3fa);
+    color: #344b68;
+    font-size: 11px;
+}
+
+.rr-sale-quick-quantity {
+    display: inline-flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 7px;
+    margin: 0;
+    color: #17355b;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.rr-sale-quick-quantity input {
+    accent-color: #235cbb;
+    width: 15px;
+    height: 15px;
+}
+
+.rr-sale-quick-quantity small {
+    color: #4d627b;
+    font-size: 11px;
+    font-weight: 500;
+}
+
+.rr-sale-counter-toolbar kbd {
+    display: inline-block;
+    margin: 0 4px 0 8px;
+    padding: 2px 5px;
+    border: 1px solid #c2cede;
+    border-bottom-width: 2px;
+    border-radius: 4px;
+    background: #fff;
+    color: #284361;
+    font-family: inherit;
+    font-size: 10px;
+}
+
+.rr-sale-items-table tbody .rr-sale-draft-row td {
+    background: #f0f6ff;
+    border-bottom: 2px solid #9db9e1;
+    color: #516680;
+}
+
+.rr-sale-items-table tbody .rr-sale-draft-row:hover td {
+    background: #f0f6ff;
+}
+
+.rr-sale-draft-product {
+    min-width: 260px;
+}
+
+.rr-sale-draft-product .rr-sale-product-search {
+    width: 100%;
+    max-width: none;
+    margin: 0;
+}
+
+.rr-sale-draft-product .rr-sale-product-search-input {
+    min-height: 36px;
+    border: 1px solid #a1b8d8;
+    border-radius: 4px;
+    background: #fff;
+    box-shadow: inset 0 1px 2px #213e6410;
+}
+
+.rr-sale-draft-product .rr-sale-product-search-input:focus-within {
+    border-color: #2865c5;
+    box-shadow: 0 0 0 2px #2865c522;
+}
+
+.rr-sale-draft-product input {
+    min-width: 0;
+    width: 100%;
+    font-size: 13px;
+}
+
+.rr-sale-draft-value {
+    display: block;
+    padding: 6px;
+    border: 1px dashed #b8c8dd;
+    border-radius: 4px;
+    color: #526783;
+}
+
+.rr-sale-grid-input:focus,
+.rr-sale-discount-input input:focus {
+    outline: 2px solid #4d83d5;
+    outline-offset: 1px;
+    background: #fff9e8;
+}
+
+.rr-sale-search-results.rr-sale-counter-results {
+    position: fixed !important;
+    inset: auto !important;
+    top: var(--counter-top) !important;
+    left: var(--counter-left) !important;
+    width: var(--counter-width) !important;
+    max-width: calc(100vw - 24px) !important;
+    height: auto !important;
+    max-height: var(--counter-height) !important;
+    z-index: 6000 !important;
+    display: flex !important;
+    flex-direction: column;
+    margin: 0 !important;
+    overflow: hidden !important;
+    border: 1px solid #8096b3;
+    border-radius: 6px;
+    background: #fff;
+    color: #193351;
+    box-shadow: 0 14px 30px #19335130, 0 0 0 1px #fff8;
+    font-size: 13px;
+    animation: rr-counter-open 120ms ease-out;
+}
+
+.rr-sale-counter-results .rr-sale-search-results-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-shrink: 0;
+    min-height: 37px;
+    gap: 8px;
+    background: linear-gradient(180deg, #f8fbff, #e5edf8);
+}
+
+.rr-sale-counter-results .rr-sale-search-results-header>div {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.rr-sale-counter-results .rr-sale-search-results-list {
+    max-height: none !important;
+    min-height: 0;
+    overflow-y: auto !important;
+    flex: 1 1 auto;
+}
+
+.rr-sale-counter-results .rr-sale-search-result {
+    display: grid !important;
+    grid-template-columns: 30px minmax(0, 1fr) 75px 90px 18px;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    min-height: 58px;
+    padding: 9px 12px;
+    border: 0;
+    border-bottom: 1px solid #e0e7f1;
+    border-left: 3px solid transparent;
+    border-radius: 0;
+    background: #fff;
+    color: #183455;
+    text-align: left;
+    cursor: pointer;
+}
+
+.rr-sale-counter-results .rr-sale-search-result:nth-child(even) {
+    background: #f6f8fc;
+}
+
+.rr-sale-counter-results .rr-sale-search-result.keyboard-selected,
+.rr-sale-counter-results .rr-sale-search-result:hover {
+    border-left-color: #2865c5;
+    background: #e5efff;
+    box-shadow: inset 0 0 0 1px #c1d5f1;
+}
+
+.rr-sale-counter-results .rr-sale-search-result-name {
+    min-width: 0;
+}
+
+.rr-sale-counter-results .rr-sale-search-result-name strong {
+    display: block;
+    font-size: 13px;
+    overflow-wrap: anywhere;
+}
+
+.rr-sale-counter-results .rr-sale-search-result-name span {
+    display: block;
+    color: #4d627b;
+    font-size: 11px;
+    overflow-wrap: anywhere;
+}
+
+.rr-sale-counter-results :is(.rr-sale-search-result-stock, .rr-sale-search-result-price) {
+    display: grid;
+    text-align: right;
+}
+
+.rr-sale-counter-results :is(.rr-sale-search-result-stock, .rr-sale-search-result-price) span {
+    color: #4d627b;
+    font-size: 10px;
+}
+
+.rr-sale-counter-results :is(.rr-sale-search-result-stock, .rr-sale-search-result-price) strong {
+    font-size: 13px;
+}
+
+.rr-sale-btn.print {
+    border: 1px solid #14734f;
+    color: #fff;
+    background: linear-gradient(180deg, #20845e, #126844);
+    box-shadow: 0 2px 4px #1268441a;
+}
+
+.rr-sale-btn.print:hover:not(:disabled) {
+    color: #fff;
+    background: #115b3d;
+}
+
+.rr-sale-btn.print:disabled {
+    opacity: .55;
+    cursor: not-allowed;
+}
+
+.rr-sale-submit-error {
+    margin: 12px 0;
+    padding: 12px;
+    border: 1px solid #e7bbbb;
+    border-radius: 5px;
+    background: #fff0f0;
+    color: #982c2c;
+    font-size: 13px;
+}
+
+@keyframes rr-counter-open {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+@media (max-width: 575px) {
+    .rr-sale-counter-results .rr-sale-search-result {
+        grid-template-columns: minmax(0, 1fr) 60px 75px;
+        gap: 8px;
+        padding: 9px;
+    }
+
+    .rr-sale-counter-results .rr-sale-search-result-icon,
+    .rr-sale-counter-results .rr-sale-search-result>.bi-plus-circle {
+        display: none;
+    }
+
+    .rr-sale-quick-quantity small {
+        display: none;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .rr-sale-search-results.rr-sale-counter-results {
+        animation: none;
+    }
+}
+
+.rr-sale-shortcut-notes {
+    margin: 10px 12px;
+    border: 1px solid #c8d6e8;
+    border-radius: 5px;
+    background: #f7faff;
+    color: #304b6d;
+    font-size: 11px;
+}
+
+.rr-sale-shortcut-notes summary {
+    padding: 8px 10px;
+    color: #1c3e68;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.rr-sale-shortcut-notes summary:focus-visible {
+    outline: 2px solid #4d83d5;
+    outline-offset: 2px;
+}
+
+.rr-sale-shortcut-notes summary>i {
+    margin-right: 6px;
+}
+
+.rr-sale-shortcut-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 9px 14px;
+    padding: 2px 10px 10px;
+}
+
+.rr-sale-shortcut-grid span {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.rr-sale-shortcut-notes kbd {
+    padding: 2px 5px;
+    border: 1px solid #c2cede;
+    border-bottom-width: 2px;
+    border-radius: 4px;
+    background: #fff;
+    color: #234570;
+    font-family: inherit;
+    font-size: 10px;
+    white-space: nowrap;
+}
+
+.rr-sale-shortcut-notes p {
+    margin: 0;
+    padding: 9px 10px;
+    border-top: 1px solid #dce5f2;
+    line-height: 1.7;
+    color: #4d627b;
+}
+
+@media (max-width: 1100px) {
+    .rr-sale-shortcut-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 575px) {
+    .rr-sale-shortcut-grid {
+        grid-template-columns: minmax(0, 1fr);
+    }
+}
+
+.rr-sale-price-note {
+    padding: 9px 12px;
+    border-bottom: 1px solid #c8d6e8;
+    background: #edf5ff;
+    color: #25476e;
+    font-size: 12px;
+    line-height: 1.6;
+}
+
+.rr-sale-exclusive-rate {
+    color: #235a87 !important;
+    background: #f3f8ff !important;
+    font-variant-numeric: tabular-nums;
+}
+
+.rr-sale-items-table thead small {
+    font-size: 10px;
+    font-weight: 500;
+    text-transform: none;
+}

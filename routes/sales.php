@@ -124,6 +124,12 @@ Route::middleware([
     )->name(
         'sales.check-stock'
     );
+    
+
+    Route::get('/sales/register/parties', [
+        SalesController::class,
+        'searchRegisterParties',
+    ])->name('sales.register.parties');
 
 
     /*

@@ -1,13 +1,55 @@
-import React from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Head, Link, usePage } from '@inertiajs/react';
-
 import BusinessLayout from '@/Layouts/BusinessLayout';
 import MasterNavigation from '../../Components/Business/MasterNavigation';
-
 import '../../../css/business/sales.css';
-
+import '../../../css/business/sales-show.css';
 export default function Show({ sale }) {
     const { business } = usePage().props;
+    const [printing, setPrinting] = useState(false);
+    const [printError, setPrintError] = useState('');
+    const printRequest = useRef(null);
+    useEffect(() => () => printRequest.current?.abort(), []);
+
+    const openPrint = async () => {
+        if (printRequest.current) return;
+        const popup = window.open('about:blank', '_blank');
+        if (!popup) {
+            setPrintError('Allow pop-ups for this application to open the invoice.');
+            return;
+        }
+        popup.document.write(`<!doctype html><html><head><title>Preparing invoice</title><style>
+            body{margin:0;min-height:100vh;display:grid;place-items:center;background:#f1f5fb;color:#17355d;font:14px Arial}
+            .box{text-align:center;background:white;padding:35px 45px;border:1px solid #d3deef;border-radius:12px;box-shadow:0 8px 25px #17355d10}
+            .spinner{width:34px;height:34px;margin:0 auto 18px;border:3px solid #dce6f5;border-top-color:#315fce;border-radius:50%;animation:spin .8s linear infinite}
+            h1{font-size:18px}p{color:#526580;line-height:1.6}@keyframes spin{to{transform:rotate(360deg)}}
+            @media(prefers-reduced-motion:reduce){.spinner{animation:none}}
+            </style></head><body><div class="box" role="status"><div class="spinner"></div><h1>Preparing your invoice</h1><p>Please wait while the print layout loads.</p></div></body></html>`);
+        popup.document.close();
+        const controller = new AbortController();
+        printRequest.current = controller;
+        setPrinting(true);
+        setPrintError('');
+        try {
+            const url = `/sales/${sale.id}/print?auto_print=1`;
+            const response = await fetch(url, { credentials: 'same-origin', signal: controller.signal });
+            if (!response.ok || new URL(response.url).pathname !== `/sales/${sale.id}/print`) {
+                throw new Error('Unable to load the invoice. Check your session and print permission.');
+            }
+            const html = await response.text();
+            if (popup.closed) return;
+            popup.history.replaceState(null, '', url);
+            popup.document.open();
+            popup.document.write(html);
+            popup.document.close();
+        } catch (error) {
+            if (error.name !== 'AbortError') setPrintError(error.message || 'Unable to open the invoice. Please try again.');
+            popup.close();
+        } finally {
+            printRequest.current = null;
+            if (!controller.signal.aborted) setPrinting(false);
+        }
+    };
     const isGstBill = (sale?.billing_type ?? 'gst') === 'gst';
     const items = Array.isArray(sale?.items) ? sale.items : [];
     const customer = sale?.customer ?? {};
@@ -16,23 +58,19 @@ export default function Show({ sale }) {
     const mechanic = sale?.mechanic ?? null;
     const commission =
         sale?.mechanic_commission ?? sale?.mechanicCommission ?? null;
-
     const itemDiscountTotal = items.reduce(
         (total, item) => total + numberValue(item.discount),
         0
     );
-
     return (
         <>
             <Head title={`Sale ${sale?.invoice_no ?? ''}`} />
-
             <div className="rr-sale-show-page">
                 <MasterNavigation
                     active="sales"
                     title="Sales"
                     subtitle="Invoice details, payment and stock movement"
                 />
-
                 <header className="rr-show-command-window">
                     <div className="rr-show-title-area">
                         <Link
@@ -42,11 +80,9 @@ export default function Show({ sale }) {
                         >
                             <i className="bi bi-arrow-left"></i>
                         </Link>
-
                         <div className="rr-show-document-icon">
                             <i className="bi bi-receipt-cutoff"></i>
                         </div>
-
                         <div>
                             <span className="rr-show-eyebrow">
                                 Sales Invoice
@@ -68,16 +104,11 @@ export default function Show({ sale }) {
                             </div>
                         </div>
                     </div>
-
                     <div className="rr-show-command-actions">
-                        <a
-                            href={`/sales/${sale.id}/print`}
-                            target="_blank"
-                            rel="noreferrer"
-                            className="rr-show-button print"
-                        >
-                            <i className="bi bi-printer"></i> Print
-                        </a>
+                        <button type="button" onClick={openPrint} disabled={printing} className="rr-show-button print">
+                            {printing ? <><span className="spinner-border spinner-border-sm" aria-hidden="true" /> Preparing…</>
+                                : <><i className="bi bi-printer" aria-hidden="true" /> Print Invoice</>}
+                        </button>
                         <a
                             href={`/sales/${sale.id}/pdf`}
                             className="rr-show-button pdf"
@@ -95,7 +126,8 @@ export default function Show({ sale }) {
                         )}
                     </div>
                 </header>
-
+                {printError && <div className="rr-show-print-error" role="alert"><i className="bi bi-exclamation-triangle" aria-hidden="true" />{printError}</div>}
+                {printing && <div className="rr-show-print-progress" role="status"><span className="spinner-border spinner-border-sm" aria-hidden="true" />Preparing the print layout. The new tab displays the loading status.</div>}
                 <div className="rr-show-summary-strip">
                     <SummaryCard
                         icon="bi-currency-rupee"
@@ -126,7 +158,6 @@ export default function Show({ sale }) {
                         tone={paymentTone(sale?.payment_status)}
                     />
                 </div>
-
                 <div className="rr-show-party-grid">
                     <InfoWindow icon="bi-building" title="Company & Branch">
                         <InfoPrimary
@@ -156,7 +187,6 @@ export default function Show({ sale }) {
                             />
                         )}
                     </InfoWindow>
-
                     <InfoWindow icon="bi-person" title="Bill To">
                         <InfoPrimary
                             value={customer.customer_name ?? 'Customer'}
@@ -178,7 +208,6 @@ export default function Show({ sale }) {
                             />
                         )}
                     </InfoWindow>
-
                     <InfoWindow
                         icon={mechanic ? 'bi-tools' : 'bi-info-circle'}
                         title="Sale Information"
@@ -215,14 +244,12 @@ export default function Show({ sale }) {
                         />
                     </InfoWindow>
                 </div>
-
                 <section className="rr-show-window rr-show-items-window">
                     <WindowTitle
                         icon="bi-table"
                         title="Invoice Items"
                         detail={`${items.length} line(s)`}
                     />
-
                     <div className="rr-show-table-wrap">
                         <table className="rr-show-items-table">
                             <thead>
@@ -232,7 +259,8 @@ export default function Show({ sale }) {
                                     <th>Location</th>
                                     <th className="number">Qty</th>
                                     <th className="number">Free</th>
-                                    <th className="number">Rate</th>
+                                    <th className="number">Selling Rate<br /><small>GST inclusive</small></th>
+                                    {isGstBill && <th className="number">Rate excl. GST</th>}
                                     <th className="number">Discount</th>
                                     {isGstBill && (
                                         <th className="number">GST</th>
@@ -281,8 +309,9 @@ export default function Show({ sale }) {
                                             {quantity(item.free_quantity)}
                                         </td>
                                         <td className="number">
-                                            {money(item.sale_price)}
+                                            {money(inclusiveRate(item, isGstBill))}
                                         </td>
+                                        {isGstBill && <td className="number">{money(item.sale_price)}</td>}
                                         <td className="number">
                                             <div className="rr-show-discount-cell">
                                                 <strong>
@@ -316,10 +345,9 @@ export default function Show({ sale }) {
                                         </td>
                                     </tr>
                                 ))}
-
                                 {!items.length && (
                                     <tr>
-                                        <td colSpan={isGstBill ? 9 : 8}>
+                                        <td colSpan={isGstBill ? 10 : 8}>
                                             <div className="rr-show-empty">
                                                 <i className="bi bi-inbox"></i>
                                                 <strong>
@@ -333,7 +361,6 @@ export default function Show({ sale }) {
                         </table>
                     </div>
                 </section>
-
                 <div className="rr-show-bottom-grid">
                     <div className="rr-show-left-stack">
                         {sale?.remarks && (
@@ -347,7 +374,6 @@ export default function Show({ sale }) {
                                 </div>
                             </section>
                         )}
-
                         {mechanic && (
                             <section className="rr-show-window">
                                 <WindowTitle
@@ -380,74 +406,22 @@ export default function Show({ sale }) {
                             </section>
                         )}
                     </div>
-
-                    <section className="rr-show-total-panel">
-                        <div className="rr-show-total-title">
-                            <i className="bi bi-calculator"></i>
-                            Invoice Summary
+                    <section className="rr-show-total-panel rr-show-compact-summary">
+                        <div className="rr-show-total-title"><i className="bi bi-calculator" aria-hidden="true" /> Invoice Summary</div>
+                        <div className="rr-show-compact-net"><span>Invoice Total</span><strong>{money(sale?.grand_total)}</strong><StatusBadge value={sale?.payment_status} /></div>
+                        <div className="rr-show-payment-cards">
+                            <div className="paid"><span>Paid Amount</span><strong>{money(sale?.paid_amount)}</strong></div>
+                            <div className={numberValue(sale?.balance_amount) > 0 ? 'due' : 'settled'}><span>Due Balance</span><strong>{money(sale?.balance_amount)}</strong></div>
                         </div>
-                        <div className="rr-show-total-body">
-                            <TotalRow
-                                label={
-                                    isGstBill
-                                        ? 'Taxable Subtotal'
-                                        : 'Items Subtotal'
-                                }
-                                value={sale?.sub_total}
-                            />
-                            {itemDiscountTotal > 0 && (
-                                <TotalRow
-                                    label="Item Discounts"
-                                    value={-itemDiscountTotal}
-                                    muted
-                                />
-                            )}
-                            {isGstBill && (
-                                <TotalRow
-                                    label="GST Total"
-                                    value={sale?.gst_total}
-                                />
-                            )}
-                            <TotalRow
-                                label="Gross Total"
-                                value={
-                                    numberValue(sale?.sub_total) +
-                                    numberValue(sale?.gst_total)
-                                }
-                                strong
-                            />
-                            <TotalRow
-                                label="Invoice Discount"
-                                value={-numberValue(sale?.final_discount)}
-                                muted
-                            />
-                            <TotalRow
-                                label="Round Off"
-                                value={sale?.round_off}
-                                signed
-                            />
-
-                            <div className="rr-show-net-total">
-                                <span>NET AMOUNT</span>
-                                <strong>{money(sale?.grand_total)}</strong>
-                            </div>
-
-                            <TotalRow
-                                label="Paid Amount"
-                                value={sale?.paid_amount}
-                                tone="paid"
-                            />
-
-                            <div
-                                className={`rr-show-balance ${numberValue(sale?.balance_amount) > 0 ? 'due' : 'settled'}`}
-                            >
-                                <span>Balance</span>
-                                <strong>{money(sale?.balance_amount)}</strong>
-                            </div>
+                        <div className="rr-show-summary-breakdown">
+                            <span>{isGstBill ? 'Taxable' : 'Subtotal'} <strong>{money(sale?.sub_total)}</strong></span>
+                            {isGstBill && <span>GST <strong>{money(sale?.gst_total)}</strong></span>}
+                            {numberValue(sale?.final_discount) > 0 && <span>Bill discount <strong>−{money(sale.final_discount)}</strong></span>}
+                            {numberValue(sale?.round_off) !== 0 && <span>Round off <strong>{numberValue(sale.round_off) > 0 ? '+' : '−'}{money(Math.abs(numberValue(sale.round_off)))}</strong></span>}
                         </div>
+                        {itemDiscountTotal > 0 && <div className="rr-show-discount-note">Item discounts are already included in the subtotal.</div>}
                     </section>
                 </div>
-
                 <footer className="rr-show-footer-bar">
                     <div>
                         <i className="bi bi-clock-history"></i>
@@ -460,21 +434,16 @@ export default function Show({ sale }) {
                         >
                             Back to Sales
                         </Link>
-                        <a
-                            href={`/sales/${sale.id}/print`}
-                            target="_blank"
-                            rel="noreferrer"
-                            className="rr-show-button primary"
-                        >
-                            <i className="bi bi-printer"></i> Print Invoice
-                        </a>
+                        <button type="button" onClick={openPrint} disabled={printing} className="rr-show-button print">
+                            {printing ? <><span className="spinner-border spinner-border-sm" aria-hidden="true" /> Preparing…</>
+                                : <><i className="bi bi-printer" aria-hidden="true" /> Print Invoice</>}
+                        </button>
                     </div>
                 </footer>
             </div>
         </>
     );
 }
-
 function WindowTitle({ icon, title, detail }) {
     return (
         <div className="rr-show-window-title">
@@ -486,7 +455,6 @@ function WindowTitle({ icon, title, detail }) {
         </div>
     );
 }
-
 function SummaryCard({ icon, label, value, tone }) {
     return (
         <div className={`rr-show-summary-card ${tone}`}>
@@ -500,7 +468,6 @@ function SummaryCard({ icon, label, value, tone }) {
         </div>
     );
 }
-
 function InfoWindow({ icon, title, children }) {
     return (
         <section className="rr-show-window rr-show-info-window">
@@ -509,12 +476,10 @@ function InfoWindow({ icon, title, children }) {
         </section>
     );
 }
-
 function InfoPrimary({ value }) {
     if (!value) return null;
     return <strong className="rr-show-info-primary">{value}</strong>;
 }
-
 function InfoLine({ icon, label, value }) {
     if (!value) return null;
     return (
@@ -527,7 +492,6 @@ function InfoLine({ icon, label, value }) {
         </div>
     );
 }
-
 function StatusBadge({ value }) {
     return (
         <span className={`rr-show-status ${String(value).toLowerCase()}`}>
@@ -535,7 +499,6 @@ function StatusBadge({ value }) {
         </span>
     );
 }
-
 function Detail({ label, value, strong }) {
     return (
         <div>
@@ -546,7 +509,6 @@ function Detail({ label, value, strong }) {
         </div>
     );
 }
-
 function TotalRow({
     label,
     value,
@@ -559,7 +521,6 @@ function TotalRow({
     const shown = signed
         ? `${numeric >= 0 ? '+' : '-'}${money(Math.abs(numeric))}`
         : money(numeric);
-
     return (
         <div
             className={`rr-show-total-row ${strong ? 'strong' : ''} ${muted ? 'muted' : ''} ${tone}`}
@@ -569,39 +530,33 @@ function TotalRow({
         </div>
     );
 }
-
 function discountLabel(item) {
     if (item.discount_type === 'percentage') {
         return `${quantity(item.discount_value)}% discount`;
     }
     return 'Fixed discount';
 }
-
 function commissionText(sale, commission) {
     if (sale?.commission_type === 'percentage') {
         return `${quantity(sale.commission_percent)}% • ${money(sale.commission_amount)}`;
     }
     return `${money(sale?.commission_amount ?? commission?.commission_amount)} fixed`;
 }
-
 function productMeta(product = {}) {
     return [product.product_code, product.part_number, product.unit?.short_name]
         .filter(Boolean)
         .join(' • ');
 }
-
 function joinAddress(record = {}) {
     return [record.address, record.city, record.state, record.pincode]
         .filter(Boolean)
         .join(', ');
 }
-
 function paymentTone(status) {
     if (status === 'Paid') return 'green';
     if (status === 'Partially Paid') return 'amber';
     return 'red';
 }
-
 function capitalize(value) {
     if (!value) return '—';
     return (
@@ -609,12 +564,10 @@ function capitalize(value) {
         String(value).slice(1).replaceAll('_', ' ')
     );
 }
-
 function numberValue(value) {
     const parsed = Number(value ?? 0);
     return Number.isFinite(parsed) ? parsed : 0;
 }
-
 function money(value) {
     return new Intl.NumberFormat('en-IN', {
         style: 'currency',
@@ -623,14 +576,12 @@ function money(value) {
         maximumFractionDigits: 2,
     }).format(numberValue(value));
 }
-
 function quantity(value) {
     return new Intl.NumberFormat('en-IN', {
         minimumFractionDigits: 0,
         maximumFractionDigits: 3,
     }).format(numberValue(value));
 }
-
 function formatDate(value) {
     if (!value) return '—';
     const date = new Date(value);
@@ -641,7 +592,6 @@ function formatDate(value) {
         year: 'numeric',
     }).format(date);
 }
-
 function formatDateTime(value) {
     if (!value) return '—';
     const date = new Date(value);
@@ -654,5 +604,15 @@ function formatDateTime(value) {
         minute: '2-digit',
     }).format(date);
 }
-
 Show.layout = (page) => <BusinessLayout>{page}</BusinessLayout>;
+
+function inclusiveRate(item, isGstBill) {
+    const qty = numberValue(item.quantity);
+    const factor = 1 + (isGstBill ? numberValue(item.gst_percent) : 0) / 100;
+    const discount = numberValue(item.discount_value ?? item.discount);
+    const gross = item.discount_type === 'percentage' && discount < 100
+        ? numberValue(item.line_total) / (1 - discount / 100)
+        : numberValue(item.line_total) + numberValue(item.discount) * factor;
+    return qty > 0 && gross > 0 ? Math.round(gross / qty * 100) / 100
+        : Math.round(numberValue(item.sale_price) * factor * 100) / 100;
+}
