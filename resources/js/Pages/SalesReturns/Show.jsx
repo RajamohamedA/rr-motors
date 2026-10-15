@@ -1,4 +1,6 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
+
+import { createPortal } from "react-dom";
 
 import { Head, Link, router, usePage } from "@inertiajs/react";
 
@@ -30,6 +32,35 @@ export default function Show({
     const isCancelled = salesReturn?.status === "cancelled";
     const [cancelConfirmation, setCancelConfirmation] = useState(false);
     const [cancelling, setCancelling] = useState(false);
+
+    const [navigation, setNavigation] = useState("");
+    const [printError, setPrintError] = useState("");
+    useEffect(() => {
+        const offStart = router.on("start", () => setNavigation("Loading page…"));
+        const offFinish = router.on("finish", () => setNavigation(""));
+        return () => { offStart(); offFinish(); };
+    }, []);
+
+    const openPrint = async (event) => {
+        event.preventDefault();
+        setPrintError("");
+        const popup = window.open("", "_blank");
+        if (!popup) { setPrintError("Allow popups to open the print preview."); return; }
+        popup.document.write('<!doctype html><html><head><title>Preparing return print</title><style>@keyframes spin{to{transform:rotate(360deg)}}body{margin:0;min-height:100vh;display:grid;place-items:center;background:#eff4fb;color:#23466e;font-family:Segoe UI,Arial}.card{background:white;padding:35px;border-radius:14px;text-align:center;box-shadow:0 12px 40px #183b6520}.spinner{width:42px;height:42px;margin:0 auto 20px;border:4px solid #e0ebfa;border-top-color:#3274bd;border-radius:50%;animation:spin .9s linear infinite}</style></head><body><div class="card"><div class="spinner"></div><h3>Preparing print preview…</h3><p>Please wait while your return note loads.</p></div></body></html>');
+        popup.document.close();
+        try {
+            const url = new URL(`/sales-returns/${salesReturn.id}/print?paper=a4`, window.location.origin);
+            const response = await fetch(url, { credentials: "same-origin", headers: { Accept: "text/html" } });
+            if (!response.ok || new URL(response.url).pathname !== url.pathname) throw new Error("Print preview could not load. Please try again.");
+            const html = await response.text();
+            if (popup.closed) return;
+            popup.history.replaceState(null, "", url.href);
+            popup.document.open(); popup.document.write(html); popup.document.close();
+        } catch (error) {
+            setPrintError(error.message || "Unable to open print preview.");
+            if (!popup.closed) popup.document.body.textContent = "Unable to prepare print preview. Close this window and try Print again from the return page.";
+        }
+    };
 
     const totalQuantity = items.reduce(
         (total, item) => total + numberValue(item.quantity),
@@ -74,6 +105,16 @@ export default function Show({
         <>
             <Head title={`Sales Return ${salesReturn?.return_no ?? ""}`} />
 
+            {(navigation || cancelling) && typeof document !== "undefined" && createPortal(
+                <div className="rr-return-navigation-overlay" role="status" aria-live="polite">
+                    <div className="rr-return-navigation-card">
+                        <div className="rr-return-navigation-mark"><i className="bi bi-arrow-counterclockwise"></i><span /></div>
+                        <strong>{cancelling ? "Cancelling sales return…" : navigation}</strong>
+                        <p>Please wait while your request is completed.</p>
+                        <div className="rr-return-navigation-track"><span /></div>
+                    </div>
+                </div>, document.body
+            )}
             <div className="rr-return-page rr-return-show-page">
                 <MasterNavigation
                     active="sales-returns"
@@ -95,6 +136,7 @@ export default function Show({
                     </div>
                 )}
 
+                {printError && <div className="rr-return-alert danger" role="alert"><i className="bi bi-exclamation-triangle"></i>{printError}</div>}
                 <header className="rr-return-header rr-return-show-header">
                     <div className="rr-return-header-main">
                         <Link
@@ -137,16 +179,14 @@ export default function Show({
                             href={`/sales-returns/${salesReturn.id}/print?paper=a4`}
                             target="_blank"
                             rel="noreferrer"
-                            className="rr-return-btn"
+                            className="rr-return-btn return-print"
+                            onClick={openPrint}
                         >
                             <i className="bi bi-printer"></i> Print
                         </a>
 
                         <div className="rr-return-paper-menu">
-                            <button type="button" className="rr-return-btn">
-                                <i className="bi bi-file-earmark-pdf"></i> PDF
-                                <i className="bi bi-chevron-down"></i>
-                            </button>
+                            <span className="rr-return-btn return-pdf"><i className="bi bi-file-earmark-pdf"></i> PDF exports</span>
                             <div className="rr-return-paper-options">
                                 <a href={`/sales-returns/${salesReturn.id}/pdf?paper=a4`}>
                                     <i className="bi bi-file-earmark-text"></i>
@@ -385,7 +425,8 @@ export default function Show({
                                     <th>Model / Part No.</th>
                                     <th className="number">Qty</th>
                                     <th className="number">Free</th>
-                                    <th className="number">Rate</th>
+                                    <th className="number">Net rate</th>
+                                    {isGstBill && <th className="number">Rate excl. GST</th>}
                                     <th className="number">Discount</th>
                                     <th className="number">Taxable</th>
                                     {isGstBill && <th className="number">GST</th>}
@@ -417,8 +458,9 @@ export default function Show({
                                                 {formatQuantity(item.free_quantity)}
                                             </td>
                                             <td className="number">
-                                                {formatMoney(item.sale_price)}
+                                                {formatMoney(numberValue(item.sale_price) * (isGstBill ? 1 + numberValue(item.gst_percent) / 100 : 1))}
                                             </td>
+                                            {isGstBill && <td className="number">{formatMoney(item.sale_price)}</td>}
                                             <td className="number">
                                                 <strong>{formatMoney(item.discount_amount)}</strong>
                                                 <span>{discountLabel(item)}</span>
@@ -442,7 +484,7 @@ export default function Show({
                                 ) : (
                                     <tr>
                                         <td
-                                            colSpan={isGstBill ? 10 : 9}
+                                            colSpan={isGstBill ? 11 : 9}
                                             className="rr-return-empty"
                                         >
                                             <i className="bi bi-inbox"></i>
@@ -622,7 +664,7 @@ function InfoWindow({ icon, title, children }) {
 }
 
 function InfoRow({ label, value, href = null, strong = false }) {
-    const displayedValue = value || "-";
+    const displayedValue = value ?? "-";
 
     return (
         <div className="rr-return-show-info-row">
@@ -707,11 +749,13 @@ function formatMoney(value) {
 function displayDate(value) {
     if (!value) return "-";
 
+    const date = new Date(/^\d{4}-\d{2}-\d{2}$/.test(value) ? `${value}T00:00:00` : value);
+    if (Number.isNaN(date.getTime())) return "-";
     return new Intl.DateTimeFormat("en-IN", {
         day: "2-digit",
         month: "short",
         year: "numeric",
-    }).format(new Date(value));
+    }).format(date);
 }
 
 Show.layout = (page) => <BusinessLayout>{page}</BusinessLayout>;

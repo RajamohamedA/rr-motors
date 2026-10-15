@@ -1,4 +1,6 @@
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
+
+import { createPortal } from "react-dom";
 
 import { Head, Link, router, usePage } from "@inertiajs/react";
 
@@ -22,6 +24,26 @@ export default function Index({
         date_to: filters.date_to ?? "",
         status: filters.status ?? "all",
     });
+
+    const [navigation, setNavigation] = useState(null);
+
+    useEffect(() => {
+        const removeStart = router.on("start", (event) => {
+            const path = event.detail.visit.url.pathname;
+            const message = path.endsWith("/create") ? "Opening new sales return…"
+                : path.endsWith("/edit") ? "Opening return editor…"
+                    : path.endsWith("/cancel") ? "Cancelling sales return…"
+                        : /\/sales-returns\/[^/]+$/.test(path) ? "Opening return details…"
+                            : "Loading return register…";
+            setNavigation(message);
+        });
+        const removeFinish = router.on("finish", () => setNavigation(null));
+        return () => { removeStart(); removeFinish(); };
+    }, []);
+
+    const [filterOpen, setFilterOpen] = useState(true);
+    const [filtering, setFiltering] = useState(false);
+    const appliedCount = [filters.search, filters.status && filters.status !== "all", filters.quick_filter && filters.quick_filter !== "today"].filter(Boolean).length;
 
     const [confirmModal, setConfirmModal] = useState({
         show: false,
@@ -51,6 +73,8 @@ export default function Index({
             preserveState: true,
             preserveScroll: true,
             replace: true,
+            onStart: () => setFiltering(true),
+            onFinish: () => setFiltering(false),
         });
     };
 
@@ -131,8 +155,18 @@ export default function Index({
     return (
         <>
             <Head title="Sales Returns" />
+            {navigation && typeof document !== "undefined" && createPortal(
+                <div className="rr-return-navigation-overlay" role="status" aria-live="polite" aria-label={navigation}>
+                    <div className="rr-return-navigation-card">
+                        <div className="rr-return-navigation-mark"><i className="bi bi-arrow-counterclockwise"></i><span /></div>
+                        <strong>{navigation}</strong>
+                        <p>Please wait while we prepare your page.</p>
+                        <div className="rr-return-navigation-track"><span /></div>
+                    </div>
+                </div>, document.body
+            )}
 
-            <div className="rr-return-page rr-return-index-page">
+            <div className="rr-return-page rr-return-index-page" aria-busy={filtering}>
                 <MasterNavigation
                     active="sales-returns"
                     title="Sales Returns"
@@ -145,11 +179,11 @@ export default function Index({
                             <i className="bi bi-arrow-counterclockwise"></i>
                         </div>
                         <div>
-                            <span className="rr-return-eyebrow">Sales Register</span>
+                            <span className="rr-return-eyebrow">SALES / RETURN REGISTER</span>
                             <h1>Sales Returns</h1>
                             <div className="rr-return-header-meta">
                                 <span>{returns.total ?? records.length} total records</span>
-                                <span>Branch-isolated register</span>
+                                <span>Returns, refunds & stock adjustments</span>
                             </div>
                         </div>
                     </div>
@@ -208,17 +242,24 @@ export default function Index({
                             <i className="bi bi-funnel"></i>
                             <strong>Search and Filter</strong>
                         </div>
-                        <button
-                            type="button"
-                            className="rr-return-reset"
-                            onClick={resetFilters}
-                        >
-                            <i className="bi bi-arrow-counterclockwise"></i>
-                            Reset
-                        </button>
+                        <div className="rr-return-filter-tools">
+                            {appliedCount > 0 && <span className="rr-return-filter-badge">{appliedCount} active</span>}
+                            <button type="button" className="rr-return-reset" aria-expanded={filterOpen} aria-controls="return-filter-content" onClick={() => setFilterOpen((value) => !value)}>
+                                <i className={`bi bi-chevron-${filterOpen ? "up" : "down"}`}></i>{filterOpen ? "Hide" : "Show"}
+                            </button>
+                            <button
+                                type="button"
+                                disabled={filtering}
+                                className="rr-return-reset"
+                                onClick={resetFilters}
+                            >
+                                <i className="bi bi-arrow-counterclockwise"></i>
+                                Reset
+                            </button>
+                        </div>
                     </div>
 
-                    <div className="rr-return-window-body">
+                    <div id="return-filter-content" className="rr-return-window-body" hidden={!filterOpen}>
                         <div className="rr-return-quick-filters">
                             {[
                                 ["today", "Today"],
@@ -247,10 +288,11 @@ export default function Index({
                             }}
                         >
                             <div className="rr-return-field rr-return-search-field">
-                                <label>Search</label>
+                                <label htmlFor="return-search">Search returns</label>
                                 <div className="rr-return-filter-search">
                                     <i className="bi bi-search"></i>
                                     <input
+                                        id="return-search"
                                         type="search"
                                         value={form.search}
                                         placeholder="Return no, invoice, customer or mobile..."
@@ -265,8 +307,8 @@ export default function Index({
                             </div>
 
                             <div className="rr-return-field">
-                                <label>Status</label>
-                                <select
+                                <label htmlFor="return-status">Return status</label>
+                                <select id="return-status"
                                     value={form.status}
                                     onChange={(event) =>
                                         setForm((previous) => ({
@@ -284,9 +326,11 @@ export default function Index({
                             {form.quick_filter === "custom" && (
                                 <>
                                     <div className="rr-return-field">
-                                        <label>From Date</label>
+                                        <label htmlFor="return-date-from">From date</label>
                                         <input
+                                            id="return-date-from"
                                             type="date"
+                                            max={form.date_to || undefined}
                                             value={form.date_from}
                                             onChange={(event) =>
                                                 setForm((previous) => ({
@@ -297,9 +341,11 @@ export default function Index({
                                         />
                                     </div>
                                     <div className="rr-return-field">
-                                        <label>To Date</label>
+                                        <label htmlFor="return-date-to">To date</label>
                                         <input
+                                            id="return-date-to"
                                             type="date"
+                                            min={form.date_from || undefined}
                                             value={form.date_to}
                                             onChange={(event) =>
                                                 setForm((previous) => ({
@@ -314,10 +360,11 @@ export default function Index({
 
                             <button
                                 type="submit"
+                                disabled={filtering}
                                 className="rr-return-btn primary rr-return-apply-filter"
                             >
-                                <i className="bi bi-search"></i>
-                                Apply Filter
+                                <i className={filtering ? "bi bi-arrow-repeat rr-return-spin" : "bi bi-search"}></i>
+                                {filtering ? "Updating…" : "Apply filters"}
                             </button>
                         </form>
                     </div>
@@ -327,7 +374,7 @@ export default function Index({
                     <div className="rr-return-window-title">
                         <div>
                             <i className="bi bi-list-ul"></i>
-                            <strong>Return Register</strong>
+                            <strong>Return Register</strong><span className="rr-return-register-chip">{returns.total ?? records.length} records</span>
                         </div>
                         <span className="rr-return-record-count">
                             Showing {returns.from ?? 0}–{returns.to ?? 0} of{" "}
@@ -335,6 +382,7 @@ export default function Index({
                         </span>
                     </div>
 
+                    {filtering && <div className="rr-return-loading" role="status"><i className="bi bi-arrow-repeat rr-return-spin"></i> Updating return register…</div>}
                     <div className="rr-return-index-table-wrap">
                         <table className="rr-return-index-table">
                             <thead>
@@ -360,7 +408,7 @@ export default function Index({
                                             title="Click row to view return details"
                                             onClick={(event) => openDetails(event, item)}
                                             onKeyDown={(event) => {
-                                                if (event.key === "Enter") {
+                                                if (event.key === "Enter" && event.target === event.currentTarget) {
                                                     router.visit(`/sales-returns/${item.id}`);
                                                 }
                                             }}
@@ -369,7 +417,7 @@ export default function Index({
                                             <td>
                                                 <strong>{item.return_no}</strong>
                                                 <span>
-                                                    {item.billing_type === "gst" ? "GST" : "Non-GST"}
+                                                    {item.billing_type === "gst" ? "GST bill" : "Cash bill"}
                                                 </span>
                                             </td>
                                             <td>{item.sale?.invoice_no ?? "-"}</td>
@@ -395,14 +443,14 @@ export default function Index({
                                             <td className="actions">
                                                 <Link
                                                     href={`/sales-returns/${item.id}`}
-                                                    title="View"
+                                                    title="View return" aria-label={`View ${item.return_no}`} className="return-action-view"
                                                 >
                                                     <i className="bi bi-eye"></i>
                                                 </Link>
                                                 {item.status === "completed" && (
                                                     <Link
                                                         href={`/sales-returns/${item.id}/edit`}
-                                                        title="Edit"
+                                                        title="Edit return" aria-label={`Edit ${item.return_no}`} className="return-action-edit"
                                                     >
                                                         <i className="bi bi-pencil"></i>
                                                     </Link>
@@ -411,13 +459,13 @@ export default function Index({
                                                     href={`/sales-returns/${item.id}/print`}
                                                     target="_blank"
                                                     rel="noreferrer"
-                                                    title="Print"
+                                                    title="Print" aria-label={`Print ${item.return_no}`} className="return-action-print"
                                                 >
                                                     <i className="bi bi-printer"></i>
                                                 </a>
                                                 <a
                                                     href={`/sales-returns/${item.id}/pdf`}
-                                                    title="PDF"
+                                                    title="Download PDF" aria-label={`Download PDF ${item.return_no}`} className="return-action-pdf"
                                                 >
                                                     <i className="bi bi-file-earmark-pdf"></i>
                                                 </a>
@@ -425,7 +473,7 @@ export default function Index({
                                                     <button
                                                         type="button"
                                                         className="danger"
-                                                        title="Cancel return"
+                                                        title="Cancel return" aria-label={`Cancel ${item.return_no}`}
                                                         onClick={() => openCancelConfirm(item)}
                                                     >
                                                         <i className="bi bi-x-octagon"></i>
@@ -488,12 +536,15 @@ function Pagination({ links }) {
     if (!Array.isArray(links) || links.length <= 3) return null;
 
     return (
-        <nav className="rr-return-pagination">
+        <nav className="rr-return-pagination" aria-label="Sales return pages">
             {links.map((link, index) => (
                 <Link
                     key={`${link.label}-${index}`}
                     href={link.url || "#"}
                     preserveScroll
+                    aria-current={link.active ? "page" : undefined}
+                    aria-disabled={!link.url}
+                    tabIndex={link.url ? 0 : -1}
                     className={`${link.active ? "active" : ""} ${!link.url ? "disabled" : ""}`}
                     dangerouslySetInnerHTML={{ __html: link.label }}
                     onClick={(event) => {
@@ -536,11 +587,13 @@ function formatMoney(value) {
 
 function displayDate(value) {
     if (!value) return "-";
+    const date = new Date(/^\d{4}-\d{2}-\d{2}$/.test(value) ? `${value}T00:00:00` : value);
+    if (Number.isNaN(date.getTime())) return "-";
     return new Intl.DateTimeFormat("en-IN", {
         day: "2-digit",
         month: "short",
         year: "numeric",
-    }).format(new Date(value));
+    }).format(date);
 }
 
 Index.layout = (page) => <BusinessLayout>{page}</BusinessLayout>;

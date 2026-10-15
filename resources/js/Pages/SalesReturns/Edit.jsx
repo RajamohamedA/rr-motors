@@ -1,4 +1,6 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
+
+import { createPortal } from "react-dom";
 
 import axios from "axios";
 
@@ -20,6 +22,39 @@ export default function Edit({ salesReturn, accounts = [] }) {
     const [loading, setLoading] = useState(true);
     const [pageError, setPageError] = useState("");
     const [updateConfirmation, setUpdateConfirmation] = useState(false);
+
+    const [shortcutsOpen, setShortcutsOpen] = useState(false);
+    const [saving, setSaving] = useState(false);
+    const saveLock = useRef(false);
+    const formRef = useRef(null);
+    const tableRef = useRef(null);
+    const printRequested = useRef(false);
+    const submitRef = useRef(null);
+
+    useEffect(() => {
+        const onKey = (event) => {
+            if (!["F9", "F10"].includes(event.key)) return;
+            event.preventDefault();
+            if (saveLock.current || event.repeat) return;
+            tableRef.current?.querySelector("input:not(:disabled)")?.focus();
+            printRequested.current = event.key === "F10";
+            submitRef.current?.({ preventDefault() { } });
+        };
+        document.addEventListener("keydown", onKey);
+        return () => document.removeEventListener("keydown", onKey);
+    }, []);
+
+    const moveQuantity = (event) => {
+        const keys = ["Enter", "Escape", "ArrowLeft", "ArrowRight"];
+        if (!keys.includes(event.key) || event.target.tagName !== "INPUT") return;
+        if (event.altKey || event.ctrlKey || event.metaKey) return;
+        event.preventDefault();
+        const inputs = Array.from(tableRef.current.querySelectorAll("input:not(:disabled)"));
+        const direction = event.key === "ArrowLeft" || (event.key === "Enter" && event.shiftKey) ? -1 : 1;
+        const next = inputs[inputs.indexOf(event.target) + direction];
+        if (next) { next.focus(); next.select(); }
+        else if (direction > 0) formRef.current?.querySelector("[name='return_date']")?.focus();
+    };
 
     const { data, setData, put, processing, errors } = useForm({
         sale_id: String(salesReturn?.sale_id ?? sale?.id ?? ""),
@@ -254,14 +289,17 @@ export default function Edit({ salesReturn, accounts = [] }) {
 
     const submit = (event) => {
         event.preventDefault();
+        if (loading || processing || saveLock.current || updateConfirmation) return;
         setPageError("");
 
         if (!hasReturnQuantity) {
+            printRequested.current = false;
             setPageError("Enter a return quantity for at least one product.");
             return;
         }
 
         if (requiresRefundAccount && !data.account_id) {
+            printRequested.current = false;
             setPageError("Select the cash or bank account used for the refund.");
             return;
         }
@@ -270,29 +308,68 @@ export default function Edit({ salesReturn, accounts = [] }) {
     };
 
     const confirmUpdate = () => {
+        if (saveLock.current || processing || loading) return;
+        const wantsPrint = printRequested.current;
+        printRequested.current = false;
+        const popup = wantsPrint ? window.open("", "_blank") : null;
+        if (popup) {
+            popup.document.write('<!doctype html><html><head><title>Preparing return print</title></head><body style="margin:0;min-height:100vh;display:grid;place-items:center;background:#eff4fb;color:#23466e;font-family:Segoe UI,Arial"><div style="text-align:center"><h3>Updating your return…</h3><p>Please wait while your print preview is prepared.</p></div></body></html>');
+            popup.document.close();
+        }
+        saveLock.current = true;
+        setSaving(true);
         put(`/sales-returns/${salesReturn.id}`, {
             preserveScroll: true,
-            onFinish: () => setUpdateConfirmation(false),
+            onSuccess: async () => {
+                if (!wantsPrint) return;
+                if (!popup) { window.alert("Return updated. Allow popups and print from the return details page."); return; }
+                try {
+                    const url = new URL(`/sales-returns/${salesReturn.id}/print`, window.location.origin);
+                    const response = await fetch(url, { credentials: "same-origin", headers: { Accept: "text/html" } });
+                    if (!response.ok || new URL(response.url).pathname !== url.pathname) throw new Error("Print unavailable");
+                    const html = await response.text();
+                    if (popup.closed) return;
+                    popup.history.replaceState(null, "", url.href);
+                    popup.document.open(); popup.document.write(html); popup.document.close();
+                } catch {
+                    if (!popup.closed) popup.document.body.textContent = "Return updated. Print preview could not load. Open the saved return and try Print again.";
+                }
+            },
+            onError: () => { if (popup && !popup.closed) popup.close(); },
+            onFinish: () => { saveLock.current = false; setSaving(false); setUpdateConfirmation(false); },
         });
     };
 
     const closeUpdateConfirmation = () => {
         if (processing) return;
+        printRequested.current = false;
         setUpdateConfirmation(false);
     };
+
+    submitRef.current = submit;
 
     return (
         <>
             <Head title={`Edit ${salesReturn?.return_no ?? "Sales Return"}`} />
 
-            <div className="rr-return-page">
+            {(saving || processing || loading) && typeof document !== "undefined" && createPortal(
+                <div className="rr-return-navigation-overlay" role="status" aria-live="polite">
+                    <div className="rr-return-navigation-card">
+                        <div className="rr-return-navigation-mark"><i className="bi bi-arrow-counterclockwise"></i><span /></div>
+                        <strong>{loading ? "Refreshing invoice balances…" : "Updating sales return…"}</strong>
+                        <p>{loading ? "Preparing items and available return quantities." : "Please wait while the return is saved."}</p>
+                        <div className="rr-return-navigation-track"><span /></div>
+                    </div>
+                </div>, document.body
+            )}
+            <div className="rr-return-page rr-return-create-page rr-return-edit-page">
                 <MasterNavigation
                     active="sales-returns"
                     title="Sales Return"
                     subtitle="Edit returned quantities and refund information"
                 />
 
-                <form onSubmit={submit}>
+                <form ref={formRef} onSubmit={submit} aria-busy={processing || saving}>
                     <header className="rr-return-header">
                         <div className="rr-return-header-main">
                             <Link
@@ -334,12 +411,26 @@ export default function Edit({ salesReturn, accounts = [] }) {
                             <button
                                 type="submit"
                                 className="rr-return-btn primary"
-                                disabled={processing || loading || !hasReturnQuantity}
+                                disabled={processing || saving || loading || !hasReturnQuantity}
                             >
-                                {processing ? "Updating..." : "Update Return"}
+                                <i className={processing || saving ? "bi bi-arrow-repeat rr-return-spin" : "bi bi-check2-circle"}></i>
+                                {processing || saving ? "Updating…" : "Update Return"} <kbd>F9</kbd>
+                            </button>
+                            <button type="button" className="rr-return-btn print" disabled={processing || saving || loading || !hasReturnQuantity} onClick={() => { printRequested.current = true; submit({ preventDefault() { } }); }}>
+                                <i className="bi bi-printer"></i> Update & Print <kbd>F10</kbd>
                             </button>
                         </div>
                     </header>
+                    <section className="rr-return-shortcuts">
+                        <button type="button" onClick={() => setShortcutsOpen((value) => !value)} aria-expanded={shortcutsOpen} aria-controls="return-shortcut-notes"><i className="bi bi-keyboard"></i> Billing shortcuts <i className={`bi bi-chevron-${shortcutsOpen ? "up" : "down"}`}></i></button>
+                        {shortcutsOpen && <div id="return-shortcut-notes">
+                            <span><kbd className="purple">Enter / Esc</kbd> Next quantity</span>
+                            <span><kbd className="purple">Shift + Enter / ←</kbd> Previous quantity</span>
+                            <span><kbd className="blue">→</kbd> Next quantity</span>
+                            <span><kbd className="green">F9</kbd> Update return</span>
+                            <span><kbd className="orange">F10</kbd> Update & print</span>
+                        </div>}
+                    </section>
 
                     {(pageError || errors.items || errors.sale_id) && (
                         <div className="rr-return-alert danger">
@@ -408,7 +499,7 @@ export default function Edit({ salesReturn, accounts = [] }) {
                             </div>
                         )}
 
-                        <div className="rr-return-table-wrap">
+                        <div ref={tableRef} className="rr-return-table-wrap" onKeyDown={moveQuantity}>
                             <table className="rr-return-table">
                                 <thead>
                                     <tr>
@@ -419,7 +510,8 @@ export default function Edit({ salesReturn, accounts = [] }) {
                                         <th className="number">Available</th>
                                         <th className="number">Return Qty</th>
                                         <th className="number">Free Return</th>
-                                        <th className="number">Rate</th>
+                                        <th className="number">Net rate</th>
+                                        {sale?.billing_type === "gst" && <th className="number">Rate excl. GST</th>}
                                         <th className="number">Discount</th>
                                         {sale?.billing_type === "gst" && (
                                             <th className="number">GST</th>
@@ -437,7 +529,7 @@ export default function Edit({ salesReturn, accounts = [] }) {
                                         return (
                                             <tr
                                                 key={row.sale_item_id}
-                                                className={unavailable ? "unavailable" : ""}
+                                                className={unavailable ? "unavailable" : numberValue(row.return_qty) > 0 || numberValue(row.return_free_qty) > 0 ? "return-selected" : ""}
                                             >
                                                 <td>{index + 1}</td>
                                                 <td>
@@ -494,8 +586,9 @@ export default function Edit({ salesReturn, accounts = [] }) {
                                                     <ErrorText message={errors[`free_qty.${index}`]} />
                                                 </td>
                                                 <td className="number">
-                                                    {formatMoney(row.sale_price)}
+                                                    {formatMoney(row.sale_price * (sale?.billing_type === "gst" ? 1 + row.gst_percent / 100 : 1))}
                                                 </td>
+                                                {sale?.billing_type === "gst" && <td className="number">{formatMoney(row.sale_price)}</td>}
                                                 <td className="number">
                                                     {formatMoney(calculation.discount)}
                                                 </td>
@@ -522,7 +615,7 @@ export default function Edit({ salesReturn, accounts = [] }) {
                             <div className="rr-return-window-body rr-return-form-grid">
                                 <Field label="Return Date">
                                     <input
-                                        type="date"
+                                        type="date" name="return_date"
                                         value={data.return_date}
                                         onChange={(event) =>
                                             setData("return_date", event.target.value)
@@ -645,6 +738,22 @@ export default function Edit({ salesReturn, accounts = [] }) {
                             </div>
                         </section>
                     </div>
+                    <footer className="rr-return-create-footer">
+                        <div className="rr-return-footer-total">
+                            <span>Refund total</span>
+                            <strong>{formatMoney(Math.round(totals.amount))}</strong>
+                            <small>{formatQty(totals.quantity)} return qty · {formatQty(totals.freeQuantity)} free qty</small>
+                        </div>
+                        <div className="rr-return-actions">
+                            <button type="submit" className="rr-return-btn primary" disabled={processing || saving || loading || !hasReturnQuantity}>
+                                <i className={processing || saving ? "bi bi-arrow-repeat rr-return-spin" : "bi bi-check2-circle"}></i>
+                                {processing || saving ? "Saving…" : "Update Return"}<kbd>F9</kbd>
+                            </button>
+                            <button type="button" className="rr-return-btn print" disabled={processing || saving || loading || !hasReturnQuantity} onClick={() => { printRequested.current = true; submit({ preventDefault() { } }); }}>
+                                <i className="bi bi-printer"></i> Update & Print <kbd>F10</kbd>
+                            </button>
+                        </div>
+                    </footer>
                 </form>
 
                 <ConfirmModal
