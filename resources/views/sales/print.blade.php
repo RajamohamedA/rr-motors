@@ -10,7 +10,7 @@
     <style id="dynamic-page-size">
         @page {
             size: A4 portrait;
-            margin: 10mm;
+            margin: 7mm;
         }
     </style>
     <style>
@@ -2160,6 +2160,46 @@
             border-top: 0;
             padding-top: 5px;
         }
+
+        .invoice-gst-split {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: -1px;
+            font-size: 10px;
+            page-break-inside: avoid;
+        }
+
+        .invoice-gst-split th,
+        .invoice-gst-split td {
+            padding: 5px 6px;
+            border: 1px solid #777;
+            text-align: right;
+            color: #000;
+        }
+
+        .invoice-gst-split th {
+            font-size: 9px;
+            background: #f4f4f4;
+        }
+
+        .invoice-gst-split tfoot td {
+            font-weight: bold;
+        }
+
+        .paper.a5 .invoice-gst-split {
+            font-size: 8px;
+        }
+
+        .paper.a5 .invoice-gst-split th {
+            font-size: 7px;
+        }
+
+        .receipt-split-tax small {
+            display: block;
+            font-size: 9px;
+            font-weight: normal;
+            margin-top: 2px;
+        }
     </style>
 </head>
 
@@ -2211,6 +2251,8 @@
             'rate' => (float) $rate,
             'taxable' => $taxable,
             'gst' => $gst,
+            'cgst' => round($gst / 2, 2),
+            'sgst' => round($gst - round($gst / 2, 2), 2),
             ];
             });
             @endphp
@@ -2358,6 +2400,43 @@
                         <span>Paid Amount <strong>Rs. {{ number_format((float) $sale->paid_amount, 2) }}</strong></span>
                         <span>Due Balance <strong>Rs. {{ number_format((float) $sale->balance_amount, 2) }}</strong></span>
                     </div>
+
+                    @if ($isGstBill && (float) $sale->gst_total > 0)
+                    <table class="invoice-gst-split" aria-label="CGST and SGST breakdown">
+                        <thead>
+                            <tr>
+                                <th>Taxable Amount</th>
+                                <th>CGST %</th>
+                                <th>CGST Amount</th>
+                                <th>SGST %</th>
+                                <th>SGST Amount</th>
+                                <th>Total GST</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach ($taxSummary as $tax)
+                            <tr>
+                                <td>{{ number_format($tax['taxable'], 2) }}</td>
+                                <td>{{ number_format($tax['rate'] / 2, 2) }}%</td>
+                                <td>{{ number_format($tax['cgst'], 2) }}</td>
+                                <td>{{ number_format($tax['rate'] / 2, 2) }}%</td>
+                                <td>{{ number_format($tax['sgst'], 2) }}</td>
+                                <td>{{ number_format($tax['gst'], 2) }}</td>
+                            </tr>
+                            @endforeach
+                        </tbody>
+                        <tfoot>
+                            <tr>
+                                <td>{{ number_format($taxSummary->sum('taxable'), 2) }}</td>
+                                <td></td>
+                                <td>{{ number_format($taxSummary->sum('cgst'), 2) }}</td>
+                                <td></td>
+                                <td>{{ number_format($taxSummary->sum('sgst'), 2) }}</td>
+                                <td>{{ number_format($taxSummary->sum('gst'), 2) }}</td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                    @endif
                     <div class="classic-bottom">
                         <div><span>Amount Chargeable (in words)</span><strong>{{ $amountWords }}</strong></div>
                         <div class="classic-signature"><strong>For {{ $company->company_name ?? 'Company' }}</strong><span>Authorised Signatory</span></div>
@@ -2435,27 +2514,30 @@
                     </div>
                     @if($isGstBill && (float) $sale->gst_total > 0)
 
-                    <table class="receipt-tax-table">
+                    <table class="receipt-tax-table receipt-split-tax">
                         <thead>
                             <tr>
-                                <th>Tax %</th>
                                 <th>Taxable</th>
+                                <th>CGST</th>
+                                <th>SGST</th>
                                 <th>GST</th>
                             </tr>
                         </thead>
                         <tbody>
-                            @foreach($taxSummary as $tax)
+                            @foreach ($taxSummary as $tax)
                             <tr>
-                                <td>{{ number_format($tax['rate'], 2) }}%</td>
                                 <td>{{ number_format($tax['taxable'], 2) }}</td>
+                                <td>{{ number_format($tax['cgst'], 2) }}<small>{{ number_format($tax['rate'] / 2, 2) }}%</small></td>
+                                <td>{{ number_format($tax['sgst'], 2) }}<small>{{ number_format($tax['rate'] / 2, 2) }}%</small></td>
                                 <td>{{ number_format($tax['gst'], 2) }}</td>
                             </tr>
                             @endforeach
                         </tbody>
                         <tfoot>
                             <tr>
-                                <td>Total</td>
                                 <td>{{ number_format($taxSummary->sum('taxable'), 2) }}</td>
+                                <td>{{ number_format($taxSummary->sum('cgst'), 2) }}</td>
+                                <td>{{ number_format($taxSummary->sum('sgst'), 2) }}</td>
                                 <td>{{ number_format($taxSummary->sum('gst'), 2) }}</td>
                             </tr>
                         </tfoot>
@@ -2483,9 +2565,8 @@
                     if (!sheet || !filler) return;
                     paper.style.setProperty('--invoice-fill-height', '0px');
                     if (paper.classList.contains('thermal')) return;
-                    // Printable heights: A4 277mm, A5 196mm. Reserve 8mm for
-                    // browser/printer rounding and footer clearance.
-                    const targetMm = paper.classList.contains('a5') ? 188 : 269;
+                    // A4 297mm / A5 210mm, less 14mm page margins and 2mm rounding allowance.
+                    const targetMm = paper.classList.contains('a5') ? 194 : 281;
                     const targetPx = targetMm * 96 / 25.4;
                     const contentHeight = sheet.getBoundingClientRect().height;
                     const remaining = Math.max(0, Math.floor(targetPx - contentHeight));
@@ -2505,7 +2586,7 @@
                         const heightMm = Math.max(100, Math.ceil(paper.scrollHeight * 25.4 / 96) + 10);
                         pageStyle.textContent = `@page { size: 80mm ${heightMm}mm; margin: 2mm; }`;
                     } else if (size === 'a4') {
-                        pageStyle.textContent = '@page { size: A4 portrait; margin: 10mm; }';
+                        pageStyle.textContent = '@page { size: A4 portrait; margin: 7mm; }';
                     } else {
                         pageStyle.textContent = '@page { size: A5 portrait; margin: 7mm; }';
                     }

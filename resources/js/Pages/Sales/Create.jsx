@@ -362,7 +362,10 @@ export default function Create({
                 }
                 return;
             }
-            if (productSearching) {
+            if (!productSearch.trim() && rows.length) {
+                setProductSearchOpen(false);
+                focusBillingEnd();
+            } else if (productSearching) {
                 pendingSearchEnter.current = productSearch.trim();
             } else if (productResults[selectedResult]) {
                 addProduct(productResults[selectedResult]);
@@ -384,6 +387,25 @@ export default function Create({
         }
     }, [productSearching, productResults, productSearch]);
 
+    const billingEndFields = () => Array.from(
+        billingFormRef.current?.querySelectorAll(
+            '.rr-sale-bottom-grid input:not([type="hidden"]), .rr-sale-bottom-grid select, .rr-sale-bottom-grid textarea'
+        ) ?? []
+    ).filter((field) => !field.disabled && !field.readOnly && field.getClientRects().length);
+
+    const focusBillingControl = (field) => {
+        if (!field) return;
+        field.focus();
+        if (field.tagName === 'INPUT' && !['date', 'checkbox', 'radio'].includes(field.type)) field.select?.();
+        field.scrollIntoView({ block: 'nearest', behavior: 'auto' });
+    };
+
+    const billingPrintButton = () => billingFormRef.current?.querySelector(
+        '.rr-sale-command-bar button[value="print"]'
+    );
+
+    const focusBillingEnd = () => focusBillingControl(billingEndFields()[0] ?? billingPrintButton());
+
     const handleBillingKeys = (event) => {
         if (event.defaultPrevented || event.nativeEvent.isComposing || stockAssist.show) return;
         if (event.key === 'F2') {
@@ -393,40 +415,63 @@ export default function Create({
         }
         const input = event.target;
         const rowIndex = input.dataset.saleRow;
+        const backwards = event.key === 'ArrowLeft' || (event.key === 'Enter' && event.shiftKey);
+        const forward = event.key === 'ArrowRight' || event.key === 'Enter';
         if (rowIndex === undefined) {
-            // Avoid completing a bill accidentally while entering customer/payment data.
+            const endFields = billingEndFields();
+            const printButton = billingPrintButton();
+            const sequence = [...endFields, printButton].filter(Boolean);
+            const position = sequence.indexOf(input);
+            if (position >= 0 && (backwards || forward)) {
+                // Shift+Enter keeps a new line available in Remarks.
+                if (input.tagName === 'TEXTAREA' && event.key === 'Enter' && event.shiftKey) return;
+                if (input === printButton && event.key === 'Enter' && !event.shiftKey) {
+                    event.preventDefault();
+                    if (!event.repeat && !printButton.disabled) printButton.click();
+                    return;
+                }
+                event.preventDefault();
+                if (event.repeat) return;
+                const next = sequence[position + (backwards ? -1 : 1)];
+                if (next) focusBillingControl(next);
+                else if (backwards) {
+                    const fields = billingFormRef.current.querySelectorAll(
+                        `[data-sale-row="${rows.length - 1}"][data-sale-field]`
+                    );
+                    focusBillingControl([...fields].at(-1) ?? searchInputRef.current);
+                }
+                return;
+            }
             if (event.key === 'Enter' && input.tagName === 'INPUT') event.preventDefault();
             return;
         }
         const fields = Array.from(billingFormRef.current.querySelectorAll(
             `[data-sale-row="${rowIndex}"][data-sale-field]`
-        ));
+        )).filter((field) => !field.disabled);
         const position = fields.indexOf(input);
         const last = position === fields.length - 1;
-        if (event.key === 'Enter' || event.key === 'Escape'
-            || event.key === 'ArrowRight' || event.key === 'ArrowLeft'
+        if (forward || backwards || event.key === 'Escape'
             || (event.key === 'Tab' && !event.shiftKey && last)) {
             event.preventDefault();
+            if (event.repeat) return;
             if ((event.ctrlKey || event.metaKey) && event.key === 'Enter') {
                 focusProductSearch();
                 return;
             }
-            const backwards = event.key === 'ArrowLeft' || (event.key === 'Enter' && event.shiftKey);
             const next = fields[position + (backwards ? -1 : 1)];
-            if (next) {
-                next.focus(); next.select?.();
-            } else if (backwards && Number(rowIndex) > 0) {
-                const previousFields = Array.from(billingFormRef.current.querySelectorAll(
+            if (next) focusBillingControl(next);
+            else if (backwards && Number(rowIndex) > 0) {
+                const previousFields = billingFormRef.current.querySelectorAll(
                     `[data-sale-row="${Number(rowIndex) - 1}"][data-sale-field]`
-                ));
-                const previous = previousFields.at(-1);
-                previous?.focus(); previous?.select?.();
-            } else if (event.key === 'ArrowRight' && Number(rowIndex) < rows.length - 1) {
-                const nextRow = billingFormRef.current.querySelector(
-                    `[data-sale-row="${Number(rowIndex) + 1}"][data-sale-field="qty"]`
                 );
-                nextRow?.focus(); nextRow?.select?.();
-            } else focusProductSearch();
+                focusBillingControl([...previousFields].at(-1));
+            } else if (backwards) focusProductSearch();
+            else if (event.key === 'Escape' || event.key === 'Tab') focusProductSearch();
+            else if (Number(rowIndex) < rows.length - 1) {
+                focusBillingControl(billingFormRef.current.querySelector(
+                    `[data-sale-row="${Number(rowIndex) + 1}"][data-sale-field="qty"]`
+                ));
+            } else focusBillingEnd();
         }
     };
 
@@ -1588,13 +1633,13 @@ export default function Create({
                                 <span><kbd>Enter</kbd> Add product / Next field</span>
                                 <span><kbd>Esc</kbd> Next item field / Clear search</span>
                                 <span><kbd>Shift + Enter</kbd> Previous item field</span>
-                                <span><kbd>→ / ←</kbd> Next / Previous item field</span>
+                                <span><kbd>→ / ←</kbd> Next / Previous billing field</span>
                                 <span><kbd>Ctrl + Enter</kbd> Next product search</span>
                                 <span><kbd>F2</kbd> Focus product search</span>
                                 <span><kbd>F9</kbd> Complete Sale</span>
                                 <span><kbd>F10</kbd> Complete &amp; Print</span>
                             </div>
-                            <p>Item entry: Qty → Free → Rate → Discount → GST → next product.
+                            <p>Item entry: Qty → Free → Rate → Discount → GST → next row. After the last item, Enter / Right Arrow moves through Invoice Discount, payment fields, Remarks, and Complete &amp; Print. Press Enter on Complete &amp; Print to save and print. Use Esc or Ctrl + Enter for the next product search.
                                 GST is skipped for non-GST bills. Left Arrow from Qty moves to the previous row.
                                 F9/F10 focus the item grid before completing the sale. Enable <strong>Qty 1 mode</strong> to add single-unit items continuously.
                                 In search, <kbd>Ctrl + Enter</kbd> edits the last item's quantity.
@@ -2512,7 +2557,53 @@ function StockAssistModal({
     onTransferQtyChange,
     onTransfer,
 }) {
+    const modalRef = useRef(null);
     const data = state.data;
+
+    useEffect(() => {
+        const previous = document.activeElement;
+        return () => previous?.isConnected && previous.focus();
+    }, []);
+
+    useEffect(() => {
+        if (!state.loading && data) {
+            modalRef.current?.querySelector('[data-transfer-step="source"]')?.focus();
+        }
+    }, [state.loading, Boolean(data)]);
+
+    const handleKeys = (event) => {
+        event.stopPropagation();
+        if (event.key === "Escape") {
+            event.preventDefault();
+            if (!state.transferring) onClose();
+            return;
+        }
+        const root = modalRef.current;
+        if (event.key === "Tab") {
+            const all = [...root.querySelectorAll('button:not(:disabled), select:not(:disabled), input:not(:disabled)')];
+            const first = all[0], last = all[all.length - 1];
+            if (event.shiftKey && document.activeElement === first) {
+                event.preventDefault(); last?.focus();
+            } else if (!event.shiftKey && document.activeElement === last) {
+                event.preventDefault(); first?.focus();
+            }
+            return;
+        }
+        if (state.transferring || event.isComposing) return;
+        const steps = [...root.querySelectorAll('[data-transfer-step]')];
+        const index = steps.indexOf(event.target);
+        if (index < 0) return;
+        const direction = event.key === "ArrowLeft" || (event.key === "Enter" && event.shiftKey)
+            ? -1 : event.key === "ArrowRight" || event.key === "Enter" ? 1 : 0;
+        if (!direction) return;
+        if (event.key === "Enter" && event.target.dataset.transferStep === "submit" && !event.shiftKey) return;
+        event.preventDefault();
+        const next = steps[index + direction];
+        if (next && !next.disabled) {
+            next.focus();
+            if (next.tagName === "INPUT") next.select();
+        }
+    };
 
     const selected = data?.godowns?.find(
         (godown) => Number(godown.id) === Number(state.selectedGodownId),
@@ -2526,10 +2617,14 @@ function StockAssistModal({
         <div className="rr-sale-modal-layer">
             <div
                 className="rr-sale-modal-backdrop"
-                onClick={onClose}
+                onClick={() => !state.transferring && onClose()}
             ></div>
             <div
                 className="rr-sale-stock-modal"
+                ref={modalRef}
+                onKeyDown={handleKeys}
+                aria-labelledby="stock-assist-title"
+                aria-busy={state.loading || state.transferring}
                 role="dialog"
                 aria-modal="true"
             >
@@ -2538,13 +2633,14 @@ function StockAssistModal({
                         <i className="bi bi-box-arrow-in-down"></i>
                     </div>
                     <div>
-                        <strong>Stock Assist</strong>
+                        <strong id="stock-assist-title">Transfer stock to shop</strong>
                         <span>
                             Transfer stock from Godown to Shop without leaving the sale.
                         </span>
                     </div>
                     <button
                         type="button"
+                        aria-label="Close stock transfer"
                         onClick={onClose}
                         disabled={state.transferring}
                     >
@@ -2603,8 +2699,11 @@ function StockAssistModal({
 
                         <div className="rr-sale-transfer-section">
                             <div className="rr-sale-field">
-                                <label>Transfer From Godown</label>
+                                <label htmlFor="stock-transfer-source">Transfer from godown</label>
                                 <select
+                                    id="stock-transfer-source"
+                                    data-transfer-step="source"
+                                    disabled={state.transferring}
                                     value={state.selectedGodownId}
                                     onChange={(event) => onGodownChange(event.target.value)}
                                 >
@@ -2623,10 +2722,11 @@ function StockAssistModal({
                             </div>
 
                             <div className="rr-sale-field">
-                                <label>Transfer Quantity</label>
+                                <label htmlFor="stock-transfer-quantity">Transfer quantity</label>
                                 <div className="rr-sale-transfer-qty-control">
                                     <button
                                         type="button"
+                                        disabled={state.transferring || !selected}
                                         onClick={() =>
                                             onTransferQtyChange(String(Math.max(1, transferQty - 1)))
                                         }
@@ -2634,6 +2734,9 @@ function StockAssistModal({
                                         −
                                     </button>
                                     <input
+                                        id="stock-transfer-quantity"
+                                        data-transfer-step="quantity"
+                                        disabled={state.transferring}
                                         type="number"
                                         min="1"
                                         max={selected?.available_stock ?? undefined}
@@ -2646,6 +2749,7 @@ function StockAssistModal({
                                     />
                                     <button
                                         type="button"
+                                        disabled={state.transferring || !selected}
                                         onClick={() =>
                                             onTransferQtyChange(
                                                 String(
@@ -2686,6 +2790,7 @@ function StockAssistModal({
                             </div>
                         )}
 
+                        <div className="rr-sale-transfer-shortcuts"><span><kbd>←</kbd><kbd>→</kbd> Previous / next</span><span><kbd>Enter</kbd> Next / confirm</span><span><kbd>Esc</kbd> Close</span></div>
                         <div className="rr-sale-modal-footer">
                             <button
                                 type="button"
@@ -2698,6 +2803,7 @@ function StockAssistModal({
                             <button
                                 type="button"
                                 className="rr-sale-btn transfer"
+                                data-transfer-step="submit"
                                 disabled={
                                     state.transferring ||
                                     !state.selectedGodownId ||

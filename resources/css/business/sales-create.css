@@ -276,3 +276,509 @@
         animation: none;
     }
 }
+
+/* Stock transfer dialog: scoped so other sales windows keep their styling. */
+.rr-sale-modal-layer:has(.rr-sale-stock-modal) {
+    position: fixed;
+    inset: 0;
+    z-index: 15000;
+    display: grid;
+    place-items: center;
+    padding: 18px;
+}
+
+.rr-sale-modal-layer:has(.rr-sale-stock-modal) .rr-sale-modal-backdrop {
+    position: absolute;
+    inset: 0;
+    background: #10243c99;
+    backdrop-filter: blur(4px);
+}
+
+.rr-sale-modal-layer .rr-sale-stock-modal {
+    position: relative;
+    width: min(650px, 100%);
+    max-height: calc(100dvh - 36px);
+    overflow: auto;
+    border: 1px solid #c8d7eb;
+    border-radius: 17px;
+    background: #fff;
+    color: #18324f;
+    box-shadow: 0 24px 80px #071b3d55;
+    animation: saleStockIn .2s ease-out;
+}
+
+.rr-sale-stock-modal *,
+.rr-sale-stock-modal *::before,
+.rr-sale-stock-modal *::after {
+    box-sizing: border-box;
+}
+
+.rr-sale-stock-modal .rr-sale-modal-header.stock {
+    display: flex;
+    align-items: center;
+    gap: 13px;
+    padding: 20px 22px;
+    background: linear-gradient(120deg, #153961, #2764a2);
+    color: #fff;
+    border: 0;
+}
+
+.rr-sale-stock-modal .rr-sale-modal-header.stock strong {
+    display: block;
+    color: #fff !important;
+    -webkit-text-fill-color: #fff;
+    font-size: 18px;
+}
+
+.rr-sale-stock-modal .rr-sale-modal-header.stock span {
+    display: block;
+    margin-top: 5px;
+    color: #e1edfc !important;
+    -webkit-text-fill-color: #e1edfc;
+    font-size: 12px;
+    line-height: 1.5;
+}
+
+.rr-sale-stock-modal .rr-sale-modal-icon {
+    display: grid;
+    place-items: center;
+    flex: 0 0 44px;
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    background: #ffffff20;
+    color: #fff;
+}
+
+.rr-sale-stock-modal .rr-sale-modal-header.stock>button {
+    margin-left: auto;
+    flex: 0 0 32px;
+    width: 32px;
+    height: 32px;
+    border: 1px solid #ffffff55;
+    border-radius: 8px;
+    background: #ffffff16;
+    color: #fff !important;
+    cursor: pointer;
+}
+
+.rr-sale-stock-modal .rr-sale-modal-header.stock>button:hover {
+    background: #ffffff30;
+}
+
+.rr-sale-stock-modal i {
+    color: inherit !important;
+    -webkit-text-fill-color: currentColor;
+}
+
+.rr-sale-stock-modal .rr-sale-stock-product {
+    display: flex;
+    justify-content: space-between;
+    gap: 16px;
+    margin: 20px 22px 15px;
+    padding: 15px;
+    border: 1px solid #d9e4f2;
+    border-radius: 11px;
+    background: #f7faff;
+}
+
+.rr-sale-stock-modal .rr-sale-stock-product span,
+.rr-sale-stock-modal .rr-sale-stock-product small {
+    display: block;
+    color: #526985 !important;
+    -webkit-text-fill-color: #526985;
+    font-size: 11px;
+}
+
+.rr-sale-stock-modal .rr-sale-stock-product strong {
+    display: block;
+    margin: 4px 0;
+    color: #183b61 !important;
+    -webkit-text-fill-color: #183b61;
+    font-size: 16px;
+    overflow-wrap: anywhere;
+}
+
+.rr-sale-stock-modal .rr-sale-stock-required {
+    flex-shrink: 0;
+    text-align: right;
+}
+
+.rr-sale-stock-modal .rr-sale-stock-summary {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 10px;
+    margin: 0 22px 18px;
+}
+
+.rr-sale-stock-modal .rr-sale-stock-metric {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    min-width: 0;
+    padding: 13px 10px;
+    border: 1px solid #cbdcf4;
+    border-radius: 10px;
+    background: #edf4ff;
+    color: #234f89;
+}
+
+.rr-sale-stock-modal .rr-sale-stock-metric span {
+    color: inherit !important;
+    -webkit-text-fill-color: currentColor;
+    font-size: 11px;
+    font-weight: 600;
+}
+
+.rr-sale-stock-modal .rr-sale-stock-metric strong {
+    color: inherit !important;
+    -webkit-text-fill-color: currentColor;
+    font-size: 23px;
+    font-variant-numeric: tabular-nums;
+}
+
+.rr-sale-stock-modal .rr-sale-stock-metric.godown {
+    background: #f1edff;
+    color: #6341a2;
+    border-color: #d9cdf6;
+}
+
+.rr-sale-stock-modal .rr-sale-stock-metric.ok {
+    background: #eaf8f1;
+    color: #166746;
+    border-color: #bde5d0;
+}
+
+.rr-sale-stock-modal .rr-sale-stock-metric.short,
+.rr-sale-stock-modal .rr-sale-stock-metric.danger {
+    background: #fff0f2;
+    color: #ad314b;
+    border-color: #f3cbd3;
+}
+
+.rr-sale-stock-modal .rr-sale-transfer-section {
+    display: grid;
+    grid-template-columns: 1.4fr 1fr;
+    gap: 16px;
+    margin: 0 22px 16px;
+}
+
+.rr-sale-stock-modal .rr-sale-field label {
+    display: block;
+    margin-bottom: 7px;
+    color: #294764 !important;
+    -webkit-text-fill-color: #294764;
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.rr-sale-stock-modal .rr-sale-field select,
+.rr-sale-stock-modal .rr-sale-field input {
+    position: static;
+    width: 100%;
+    min-width: 0;
+    height: 42px;
+    padding: 9px 11px;
+    border: 1px solid #bacde4;
+    border-radius: 8px;
+    background: #fff !important;
+    color: #173b60 !important;
+    -webkit-text-fill-color: #173b60;
+    font-size: 14px;
+    opacity: 1;
+}
+
+.rr-sale-stock-modal option {
+    background: #fff;
+    color: #173b60;
+}
+
+.rr-sale-stock-modal .rr-sale-transfer-qty-control {
+    display: grid;
+    grid-template-columns: 36px minmax(0, 1fr) 36px;
+    gap: 5px;
+    border: 0;
+    background: transparent;
+}
+
+.rr-sale-stock-modal .rr-sale-transfer-qty-control input {
+    text-align: center;
+}
+
+.rr-sale-stock-modal .rr-sale-transfer-qty-control button {
+    width: 36px;
+    height: 42px;
+    padding: 0;
+    border: 1px solid #c2d4ea;
+    border-radius: 8px;
+    background: #edf4ff;
+    color: #24558d !important;
+    -webkit-text-fill-color: #24558d;
+    font-size: 21px;
+    cursor: pointer;
+}
+
+.rr-sale-stock-modal .rr-sale-transfer-help {
+    display: block;
+    margin-top: 6px;
+    color: #526985 !important;
+    -webkit-text-fill-color: #526985;
+    font-size: 11px;
+}
+
+.rr-sale-stock-modal .rr-sale-transfer-result {
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin: 0 22px 14px;
+    padding: 12px 14px;
+    border-radius: 9px;
+    background: #eaf8f1;
+    color: #176246;
+    font-size: 12px;
+}
+
+.rr-sale-stock-modal .rr-sale-transfer-result.warning {
+    background: #fff0f2;
+    color: #a52e48;
+}
+
+.rr-sale-stock-modal .rr-sale-transfer-result :is(span, strong) {
+    color: inherit !important;
+    -webkit-text-fill-color: currentColor;
+}
+
+.rr-sale-stock-modal .rr-sale-modal-error,
+.rr-sale-stock-modal .rr-sale-stock-danger-note {
+    margin: 14px 22px;
+    padding: 12px;
+    border: 1px solid #edc4ce;
+    border-radius: 9px;
+    background: #fff1f4;
+    color: #a32742 !important;
+    -webkit-text-fill-color: #a32742;
+}
+
+.rr-sale-stock-modal .rr-sale-transfer-shortcuts {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    padding: 0 22px 16px;
+    color: #536b85;
+    font-size: 11px;
+}
+
+.rr-sale-transfer-shortcuts kbd {
+    display: inline-block;
+    min-width: 22px;
+    margin-right: 3px;
+    padding: 3px 5px;
+    border: 1px solid #c9d7ea;
+    border-bottom-width: 2px;
+    border-radius: 4px;
+    background: #f0f5fc;
+    color: #294f7a;
+    font-size: 10px;
+}
+
+.rr-sale-stock-modal .rr-sale-modal-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    padding: 16px 22px;
+    border-top: 1px solid #dce5f1;
+    background: #f7faff;
+}
+
+.rr-sale-stock-modal .rr-sale-modal-footer .rr-sale-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    min-height: 42px;
+    padding: 10px 17px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.rr-sale-stock-modal .rr-sale-modal-footer .secondary {
+    border: 1px solid #b9cce3;
+    background: #fff;
+    color: #315374 !important;
+    -webkit-text-fill-color: #315374;
+}
+
+.rr-sale-stock-modal .rr-sale-modal-footer .secondary:hover {
+    background: #eaf1fa;
+}
+
+.rr-sale-stock-modal .rr-sale-modal-footer .transfer {
+    border: 1px solid #215b9e;
+    background: #2463a7;
+    color: #fff !important;
+    -webkit-text-fill-color: #fff;
+}
+
+.rr-sale-stock-modal .rr-sale-modal-footer .transfer:hover:not(:disabled) {
+    background: #194b82;
+    color: #fff !important;
+}
+
+.rr-sale-stock-modal button:disabled {
+    opacity: .55;
+    cursor: not-allowed;
+}
+
+.rr-sale-stock-modal :is(button, input, select):focus-visible {
+    outline: 3px solid #89b7f3;
+    outline-offset: 3px;
+}
+
+.rr-sale-stock-modal .rr-sale-modal-loading {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    padding: 50px 20px;
+    color: #315b87;
+}
+
+@keyframes saleStockIn {
+    from {
+        opacity: 0;
+        transform: translateY(12px) scale(.98);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+@media(max-width:575px) {
+    .rr-sale-stock-modal .rr-sale-stock-summary {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .rr-sale-stock-modal .rr-sale-transfer-section {
+        grid-template-columns: 1fr;
+    }
+
+    .rr-sale-stock-modal .rr-sale-modal-header.stock {
+        padding: 16px;
+    }
+
+    .rr-sale-stock-modal .rr-sale-modal-header.stock strong {
+        font-size: 16px;
+    }
+}
+
+@media(prefers-reduced-motion:reduce) {
+    .rr-sale-modal-layer .rr-sale-stock-modal {
+        animation: none;
+    }
+}
+
+/* Wider stock transfer window and consistently sized quantity controls. */
+.rr-sale-modal-layer .rr-sale-stock-modal {
+    width: min(900px, calc(100vw - 36px)) !important;
+    max-width: 900px !important;
+    min-width: 0 !important;
+}
+
+.rr-sale-stock-modal .rr-sale-modal-header.stock>div:nth-child(2) {
+    flex: 1;
+    min-width: 0;
+}
+
+.rr-sale-stock-modal .rr-sale-transfer-section {
+    grid-template-columns: minmax(0, 1.6fr) minmax(240px, 1fr);
+    align-items: start;
+}
+
+.rr-sale-stock-modal .rr-sale-transfer-section .rr-sale-field {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    height: auto;
+    overflow: visible;
+}
+
+.rr-sale-stock-modal .rr-sale-transfer-section .rr-sale-field>label {
+    position: static;
+    height: auto;
+    min-height: 18px;
+    margin: 0 0 8px;
+    line-height: 18px;
+}
+
+.rr-sale-stock-modal #stock-transfer-source {
+    cursor: pointer;
+    height: 46px !important;
+    min-height: 46px !important;
+    max-height: none !important;
+    line-height: normal;
+    padding: 10px 32px 10px 12px;
+}
+
+.rr-sale-stock-modal .rr-sale-transfer-qty-control {
+    display: grid !important;
+    grid-template-columns: 44px minmax(0, 1fr) 44px;
+    align-items: stretch;
+    gap: 6px;
+    width: 100%;
+    height: 46px !important;
+    min-height: 46px !important;
+    padding: 0 !important;
+    overflow: visible !important;
+    flex-shrink: 0;
+}
+
+.rr-sale-stock-modal .rr-sale-transfer-qty-control> :is(input, button) {
+    position: static !important;
+    box-sizing: border-box;
+    width: 100% !important;
+    height: 46px !important;
+    min-height: 46px !important;
+    max-height: none !important;
+    margin: 0 !important;
+    transform: none !important;
+    border-radius: 8px;
+}
+
+.rr-sale-stock-modal .rr-sale-transfer-qty-control>input {
+    padding: 10px 6px !important;
+    line-height: normal !important;
+    font-size: 16px;
+    font-weight: 700;
+    appearance: textfield;
+    -moz-appearance: textfield;
+}
+
+.rr-sale-stock-modal .rr-sale-transfer-qty-control>input::-webkit-inner-spin-button,
+.rr-sale-stock-modal .rr-sale-transfer-qty-control>input::-webkit-outer-spin-button {
+    margin: 0;
+    -webkit-appearance: none;
+}
+
+.rr-sale-stock-modal .rr-sale-transfer-qty-control>button {
+    display: grid !important;
+    place-items: center;
+    padding: 0 !important;
+    line-height: 1 !important;
+    cursor: pointer;
+}
+
+.rr-sale-stock-modal #stock-transfer-source:disabled,
+.rr-sale-stock-modal .rr-sale-transfer-qty-control>button:disabled {
+    cursor: not-allowed;
+}
+
+@media (max-width: 640px) {
+    .rr-sale-stock-modal .rr-sale-transfer-section {
+        grid-template-columns: minmax(0, 1fr);
+    }
+}
