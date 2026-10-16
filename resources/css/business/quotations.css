@@ -3007,3 +3007,3711 @@
         grid-template-columns: 1fr;
     }
 }
+
+/* Quotation register only. Keep quotations.css for the other pages and modals. */
+.rr-quote-index-page {
+    min-width: 0;
+    padding: 14px;
+    background: #f3f6fb;
+    color: #213c5d;
+    font-family: "Segoe UI", Arial, sans-serif;
+    font-size: 13px;
+}
+
+.rr-quote-index-page .rr-quote-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 17px;
+    position: relative;
+    padding: 18px 20px;
+    margin-bottom: 16px;
+    border: 1px solid #275991;
+    border-radius: 12px;
+    background: linear-gradient(115deg, #13395f, #215e9d 75%, #2879af);
+    box-shadow: 0 6px 20px #173d6420;
+}
+
+.rr-quote-index-page .rr-quote-header-main {
+    display: flex;
+    align-items: center;
+    gap: 13px;
+    min-width: 0;
+}
+
+.rr-quote-index-page .rr-quote-header-icon {
+    display: grid;
+    place-items: center;
+    width: 51px;
+    height: 51px;
+    flex: 0 0 51px;
+    border: 1px solid #ffffff40;
+    border-radius: 13px;
+    color: white;
+    background: #ffffff1f;
+    font-size: 25px;
+    box-shadow: 0 5px 12px #08234520;
+}
+
+.rr-quote-index-page .rr-quote-eyebrow {
+    color: #c3ddfa;
+    letter-spacing: 1px;
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+}
+
+.rr-quote-index-page .rr-quote-header h1 {
+    color: white;
+    margin: 3px 0 6px;
+    font-size: 23px;
+    letter-spacing: -.5px;
+    line-height: 1.3;
+}
+
+.rr-quote-index-page .rr-quote-header-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 15px;
+    color: #dceafa;
+    font-size: 11px;
+}
+
+.rr-quote-index-page .rr-quote-header-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.rr-quote-index-page .rr-quote-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    min-height: 36px;
+    padding: 8px 12px;
+    border: 1px solid #c9d9eb;
+    border-radius: 7px;
+    color: #2d5885;
+    background: white;
+    text-decoration: none;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background .15s, box-shadow .15s;
+}
+
+.rr-quote-index-page .rr-quote-btn.primary {
+    background: #225b9e;
+    color: white;
+    border-color: #225b9e;
+}
+
+.rr-quote-index-page .rr-quote-header .rr-quote-btn {
+    background: #ffffff14;
+    color: white;
+    border-color: #ffffff50;
+}
+
+.rr-quote-index-page .rr-quote-header .rr-quote-btn.primary {
+    background: white;
+    color: #174c84;
+    border-color: white;
+}
+
+.rr-quote-index-page .rr-quote-btn:hover {
+    box-shadow: 0 3px 10px #183b6526;
+}
+
+.rr-quote-index-page .rr-quote-metrics {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 13px;
+    margin: 0 0 16px;
+}
+
+.rr-quote-index-page .rr-quote-metric {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: center;
+    position: relative;
+    min-width: 0;
+    min-height: 110px;
+    gap: 6px;
+    padding: 17px 14px 17px 72px;
+    border: 1px solid #d1deed;
+    border-top: 3px solid #3b78bd;
+    border-radius: 11px;
+    background: linear-gradient(125deg, #fff, #f0f6ff);
+    box-shadow: 0 3px 12px #1734500b;
+    transition: transform .18s, box-shadow .18s;
+}
+
+.rr-quote-index-page .rr-quote-metric:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 18px #17345016;
+}
+
+.rr-quote-index-page .rr-quote-metric>div {
+    position: absolute;
+    left: 16px;
+    top: 50%;
+    transform: translateY(-50%);
+    display: grid;
+    place-items: center;
+    width: 42px;
+    height: 42px;
+    grid-row: auto;
+    border: 0;
+    border-radius: 12px;
+    background: #e1edff;
+    color: #285fa0;
+    font-size: 22px;
+}
+
+.rr-quote-index-page .rr-quote-metric>span {
+    display: block;
+    overflow: visible;
+    white-space: normal;
+    color: #49617e;
+    font-size: 11px;
+    font-weight: 600;
+    line-height: 1.45;
+}
+
+.rr-quote-index-page .rr-quote-metric>strong {
+    display: block;
+    overflow: visible;
+    overflow-wrap: anywhere;
+    white-space: normal;
+    color: #204b7b;
+    font-size: clamp(18px, 1.6vw, 23px);
+    line-height: 1.2;
+    font-variant-numeric: tabular-nums;
+}
+
+.rr-quote-index-page .rr-quote-metric.slate {
+    border-top-color: #c1872f;
+    background: linear-gradient(125deg, #fff, #fff7e9);
+}
+
+.rr-quote-index-page .rr-quote-metric.slate>div {
+    color: #a66a18;
+    background: #fff0d5;
+}
+
+.rr-quote-index-page .rr-quote-metric.green {
+    border-top-color: #288260;
+    background: linear-gradient(125deg, #fff, #edf9f3);
+}
+
+.rr-quote-index-page .rr-quote-metric.green>div {
+    color: #1d7b53;
+    background: #dff5e9;
+}
+
+.rr-quote-index-page .rr-quote-metric.violet {
+    border-top-color: #8056b9;
+    background: linear-gradient(125deg, #fff, #f4effc);
+}
+
+.rr-quote-index-page .rr-quote-metric.violet>div {
+    color: #7850ae;
+    background: #eee4fb;
+}
+
+.rr-quote-index-page .rr-quote-window {
+    border: 1px solid #cbd9e9;
+    border-radius: 10px;
+    background: white;
+    box-shadow: 0 3px 12px #17345009;
+    margin-bottom: 16px;
+    overflow: hidden;
+}
+
+.rr-quote-index-page .rr-quote-window-title {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+    padding: 11px 14px;
+    border-bottom: 1px solid #dbe5f1;
+    color: #2d5079;
+    background: #f7faff;
+}
+
+.rr-quote-index-page .rr-quote-window-title>div {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.rr-quote-index-page .rr-quote-window-title strong {
+    font-size: 13px;
+}
+
+.rr-quote-index-page .rr-quote-window-body {
+    padding: 14px;
+}
+
+.rr-quote-index-page [hidden] {
+    display: none !important;
+}
+
+.rr-quote-index-page .rr-quote-filter-tools {
+    display: flex;
+    gap: 8px;
+}
+
+.rr-quote-index-page .rr-quote-reset {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 5px 8px;
+    border: 1px solid #d1ddec;
+    border-radius: 6px;
+    background: white;
+    color: #456182;
+    font-size: 11px;
+    cursor: pointer;
+}
+
+.rr-quote-index-page .rr-quote-quick-filters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 14px;
+}
+
+.rr-quote-index-page .rr-quote-quick-filters button {
+    padding: 6px 12px;
+    border: 1px solid #d1deed;
+    border-radius: 6px;
+    background: #f6f9fd;
+    color: #46617f;
+    font-size: 11px;
+    cursor: pointer;
+}
+
+.rr-quote-index-page .rr-quote-quick-filters button.active {
+    background: #e6effd;
+    border-color: #84a5d0;
+    color: #215597;
+    box-shadow: inset 0 -2px #3f79ba;
+    font-weight: 700;
+}
+
+.rr-quote-index-page .rr-quote-filter-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    align-items: flex-end;
+}
+
+.rr-quote-index-page .rr-quote-field {
+    display: block;
+    flex: 1 1 160px;
+    min-width: 0;
+    margin: 0;
+}
+
+.rr-quote-index-page .rr-quote-filter-grid>.rr-quote-field:first-child {
+    flex: 3 1 300px;
+}
+
+.rr-quote-index-page .rr-quote-field>span {
+    display: block;
+    margin-bottom: 6px;
+    font-size: 11px;
+    color: #3d5979;
+    font-weight: 700;
+}
+
+.rr-quote-index-page .rr-quote-date-field {
+    flex: 1 1 150px;
+    min-width: 0;
+}
+
+.rr-quote-index-page .rr-quote-field input,
+.rr-quote-index-page .rr-quote-field select {
+    display: block;
+    width: 100%;
+    min-width: 0;
+    height: 37px;
+    padding: 0 10px;
+    border: 1px solid #c0d1e5;
+    border-radius: 6px;
+    background: white;
+    color: #294b6d;
+    font-size: 12px;
+}
+
+.rr-quote-index-page .rr-quote-search {
+    display: flex;
+    align-items: stretch;
+    width: 100%;
+    min-width: 0;
+    height: 37px;
+    padding: 0;
+    border: 1px solid #c0d1e5;
+    border-radius: 6px;
+    overflow: hidden;
+    background: white;
+}
+
+.rr-quote-index-page .rr-quote-search>i {
+    display: grid;
+    place-items: center;
+    position: static;
+    inset: auto;
+    flex: 0 0 36px;
+    width: 36px;
+    height: auto;
+    margin: 0;
+    padding: 0;
+    color: #426b9b;
+    background: #eff5fd;
+    border: 0;
+    border-right: 1px solid #dce6f2;
+    font-size: 14px;
+}
+
+.rr-quote-index-page .rr-quote-search>input {
+    display: block;
+    position: static;
+    flex: 1 1 0%;
+    min-width: 0;
+    width: 0;
+    height: 35px;
+    margin: 0;
+    padding: 0 10px;
+    border: 0;
+    border-radius: 0;
+    box-shadow: none;
+}
+
+.rr-quote-index-page .rr-quote-search:focus-within {
+    border-color: #4d82bc;
+    box-shadow: 0 0 0 3px #3c7bc21d;
+}
+
+.rr-quote-index-page .rr-quote-search>input:focus {
+    outline: 0;
+    box-shadow: none;
+}
+
+.rr-quote-index-page .rr-quote-table-wrap {
+    overflow-x: auto;
+    max-height: none;
+}
+
+.rr-quote-index-page .rr-quote-table {
+    width: 100%;
+    min-width: 1120px;
+    border-collapse: separate;
+    border-spacing: 0;
+    font-size: 12px;
+    table-layout: auto;
+}
+
+.rr-quote-index-page .rr-quote-table th {
+    padding: 12px 11px;
+    color: #345878;
+    background: #eaf1fb;
+    border-bottom: 1px solid #c7d8eb;
+    white-space: nowrap;
+    font-size: 11px;
+    font-weight: 700;
+}
+
+.rr-quote-index-page .rr-quote-table td {
+    padding: 12px 11px;
+    color: #2c4866;
+    border-bottom: 1px solid #e3ecf5;
+    vertical-align: middle;
+}
+
+.rr-quote-index-page .rr-quote-table tbody tr {
+    cursor: pointer;
+    transition: background .15s;
+}
+
+.rr-quote-index-page .rr-quote-table tbody tr:nth-child(even) {
+    background: #f9fbff;
+}
+
+.rr-quote-index-page .rr-quote-table tbody tr:hover,
+.rr-quote-index-page .rr-quote-table tbody tr:focus {
+    background: #edf4ff;
+    outline: 2px solid #8aaed6;
+    outline-offset: -2px;
+}
+
+.rr-quote-index-page .rr-quote-table tbody tr.terminal {
+    opacity: 1;
+}
+
+.rr-quote-index-page .rr-quote-table td>strong {
+    display: block;
+    color: #255184;
+}
+
+.rr-quote-index-page .rr-quote-table td>span {
+    display: block;
+    margin-top: 4px;
+    font-size: 11px;
+    color: #5b728e;
+}
+
+.rr-quote-index-page .rr-quote-table .amount {
+    font-size: 13px;
+    font-weight: 700;
+    color: #214d79;
+    white-space: nowrap;
+    font-variant-numeric: tabular-nums;
+}
+
+.rr-quote-index-page .rr-quote-table .number {
+    text-align: right;
+}
+
+.rr-quote-index-page .rr-quote-table .actions {
+    white-space: nowrap;
+}
+
+.rr-quote-index-page .rr-quote-table td.actions a,
+.rr-quote-index-page .rr-quote-table td.actions button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 29px;
+    height: 29px;
+    margin: 2px;
+    padding: 0;
+    border: 1px solid #cbdced;
+    border-radius: 6px;
+    background: #edf4ff;
+    color: #2c609e;
+    cursor: pointer;
+}
+
+.rr-quote-index-page .rr-quote-table td.actions .print,
+.rr-quote-index-page .rr-quote-table td.actions .approve {
+    color: #1b7650;
+    border-color: #c1dfcd;
+    background: #eaf8ef;
+}
+
+.rr-quote-index-page .rr-quote-table td.actions .convert {
+    color: #7347a5;
+    background: #f2eafa;
+    border-color: #d9c8ed;
+}
+
+.rr-quote-index-page .rr-quote-table td.actions .danger {
+    color: #a93647;
+    background: #fff0f2;
+    border-color: #e9c6ce;
+}
+
+.rr-quote-index-page .rr-quote-status {
+    display: inline-block;
+    border-radius: 20px;
+    padding: 4px 8px;
+    background: #edf2f8;
+    color: #526780;
+    border: 1px solid #d3deeb;
+    font-size: 10px;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+.rr-quote-index-page .rr-quote-status.approved {
+    background: #e5f6ec;
+    color: #186741;
+    border-color: #b9dfc8;
+}
+
+.rr-quote-index-page .rr-quote-status.converted {
+    background: #f0e8fa;
+    color: #6d439f;
+    border-color: #d7c6ec;
+}
+
+.rr-quote-index-page .rr-quote-status.pending {
+    background: #fff4df;
+    color: #946014;
+    border-color: #ead4a5;
+}
+
+.rr-quote-index-page .rr-quote-status.rejected,
+.rr-quote-index-page .rr-quote-status.cancelled,
+.rr-quote-index-page .rr-quote-status.expired {
+    background: #fff0f2;
+    color: #a13749;
+    border-color: #e7c2cb;
+}
+
+.rr-quote-index-page .rr-quote-record-count {
+    color: #526d8a;
+    font-size: 11px;
+}
+
+.rr-quote-index-page .rr-quote-pagination {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+    padding: 12px 14px;
+    background: #fafcff;
+}
+
+.rr-quote-index-page .rr-quote-pagination a {
+    padding: 6px 10px;
+    border: 1px solid #d0ddec;
+    border-radius: 6px;
+    color: #355d86;
+    background: white;
+    text-decoration: none;
+    font-size: 12px;
+}
+
+.rr-quote-index-page .rr-quote-pagination a.active {
+    background: #225b9e;
+    color: white;
+    border-color: #225b9e;
+}
+
+.rr-quote-index-page .rr-quote-pagination a.disabled {
+    opacity: .45;
+    pointer-events: none;
+}
+
+.rr-quote-index-page .rr-quote-filter-loading {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    padding: 9px 14px;
+    color: #2a5d98;
+    background: #edf4ff;
+    font-size: 12px;
+}
+
+.rr-quote-index-spin {
+    display: inline-block;
+    animation: rr-quote-spin 1s linear infinite;
+}
+
+.rr-quote-index-page :is(input, select, button, a):focus-visible {
+    outline: 2px solid #4185ca;
+    outline-offset: 2px;
+}
+
+.rr-quote-index-page button:disabled {
+    opacity: .6;
+    cursor: wait;
+}
+
+@keyframes rr-quote-spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+@media (prefers-reduced-motion:no-preference) {
+
+    .rr-quote-index-page .rr-quote-header,
+    .rr-quote-index-page .rr-quote-metric {
+        animation: rr-quote-enter .3s ease-out both;
+    }
+
+    .rr-quote-index-page .rr-quote-metric:nth-child(2) {
+        animation-delay: .05s;
+    }
+
+    .rr-quote-index-page .rr-quote-metric:nth-child(3) {
+        animation-delay: .1s;
+    }
+
+    .rr-quote-index-page .rr-quote-metric:nth-child(4) {
+        animation-delay: .15s;
+    }
+}
+
+@keyframes rr-quote-enter {
+    from {
+        opacity: 0;
+        transform: translateY(5px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@media (max-width:1150px) {
+    .rr-quote-index-page .rr-quote-metrics {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width:600px) {
+    .rr-quote-index-page .rr-quote-header {
+        padding: 14px;
+    }
+
+    .rr-quote-index-page .rr-quote-header h1 {
+        font-size: 20px;
+    }
+
+    .rr-quote-index-page .rr-quote-header-actions {
+        width: 100%;
+    }
+
+    .rr-quote-index-page .rr-quote-header-actions .rr-quote-btn {
+        flex: 1 1 auto;
+    }
+
+    .rr-quote-index-page .rr-quote-metric {
+        padding: 59px 12px 14px;
+        min-height: 138px;
+    }
+
+    .rr-quote-index-page .rr-quote-metric>div {
+        top: 12px;
+        left: 12px;
+        transform: none;
+        width: 35px;
+        height: 35px;
+        font-size: 19px;
+    }
+
+    .rr-quote-index-page .rr-quote-metric>strong {
+        font-size: 19px;
+    }
+
+    .rr-quote-index-page .rr-quote-filter-grid>.rr-quote-field,
+    .rr-quote-index-page .rr-quote-filter-grid>.rr-quote-date-field {
+        flex-basis: 100%;
+    }
+}
+
+@media (prefers-reduced-motion:reduce) {
+    .rr-quote-index-spin {
+        animation: none;
+    }
+
+    .rr-quote-index-page .rr-quote-metric {
+        transition: none;
+    }
+}
+
+/* Quotation/proforma create and edit — shared billing workspace. */
+.rr-quote-create-page {
+    background: #f3f6fb;
+    color: #213e5c;
+}
+
+.rr-quote-create-page .rr-quote-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px;
+    padding: 16px 18px;
+    border: 1px solid #275c91;
+    border-radius: 12px;
+    background: linear-gradient(115deg, #14395f, #256aa6);
+    box-shadow: 0 5px 18px #153f6c20;
+}
+
+.rr-quote-create-page .rr-quote-header h1 {
+    font-size: 22px;
+    color: white;
+    letter-spacing: -.4px;
+    margin: 3px 0 5px;
+}
+
+.rr-quote-create-page .rr-quote-eyebrow {
+    font-size: 10px;
+    color: #c6dff9;
+    letter-spacing: 1px;
+}
+
+.rr-quote-create-page .rr-quote-header-meta {
+    color: #dfedfc;
+    font-size: 11px;
+    flex-wrap: wrap;
+}
+
+.rr-quote-create-page .rr-quote-header-icon {
+    display: grid;
+    place-items: center;
+    width: 46px;
+    height: 46px;
+    border: 1px solid #ffffff44;
+    border-radius: 12px;
+    background: #ffffff1c;
+    color: white;
+    font-size: 24px;
+    flex-shrink: 0;
+}
+
+.rr-quote-create-page .rr-quote-back {
+    background: #ffffff14;
+    color: white;
+    border-color: #ffffff45;
+    border-radius: 6px;
+}
+
+.rr-quote-create-page .rr-quote-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    min-height: 36px;
+    padding: 8px 12px;
+    font-size: 12px;
+    font-weight: 600;
+    border: 1px solid #c5d7eb;
+    border-radius: 7px;
+    background: white;
+    color: #2a598a;
+    cursor: pointer;
+}
+
+.rr-quote-create-page .rr-quote-header-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 7px;
+}
+
+.rr-quote-create-page .rr-quote-header .rr-quote-btn.cancel {
+    background: #ffffff14;
+    color: white;
+    border-color: #ffffff50;
+}
+
+.rr-quote-create-page .rr-quote-btn.primary {
+    color: white;
+    background: #215f9e;
+    border-color: #215f9e;
+}
+
+.rr-quote-create-page .rr-quote-header .rr-quote-btn.primary {
+    color: #1e5188;
+    background: white;
+    border-color: white;
+}
+
+.rr-quote-create-page .rr-quote-btn.print {
+    color: #17663e;
+    background: #ddf5e7;
+    border-color: #b7ddc8;
+}
+
+.rr-quote-create-page .rr-quote-btn.draft {
+    color: #865c16;
+    background: #fff4dd;
+    border-color: #e7d6b1;
+}
+
+.rr-quote-create-page button:disabled {
+    opacity: .55;
+    cursor: wait;
+}
+
+.rr-quote-create-page .rr-quote-create-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 13px;
+    margin: 13px 0;
+    align-items: start;
+}
+
+.rr-quote-create-page .rr-quote-window {
+    background: white;
+    border: 1px solid #cddbeb;
+    border-radius: 10px;
+    box-shadow: 0 3px 12px #1a345009;
+    overflow: visible;
+    margin-bottom: 14px;
+    min-width: 0;
+}
+
+.rr-quote-create-page .rr-quote-window-title {
+    padding: 11px 14px;
+    color: #2d5079;
+    background: #f7faff;
+    border-bottom: 1px solid #dae5f1;
+    border-radius: 10px 10px 0 0;
+}
+
+.rr-quote-create-page .rr-quote-window-body {
+    padding: 14px;
+}
+
+.rr-quote-create-page .rr-quote-create-field {
+    display: block;
+    min-width: 0;
+    color: #365577;
+}
+
+.rr-quote-create-page .rr-quote-create-field>span {
+    display: block;
+    color: #4c6580;
+    font-weight: 600;
+    font-size: 11px;
+    margin-bottom: 6px;
+}
+
+.rr-quote-create-page .rr-quote-create-field input,
+.rr-quote-create-page .rr-quote-create-field select,
+.rr-quote-create-page .rr-quote-create-field textarea {
+    border: 1px solid #bed0e5;
+    border-radius: 6px;
+    min-height: 36px;
+    color: #24496e;
+    background: white;
+    font-size: 12px;
+}
+
+.rr-quote-create-page .rr-quote-selected-party {
+    border: 1px solid #c6dbee;
+    background: #eef6ff;
+    border-radius: 8px;
+    padding: 12px;
+    color: #2a5788;
+}
+
+.rr-quote-create-page .rr-quote-selected-party strong {
+    color: #264e79;
+}
+
+.rr-quote-create-page .rr-quote-selected-party span {
+    color: #516e8a;
+}
+
+.rr-quote-create-page .rr-quote-source-toggle button {
+    border-radius: 6px;
+    color: #3e5b7a;
+    border-color: #cadaed;
+}
+
+.rr-quote-create-page .rr-quote-source-toggle button.active {
+    background: #e6effc;
+    color: #205b9a;
+    border-color: #8aaed4;
+}
+
+.rr-quote-create-page .rr-quote-shortcuts {
+    margin-top: 13px;
+    margin-bottom: 9px;
+    border: 1px solid #d0ddec;
+    border-radius: 8px;
+    background: white;
+}
+
+.rr-quote-create-page .rr-quote-shortcuts>button {
+    display: flex;
+    width: 100%;
+    align-items: center;
+    gap: 8px;
+    border: 0;
+    border-radius: 8px;
+    padding: 9px 12px;
+    background: #f8fbff;
+    color: #3b5b80;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.rr-quote-create-page .rr-quote-shortcuts>button i:last-child {
+    margin-left: auto;
+}
+
+.rr-quote-create-page .rr-quote-shortcuts>div {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px 20px;
+    padding: 12px;
+    border-top: 1px solid #e0e9f3;
+}
+
+.rr-quote-create-page .rr-quote-shortcuts span {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    color: #4c6681;
+    font-size: 11px;
+}
+
+.rr-quote-create-page kbd {
+    font: 600 10px "Segoe UI", sans-serif;
+    color: #245b9f;
+    border: 1px solid #c6d9ef;
+    border-radius: 4px;
+    background: #eaf3ff;
+    padding: 3px 6px;
+}
+
+.rr-quote-create-page kbd.purple {
+    color: #7148a0;
+    background: #f1eafa;
+}
+
+.rr-quote-create-page kbd.green {
+    color: #1c6c49;
+    background: #e6f7ec;
+}
+
+.rr-quote-create-page kbd.orange {
+    color: #925d17;
+    background: #fff2dc;
+}
+
+.rr-quote-create-page .rr-quote-fast-mode {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    color: #4c6580;
+    font-size: 11px;
+    padding: 5px 2px;
+}
+
+.rr-quote-create-page .rr-quote-fast-mode input {
+    width: 14px;
+    height: 14px;
+    accent-color: #2566a9;
+}
+
+.rr-quote-create-page .rr-quote-table-wrap {
+    overflow-x: auto;
+    max-height: none;
+}
+
+.rr-quote-create-page .rr-quote-items-table {
+    width: 100%;
+    min-width: 1100px;
+    border-collapse: separate;
+    border-spacing: 0;
+    font-size: 12px;
+    table-layout: auto;
+}
+
+.rr-quote-create-page .rr-quote-items-table th {
+    padding: 12px 10px;
+    background: #eaf2fb;
+    color: #355b80;
+    border-bottom: 1px solid #c9d9ec;
+    font-size: 11px;
+    white-space: nowrap;
+}
+
+.rr-quote-create-page .rr-quote-items-table td {
+    padding: 11px 10px;
+    border-bottom: 1px solid #e3ebf5;
+    color: #315273;
+    vertical-align: middle;
+    font-variant-numeric: tabular-nums;
+}
+
+.rr-quote-create-page .rr-quote-items-table tbody tr[data-product]:nth-child(even) {
+    background: #f8fbff;
+}
+
+.rr-quote-create-page .rr-quote-items-table tr[data-product]:focus-within {
+    background: #edf5ff;
+    box-shadow: inset 3px 0 #3a7fbe;
+}
+
+.rr-quote-create-page .rr-quote-items-table td:nth-child(2) {
+    min-width: 190px;
+}
+
+.rr-quote-create-page .rr-quote-items-table td strong {
+    color: #24517f;
+}
+
+.rr-quote-create-page .rr-quote-items-table td span {
+    color: #57728e;
+    font-size: 11px;
+}
+
+.rr-quote-create-page .rr-quote-items-table input,
+.rr-quote-create-page .rr-quote-items-table select {
+    height: 34px;
+    border: 1px solid #b6cce4;
+    border-radius: 6px;
+    color: #244d78;
+    background: white;
+}
+
+.rr-quote-create-page .rr-quote-items-table input:focus {
+    outline: 2px solid #357bc125;
+    border-color: #3d7fbf;
+}
+
+.rr-quote-create-page .rr-quote-blank-row>td {
+    padding: 0;
+    background: #f3f8ff;
+}
+
+.rr-quote-create-page .rr-quote-blank-row .rr-quote-window-body {
+    padding: 12px;
+}
+
+.rr-quote-create-page .rr-quote-product-search {
+    width: 100%;
+    max-width: none;
+}
+
+.rr-quote-create-page .rr-quote-search-input {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    height: 39px;
+    min-width: 0;
+    padding: 0;
+    border: 1px solid #bbd0e7;
+    border-radius: 7px;
+    overflow: hidden;
+    background: white;
+}
+
+.rr-quote-create-page .rr-quote-search-input>i {
+    position: static;
+    display: grid;
+    place-items: center;
+    flex: 0 0 36px;
+    width: 36px;
+    height: 37px;
+    color: #46729f;
+    background: #edf4ff;
+}
+
+.rr-quote-create-page .rr-quote-search-input>input {
+    position: static;
+    display: block;
+    flex: 1 1 0%;
+    width: 0;
+    min-width: 0;
+    height: 37px;
+    border: 0;
+    border-radius: 0;
+    margin: 0;
+    padding: 0 10px;
+    outline: 0;
+}
+
+.rr-quote-create-page .rr-quote-search-input>button {
+    flex: 0 0 32px;
+    border: 0;
+    background: transparent;
+    color: #5a7190;
+}
+
+.rr-quote-create-page .rr-quote-bottom-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1.4fr) minmax(300px, 1fr);
+    gap: 14px;
+    align-items: start;
+}
+
+.rr-quote-create-page .rr-quote-summary {
+    padding: 13px 15px;
+}
+
+.rr-quote-create-page .rr-quote-summary-row {
+    padding: 7px 0;
+    color: #4b6680;
+    border-bottom: 1px dashed #dbe5ef;
+}
+
+.rr-quote-create-page .rr-quote-summary-row>span {
+    color: #4b6680;
+    font-size: 11px;
+}
+
+.rr-quote-create-page .rr-quote-summary-row>strong {
+    color: #284d73;
+    font-size: 12px;
+}
+
+.rr-quote-create-page .rr-quote-summary-row.grand {
+    margin-top: 9px;
+    padding: 12px;
+    background: #eaf6ef;
+    border: 1px solid #bcdcC9;
+    border-radius: 8px;
+}
+
+.rr-quote-create-page .rr-quote-summary-row.grand>span {
+    color: #1f6646;
+    font-size: 13px;
+}
+
+.rr-quote-create-page .rr-quote-summary-row.grand>strong {
+    color: #145e3b;
+    font-size: 22px;
+}
+
+.rr-quote-create-page .rr-quote-form-actions {
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 12px;
+    border: 1px solid #ccdbea;
+    border-top: 3px solid #34699f;
+    border-radius: 9px;
+    padding: 15px;
+    background: white;
+}
+
+.rr-quote-results.product {
+    margin: 0;
+    border: 1px solid #b9d1e9;
+    border-radius: 9px;
+    background: white;
+    box-shadow: 0 10px 30px #15396333;
+    color: #23496f;
+    font: 12px "Segoe UI", Arial, sans-serif;
+}
+
+.rr-quote-results.product>button {
+    display: flex;
+    width: 100%;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 12px;
+    background: white;
+    border: 0;
+    border-bottom: 1px solid #e1ebf5;
+    color: #244c76;
+    text-align: left;
+    cursor: pointer;
+}
+
+.rr-quote-results.product>button.active,
+.rr-quote-results.product>button:hover {
+    background: #eaf4ff;
+    box-shadow: inset 3px 0 #3b7dc0;
+}
+
+.rr-quote-results.product>button strong,
+.rr-quote-results.product>button span {
+    display: block;
+}
+
+.rr-quote-results.product>button span {
+    color: #5b7692;
+    margin-top: 4px;
+    font-size: 11px;
+}
+
+.rr-quote-save-overlay {
+    position: fixed;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    padding: 20px;
+    background: #102b4890;
+    backdrop-filter: blur(4px);
+    z-index: 2147483000;
+    font-family: "Segoe UI", Arial, sans-serif;
+}
+
+.rr-quote-save-overlay>div {
+    width: min(350px, 100%);
+    padding: 30px;
+    border-radius: 15px;
+    background: white;
+    box-shadow: 0 20px 70px #071e4c40;
+    text-align: center;
+    color: #274c74;
+}
+
+.rr-quote-save-spinner {
+    display: block;
+    width: 48px;
+    height: 48px;
+    margin: 0 auto 22px;
+    border: 4px solid #dfeaf8;
+    border-top-color: #326fae;
+    border-radius: 50%;
+    animation: rr-quote-spin .9s linear infinite;
+}
+
+.rr-quote-save-overlay strong {
+    display: block;
+    font-size: 17px;
+}
+
+.rr-quote-save-overlay p {
+    font-size: 12px;
+    color: #58728d;
+    margin-top: 10px;
+}
+
+@media (max-width:1150px) {
+    .rr-quote-create-page .rr-quote-create-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width:760px) {
+
+    .rr-quote-create-page .rr-quote-create-grid,
+    .rr-quote-create-page .rr-quote-bottom-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .rr-quote-create-page .rr-quote-header h1 {
+        font-size: 20px;
+    }
+
+    .rr-quote-create-page .rr-quote-form-actions>div {
+        width: 100%;
+    }
+}
+
+@media (prefers-reduced-motion:no-preference) {
+    .rr-quote-create-page .rr-quote-header {
+        animation: rr-quote-enter .3s ease-out both;
+    }
+}
+
+@media (prefers-reduced-motion:reduce) {
+    .rr-quote-save-spinner {
+        animation: none;
+    }
+}
+
+/* Create polish: explicit button states prevent inherited white hover text. */
+.rr-quote-create-page .rr-quote-header {
+    gap: 12px;
+    padding: 17px 18px;
+}
+
+.rr-quote-create-page .rr-quote-header-main {
+    flex: 1 1 320px;
+    min-width: 0;
+}
+
+.rr-quote-create-page .rr-quote-header .rr-quote-btn.primary:hover,
+.rr-quote-create-page .rr-quote-header .rr-quote-btn.primary:focus-visible {
+    color: #144473;
+    background: #e5f1ff;
+    border-color: #c9dffa;
+}
+
+.rr-quote-create-page .rr-quote-btn.print:hover,
+.rr-quote-create-page .rr-quote-btn.print:focus-visible {
+    color: #115635;
+    background: #c4ead6;
+    border-color: #96ceb1;
+}
+
+.rr-quote-create-page .rr-quote-btn.draft:hover,
+.rr-quote-create-page .rr-quote-btn.draft:focus-visible {
+    color: #75470b;
+    background: #ffe8b8;
+    border-color: #d9bb80;
+}
+
+.rr-quote-create-page .rr-quote-header .rr-quote-btn.cancel:hover {
+    background: #ffffff26;
+    color: white;
+    border-color: #ffffff7a;
+}
+
+.rr-quote-create-page .rr-quote-form-actions .rr-quote-btn.primary:hover {
+    color: white;
+    background: #164b83;
+    border-color: #164b83;
+}
+
+.rr-quote-create-page .rr-quote-btn:hover>i,
+.rr-quote-create-page .rr-quote-btn:hover>kbd {
+    color: inherit;
+}
+
+.rr-quote-create-page .rr-quote-shortcuts>button {
+    min-height: 40px;
+}
+
+.rr-quote-create-page .rr-quote-shortcut-switch {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    margin-left: auto;
+    color: #617792;
+    font-size: 10px;
+}
+
+.rr-quote-create-page .rr-quote-shortcut-switch>i {
+    font-size: 25px;
+    line-height: 1;
+}
+
+.rr-quote-create-page .rr-quote-shortcut-switch.on {
+    color: #247c54;
+}
+
+.rr-quote-create-page .rr-quote-quick-add {
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    gap: 7px;
+    width: 100%;
+    margin-top: 10px;
+    min-height: 34px;
+    border: 1px dashed #90b4d9;
+    border-radius: 7px;
+    background: #edf5ff;
+    color: #265b93;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.rr-quote-create-page .rr-quote-quick-add:hover {
+    color: #194575;
+    background: #deecff;
+    border-color: #5f91c2;
+}
+
+.rr-quote-create-page .rr-quote-selected-party button {
+    color: #2a5d92;
+    background: white;
+    border: 1px solid #bfd4e9;
+    border-radius: 6px;
+    padding: 6px 9px;
+    font-size: 11px;
+}
+
+.rr-quote-create-page .rr-quote-selected-party button:hover {
+    color: #184b7e;
+    background: #e0edff;
+}
+
+.rr-quote-create-page .rr-quote-lookup-input {
+    display: flex;
+    align-items: stretch;
+    min-width: 0;
+    width: 100%;
+    height: 39px;
+    padding: 0;
+    border: 1px solid #bbcee4;
+    border-radius: 7px;
+    overflow: hidden;
+    background: white;
+}
+
+.rr-quote-create-page .rr-quote-lookup-input>i {
+    display: grid;
+    place-items: center;
+    position: static;
+    inset: auto;
+    flex: 0 0 35px;
+    width: 35px;
+    height: auto;
+    padding: 0;
+    margin: 0;
+    color: #49729e;
+    background: #eff5fe;
+    border-right: 1px solid #d8e4f1;
+}
+
+.rr-quote-create-page .rr-quote-lookup-input>input {
+    display: block;
+    position: static;
+    flex: 1 1 0%;
+    width: 0;
+    min-width: 0;
+    height: 37px;
+    margin: 0;
+    padding: 0 10px;
+    background: white;
+    border: 0;
+    outline: 0;
+    border-radius: 0;
+    box-shadow: none;
+    color: #24496e;
+    font-size: 12px;
+}
+
+.rr-quote-create-page .rr-quote-lookup-input>button {
+    display: grid;
+    place-items: center;
+    flex: 0 0 32px;
+    width: 32px;
+    padding: 0;
+    border: 0;
+    background: white;
+    color: #5b718c;
+}
+
+.rr-quote-create-page .rr-quote-lookup-input:focus-within {
+    border-color: #4782bb;
+    box-shadow: 0 0 0 3px #347cc21c;
+}
+
+.rr-quote-create-page .rr-quote-next-product {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 8px;
+}
+
+.rr-quote-create-page .rr-quote-next-product>span {
+    display: grid;
+    place-items: center;
+    width: 24px;
+    height: 24px;
+    border-radius: 6px;
+    color: #245b95;
+    background: #deebfc;
+    font-weight: 700;
+    font-size: 11px;
+}
+
+.rr-quote-create-page .rr-quote-next-product>strong {
+    color: #2e5681;
+    font-size: 12px;
+}
+
+.rr-quote-create-page .rr-quote-next-product>small {
+    margin-left: auto;
+    color: #55718e;
+    font-size: 10px;
+}
+
+.rr-quote-create-page .rr-quote-items-table .rr-quote-blank-row {
+    background: #f1f7ff;
+}
+
+.rr-quote-create-page .rr-quote-items-table .rr-quote-blank-row>td {
+    border-top: 2px solid #c7dcf2;
+}
+
+.rr-quote-quick-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 1400;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    background: #11294491;
+    backdrop-filter: blur(4px);
+    overflow-y: auto;
+}
+
+.rr-quote-quick-backdrop .rr-quote-quick-modal {
+    width: min(650px, 100%);
+    max-height: calc(100dvh - 40px);
+    display: flex;
+    flex-direction: column;
+    margin: auto;
+    padding: 0;
+    border: 1px solid #c5d7e9;
+    border-radius: 13px;
+    background: white;
+    color: #25476b;
+    box-shadow: 0 22px 70px #0c24474d;
+    overflow: hidden;
+    font-family: "Segoe UI", Arial, sans-serif;
+}
+
+.rr-quote-quick-modal .rr-quote-modal-title {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 18px;
+    background: linear-gradient(115deg, #16436f, #2868a3);
+    border: 0;
+    color: white;
+}
+
+.rr-quote-quick-modal .rr-quote-modal-title>div {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.rr-quote-quick-modal .rr-quote-modal-title>div>i {
+    display: grid;
+    place-items: center;
+    width: 35px;
+    height: 35px;
+    border-radius: 10px;
+    background: #ffffff20;
+    color: white;
+    font-size: 20px;
+}
+
+.rr-quote-quick-modal .rr-quote-modal-title strong {
+    color: white;
+    font-size: 16px;
+}
+
+.rr-quote-quick-modal .rr-quote-modal-title>button {
+    display: grid;
+    place-items: center;
+    width: 30px;
+    height: 30px;
+    background: #ffffff1a;
+    border: 1px solid #ffffff40;
+    border-radius: 6px;
+    color: white;
+    cursor: pointer;
+}
+
+.rr-quote-quick-modal .rr-quote-modal-body {
+    padding: 19px;
+    overflow-y: auto;
+    background: #fcfdff;
+}
+
+.rr-quote-quick-modal .rr-quote-quick-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 14px;
+}
+
+.rr-quote-quick-modal .rr-quote-create-field {
+    display: block;
+    min-width: 0;
+    margin: 0;
+}
+
+.rr-quote-quick-modal .rr-quote-create-field>span {
+    display: block;
+    font-size: 11px;
+    color: #3d5b7a;
+    font-weight: 700;
+    margin-bottom: 6px;
+}
+
+.rr-quote-quick-modal .rr-quote-create-field input,
+.rr-quote-quick-modal .rr-quote-create-field textarea,
+.rr-quote-quick-modal .rr-quote-create-field select {
+    width: 100%;
+    box-sizing: border-box;
+    border: 1px solid #bdcee2;
+    border-radius: 6px;
+    min-height: 37px;
+    padding: 8px 10px;
+    color: #244769;
+    background: white;
+    font-size: 13px;
+}
+
+.rr-quote-quick-modal .rr-quote-create-field input:focus,
+.rr-quote-quick-modal .rr-quote-create-field textarea:focus {
+    border-color: #4d86be;
+    outline: 2px solid #357cc21d;
+}
+
+.rr-quote-quick-modal .rr-quote-modal-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 9px;
+    padding: 13px 18px;
+    border-top: 1px solid #dce7f1;
+    background: #f5f9ff;
+}
+
+.rr-quote-quick-modal .rr-quote-modal-actions>button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    padding: 9px 15px;
+    border: 1px solid #c0d2e5;
+    border-radius: 7px;
+    background: white;
+    color: #3a5d80;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.rr-quote-quick-modal .rr-quote-modal-actions>button.primary {
+    color: white;
+    background: #2262a1;
+    border-color: #2262a1;
+    box-shadow: 0 3px 9px #225b9920;
+}
+
+.rr-quote-quick-modal .rr-quote-modal-actions>button.primary:hover {
+    color: white;
+    background: #174c82;
+    border-color: #174c82;
+}
+
+.rr-quote-quick-modal .rr-quote-modal-actions>button:not(.primary):hover {
+    color: #244c75;
+    background: #e7f0fc;
+}
+
+.rr-quote-quick-modal button:disabled {
+    opacity: .55;
+    cursor: wait;
+}
+
+@media (max-width:540px) {
+    .rr-quote-quick-modal .rr-quote-quick-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .rr-quote-quick-backdrop {
+        padding: 12px;
+    }
+
+    .rr-quote-quick-backdrop .rr-quote-quick-modal {
+        max-height: calc(100dvh - 24px);
+    }
+
+    .rr-quote-create-page .rr-quote-next-product>small {
+        margin-left: 0;
+        width: 100%;
+    }
+}
+
+/* Search and replace a product directly in each quotation item row. */
+.rr-quote-create-page .rr-quote-items-table td:nth-child(2) {
+    min-width: 280px;
+}
+
+.rr-quote-create-page .rr-quote-row-search {
+    width: 100%;
+    min-width: 250px;
+    margin-bottom: 5px;
+}
+
+.rr-quote-create-page .rr-quote-row-search .rr-quote-lookup-input {
+    height: 35px;
+}
+
+.rr-quote-create-page .rr-quote-row-search .rr-quote-lookup-input>input {
+    height: 33px;
+    width: 0;
+    min-width: 0;
+    font-size: 12px;
+}
+
+.rr-quote-create-page .rr-quote-row-selected-name {
+    display: block;
+    font-size: 11px;
+    margin-top: 4px;
+}
+
+/* Sales-style product entry: search belongs to the Product cell of a draft row. */
+.rr-quote-create-page .rr-quote-items-table .rr-quote-draft-row {
+    background: #eff6ff;
+}
+
+.rr-quote-create-page .rr-quote-items-table .rr-quote-draft-row>td {
+    border-top: 1px solid #c6dbf0;
+    border-bottom: 1px solid #c6dbf0;
+    padding: 10px;
+    vertical-align: middle;
+    color: #65809d;
+}
+
+.rr-quote-create-page .rr-quote-draft-product {
+    min-width: 320px;
+}
+
+.rr-quote-create-page .rr-quote-draft-product .rr-quote-product-search {
+    min-width: 300px;
+    width: 100%;
+}
+
+.rr-quote-create-page .rr-quote-draft-product .rr-quote-lookup-input {
+    border-color: #8eb5dc;
+    background: #fff;
+    box-shadow: 0 1px 5px #2d629b10;
+}
+
+.rr-quote-create-page .rr-quote-draft-product .rr-quote-lookup-input>input {
+    font-size: 12px;
+}
+
+.rr-quote-create-page .rr-quote-draft-value {
+    display: inline-block;
+    padding: 5px 12px;
+    border: 1px solid #cbddf0;
+    border-radius: 5px;
+    background: white;
+    color: #315d89;
+}
+
+.rr-quote-create-page .rr-quote-draft-plus {
+    text-align: center;
+    color: #3b83bb;
+    font-size: 18px;
+}
+
+.rr-quote-create-page .rr-quote-items-table tr[data-product]>td:nth-child(2) {
+    min-width: 320px;
+}
+
+/* Reset inherited absolute icon/spinner positioning in lookup controls. */
+.rr-quote-create-page .rr-quote-lookup-input {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    position: relative;
+    min-width: 0;
+    width: 100%;
+    height: 40px;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+.rr-quote-create-page .rr-quote-lookup-input>i:first-child {
+    position: static;
+    inset: auto;
+    transform: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    align-self: stretch;
+    flex: 0 0 38px;
+    width: 38px;
+    min-width: 38px;
+    height: auto;
+    margin: 0;
+    padding: 0;
+    line-height: 1;
+    font-size: 15px;
+    color: #37699c;
+    background: #edf4ff;
+    border: 0;
+    border-right: 1px solid #d3e2f3;
+    border-radius: 0;
+}
+
+.rr-quote-create-page .rr-quote-lookup-input>input {
+    position: static;
+    inset: auto;
+    transform: none;
+    display: block;
+    flex: 1 1 auto;
+    width: 100%;
+    min-width: 0;
+    max-width: none;
+    height: 38px;
+    min-height: 0;
+    margin: 0;
+    padding: 0 11px;
+    border: 0;
+    border-radius: 0;
+    outline: 0;
+    box-shadow: none;
+    font-size: 13px;
+    line-height: normal;
+    color: #23486d;
+    background: white;
+}
+
+.rr-quote-create-page .rr-quote-lookup-input>.rr-quote-lookup-spinner {
+    position: static;
+    inset: auto;
+    transform: none;
+    flex: 0 0 15px;
+    width: 15px;
+    height: 15px;
+    margin: 0 10px 0 0;
+    color: #3c74ad;
+}
+
+.rr-quote-create-page .rr-quote-lookup-input>button {
+    position: static;
+    inset: auto;
+    transform: none;
+    display: grid;
+    place-items: center;
+    align-self: stretch;
+    flex: 0 0 32px;
+    width: 32px;
+    height: auto;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    border-radius: 0;
+    color: #526f8d;
+    background: white;
+}
+
+.rr-quote-create-page .rr-quote-items-table .rr-quote-draft-product {
+    min-width: 360px;
+    width: 360px;
+}
+
+.rr-quote-create-page .rr-quote-draft-product .rr-quote-product-search {
+    display: block;
+    min-width: 340px;
+    width: 100%;
+    margin: 0;
+    padding: 0;
+}
+
+.rr-quote-results.product {
+    box-sizing: border-box;
+    border: 1px solid #afcbe6;
+    background: white;
+    border-radius: 10px;
+    font-size: 13px;
+}
+
+.rr-quote-results.product .rr-quote-product-result-title {
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 13px;
+    background: #eaf2fd;
+    border-bottom: 1px solid #cfdeef;
+    color: #305d89;
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.rr-quote-results.product .rr-quote-product-result-title>button {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    border: 1px solid #c3d6ea;
+    border-radius: 5px;
+    padding: 4px 7px;
+    color: #486783;
+    background: white;
+    font-size: 11px;
+    cursor: pointer;
+}
+
+.rr-quote-results.product>button {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(130px, 190px) 20px;
+    align-items: center;
+    gap: 14px;
+    padding: 12px 14px;
+}
+
+.rr-quote-results.product>button>div {
+    min-width: 0;
+}
+
+.rr-quote-results.product>button strong {
+    font-size: 13px;
+    line-height: 1.4;
+    color: #224e7c;
+    white-space: normal;
+    overflow-wrap: anywhere;
+}
+
+.rr-quote-results.product>button span {
+    font-size: 11px;
+    line-height: 1.5;
+    color: #5a7391;
+    white-space: normal;
+}
+
+.rr-quote-results.product>button em {
+    display: block;
+    padding: 7px 9px;
+    border-radius: 6px;
+    background: #f0f7fc;
+    color: #256b58;
+    font-size: 11px;
+    font-style: normal;
+    line-height: 1.6;
+    text-align: right;
+    white-space: normal;
+}
+
+.rr-quote-results.product>button>i {
+    color: #3a7cb8;
+    font-size: 17px;
+}
+
+.rr-quote-results.product>button.active {
+    background: #e7f2ff;
+    outline: 0;
+    box-shadow: inset 4px 0 #327dc3;
+}
+
+.rr-quote-results.product .rr-quote-result-message {
+    padding: 20px 14px;
+    color: #526e8b;
+    font-size: 12px;
+    background: white;
+}
+
+.rr-quote-results.product .rr-quote-result-loading {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+@media (max-width:540px) {
+    .rr-quote-results.product>button {
+        grid-template-columns: minmax(0, 1fr) 18px;
+        gap: 5px 10px;
+    }
+
+    .rr-quote-results.product>button em {
+        grid-column: 1;
+        text-align: left;
+    }
+
+    .rr-quote-results.product>button>i {
+        grid-column: 2;
+        grid-row: 1 / 3;
+    }
+}
+
+/* Dedicated search layout: isolate icon, text and trailing controls from legacy rules. */
+.rr-quote-create-page .rr-quote-search-control {
+    display: grid;
+    grid-template-columns: 38px minmax(0, 1fr) auto auto;
+    align-items: center;
+    gap: 0;
+    position: relative;
+    width: 100%;
+    min-width: 0;
+    height: 42px;
+    padding: 0;
+    box-sizing: border-box;
+    overflow: hidden;
+    border: 1px solid #9fbfe0;
+    border-radius: 7px;
+    background: #fff;
+}
+
+.rr-quote-create-page .rr-quote-search-control>i:first-child {
+    grid-column: 1;
+    grid-row: 1;
+    position: static;
+    inset: auto;
+    transform: none;
+    display: grid;
+    place-items: center;
+    width: 38px;
+    min-width: 0;
+    height: 40px;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    border-right: 1px solid #d6e3f1;
+    background: #edf4fd;
+    color: #315e8b;
+    line-height: 1;
+}
+
+.rr-quote-create-page .rr-quote-search-control>input[type="search"] {
+    grid-column: 2;
+    grid-row: 1;
+    display: block;
+    position: static;
+    inset: auto;
+    transform: none;
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
+    height: 40px;
+    min-height: 0;
+    margin: 0;
+    padding: 0 10px;
+    box-sizing: border-box;
+    border: 0;
+    border-radius: 0;
+    outline: 0;
+    box-shadow: none;
+    background: #fff;
+    color: #183b61;
+    -webkit-text-fill-color: #183b61;
+    caret-color: #183b61;
+    opacity: 1;
+    visibility: visible;
+    font: 13px "Segoe UI", Arial, sans-serif;
+    line-height: normal;
+    text-align: left;
+    text-indent: 0;
+}
+
+.rr-quote-create-page .rr-quote-search-control>input[type="search"]::placeholder {
+    color: #617c97;
+    -webkit-text-fill-color: #617c97;
+    opacity: 1;
+}
+
+.rr-quote-create-page .rr-quote-search-control>.rr-quote-lookup-spinner {
+    grid-column: 3;
+    grid-row: 1;
+    position: static;
+    inset: auto;
+    transform: none;
+    width: 15px;
+    height: 15px;
+    margin: 0 9px;
+}
+
+.rr-quote-create-page .rr-quote-search-control>button {
+    grid-column: 4;
+    grid-row: 1;
+    position: static;
+    inset: auto;
+    transform: none;
+    width: 32px;
+    height: 40px;
+    min-width: 0;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    display: grid;
+    place-items: center;
+    background: white;
+    color: #4c6884;
+}
+
+.rr-quote-create-page .rr-quote-items-table td.rr-quote-draft-product {
+    min-width: 390px;
+    width: 390px;
+    max-width: none;
+    overflow: visible;
+}
+
+.rr-quote-create-page td.rr-quote-draft-product .rr-quote-product-search {
+    display: block;
+    width: 100%;
+    min-width: 370px;
+    max-width: none;
+    overflow: visible;
+}
+
+/* Keyboard billing and product identity. */
+.rr-quote-create-page .rr-quote-fast-mode,
+.rr-quote-create-page .rr-quote-fast-mode input {
+    cursor: pointer;
+}
+
+.rr-quote-create-page input[type="date"] {
+    cursor: pointer;
+}
+
+.rr-quote-create-page .rr-quote-results:not(.product)>button.active {
+    background: #e6f1ff;
+    box-shadow: inset 3px 0 #397dc1;
+    color: #214e7b;
+}
+
+.rr-quote-create-page .rr-quote-product-identity>strong {
+    display: block;
+    font-size: 13px;
+    line-height: 1.5;
+    color: #204d7b;
+    overflow-wrap: anywhere;
+}
+
+.rr-quote-create-page .rr-quote-product-identity>div {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 5px;
+    margin-top: 6px;
+}
+
+.rr-quote-create-page .rr-quote-product-identity span.rr-quote-part-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 3px 7px;
+    border: 1px solid #c5d8ed;
+    border-radius: 5px;
+    color: #2a5b8d;
+    background: #edf5ff;
+    font-size: 10px;
+    font-weight: 600;
+}
+
+.rr-quote-create-page .rr-quote-product-identity span.rr-quote-code-tag {
+    padding: 3px 6px;
+    color: #536f8c;
+    background: #f2f5f9;
+    border-radius: 4px;
+    font-size: 10px;
+}
+
+.rr-quote-create-page .rr-quote-product-identity>small {
+    display: block;
+    margin-top: 5px;
+    color: #5c738e;
+    font-size: 11px;
+}
+
+/* Quotation/proforma show — current design and inclusive net rate display. */
+.rr-quote-show-page {
+    color: #244362;
+    background: #f3f6fb;
+}
+
+.rr-quote-show-page .rr-quote-show-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 14px;
+    padding: 17px 18px;
+    background: linear-gradient(115deg, #153b63, #256aa5);
+    border: 1px solid #275c91;
+    border-radius: 12px;
+    box-shadow: 0 5px 18px #153c6320;
+}
+
+.rr-quote-show-page .rr-quote-header-main {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-width: 0;
+}
+
+.rr-quote-show-page .rr-quote-header h1 {
+    color: white;
+    font-size: 23px;
+    letter-spacing: -.4px;
+    margin: 3px 0 6px;
+}
+
+.rr-quote-show-page .rr-quote-eyebrow {
+    color: #c8dff7;
+    font-size: 10px;
+    letter-spacing: 1px;
+}
+
+.rr-quote-show-page .rr-quote-header-meta {
+    color: #dfedfc;
+    font-size: 11px;
+    flex-wrap: wrap;
+}
+
+.rr-quote-show-page .rr-quote-header-icon {
+    display: grid;
+    place-items: center;
+    flex-shrink: 0;
+    width: 47px;
+    height: 47px;
+    border: 1px solid #ffffff40;
+    border-radius: 12px;
+    color: white;
+    background: #ffffff1b;
+    font-size: 24px;
+}
+
+.rr-quote-show-page .rr-quote-back {
+    color: white;
+    background: #ffffff14;
+    border-color: #ffffff40;
+    border-radius: 6px;
+}
+
+.rr-quote-show-page .rr-quote-header-actions {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 7px;
+}
+
+.rr-quote-show-page .rr-quote-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 8px 11px;
+    min-height: 35px;
+    border-radius: 6px;
+    border: 1px solid #c6d8ec;
+    color: #2c5a88;
+    background: white;
+    font-size: 12px;
+    font-weight: 600;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.rr-quote-show-page .rr-quote-btn.edit {
+    color: #24558c;
+    background: white;
+}
+
+.rr-quote-show-page .rr-quote-btn.print {
+    color: #17653f;
+    background: #e1f4e9;
+    border-color: #b5ddc8;
+}
+
+.rr-quote-show-page .rr-quote-btn.print:hover {
+    color: #104e31;
+    background: #c6ead7;
+}
+
+.rr-quote-show-page .rr-quote-btn.pdf {
+    color: #9b3b4b;
+    background: #fff0f2;
+    border-color: #e8c5cc;
+}
+
+.rr-quote-show-page .rr-quote-btn.pdf:hover {
+    color: #812b3c;
+    background: #ffdde5;
+}
+
+.rr-quote-show-page .rr-quote-btn.edit:hover {
+    color: #184675;
+    background: #e5effd;
+}
+
+.rr-quote-show-page .rr-quote-btn.convert {
+    color: #62418c;
+    background: #f0e6fc;
+    border-color: #d2bce9;
+}
+
+.rr-quote-show-page .rr-quote-btn.convert:hover {
+    color: #503276;
+    background: #e3d3f5;
+}
+
+.rr-quote-show-page .rr-quote-show-commandbar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin: 13px 0;
+    padding: 10px 12px;
+    border: 1px solid #d1dfed;
+    border-radius: 8px;
+    background: white;
+}
+
+.rr-quote-show-page .rr-quote-show-commandbar button {
+    border-radius: 6px;
+    font-size: 11px;
+    cursor: pointer;
+}
+
+.rr-quote-show-page .rr-quote-window {
+    background: white;
+    border: 1px solid #cedbea;
+    border-radius: 10px;
+    box-shadow: 0 3px 12px #18334d09;
+    overflow: hidden;
+    margin-bottom: 14px;
+    min-width: 0;
+}
+
+.rr-quote-show-page .rr-quote-window-title {
+    padding: 11px 14px;
+    border-bottom: 1px solid #dae5f1;
+    background: #f7faff;
+    color: #31577e;
+}
+
+.rr-quote-show-page .rr-quote-window-title strong {
+    font-size: 13px;
+    color: #31577e;
+}
+
+.rr-quote-show-page .rr-quote-show-overview {
+    display: grid;
+    grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr) minmax(260px, .9fr);
+    gap: 13px;
+    align-items: stretch;
+    margin-bottom: 2px;
+}
+
+.rr-quote-show-page .rr-quote-show-party {
+    padding: 15px;
+}
+
+.rr-quote-show-page .rr-quote-party-avatar {
+    display: grid;
+    place-items: center;
+    border: 0;
+    border-radius: 12px;
+    width: 42px;
+    height: 42px;
+    color: #2b669f;
+    background: #e6f1ff;
+}
+
+.rr-quote-show-page .rr-quote-party-primary strong {
+    color: #234c78;
+    font-size: 15px;
+}
+
+.rr-quote-show-page .rr-quote-party-primary span {
+    color: #58728e;
+    font-size: 11px;
+}
+
+.rr-quote-show-page .rr-quote-detail-grid {
+    padding: 13px 14px;
+    gap: 12px;
+}
+
+.rr-quote-show-page .rr-quote-total-hero {
+    padding: 17px 16px;
+    color: #155e3a;
+    background: linear-gradient(120deg, #f7fdf9, #e7f6ee);
+    border-bottom: 1px solid #d0e9db;
+}
+
+.rr-quote-show-page .rr-quote-total-hero span,
+.rr-quote-show-page .rr-quote-total-hero small {
+    color: #416d57;
+}
+
+.rr-quote-show-page .rr-quote-total-hero strong {
+    color: #145c38;
+    font-size: 29px;
+    font-variant-numeric: tabular-nums;
+}
+
+.rr-quote-show-page .rr-quote-total-mini {
+    padding: 12px 14px;
+    background: white;
+    color: #45637f;
+}
+
+.rr-quote-show-page .rr-quote-mechanic-strip {
+    border-left: 3px solid #8561ba;
+}
+
+.rr-quote-show-page .rr-quote-mechanic-details {
+    padding: 12px 14px;
+}
+
+.rr-quote-show-page .rr-quote-table-wrap {
+    max-height: none;
+    overflow-x: auto;
+}
+
+.rr-quote-show-page .rr-quote-show-table {
+    min-width: 1120px;
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    table-layout: auto;
+    font-size: 12px;
+}
+
+.rr-quote-show-page .rr-quote-show-table th {
+    background: #eaf2fb;
+    color: #355a7c;
+    padding: 12px 10px;
+    font-size: 11px;
+    border-bottom: 1px solid #cadbed;
+    white-space: nowrap;
+}
+
+.rr-quote-show-page .rr-quote-show-table td {
+    color: #2d4c6b;
+    padding: 12px 10px;
+    border-bottom: 1px solid #e3ecf5;
+    vertical-align: middle;
+}
+
+.rr-quote-show-page .rr-quote-show-table tbody tr:nth-child(even) {
+    background: #f9fbff;
+}
+
+.rr-quote-show-page .rr-quote-show-table tbody tr:hover {
+    background: #edf5ff;
+}
+
+.rr-quote-show-page .rr-quote-product-cell {
+    min-width: 230px;
+}
+
+.rr-quote-show-page .rr-quote-product-cell>strong {
+    display: block;
+    color: #234e7c;
+    font-size: 13px;
+}
+
+.rr-quote-show-page .rr-quote-show-product-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+    margin: 6px 0;
+}
+
+.rr-quote-show-page .rr-quote-show-product-tags span {
+    display: inline-flex;
+    padding: 3px 6px;
+    border: 1px solid #d8e2ef;
+    border-radius: 5px;
+    background: #f1f5fa;
+    color: #52708d;
+    font-size: 10px;
+}
+
+.rr-quote-show-page .rr-quote-show-product-tags span.part {
+    color: #2b6094;
+    border-color: #bfd6ed;
+    background: #eaf3ff;
+    font-weight: 600;
+}
+
+.rr-quote-show-page .rr-quote-cell-subtext,
+.rr-quote-show-page .rr-quote-product-cell>small {
+    display: block;
+    margin-top: 4px;
+    color: #5a7490;
+    font-size: 10px;
+}
+
+.rr-quote-show-page .rr-quote-show-table .amount {
+    color: #196540;
+    font-size: 13px;
+    font-weight: 700;
+    background: #edf8f2;
+}
+
+.rr-quote-show-page .rr-quote-show-table .number {
+    white-space: nowrap;
+    font-variant-numeric: tabular-nums;
+}
+
+.rr-quote-show-page .rr-quote-show-table tfoot td {
+    background: #edf3fc;
+    color: #2c5279;
+    font-weight: 700;
+}
+
+.rr-quote-show-page .rr-quote-show-bottom {
+    display: grid;
+    grid-template-columns: minmax(0, 1.3fr) minmax(300px, 1fr);
+    gap: 14px;
+    align-items: start;
+}
+
+.rr-quote-show-page .rr-quote-text-panels {
+    padding: 14px;
+    color: #496581;
+    font-size: 12px;
+    line-height: 1.7;
+}
+
+.rr-quote-show-page .rr-quote-show-summary {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 7px 16px;
+    padding: 14px;
+}
+
+.rr-quote-show-page .rr-quote-summary-row {
+    padding: 7px 0;
+    border-bottom: 1px dashed #dce6f1;
+    color: #4e6b86;
+}
+
+.rr-quote-show-page .rr-quote-summary-row>span {
+    color: #4e6b86;
+    font-size: 11px;
+}
+
+.rr-quote-show-page .rr-quote-summary-row>strong {
+    color: #2d547a;
+    font-size: 12px;
+}
+
+.rr-quote-show-page .rr-quote-summary-row.grand {
+    grid-column: 1/-1;
+    margin-top: 3px;
+    padding: 12px;
+    border: 1px solid #bfdcca;
+    border-radius: 8px;
+    background: #eaf7ef;
+}
+
+.rr-quote-show-page .rr-quote-summary-row.grand>span {
+    color: #1d6842;
+    font-size: 13px;
+}
+
+.rr-quote-show-page .rr-quote-summary-row.grand>strong {
+    color: #145d38;
+    font-size: 22px;
+}
+
+@media (max-width:1100px) {
+    .rr-quote-show-page .rr-quote-show-overview {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width:650px) {
+
+    .rr-quote-show-page .rr-quote-show-overview,
+    .rr-quote-show-page .rr-quote-show-bottom {
+        grid-template-columns: 1fr;
+    }
+
+    .rr-quote-show-page .rr-quote-header h1 {
+        font-size: 21px;
+    }
+
+    .rr-quote-show-page .rr-quote-header-actions {
+        width: 100%;
+    }
+}
+
+@media (prefers-reduced-motion:no-preference) {
+
+    .rr-quote-show-page .rr-quote-show-header,
+    .rr-quote-show-page .rr-quote-show-overview {
+        animation: rr-quote-enter .3s ease-out both;
+    }
+}
+
+/* Show-page button contrast and final visual refinement. */
+.rr-quote-show-page .rr-quote-show-header {
+    padding: 19px 20px;
+    background: linear-gradient(115deg, #153b63 10%, #245c92 72%, #2b75a6);
+    box-shadow: 0 7px 22px #153c6326;
+}
+
+.rr-quote-show-page .rr-quote-header-actions .rr-quote-btn {
+    box-shadow: 0 2px 6px #102e4f18;
+    transition: background .16s, color .16s, box-shadow .16s, transform .16s;
+}
+
+.rr-quote-show-page .rr-quote-header-actions .rr-quote-btn,
+.rr-quote-show-page .rr-quote-header-actions .rr-quote-btn:visited {
+    background: #fff;
+    color: #254e7a;
+    border-color: #c6d8ed;
+}
+
+.rr-quote-show-page .rr-quote-header-actions .rr-quote-btn:hover,
+.rr-quote-show-page .rr-quote-header-actions .rr-quote-btn:focus-visible {
+    background: #e6f0fc;
+    color: #173f6c;
+    border-color: #9bbcdf;
+    box-shadow: 0 4px 10px #102e4f28;
+    transform: translateY(-1px);
+}
+
+.rr-quote-show-page .rr-quote-header-actions .rr-quote-btn.print,
+.rr-quote-show-page .rr-quote-header-actions .rr-quote-btn.print:visited {
+    background: #e1f5e9;
+    color: #17633d;
+    border-color: #acd5bf;
+}
+
+.rr-quote-show-page .rr-quote-header-actions .rr-quote-btn.print:hover,
+.rr-quote-show-page .rr-quote-header-actions .rr-quote-btn.print:focus-visible {
+    background: #c3e8d3;
+    color: #104b2d;
+    border-color: #8fc3a7;
+}
+
+.rr-quote-show-page .rr-quote-header-actions .rr-quote-btn.pdf,
+.rr-quote-show-page .rr-quote-header-actions .rr-quote-btn.pdf:visited {
+    background: #fff0f2;
+    color: #983549;
+    border-color: #e3bac5;
+}
+
+.rr-quote-show-page .rr-quote-header-actions .rr-quote-btn.pdf:hover,
+.rr-quote-show-page .rr-quote-header-actions .rr-quote-btn.pdf:focus-visible {
+    background: #ffdae2;
+    color: #7c2437;
+    border-color: #d69eac;
+}
+
+.rr-quote-show-page .rr-quote-header-actions .rr-quote-btn.convert,
+.rr-quote-show-page .rr-quote-header-actions .rr-quote-btn.convert:visited {
+    background: #efe7fa;
+    color: #61418a;
+    border-color: #ccb5e5;
+}
+
+.rr-quote-show-page .rr-quote-header-actions .rr-quote-btn.convert:hover,
+.rr-quote-show-page .rr-quote-header-actions .rr-quote-btn.convert:focus-visible {
+    background: #ddcef2;
+    color: #4c2c74;
+    border-color: #b99bd7;
+}
+
+.rr-quote-show-page .rr-quote-header-actions .rr-quote-btn>i,
+.rr-quote-show-page .rr-quote-header-actions .rr-quote-btn>span {
+    color: inherit;
+}
+
+.rr-quote-show-page .rr-quote-header-actions .rr-quote-btn:disabled {
+    opacity: .65;
+    cursor: wait;
+    transform: none;
+}
+
+.rr-quote-show-page .rr-quote-btn:focus-visible {
+    outline: 2px solid #a4ceff;
+    outline-offset: 3px;
+}
+
+.rr-quote-show-page .rr-quote-show-overview>.rr-quote-window {
+    transition: box-shadow .2s, transform .2s;
+    border-top: 3px solid #5c8fbe;
+}
+
+.rr-quote-show-page .rr-quote-show-overview>.rr-quote-window:nth-child(2) {
+    border-top-color: #9470bd;
+}
+
+.rr-quote-show-page .rr-quote-show-overview>.rr-quote-total-window {
+    border-top-color: #4a9c72;
+}
+
+.rr-quote-show-page .rr-quote-show-overview>.rr-quote-window:hover {
+    box-shadow: 0 7px 18px #16375616;
+    transform: translateY(-2px);
+}
+
+.rr-quote-show-page .rr-quote-total-hero {
+    background: linear-gradient(125deg, #f8fdf9, #def2e7);
+}
+
+.rr-quote-show-page .rr-quote-total-hero strong {
+    font-size: 30px;
+    letter-spacing: -.7px;
+}
+
+.rr-quote-show-page .rr-quote-party-information {
+    padding-top: 12px;
+    border-top: 1px solid #e3ebf4;
+    margin-top: 12px;
+}
+
+.rr-quote-show-page .rr-quote-show-items {
+    box-shadow: 0 4px 16px #14334e0c;
+}
+
+.rr-quote-show-page .rr-quote-show-table tbody tr {
+    transition: background .15s;
+}
+
+.rr-quote-show-page .rr-quote-text-panels>div {
+    padding: 10px 12px;
+    border: 1px solid #e0e9f2;
+    border-radius: 7px;
+    background: #fbfcff;
+}
+
+.rr-quote-show-page .rr-quote-show-commandbar button:hover {
+    filter: brightness(.96);
+}
+
+@media (prefers-reduced-motion:no-preference) {
+    .rr-quote-show-page .rr-quote-header-icon>i {
+        animation: rr-quote-show-icon .6s ease-out both;
+    }
+
+    .rr-quote-show-page .rr-quote-show-overview>.rr-quote-window {
+        animation: rr-quote-enter .35s ease-out both;
+    }
+
+    .rr-quote-show-page .rr-quote-show-overview>.rr-quote-window:nth-child(2) {
+        animation-delay: .05s;
+    }
+
+    .rr-quote-show-page .rr-quote-show-overview>.rr-quote-window:nth-child(3) {
+        animation-delay: .1s;
+    }
+
+    .rr-quote-show-page .rr-quote-show-items {
+        animation: rr-quote-enter .4s ease-out both;
+    }
+}
+
+@keyframes rr-quote-show-icon {
+    from {
+        opacity: .2;
+        transform: rotate(-16deg) scale(.8);
+    }
+
+    to {
+        opacity: 1;
+        transform: rotate(0) scale(1);
+    }
+}
+
+@media (prefers-reduced-motion:reduce) {
+
+    .rr-quote-show-page .rr-quote-header-actions .rr-quote-btn,
+    .rr-quote-show-page .rr-quote-show-overview>.rr-quote-window {
+        transition: none;
+    }
+
+    .rr-quote-show-page .rr-quote-show-overview>.rr-quote-window:hover {
+        transform: none;
+    }
+}
+
+/* Explicit icon visibility and header action contrast against legacy button rules. */
+.rr-quote-index-page .rr-quote-metric>div {
+    display: grid !important;
+    place-items: center !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    background: #e1edff !important;
+    color: #245e9f !important;
+}
+
+.rr-quote-index-page .rr-quote-metric.slate>div {
+    background: #fff0d5 !important;
+    color: #976018 !important;
+}
+
+.rr-quote-index-page .rr-quote-metric.green>div {
+    background: #ddf3e7 !important;
+    color: #176c43 !important;
+}
+
+.rr-quote-index-page .rr-quote-metric.violet>div {
+    background: #ece2f9 !important;
+    color: #70449f !important;
+}
+
+.rr-quote-index-page .rr-quote-metric>div>i,
+.rr-quote-index-page .rr-quote-header-icon>i {
+    display: inline-block !important;
+    position: static !important;
+    width: auto !important;
+    height: auto !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    color: inherit !important;
+    -webkit-text-fill-color: currentColor !important;
+    font-size: 22px !important;
+    line-height: 1 !important;
+    transform: none !important;
+}
+
+.rr-quote-index-page .rr-quote-metric>div>i::before,
+.rr-quote-index-page .rr-quote-header-icon>i::before {
+    color: inherit !important;
+    -webkit-text-fill-color: currentColor !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    font-size: inherit !important;
+}
+
+.rr-quote-index-page .rr-quote-header-icon {
+    background: #ffffff26 !important;
+    color: #fff !important;
+    border-color: #ffffff55 !important;
+}
+
+.rr-quote-index-page .rr-quote-table td.actions>a,
+.rr-quote-index-page .rr-quote-table td.actions>button {
+    opacity: 1;
+    visibility: visible;
+}
+
+.rr-quote-index-page .rr-quote-table td.actions i {
+    display: inline-block;
+    font-size: 14px;
+    color: inherit;
+    -webkit-text-fill-color: currentColor;
+}
+
+.rr-quote-show-page .rr-quote-show-header .rr-quote-header-actions {
+    display: flex !important;
+    align-items: center !important;
+    flex-wrap: wrap !important;
+    gap: 8px !important;
+}
+
+.rr-quote-show-page .rr-quote-show-header .rr-quote-header-actions .rr-quote-btn {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 7px !important;
+    min-width: 70px;
+    min-height: 38px !important;
+    height: auto !important;
+    padding: 9px 13px !important;
+    border: 1px solid #d0e1f2 !important;
+    border-radius: 8px !important;
+    background: #fff !important;
+    color: #214f7e !important;
+    -webkit-text-fill-color: currentColor !important;
+    font-size: 12px !important;
+    line-height: 1.3 !important;
+    font-weight: 700 !important;
+    opacity: 1;
+    visibility: visible !important;
+    text-indent: 0 !important;
+    text-shadow: none !important;
+    overflow: visible !important;
+    white-space: nowrap;
+    box-shadow: 0 3px 8px #08284624;
+}
+
+.rr-quote-show-page .rr-quote-show-header .rr-quote-header-actions .rr-quote-btn.print {
+    background: #e0f5e8 !important;
+    color: #165e3b !important;
+    border-color: #b0d9c2 !important;
+}
+
+.rr-quote-show-page .rr-quote-show-header .rr-quote-header-actions .rr-quote-btn.pdf {
+    background: #ffedf1 !important;
+    color: #963447 !important;
+    border-color: #e4b9c4 !important;
+}
+
+.rr-quote-show-page .rr-quote-show-header .rr-quote-header-actions .rr-quote-btn.convert {
+    background: #ece4fa !important;
+    color: #5e3c8c !important;
+    border-color: #cdb8e7 !important;
+}
+
+.rr-quote-show-page .rr-quote-show-header .rr-quote-header-actions .rr-quote-btn:hover {
+    background: #dceaff !important;
+    color: #183f6d !important;
+}
+
+.rr-quote-show-page .rr-quote-show-header .rr-quote-header-actions .rr-quote-btn.print:hover {
+    background: #bee7d0 !important;
+    color: #104b2e !important;
+}
+
+.rr-quote-show-page .rr-quote-show-header .rr-quote-header-actions .rr-quote-btn.pdf:hover {
+    background: #ffd6e0 !important;
+    color: #762337 !important;
+}
+
+.rr-quote-show-page .rr-quote-show-header .rr-quote-header-actions .rr-quote-btn.convert:hover {
+    background: #d9c9f0 !important;
+    color: #47256f !important;
+}
+
+.rr-quote-show-page .rr-quote-show-header .rr-quote-header-actions .rr-quote-btn>i,
+.rr-quote-show-page .rr-quote-show-header .rr-quote-header-actions .rr-quote-btn>span {
+    color: inherit !important;
+    -webkit-text-fill-color: currentColor !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    font-size: inherit !important;
+}
+
+.rr-quote-show-page .rr-quote-show-header .rr-quote-header-actions .rr-quote-btn>i {
+    display: inline-block !important;
+    font-size: 15px !important;
+}
+
+.rr-quote-show-page .rr-quote-show-header .rr-quote-header-actions .rr-quote-btn:disabled {
+    opacity: .65 !important;
+}
+
+/* Register actions: explicit normal/hover pairs, without yellow. */
+.rr-quote-index-page .rr-quote-table td.actions>a,
+.rr-quote-index-page .rr-quote-table td.actions>button {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 32px !important;
+    height: 32px !important;
+    margin: 3px !important;
+    padding: 0 !important;
+    border: 1px solid #bcd1e9 !important;
+    border-radius: 7px !important;
+    background: #e8f1ff !important;
+    color: #245b9a !important;
+    -webkit-text-fill-color: currentColor !important;
+    opacity: 1;
+    visibility: visible !important;
+    transition: background .15s, color .15s, box-shadow .15s;
+}
+
+.rr-quote-index-page .rr-quote-table td.actions .edit {
+    background: #eef0ff !important;
+    color: #5054a2 !important;
+    border-color: #c9ccef !important;
+}
+
+.rr-quote-index-page .rr-quote-table td.actions .print,
+.rr-quote-index-page .rr-quote-table td.actions .approve {
+    background: #e1f4ea !important;
+    color: #167049 !important;
+    border-color: #b5ddc7 !important;
+}
+
+.rr-quote-index-page .rr-quote-table td.actions .convert {
+    background: #efe6fa !important;
+    color: #7543a4 !important;
+    border-color: #d6bee9 !important;
+}
+
+.rr-quote-index-page .rr-quote-table td.actions .danger {
+    background: #ffedf1 !important;
+    color: #ad344e !important;
+    border-color: #e9bac7 !important;
+}
+
+.rr-quote-index-page .rr-quote-table td.actions>a:hover,
+.rr-quote-index-page .rr-quote-table td.actions>button:hover {
+    background: #cfe1fc !important;
+    color: #163e74 !important;
+    border-color: #8aaed8 !important;
+    box-shadow: 0 3px 8px #183c6420;
+}
+
+.rr-quote-index-page .rr-quote-table td.actions .edit:hover {
+    background: #dbddfa !important;
+    color: #373982 !important;
+    border-color: #abadde !important;
+}
+
+.rr-quote-index-page .rr-quote-table td.actions .print:hover,
+.rr-quote-index-page .rr-quote-table td.actions .approve:hover {
+    background: #bfe7d2 !important;
+    color: #0e5233 !important;
+    border-color: #8ac3a5 !important;
+}
+
+.rr-quote-index-page .rr-quote-table td.actions .convert:hover {
+    background: #dfccf2 !important;
+    color: #572b83 !important;
+    border-color: #baa0d5 !important;
+}
+
+.rr-quote-index-page .rr-quote-table td.actions .danger:hover {
+    background: #ffd3df !important;
+    color: #85213b !important;
+    border-color: #d991a4 !important;
+}
+
+.rr-quote-index-page .rr-quote-table td.actions i,
+.rr-quote-index-page .rr-quote-table td.actions i::before {
+    display: inline-block !important;
+    color: inherit !important;
+    -webkit-text-fill-color: currentColor !important;
+    font-size: 15px !important;
+    line-height: 1 !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    text-shadow: none !important;
+}
+
+.rr-quote-index-page .rr-quote-metric.slate {
+    background: linear-gradient(125deg, #fff, #edf6fc);
+    border-top-color: #438ba8;
+}
+
+.rr-quote-index-page .rr-quote-metric.slate>div {
+    color: #286d8d !important;
+    background: #dff1fa !important;
+}
+
+.rr-quote-index-page .rr-quote-status.pending {
+    background: #e7f1ff;
+    color: #31639b;
+    border-color: #c1d7ef;
+}
+
+/* Create workspace refinement: restrained colors and readable billing controls. */
+.rr-quote-create-page {
+    padding: 16px;
+    background: #f2f6fb;
+}
+
+.rr-quote-create-page .rr-quote-header {
+    padding: 18px 20px;
+    border-radius: 13px;
+    background: linear-gradient(115deg, #163b61, #245b91 72%, #2b74a7);
+    box-shadow: 0 7px 22px #153b6220;
+}
+
+.rr-quote-create-page .rr-quote-header h1 {
+    font-size: 23px;
+    letter-spacing: -.5px;
+}
+
+.rr-quote-create-page .rr-quote-header .rr-quote-btn.draft {
+    background: #edf0ff;
+    color: #4d5796;
+    border-color: #c5cdea;
+}
+
+.rr-quote-create-page .rr-quote-header .rr-quote-btn.draft:hover {
+    background: #dce2fc;
+    color: #354275;
+    border-color: #aebcdf;
+}
+
+.rr-quote-create-page .rr-quote-create-grid {
+    gap: 15px;
+    margin: 15px 0 3px;
+}
+
+.rr-quote-create-page .rr-quote-window {
+    border-color: #cfdeed;
+    box-shadow: 0 3px 13px #2347670a;
+}
+
+.rr-quote-create-page .rr-quote-window-title {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 8px;
+    padding: 12px 14px;
+    background: linear-gradient(90deg, #f1f6fd, #fbfdff);
+}
+
+.rr-quote-create-page .rr-quote-window-title>div {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.rr-quote-create-page .rr-quote-window-title i {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 27px;
+    height: 27px;
+    border-radius: 7px;
+    color: #396b9f;
+    background: #e5effb;
+    font-size: 14px;
+}
+
+.rr-quote-create-page .rr-quote-window-title strong {
+    color: #31577e;
+    font-size: 12px;
+}
+
+.rr-quote-create-page .rr-quote-window-body {
+    padding: 15px;
+}
+
+.rr-quote-create-page .rr-quote-party-window {
+    border-top: 3px solid #4f89bf;
+}
+
+.rr-quote-create-page .rr-quote-selected-party {
+    background: linear-gradient(115deg, #f3f8ff, #eaf3ff);
+    border-color: #c2d8ed;
+    padding: 13px;
+}
+
+.rr-quote-create-page .rr-quote-selected-party>i {
+    display: grid;
+    place-items: center;
+    background: #dcecff;
+    color: #2c68a0;
+    width: 37px;
+    height: 37px;
+    border-radius: 10px;
+    font-size: 20px;
+    flex-shrink: 0;
+}
+
+.rr-quote-create-page .rr-quote-selected-party strong {
+    color: #214e7d;
+    font-size: 13px;
+}
+
+.rr-quote-create-page .rr-quote-create-field>span {
+    color: #415f7f;
+    font-size: 11px;
+    letter-spacing: .1px;
+}
+
+.rr-quote-create-page .rr-quote-create-field input:focus,
+.rr-quote-create-page .rr-quote-create-field select:focus,
+.rr-quote-create-page .rr-quote-create-field textarea:focus {
+    border-color: #6092c1;
+    outline: 2px solid #4c83b51b;
+    box-shadow: none;
+}
+
+.rr-quote-create-page .rr-quote-fast-mode {
+    display: inline-flex;
+    padding: 8px 11px;
+    border: 1px solid #c9dced;
+    border-radius: 7px;
+    background: #edf5fe;
+    color: #3f6386;
+    margin: 0 0 2px;
+}
+
+.rr-quote-create-page .rr-quote-items-table {
+    border-collapse: separate;
+    border-spacing: 0;
+}
+
+.rr-quote-create-page .rr-quote-items-table th {
+    background: #e9f1fb;
+    padding: 13px 10px;
+    border-right: 1px solid #d5e3f1;
+    color: #31587c;
+    font-size: 11px;
+}
+
+.rr-quote-create-page .rr-quote-items-table td {
+    border-right: 1px solid #edf1f6;
+    padding: 12px 10px;
+}
+
+.rr-quote-create-page .rr-quote-items-table th:last-child,
+.rr-quote-create-page .rr-quote-items-table td:last-child {
+    border-right: 0;
+}
+
+.rr-quote-create-page .rr-quote-items-table tr[data-product] input[type="number"] {
+    height: 35px;
+    text-align: right;
+    color: #214e79;
+    font-weight: 600;
+    border-color: #bfd2e7;
+}
+
+.rr-quote-create-page .rr-quote-items-table .rr-quote-remove {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 29px;
+    height: 29px;
+    border: 1px solid #eac5cf;
+    border-radius: 6px;
+    background: #fff0f3;
+    color: #a33b52;
+    cursor: pointer;
+}
+
+.rr-quote-create-page .rr-quote-items-table .rr-quote-remove:hover {
+    color: #81283d;
+    background: #ffdae3;
+}
+
+.rr-quote-create-page .rr-quote-summary-row.grand {
+    padding: 15px 12px;
+    background: linear-gradient(115deg, #f0faf4, #e0f2e8);
+}
+
+.rr-quote-create-page .rr-quote-summary-row.grand>strong {
+    color: #155e3a;
+    font-size: 24px;
+}
+
+.rr-quote-create-page .rr-quote-form-actions {
+    padding: 16px;
+    box-shadow: 0 4px 15px #2347670c;
+    gap: 12px;
+}
+
+.rr-quote-create-page .rr-quote-form-actions>div:first-child {
+    color: #54718d;
+    font-size: 11px;
+}
+
+@media (max-width:650px) {
+    .rr-quote-create-page {
+        padding: 10px;
+    }
+
+    .rr-quote-create-page .rr-quote-header {
+        padding: 14px;
+    }
+
+    .rr-quote-create-page .rr-quote-header h1 {
+        font-size: 20px;
+    }
+}
+
+/* Conversion stock transfer dialog — shared by quotation index and show. */
+.rr-quote-transfer-backdrop {
+    position: fixed;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 22px;
+    z-index: 1500;
+    background: #10294499;
+    backdrop-filter: blur(4px);
+    overflow-y: auto;
+}
+
+.rr-quote-transfer-backdrop .rr-quote-transfer-modal {
+    display: flex;
+    flex-direction: column;
+    width: min(1080px, 100%);
+    max-height: calc(100dvh - 44px);
+    margin: auto;
+    padding: 0;
+    overflow: hidden;
+    border: 1px solid #bcd2e7;
+    border-radius: 13px;
+    background: white;
+    color: #24476b;
+    box-shadow: 0 24px 80px #071d454d;
+    font-family: "Segoe UI", Arial, sans-serif;
+}
+
+.rr-quote-transfer-modal .rr-quote-modal-title {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 17px 19px;
+    background: linear-gradient(115deg, #173e68, #286aa5);
+    color: white;
+    border: 0;
+}
+
+.rr-quote-transfer-modal .rr-quote-modal-title>div {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.rr-quote-transfer-modal .rr-quote-modal-title strong {
+    color: white;
+    font-size: 16px;
+}
+
+.rr-quote-transfer-modal .rr-quote-modal-title i {
+    color: inherit;
+}
+
+.rr-quote-transfer-modal .rr-quote-modal-title>button {
+    display: grid;
+    place-items: center;
+    width: 31px;
+    height: 31px;
+    padding: 0;
+    border: 1px solid #ffffff40;
+    border-radius: 7px;
+    background: #ffffff17;
+    color: white;
+    cursor: pointer;
+}
+
+.rr-quote-transfer-modal .rr-quote-stock-document {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 16px;
+    align-items: center;
+    padding: 12px 18px;
+    border-bottom: 1px solid #dce6f2;
+    background: #f5f9ff;
+}
+
+.rr-quote-transfer-modal .rr-quote-stock-document span {
+    color: #58718d;
+    font-size: 11px;
+}
+
+.rr-quote-transfer-modal .rr-quote-stock-document strong {
+    color: #294f78;
+    font-size: 12px;
+}
+
+.rr-quote-transfer-modal .rr-quote-stock-notice {
+    display: flex;
+    align-items: flex-start;
+    gap: 9px;
+    margin: 13px 16px;
+    padding: 11px 12px;
+    border: 1px solid #c5daee;
+    border-radius: 7px;
+    background: #edf5ff;
+    color: #385f87;
+    font-size: 12px;
+    line-height: 1.6;
+}
+
+.rr-quote-transfer-modal .rr-quote-stock-error {
+    margin: 0 16px 12px;
+    padding: 10px 12px;
+    border: 1px solid #e7bdc9;
+    border-radius: 7px;
+    color: #9e3249;
+    background: #fff0f3;
+    font-size: 12px;
+}
+
+.rr-quote-transfer-modal .rr-quote-stock-table-wrap {
+    flex: 1 1 auto;
+    overflow: auto;
+    min-height: 0;
+    margin: 0 16px 12px;
+    border: 1px solid #cfddec;
+    border-radius: 8px;
+}
+
+.rr-quote-transfer-modal .rr-quote-stock-table {
+    width: 100%;
+    min-width: 820px;
+    border-collapse: separate;
+    border-spacing: 0;
+    font-size: 12px;
+}
+
+.rr-quote-transfer-modal .rr-quote-stock-table th {
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    padding: 12px 10px;
+    border-bottom: 1px solid #c5d8eb;
+    background: #eaf2fc;
+    color: #345b80;
+    font-size: 11px;
+    white-space: nowrap;
+}
+
+.rr-quote-transfer-modal .rr-quote-stock-table td {
+    padding: 12px 10px;
+    border-bottom: 1px solid #e2ebf5;
+    vertical-align: middle;
+    color: #315372;
+    font-variant-numeric: tabular-nums;
+}
+
+.rr-quote-transfer-modal .rr-quote-stock-table tbody tr:nth-child(even) {
+    background: #f8fbff;
+}
+
+.rr-quote-transfer-modal .rr-quote-stock-table tbody tr:focus-within {
+    background: #edf5ff;
+    box-shadow: inset 3px 0 #377ab7;
+}
+
+.rr-quote-transfer-modal .rr-quote-stock-table td>strong {
+    display: block;
+    color: #24517e;
+    font-size: 13px;
+}
+
+.rr-quote-transfer-modal .rr-quote-stock-table td>span {
+    display: block;
+    margin-top: 4px;
+    color: #5c7490;
+    font-size: 10px;
+}
+
+.rr-quote-transfer-modal .rr-quote-stock-table select,
+.rr-quote-transfer-modal .rr-quote-stock-table input {
+    width: 100%;
+    min-width: 85px;
+    height: 36px;
+    box-sizing: border-box;
+    border: 1px solid #adc6e0;
+    border-radius: 6px;
+    background: white;
+    color: #274d76;
+    padding: 7px 9px;
+    font-size: 12px;
+}
+
+.rr-quote-transfer-modal .rr-quote-stock-table select {
+    min-width: 200px;
+    cursor: pointer;
+}
+
+.rr-quote-transfer-modal .rr-quote-stock-table input {
+    text-align: right;
+    font-weight: 700;
+}
+
+.rr-quote-transfer-modal .rr-quote-stock-table input:focus,
+.rr-quote-transfer-modal .rr-quote-stock-table select:focus {
+    outline: 2px solid #4387c32b;
+    border-color: #4387c3;
+    box-shadow: none;
+}
+
+.rr-quote-transfer-modal .rr-quote-transfer-shortcuts {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 9px 18px;
+    padding: 6px 18px 13px;
+    color: #536f8a;
+    font-size: 10px;
+}
+
+.rr-quote-transfer-shortcuts span {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.rr-quote-transfer-shortcuts kbd {
+    border: 1px solid #c7d9ec;
+    border-radius: 4px;
+    background: #edf5ff;
+    color: #335f8d;
+    padding: 3px 5px;
+    font: 600 10px "Segoe UI", Arial, sans-serif;
+}
+
+.rr-quote-transfer-modal .rr-quote-modal-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 9px;
+    padding: 14px 18px;
+    border-top: 1px solid #d6e3f0;
+    background: #f6faff;
+}
+
+.rr-quote-transfer-modal .rr-quote-modal-actions>button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    min-height: 38px;
+    padding: 9px 15px;
+    border: 1px solid #bdcfe3;
+    border-radius: 7px;
+    color: #385e83;
+    background: white;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.rr-quote-transfer-modal .rr-quote-modal-actions>button.primary {
+    background: #22649e;
+    color: white;
+    border-color: #22649e;
+    box-shadow: 0 3px 9px #255d9020;
+}
+
+.rr-quote-transfer-modal .rr-quote-modal-actions>button.primary:hover {
+    background: #174c80;
+    color: white;
+    border-color: #174c80;
+}
+
+.rr-quote-transfer-modal button:disabled {
+    opacity: .55;
+    cursor: wait;
+}
+
+@media (max-width:600px) {
+    .rr-quote-transfer-backdrop {
+        padding: 10px;
+    }
+
+    .rr-quote-transfer-backdrop .rr-quote-transfer-modal {
+        max-height: calc(100dvh - 20px);
+    }
+
+    .rr-quote-transfer-modal .rr-quote-modal-actions>button {
+        flex: 1;
+    }
+}
+
+@media (prefers-reduced-motion:no-preference) {
+    .rr-quote-transfer-modal {
+        animation: rr-quote-enter .22s ease-out both;
+    }
+}
+
+/* Sales conversion dialog: invoice date, payment collection and balance. */
+.rr-quote-transfer-backdrop .rr-quote-conversion-modal {
+    overflow-y: auto;
+}
+
+.rr-quote-conversion-modal .rr-quote-modal-title {
+    position: sticky;
+    top: 0;
+    z-index: 3;
+    flex-shrink: 0;
+}
+
+.rr-quote-conversion-modal .rr-quote-modal-actions {
+    position: sticky;
+    bottom: 0;
+    z-index: 3;
+    flex-shrink: 0;
+}
+
+.rr-quote-conversion-modal .rr-quote-mini-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 14px;
+    padding: 14px 18px;
+}
+
+.rr-quote-conversion-modal .rr-quote-create-field {
+    display: block;
+    min-width: 0;
+}
+
+.rr-quote-conversion-modal .rr-quote-create-field>span {
+    display: block;
+    margin-bottom: 6px;
+    color: #486582;
+    font-size: 11px;
+    font-weight: 700;
+}
+
+.rr-quote-conversion-modal .rr-quote-create-field input,
+.rr-quote-conversion-modal .rr-quote-create-field textarea {
+    width: 100%;
+    box-sizing: border-box;
+    min-height: 37px;
+    padding: 8px 10px;
+    border: 1px solid #bcd0e5;
+    border-radius: 6px;
+    background: white;
+    color: #284f76;
+    font-size: 13px;
+}
+
+.rr-quote-conversion-modal input[type="date"] {
+    cursor: pointer;
+}
+
+.rr-quote-conversion-modal input[readonly] {
+    background: #f0f6ff;
+    color: #2c5b88;
+    font-weight: 700;
+}
+
+.rr-quote-conversion-modal .rr-quote-window-title {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 18px;
+    color: #31577e;
+    background: #f5f9ff;
+    border-top: 1px solid #dce7f2;
+    border-bottom: 1px solid #dce7f2;
+}
+
+.rr-quote-conversion-modal .rr-quote-window-title .rr-quote-btn {
+    border: 1px solid #b5cfe7;
+    border-radius: 6px;
+    padding: 7px 11px;
+    color: #225c93;
+    background: #e7f2ff;
+    cursor: pointer;
+    font-size: 11px;
+}
+
+.rr-quote-conversion-modal .rr-quote-table-wrap {
+    overflow-x: auto;
+    margin: 12px 16px;
+}
+
+.rr-quote-conversion-modal .rr-quote-table-wrap table {
+    width: 100%;
+    min-width: 700px;
+    border-collapse: collapse;
+    font-size: 12px;
+}
+
+.rr-quote-conversion-modal .rr-quote-table-wrap th {
+    padding: 11px;
+    background: #eaf2fc;
+    color: #355b7e;
+    font-size: 11px;
+}
+
+.rr-quote-conversion-modal .rr-quote-table-wrap td {
+    padding: 10px;
+    border-bottom: 1px solid #e2eaf4;
+    color: #315578;
+}
+
+.rr-quote-conversion-modal .rr-quote-table-wrap input,
+.rr-quote-conversion-modal .rr-quote-table-wrap select {
+    width: 100%;
+    min-height: 35px;
+    padding: 7px;
+    border: 1px solid #b5cce4;
+    border-radius: 6px;
+    color: #295277;
+    background: white;
+    font-size: 12px;
+}
+
+.rr-quote-conversion-modal .rr-quote-table-wrap button {
+    border: 1px solid #e5bec9;
+    border-radius: 6px;
+    color: #a3354c;
+    background: #fff0f3;
+    cursor: pointer;
+}
+
+.rr-quote-conversion-modal .rr-quote-summary {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 12px;
+    padding: 12px 18px;
+    background: #f5f9ff;
+}
+
+.rr-quote-conversion-modal .rr-quote-summary-row {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding: 11px;
+    border: 1px solid #d1dfed;
+    border-radius: 7px;
+    background: white;
+}
+
+.rr-quote-conversion-modal .rr-quote-summary-row>span {
+    color: #526f8b;
+    font-size: 11px;
+}
+
+.rr-quote-conversion-modal .rr-quote-summary-row>strong {
+    color: #285881;
+    font-size: 17px;
+}
+
+.rr-quote-conversion-modal .rr-quote-summary-row.grand {
+    background: #e6f5ec;
+    border-color: #b7dcc6;
+    margin: 0;
+}
+
+.rr-quote-conversion-modal .rr-quote-summary-row.grand>span,
+.rr-quote-conversion-modal .rr-quote-summary-row.grand>strong {
+    color: #1b6943;
+}
+
+.rr-quote-conversion-modal .rr-quote-window-body {
+    padding: 13px 18px;
+}
+
+@media (max-width:600px) {
+    .rr-quote-conversion-modal .rr-quote-summary {
+        grid-template-columns: 1fr;
+    }
+}

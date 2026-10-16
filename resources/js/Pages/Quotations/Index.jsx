@@ -14,9 +14,13 @@ export default function Index({
     quotations = { data: [], links: [] },
     filters = {},
     todayAmount = 0,
+    accounts = [],
 }) {
     const { flash = {} } = usePage().props;
     const records = Array.isArray(quotations.data) ? quotations.data : [];
+
+    const [filterOpen, setFilterOpen] = useState(true);
+    const [filtering, setFiltering] = useState(false);
 
     const [form, setForm] = useState({
         search: filters.search ?? "",
@@ -26,6 +30,10 @@ export default function Index({
         date_from: filters.date_from ?? "",
         date_to: filters.date_to ?? "",
     });
+
+    const [conversionModal, setConversionModal] = useState({ show: false, processing: false, error: "", invoice_date: today(), remarks: "", payments: [], quotation: null });
+    const quotation = conversionModal.quotation ?? {};
+    const openConversion = (document) => setConversionModal({ show: true, processing: false, error: "", invoice_date: today(), remarks: `Converted from ${document.quotation_no}`, payments: [], quotation: document });
 
     const [confirmation, setConfirmation] = useState({
         show: false,
@@ -64,6 +72,8 @@ export default function Index({
             preserveState: true,
             preserveScroll: true,
             replace: true,
+            onStart: () => setFiltering(true),
+            onFinish: () => setFiltering(false),
         });
     };
 
@@ -139,7 +149,7 @@ export default function Index({
 
             if (response.data?.ready || shortages.length === 0) {
                 setStockModal((previous) => ({ ...previous, loadingId: null }));
-                openConfirmation("convert", quotation);
+                openConversion(quotation);
                 return;
             }
 
@@ -232,7 +242,7 @@ export default function Index({
             if (response.data?.ready || shortages.length === 0) {
                 const quotation = stockModal.quotation;
                 closeStockModalAfterRequest();
-                openConfirmation("convert", quotation);
+                openConversion(quotation);
                 return;
             }
 
@@ -315,11 +325,139 @@ export default function Index({
         );
     };
 
+    const addPayment = () => {
+        const usedIds = conversionModal.payments.map((payment) =>
+            Number(payment.account_id),
+        );
+        const account = accounts.find((item) => !usedIds.includes(Number(item.id)))
+            ?? accounts[0];
+
+        if (!account) {
+            setConversionModal((previous) => ({
+                ...previous,
+                error: "No active Cash, GPay or Bank account is available for this branch.",
+            }));
+            return;
+        }
+
+        const paid = conversionModal.payments.reduce(
+            (sum, payment) => sum + numberValue(payment.amount),
+            0,
+        );
+        const balance = Math.max(0, numberValue(quotation.grand_total) - paid);
+
+        setConversionModal((previous) => ({
+            ...previous,
+            error: "",
+            payments: [
+                ...previous.payments,
+                {
+                    key: `${Date.now()}-${Math.random()}`,
+                    account_id: String(account.id),
+                    payment_mode: account.payment_mode || accountMode(account),
+                    amount: balance > 0 ? String(balance) : "0",
+                    reference_no: "",
+                },
+            ],
+        }));
+    };
+
+    const updatePayment = (index, field, value) => {
+        setConversionModal((previous) => ({
+            ...previous,
+            error: "",
+            payments: previous.payments.map((payment, paymentIndex) => {
+                if (paymentIndex !== index) return payment;
+
+                if (field === "account_id") {
+                    const account = accounts.find(
+                        (item) => Number(item.id) === Number(value),
+                    );
+
+                    return {
+                        ...payment,
+                        account_id: value,
+                        payment_mode:
+                            account?.payment_mode || accountMode(account),
+                    };
+                }
+
+                return { ...payment, [field]: value };
+            }),
+        }));
+    };
+
+    const removePayment = (index) => {
+        setConversionModal((previous) => ({
+            ...previous,
+            payments: previous.payments.filter(
+                (_, paymentIndex) => paymentIndex !== index,
+            ),
+        }));
+    };
+
+    const submitConversion = (event) => {
+        event.preventDefault();
+
+        const payments = conversionModal.payments
+            .filter((payment) => numberValue(payment.amount) > 0)
+            .map(({ account_id, payment_mode, amount, reference_no }) => ({
+                account_id,
+                payment_mode,
+                amount,
+                reference_no: reference_no || null,
+            }));
+        const paidAmount = payments.reduce(
+            (sum, payment) => sum + numberValue(payment.amount),
+            0,
+        );
+
+        if (paidAmount > numberValue(quotation.grand_total) + 0.001) {
+            setConversionModal((previous) => ({
+                ...previous,
+                error: "Total payment cannot exceed the quotation grand total.",
+            }));
+            return;
+        }
+
+        setConversionModal((previous) => ({
+            ...previous,
+            processing: true,
+            error: "",
+        }));
+
+        router.post(
+            `/quotations/${quotation.id}/convert`,
+            {
+                invoice_date: conversionModal.invoice_date,
+                remarks: conversionModal.remarks || null,
+                paid_amount: paidAmount,
+                payments,
+            },
+            {
+                preserveScroll: true,
+                onError: (errors) => {
+                    setConversionModal((previous) => ({
+                        ...previous,
+                        error: firstError(errors, "Unable to convert quotation."),
+                    }));
+                },
+                onFinish: () => {
+                    setConversionModal((previous) => ({
+                        ...previous,
+                        processing: false,
+                    }));
+                },
+            },
+        );
+    };
+
     const confirmationIsConvert = confirmation.action === "convert";
 
     return (
         <>
             <Head title="Quotations & Proforma Invoices" />
+            <ConversionModal state={conversionModal} quotation={quotation} accounts={accounts} onAddPayment={addPayment} onUpdatePayment={updatePayment} onRemovePayment={removePayment} onChange={(field, value) => setConversionModal((previous) => ({ ...previous, [field]: value }))} onClose={() => { if (!conversionModal.processing) setConversionModal((previous) => ({ ...previous, show: false })); }} onSubmit={submitConversion} />
 
             <div className="rr-quote-page rr-quote-index-page">
                 <MasterNavigation
@@ -352,7 +490,7 @@ export default function Index({
                             <h1>Quotation & Proforma Register</h1>
                             <div className="rr-quote-header-meta">
                                 <span>{quotations.total ?? records.length} records</span>
-                                <span>Branch-isolated</span>
+                                <span>Quotes, approvals & sales conversion</span>
                             </div>
                         </div>
                     </div>
@@ -384,19 +522,19 @@ export default function Index({
                     />
                     <Metric
                         icon="bi-files"
-                        label="Page Amount"
+                        label="Current page amount"
                         value={formatMoney(pageAmount)}
                         tone="slate"
                     />
                     <Metric
                         icon="bi-patch-check"
-                        label="Approved"
+                        label="Approved on this page"
                         value={approvedCount}
                         tone="green"
                     />
                     <Metric
                         icon="bi-arrow-right-circle"
-                        label="Converted"
+                        label="Converted on this page"
                         value={convertedCount}
                         tone="violet"
                     />
@@ -408,17 +546,21 @@ export default function Index({
                             <i className="bi bi-funnel"></i>
                             <strong>Search & Filters</strong>
                         </div>
-                        <button
-                            type="button"
-                            className="rr-quote-reset"
-                            onClick={resetFilters}
-                        >
-                            <i className="bi bi-arrow-counterclockwise"></i>
-                            Reset
-                        </button>
+                        <div className="rr-quote-filter-tools">
+                            <button type="button" className="rr-quote-reset" aria-expanded={filterOpen} aria-controls="quotation-filter-content" onClick={() => setFilterOpen((value) => !value)}><i className={`bi bi-chevron-${filterOpen ? "up" : "down"}`}></i>{filterOpen ? "Hide filters" : "Show filters"}</button>
+                            <button
+                                type="button"
+                                disabled={filtering}
+                                className="rr-quote-reset"
+                                onClick={resetFilters}
+                            >
+                                <i className="bi bi-arrow-counterclockwise"></i>
+                                Reset
+                            </button>
+                        </div>
                     </div>
 
-                    <div className="rr-quote-window-body">
+                    <div id="quotation-filter-content" className="rr-quote-window-body" hidden={!filterOpen}>
                         <div className="rr-quote-quick-filters">
                             {[
                                 ["today", "Today"],
@@ -531,9 +673,9 @@ export default function Index({
                                 </>
                             )}
 
-                            <button type="submit" className="rr-quote-btn primary">
-                                <i className="bi bi-search"></i>
-                                Apply
+                            <button type="submit" className="rr-quote-btn primary" disabled={filtering}>
+                                <i className={filtering ? "bi bi-arrow-repeat rr-quote-index-spin" : "bi bi-search"}></i>
+                                {filtering ? "Updating…" : "Apply filters"}
                             </button>
                         </form>
                     </div>
@@ -550,6 +692,7 @@ export default function Index({
                         </span>
                     </div>
 
+                    {filtering && <div className="rr-quote-filter-loading" role="status"><i className="bi bi-arrow-repeat rr-quote-index-spin"></i> Updating document register…</div>}
                     <div className="rr-quote-table-wrap">
                         <table className="rr-quote-table">
                             <thead>
@@ -582,7 +725,7 @@ export default function Index({
                                                 tabIndex="0"
                                                 onClick={(event) => openDetails(event, quotation)}
                                                 onKeyDown={(event) => {
-                                                    if (event.key === "Enter") {
+                                                    if (event.key === "Enter" && event.target === event.currentTarget) {
                                                         router.visit(`/quotations/${quotation.id}`);
                                                     }
                                                 }}
@@ -804,12 +947,15 @@ function Pagination({ links }) {
     if (!Array.isArray(links) || links.length <= 3) return null;
 
     return (
-        <nav className="rr-quote-pagination">
+        <nav className="rr-quote-pagination" aria-label="Quotation pages">
             {links.map((link, index) => (
                 <Link
                     key={`${link.label}-${index}`}
                     href={link.url || "#"}
                     preserveScroll
+                    aria-current={link.active ? "page" : undefined}
+                    aria-disabled={!link.url}
+                    tabIndex={link.url ? 0 : -1}
                     className={`${link.active ? "active" : ""} ${!link.url ? "disabled" : ""}`}
                     dangerouslySetInnerHTML={{ __html: link.label }}
                     onClick={(event) => {
@@ -822,12 +968,42 @@ function Pagination({ links }) {
 }
 
 function StockTransferModal({ state, onUpdate, onClose, onSubmit }) {
+    const transferForm = React.useRef(null);
+    React.useEffect(() => {
+        if (!state.show) return;
+        const previous = document.activeElement;
+        const timer = window.setTimeout(() => transferForm.current?.querySelector("select:not(:disabled), input:not(:disabled)")?.focus(), 0);
+        return () => { window.clearTimeout(timer); previous?.focus?.(); };
+    }, [state.show]);
     if (!state.show) return null;
 
     return (
-        <div className="rr-quote-modal-backdrop" role="presentation">
+        <div className="rr-quote-modal-backdrop rr-quote-transfer-backdrop" role="presentation">
             <form
-                className="rr-quote-modal rr-quote-stock-modal"
+                ref={transferForm}
+                className="rr-quote-modal rr-quote-stock-modal rr-quote-transfer-modal"
+                role="dialog" aria-modal="true" aria-label="Transfer stock to shop"
+                onKeyDown={(event) => {
+                    if (event.key === "Escape" && !state.processing) { event.preventDefault(); onClose(); return; }
+                    if (event.key === "Enter") {
+                        event.preventDefault();
+                        if (!state.processing && !event.repeat) transferForm.current?.requestSubmit();
+                        return;
+                    }
+                    if (["ArrowLeft", "ArrowRight"].includes(event.key)) {
+                        event.preventDefault();
+                        const fields = Array.from(transferForm.current.querySelectorAll("select:not(:disabled), input:not(:disabled), button[type='submit']:not(:disabled)"));
+                        const index = fields.indexOf(event.target);
+                        const next = fields[index + (event.key === "ArrowRight" ? 1 : -1)];
+                        next?.focus(); if (next?.tagName === "INPUT") next.select();
+                    }
+                    if (event.key === "Tab") {
+                        const fields = Array.from(transferForm.current.querySelectorAll("button:not(:disabled), select:not(:disabled), input:not(:disabled)"));
+                        const first = fields[0], last = fields[fields.length - 1];
+                        if (event.shiftKey && event.target === first) { event.preventDefault(); last?.focus(); }
+                        if (!event.shiftKey && event.target === last) { event.preventDefault(); first?.focus(); }
+                    }
+                }}
                 onSubmit={onSubmit}
             >
                 <div className="rr-quote-modal-title">
@@ -951,6 +1127,7 @@ function StockTransferModal({ state, onUpdate, onClose, onSubmit }) {
                     </div>
                 )}
 
+                <div className="rr-quote-transfer-shortcuts"><span><kbd>←</kbd><kbd>→</kbd> Move between fields</span><span><kbd>↑</kbd><kbd>↓</kbd> Choose godown</span><span><kbd>Enter</kbd> Transfer stock</span><span><kbd>Esc</kbd> Close</span></div>
                 <div className="rr-quote-modal-actions">
                     <button type="button" disabled={state.processing} onClick={onClose}>
                         Close
@@ -1102,3 +1279,321 @@ function apiError(error, fallback) {
 }
 
 Index.layout = (page) => <BusinessLayout>{page}</BusinessLayout>;
+
+function ConversionModal({
+    state,
+    quotation,
+    accounts,
+    onAddPayment,
+    onUpdatePayment,
+    onRemovePayment,
+    onChange,
+    onClose,
+    onSubmit,
+}) {
+    const formRef = React.useRef(null);
+    React.useEffect(() => {
+        if (!state.show) return;
+        const previous = document.activeElement;
+        const timer = window.setTimeout(() => formRef.current?.querySelector("input:not([readonly]), select")?.focus(), 0);
+        return () => { window.clearTimeout(timer); previous?.focus?.(); };
+    }, [state.show]);
+    if (!state.show) return null;
+
+    const grandTotal = numberValue(quotation.grand_total);
+    const paidAmount = state.payments.reduce(
+        (sum, payment) => sum + numberValue(payment.amount),
+        0,
+    );
+    const balanceAmount = Math.max(0, grandTotal - paidAmount);
+
+    return (
+        <div className="rr-quote-modal-backdrop rr-quote-transfer-backdrop" role="presentation">
+            <form
+                ref={formRef}
+                className="rr-quote-modal rr-quote-stock-modal rr-quote-transfer-modal rr-quote-conversion-modal"
+                role="dialog" aria-modal="true" aria-label="Convert to Sales Invoice"
+                onKeyDown={(event) => {
+                    if (event.key === "Escape" && !state.processing) { event.preventDefault(); onClose(); return; }
+                    if (["ArrowLeft", "ArrowRight"].includes(event.key) && event.target.tagName !== "TEXTAREA") {
+                        event.preventDefault();
+                        const fields = Array.from(formRef.current.querySelectorAll("input:not(:disabled):not([readonly]), select:not(:disabled), textarea:not(:disabled), button[type='submit']:not(:disabled)"));
+                        const next = fields[fields.indexOf(event.target) + (event.key === "ArrowRight" ? 1 : -1)]; next?.focus(); if (next?.tagName === "INPUT" && next.type !== "date") next.select();
+                    }
+                    if (event.key === "Enter" && event.target.tagName !== "TEXTAREA" && event.target.tagName !== "BUTTON") {
+                        event.preventDefault();
+                        const fields = Array.from(formRef.current.querySelectorAll("input:not(:disabled):not([readonly]), select:not(:disabled), textarea:not(:disabled), button[type='submit']:not(:disabled)"));
+                        const next = fields[fields.indexOf(event.target) + 1]; next?.focus();
+                    }
+                    if (event.key === "Enter" && event.ctrlKey && !state.processing) { event.preventDefault(); formRef.current?.requestSubmit(); }
+                    if (event.key === "Tab") {
+                        const fields = Array.from(formRef.current.querySelectorAll("input:not(:disabled),select:not(:disabled),textarea:not(:disabled),button:not(:disabled)"));
+                        if (event.shiftKey && event.target === fields[0]) { event.preventDefault(); fields[fields.length - 1]?.focus(); }
+                        if (!event.shiftKey && event.target === fields[fields.length - 1]) { event.preventDefault(); fields[0]?.focus(); }
+                    }
+                }}
+                onSubmit={onSubmit}
+            >
+                <div className="rr-quote-modal-title">
+                    <div>
+                        <i className="bi bi-receipt-cutoff"></i>
+                        <strong>Convert to Sales Invoice</strong>
+                    </div>
+                    <button
+                        type="button"
+                        disabled={state.processing}
+                        onClick={onClose}
+                    >
+                        <i className="bi bi-x-lg"></i>
+                    </button>
+                </div>
+
+                <div className="rr-quote-stock-notice">
+                    <i className="bi bi-info-circle"></i>
+                    The quotation will become a completed Sales invoice. Shop stock,
+                    bill-wise cost and profit will be recorded during conversion.
+                </div>
+
+                {state.error && (
+                    <div className="rr-quote-stock-error">{state.error}</div>
+                )}
+
+                <div className="rr-quote-window-body rr-quote-mini-grid">
+                    <label className="rr-quote-create-field">
+                        <span>Invoice Date</span>
+                        <input
+                            required
+                            type="date" onClick={(event) => { try { event.currentTarget.showPicker?.(); } catch { } }}
+                            value={state.invoice_date}
+                            onChange={(event) =>
+                                onChange("invoice_date", event.target.value)
+                            }
+                        />
+                    </label>
+
+                    <label className="rr-quote-create-field">
+                        <span>Quotation Total</span>
+                        <input readOnly value={formatMoney(grandTotal)} />
+                    </label>
+                </div>
+
+                <div className="rr-quote-window-title">
+                    <div>
+                        <i className="bi bi-wallet2"></i>
+                        <strong>Payment Collection</strong>
+                    </div>
+                    <button
+                        type="button"
+                        className="rr-quote-btn primary compact"
+                        disabled={state.processing || !accounts.length}
+                        onClick={onAddPayment}
+                    >
+                        <i className="bi bi-plus-lg"></i>
+                        Add Payment
+                    </button>
+                </div>
+
+                <div className="rr-quote-stock-table-wrap">
+                    <table className="rr-quote-stock-table">
+                        <thead>
+                            <tr>
+                                <th>Cash / Bank Account</th>
+                                <th>Payment Mode</th>
+                                <th>Reference No.</th>
+                                <th className="number">Amount</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {state.payments.length ? (
+                                state.payments.map((payment, index) => (
+                                    <tr key={payment.key ?? index}>
+                                        <td>
+                                            <select
+                                                required
+                                                value={payment.account_id}
+                                                onChange={(event) =>
+                                                    onUpdatePayment(
+                                                        index,
+                                                        "account_id",
+                                                        event.target.value,
+                                                    )
+                                                }
+                                            >
+                                                <option value="">Select Account</option>
+                                                {accounts.map((account) => (
+                                                    <option
+                                                        key={account.id}
+                                                        value={account.id}
+                                                    >
+                                                        {account.account_name}
+                                                        {account.account_code
+                                                            ? ` — ${account.account_code}`
+                                                            : ""}
+                                                    </option>
+                                                ))}
+                                            </select>
+                                        </td>
+                                        <td>
+                                            <select
+                                                required
+                                                value={payment.payment_mode}
+                                                onChange={(event) =>
+                                                    onUpdatePayment(
+                                                        index,
+                                                        "payment_mode",
+                                                        event.target.value,
+                                                    )
+                                                }
+                                            >
+                                                <option value="cash">Cash</option>
+                                                <option value="gpay">GPay</option>
+                                                <option value="phonepe">PhonePe</option>
+                                                <option value="upi">Other UPI</option>
+                                                <option value="bank_transfer">
+                                                    Bank Transfer
+                                                </option>
+                                                <option value="card">Card</option>
+                                                <option value="cheque">Cheque</option>
+                                            </select>
+                                        </td>
+                                        <td>
+                                            <input
+                                                type="text"
+                                                maxLength="150"
+                                                value={payment.reference_no}
+                                                placeholder="Optional"
+                                                onChange={(event) =>
+                                                    onUpdatePayment(
+                                                        index,
+                                                        "reference_no",
+                                                        event.target.value,
+                                                    )
+                                                }
+                                            />
+                                        </td>
+                                        <td>
+                                            <input
+                                                required
+                                                type="number"
+                                                min="0.01"
+                                                step="0.01"
+                                                value={payment.amount}
+                                                onFocus={(event) =>
+                                                    event.target.select()
+                                                }
+                                                onChange={(event) =>
+                                                    onUpdatePayment(
+                                                        index,
+                                                        "amount",
+                                                        event.target.value,
+                                                    )
+                                                }
+                                            />
+                                        </td>
+                                        <td>
+                                            <button
+                                                type="button"
+                                                className="rr-quote-remove"
+                                                title="Remove payment"
+                                                onClick={() => onRemovePayment(index)}
+                                            >
+                                                <i className="bi bi-x-lg"></i>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                ))
+                            ) : (
+                                <tr>
+                                    <td colSpan="5" className="rr-quote-items-empty">
+                                        No payment added. The invoice will be created as
+                                        Unpaid.
+                                    </td>
+                                </tr>
+                            )}
+                        </tbody>
+                    </table>
+                </div>
+
+                <div className="rr-quote-summary rr-quote-show-summary">
+                    <SummaryRow label="Invoice Total" value={formatMoney(grandTotal)} />
+                    <SummaryRow label="Paid Amount" value={formatMoney(paidAmount)} />
+                    <SummaryRow
+                        grand
+                        label="Balance Amount"
+                        value={formatMoney(balanceAmount)}
+                    />
+                </div>
+
+                <div className="rr-quote-window-body">
+                    <label className="rr-quote-create-field">
+                        <span>Conversion Remarks</span>
+                        <textarea
+                            rows="2"
+                            maxLength="2000"
+                            value={state.remarks}
+                            onChange={(event) =>
+                                onChange("remarks", event.target.value)
+                            }
+                        ></textarea>
+                    </label>
+                </div>
+
+                <div className="rr-quote-transfer-shortcuts"><span><kbd>←</kbd><kbd>→</kbd> Move fields</span><span><kbd>Enter</kbd> Next field / activate button</span><span><kbd>Ctrl + Enter</kbd> Convert invoice</span><span><kbd>Esc</kbd> Close</span></div>
+                <div className="rr-quote-modal-actions">
+                    <button
+                        type="button"
+                        disabled={state.processing}
+                        onClick={onClose}
+                    >
+                        Not Now
+                    </button>
+                    <button
+                        type="submit"
+                        className="primary"
+                        disabled={state.processing || paidAmount > grandTotal}
+                    >
+                        {state.processing
+                            ? "Converting..."
+                            : "Convert to Sales Invoice"}
+                    </button>
+                </div>
+            </form>
+        </div>
+    );
+}
+
+
+function today() {
+    const now = new Date();
+
+    return new Date(now.getTime() - now.getTimezoneOffset() * 60000)
+        .toISOString()
+        .slice(0, 10);
+}
+
+function firstError(errors, fallback) {
+    if (!errors || typeof errors !== "object") return fallback;
+
+    return Object.values(errors).flat().find(Boolean) || fallback;
+}
+
+function accountMode(account) {
+    if (!account) return "cash";
+
+    return {
+        cash: "cash",
+        upi: "upi",
+        bank: "bank_transfer",
+        card: "card",
+    }[account.account_type] ?? "cash";
+}
+
+function SummaryRow({ label, value, grand = false }) {
+    return (
+        <div className={`rr-quote-summary-row ${grand ? "grand" : ""}`}>
+            <span>{label}</span>
+            <strong>{value}</strong>
+        </div>
+    );
+}

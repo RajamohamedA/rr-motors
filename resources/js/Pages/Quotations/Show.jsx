@@ -1,4 +1,6 @@
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
+
+import { createPortal } from "react-dom";
 
 import axios from "axios";
 
@@ -34,6 +36,27 @@ export default function Show({ quotation, accounts = [] }) {
         remarks: "",
         payments: [],
     });
+
+    const [navigation, setNavigation] = useState("");
+    const [printError, setPrintError] = useState("");
+    useEffect(() => {
+        const start = router.on("start", () => setNavigation("Loading document…"));
+        const finish = router.on("finish", () => setNavigation(""));
+        return () => { start(); finish(); };
+    }, []);
+    const openPrint = async (event) => {
+        event.preventDefault(); setPrintError("");
+        const popup = window.open("", "_blank");
+        if (!popup) { setPrintError("Allow popups to open print preview."); return; }
+        popup.document.write('<!doctype html><html><head><title>Preparing print</title><style>@keyframes spin{to{transform:rotate(360deg)}}body{margin:0;display:grid;place-items:center;min-height:100vh;background:#eff5fc;color:#284d73;font-family:Segoe UI,Arial}.spinner{width:44px;height:44px;border:4px solid #dae7f6;border-top-color:#326fac;border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 20px}</style></head><body><div style="text-align:center"><div class="spinner"></div><h3>Preparing print preview…</h3><p>Please wait while your document loads.</p></div></body></html>'); popup.document.close();
+        try {
+            const url = new URL(`/quotations/${quotation.id}/print?paper=a4`, window.location.origin);
+            const response = await fetch(url, { credentials: "same-origin", headers: { Accept: "text/html" } });
+            if (!response.ok || new URL(response.url).pathname !== url.pathname) throw new Error("Unable to load print preview. Please try again.");
+            const html = await response.text(); if (popup.closed) return;
+            popup.history.replaceState(null, "", url.href); popup.document.open(); popup.document.write(html); popup.document.close();
+        } catch (error) { setPrintError(error.message); if (!popup.closed) popup.document.body.textContent = "Unable to load print preview. Close this window and try Print again."; }
+    };
 
     const items = Array.isArray(quotation?.items) ? quotation.items : [];
     const isGst = quotation?.billing_type === "gst";
@@ -352,7 +375,9 @@ export default function Show({ quotation, accounts = [] }) {
         <>
             <Head title={`${title} ${quotation.quotation_no}`} />
 
+            {navigation && typeof document !== "undefined" && createPortal(<div className="rr-quote-save-overlay" role="status"><div><span className="rr-quote-save-spinner" /><strong>{navigation}</strong><p>Please wait while your request completes.</p></div></div>, document.body)}
             <div className="rr-quote-page rr-quote-show-page">
+                {printError && <div className="rr-quote-alert danger" role="alert">{printError}</div>}
                 <MasterNavigation
                     active="quotations"
                     title="Quotations"
@@ -418,7 +443,7 @@ export default function Show({ quotation, accounts = [] }) {
                             href={`/quotations/${quotation.id}/print?paper=a4`}
                             target="_blank"
                             rel="noreferrer"
-                            className="rr-quote-btn print"
+                            className="rr-quote-btn print" onClick={openPrint}
                         >
                             <i className="bi bi-printer"></i>
                             Print
@@ -660,7 +685,7 @@ export default function Show({ quotation, accounts = [] }) {
                                     <th>HSN</th>
                                     <th className="number">Qty</th>
                                     <th className="number">Free</th>
-                                    <th className="number">Rate</th>
+                                    <th className="number">Net rate</th>{isGst && <th className="number">Rate excl. GST</th>}
                                     <th>Discount</th>
                                     <th className="number">Taxable</th>
                                     {isGst && <th>GST</th>}
@@ -673,12 +698,13 @@ export default function Show({ quotation, accounts = [] }) {
                                         <td>{index + 1}</td>
                                         <td className="rr-quote-product-cell">
                                             <strong>{item.product?.product_name ?? "Product"}</strong>
-                                            <small>{productDetails(item.product)}</small>
+                                            <div className="rr-quote-show-product-tags">{item.product?.part_number && <span className="part">{item.product.part_number}</span>}{item.product?.product_code && <span>{item.product.product_code}</span>}</div>
+                                            <small>{item.product?.model || item.product?.model_name || ""}</small>
                                         </td>
                                         <td>{item.product?.hsn_code || "—"}</td>
                                         <td className="number">{formatQty(item.quantity)}</td>
                                         <td className="number">{formatQty(item.free_quantity)}</td>
-                                        <td className="number">{formatMoney(item.sale_price)}</td>
+                                        <td className="number">{formatMoney(netRate(item, isGst))}</td>{isGst && <td className="number">{formatMoney(item.sale_price)}</td>}
                                         <td>
                                             {item.discount_type === "percentage"
                                                 ? `${formatQty(item.discount_value)}%`
@@ -711,7 +737,7 @@ export default function Show({ quotation, accounts = [] }) {
                                     <td className="number">
                                         {formatQty(itemTotals.freeQuantity)}
                                     </td>
-                                    <td></td>
+                                    <td></td>{isGst && <td></td>}
                                     <td>{formatMoney(itemTotals.discount)}</td>
                                     <td className="number">
                                         {formatMoney(quotation.sub_total)}
@@ -833,6 +859,16 @@ function Alert({ tone, icon, children }) {
     );
 }
 
+function netRate(item, isGst) {
+    const quantity = numberValue(item.quantity);
+    const factor = isGst ? 1 + numberValue(item.gst_percent) / 100 : 1;
+    if (quantity > 0 && item.line_total != null) {
+        if (item.discount_type === "percentage" && numberValue(item.discount_value) < 100) return numberValue(item.line_total) / (1 - numberValue(item.discount_value) / 100) / quantity;
+        if (item.discount_type !== "percentage") return (numberValue(item.line_total) + numberValue(item.discount_value) * factor) / quantity;
+    }
+    return numberValue(item.sale_price) * factor;
+}
+
 function WindowTitle({ icon, title }) {
     return (
         <div className="rr-quote-window-title">
@@ -902,6 +938,13 @@ function ConversionModal({
     onClose,
     onSubmit,
 }) {
+    const formRef = React.useRef(null);
+    React.useEffect(() => {
+        if (!state.show) return;
+        const previous = document.activeElement;
+        const timer = window.setTimeout(() => formRef.current?.querySelector("input:not([readonly]), select")?.focus(), 0);
+        return () => { window.clearTimeout(timer); previous?.focus?.(); };
+    }, [state.show]);
     if (!state.show) return null;
 
     const grandTotal = numberValue(quotation.grand_total);
@@ -912,9 +955,30 @@ function ConversionModal({
     const balanceAmount = Math.max(0, grandTotal - paidAmount);
 
     return (
-        <div className="rr-quote-modal-backdrop" role="presentation">
+        <div className="rr-quote-modal-backdrop rr-quote-transfer-backdrop" role="presentation">
             <form
-                className="rr-quote-modal rr-quote-stock-modal"
+                ref={formRef}
+                className="rr-quote-modal rr-quote-stock-modal rr-quote-transfer-modal rr-quote-conversion-modal"
+                role="dialog" aria-modal="true" aria-label="Convert to Sales Invoice"
+                onKeyDown={(event) => {
+                    if (event.key === "Escape" && !state.processing) { event.preventDefault(); onClose(); return; }
+                    if (["ArrowLeft", "ArrowRight"].includes(event.key) && event.target.tagName !== "TEXTAREA") {
+                        event.preventDefault();
+                        const fields = Array.from(formRef.current.querySelectorAll("input:not(:disabled):not([readonly]), select:not(:disabled), textarea:not(:disabled), button[type='submit']:not(:disabled)"));
+                        const next = fields[fields.indexOf(event.target) + (event.key === "ArrowRight" ? 1 : -1)]; next?.focus(); if (next?.tagName === "INPUT" && next.type !== "date") next.select();
+                    }
+                    if (event.key === "Enter" && event.target.tagName !== "TEXTAREA" && event.target.tagName !== "BUTTON") {
+                        event.preventDefault();
+                        const fields = Array.from(formRef.current.querySelectorAll("input:not(:disabled):not([readonly]), select:not(:disabled), textarea:not(:disabled), button[type='submit']:not(:disabled)"));
+                        const next = fields[fields.indexOf(event.target) + 1]; next?.focus();
+                    }
+                    if (event.key === "Enter" && event.ctrlKey && !state.processing) { event.preventDefault(); formRef.current?.requestSubmit(); }
+                    if (event.key === "Tab") {
+                        const fields = Array.from(formRef.current.querySelectorAll("input:not(:disabled),select:not(:disabled),textarea:not(:disabled),button:not(:disabled)"));
+                        if (event.shiftKey && event.target === fields[0]) { event.preventDefault(); fields[fields.length - 1]?.focus(); }
+                        if (!event.shiftKey && event.target === fields[fields.length - 1]) { event.preventDefault(); fields[0]?.focus(); }
+                    }
+                }}
                 onSubmit={onSubmit}
             >
                 <div className="rr-quote-modal-title">
@@ -946,7 +1010,7 @@ function ConversionModal({
                         <span>Invoice Date</span>
                         <input
                             required
-                            type="date"
+                            type="date" onClick={(event) => { try { event.currentTarget.showPicker?.(); } catch { } }}
                             value={state.invoice_date}
                             onChange={(event) =>
                                 onChange("invoice_date", event.target.value)
@@ -1122,6 +1186,7 @@ function ConversionModal({
                     </label>
                 </div>
 
+                <div className="rr-quote-transfer-shortcuts"><span><kbd>←</kbd><kbd>→</kbd> Move fields</span><span><kbd>Enter</kbd> Next field / activate button</span><span><kbd>Ctrl + Enter</kbd> Convert invoice</span><span><kbd>Esc</kbd> Close</span></div>
                 <div className="rr-quote-modal-actions">
                     <button
                         type="button"
@@ -1146,12 +1211,42 @@ function ConversionModal({
 }
 
 function StockTransferModal({ state, onUpdate, onClose, onSubmit }) {
+    const transferForm = React.useRef(null);
+    React.useEffect(() => {
+        if (!state.show) return;
+        const previous = document.activeElement;
+        const timer = window.setTimeout(() => transferForm.current?.querySelector("select:not(:disabled), input:not(:disabled)")?.focus(), 0);
+        return () => { window.clearTimeout(timer); previous?.focus?.(); };
+    }, [state.show]);
     if (!state.show) return null;
 
     return (
-        <div className="rr-quote-modal-backdrop" role="presentation">
+        <div className="rr-quote-modal-backdrop rr-quote-transfer-backdrop" role="presentation">
             <form
-                className="rr-quote-modal rr-quote-stock-modal"
+                ref={transferForm}
+                className="rr-quote-modal rr-quote-stock-modal rr-quote-transfer-modal"
+                role="dialog" aria-modal="true" aria-label="Transfer stock to shop"
+                onKeyDown={(event) => {
+                    if (event.key === "Escape" && !state.processing) { event.preventDefault(); onClose(); return; }
+                    if (event.key === "Enter") {
+                        event.preventDefault();
+                        if (!state.processing && !event.repeat) transferForm.current?.requestSubmit();
+                        return;
+                    }
+                    if (["ArrowLeft", "ArrowRight"].includes(event.key)) {
+                        event.preventDefault();
+                        const fields = Array.from(transferForm.current.querySelectorAll("select:not(:disabled), input:not(:disabled), button[type='submit']:not(:disabled)"));
+                        const index = fields.indexOf(event.target);
+                        const next = fields[index + (event.key === "ArrowRight" ? 1 : -1)];
+                        next?.focus(); if (next?.tagName === "INPUT") next.select();
+                    }
+                    if (event.key === "Tab") {
+                        const fields = Array.from(transferForm.current.querySelectorAll("button:not(:disabled), select:not(:disabled), input:not(:disabled)"));
+                        const first = fields[0], last = fields[fields.length - 1];
+                        if (event.shiftKey && event.target === first) { event.preventDefault(); last?.focus(); }
+                        if (!event.shiftKey && event.target === last) { event.preventDefault(); first?.focus(); }
+                    }
+                }}
                 onSubmit={onSubmit}
             >
                 <div className="rr-quote-modal-title">
@@ -1260,6 +1355,7 @@ function StockTransferModal({ state, onUpdate, onClose, onSubmit }) {
                     </table>
                 </div>
 
+                <div className="rr-quote-transfer-shortcuts"><span><kbd>←</kbd><kbd>→</kbd> Move between fields</span><span><kbd>↑</kbd><kbd>↓</kbd> Choose godown</span><span><kbd>Enter</kbd> Transfer stock</span><span><kbd>Esc</kbd> Close</span></div>
                 <div className="rr-quote-modal-actions">
                     <button type="button" disabled={state.processing} onClick={onClose}>
                         Close

@@ -1,857 +1,672 @@
 @php
 $pdfMode = $pdfMode ?? false;
-$paper = strtolower($paper ?? 'a4');
+$paper = strtolower($paper ?? request()->query('paper', 'a4'));
 $paper = in_array($paper, ['a4', 'a5'], true) ? $paper : 'a4';
 $isA5 = $paper === 'a5';
 $isGstBill = ($quotation->billing_type ?? 'gst') === 'gst';
 $company = $quotation->company;
 $store = $quotation->store;
 $customer = $quotation->customer;
-$mechanic = $quotation->mechanic;
+$items = $quotation->items ?? collect();
 $title = $quotation->documentTitle();
-$quantityTotal = $quotation->items->sum(
-fn ($item) => (float) $item->quantity
-);
-$freeQuantityTotal = $quotation->items->sum(
-fn ($item) => (float) $item->free_quantity
-);
-@endphp
-
-<!DOCTYPE html>
-<html lang="en">
-
-<head>
-    <meta charset="UTF-8">
-    <meta
-        name="viewport"
-        content="width=device-width, initial-scale=1.0">
-
-    <title>{{ $title }} {{ $quotation->quotation_no }}</title>
-
-    <style id="page-size-style">
-        @page {
-            size: {
-                    {
-                    strtoupper($paper)
-                }
-            }
-
-            portrait;
-            margin: 7mm;
-        }
-    </style>
-
-    <style>
-        * {
-            box-sizing: border-box;
-        }
-
-        html,
-        body {
-            margin: 0;
-            padding: 0;
-        }
-
-        body {
-            color: #17212b;
-
-            background: {
-                    {
-                    $pdfMode ? '#ffffff': '#dce3e9'
-                }
-            }
-
-            ;
-            font-family: DejaVu Sans,
-            Arial,
-            Helvetica,
-            sans-serif;
-            font-size: 11px;
-            line-height: 1.35;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-
-        .toolbar {
-            position: sticky;
-            top: 0;
-            z-index: 20;
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: center;
-            gap: 6px;
-            padding: 8px;
-            border-bottom: 1px solid #a9b5c1;
-            background: linear-gradient(#ffffff, #e3e8ed);
-            box-shadow: 0 2px 8px rgb(20 35 55 / 16%);
-        }
-
-        .toolbar a,
-        .toolbar button {
-            display: inline-flex;
-            min-height: 32px;
-            align-items: center;
-            justify-content: center;
-            padding: 0 12px;
-            border: 1px solid #9fadb9;
-            border-radius: 3px;
-            color: #243547;
-            background: linear-gradient(#ffffff, #e4e9ee);
-            font-size: 12px;
-            font-weight: 700;
-            text-decoration: none;
-            cursor: pointer;
-        }
-
-        .toolbar .primary,
-        .toolbar .active {
-            border-color: #07568f;
-            color: #ffffff;
-            background: linear-gradient(#2582c2, #0a5d9b);
-        }
-
-        .paper {
-            display: block;
-
-            width: {
-                    {
-                    $isA5 ? '148mm': '210mm'
-                }
-            }
-
-            ;
-
-            min-height: {
-                    {
-                    $isA5 ? '210mm': '297mm'
-                }
-            }
-
-            ;
-
-            max-width: {
-                    {
-                    $pdfMode ? '100%': 'none'
-                }
-            }
-
-            ;
-
-            margin: {
-                    {
-                    $pdfMode ? '0': '12px auto 22px'
-                }
-            }
-
-            ;
-
-            padding: {
-                    {
-                    $pdfMode ? '0': '8mm'
-                }
-            }
-
-            ;
-
-            border: {
-                    {
-                    $pdfMode ? '0': '1px solid #8f9dab'
-                }
-            }
-
-            ;
-            background: #ffffff;
-
-            box-shadow: {
-                    {
-                    $pdfMode ? 'none': '0 8px 28px rgb(20 35 55 / 20%)'
-                }
-            }
-
-            ;
-        }
-
-        body.screen-mode .paper {
-            padding-top: 10mm;
-        }
-
-        body.pdf-mode .paper {
-            width: auto !important;
-            max-width: none !important;
-            min-height: 0 !important;
-            margin: 0 !important;
-            padding: 4mm 6mm 3mm 4mm !important;
-            border: 0 !important;
-            box-shadow: none !important;
-        }
-
-        body.pdf-mode .detail-table td {
-            padding-bottom: 5px;
-        }
-
-        body.pdf-mode .items th,
-        body.pdf-mode .items td {
-            padding-top: 4px;
-            padding-bottom: 4px;
-        }
-
-        .top-table td {
-            width: 50%;
-            padding: 0;
-            vertical-align: top;
-        }
-
-        .brand-line {
-            width: 54px;
-            height: 3px;
-            margin: 0 0 6px;
-            background: #17679f;
-        }
-
-        .company-name {
-            margin: 0 0 3px;
-            color: #0b5790;
-            font-size: 19px;
-            line-height: 1.12;
-            text-transform: uppercase;
-        }
-
-        .company-lines {
-            color: #4e5f70;
-            font-size: 10px;
-            line-height: 1.45;
-        }
-
-        .document-side {
-            text-align: right;
-        }
-
-        .document-title {
-            display: inline-block;
-            min-width: 190px;
-            padding: 7px 10px;
-            border: 1px solid #174f79;
-            color: #17324d;
-            background: #eef5fa;
-            font-size: 18px;
-            font-weight: 800;
-            text-align: center;
-            text-transform: uppercase;
-        }
-
-        .document-number {
-            margin-top: 6px;
-            color: #17324d;
-            font-size: 11px;
-            font-weight: 800;
-        }
-
-        .status {
-            display: inline-block;
-            margin-top: 5px;
-            padding: 2px 7px;
-            border: 1px solid #7f96aa;
-            color: #31485e;
-            font-size: 9px;
-            font-weight: 700;
-            text-transform: uppercase;
-        }
-
-        .rule {
-            margin: 8px 0;
-            border-top: 2px solid #17679f;
-        }
-
-        .detail-table td {
-            width: 50%;
-            padding: 0 4px 7px 0;
-            vertical-align: top;
-        }
-
-        .detail-table td:last-child {
-            padding-right: 0;
-        }
-
-        .box {
-            min-height: 92px;
-            border: 1px solid #9eacba;
-        }
-
-        .box-title {
-            padding: 4px 7px;
-            border-bottom: 1px solid #9eacba;
-            color: #ffffff;
-            background: #286b9a;
-            font-size: 10px;
-            font-weight: 700;
-            text-transform: uppercase;
-        }
-
-        .box-body {
-            padding: 6px 7px;
-        }
-
-        .primary-text {
-            margin-bottom: 3px;
-            color: #17324d;
-            font-size: 12px;
-            font-weight: 800;
-        }
-
-        .meta-row {
-            display: flex;
-            justify-content: space-between;
-            gap: 8px;
-            margin: 2px 0;
-            border-bottom: 1px dotted #d2d9df;
-        }
-
-        .meta-row strong {
-            text-align: right;
-        }
-
-        .items {
-            table-layout: fixed;
-            page-break-inside: auto;
-        }
-
-        .items thead {
-            display: table-header-group;
-        }
-
-        .items tr {
-            page-break-inside: avoid;
-            page-break-after: auto;
-        }
-
-        .items th {
-            padding: 5px 3px;
-            border: 1px solid #64788a;
-            color: #ffffff;
-            background: #285f88;
-            font-size: 9px;
-            text-align: left;
-            white-space: nowrap;
-        }
-
-        .items td {
-            padding: 5px 3px;
-            border: 1px solid #aeb8c3;
-            vertical-align: top;
-            overflow-wrap: anywhere;
-        }
-
-        .items tbody tr:nth-child(even) {
-            background: #f1f5f8;
-        }
-
-        .number {
-            text-align: right !important;
-            white-space: nowrap;
-        }
-
-        .center {
-            text-align: center !important;
-        }
-
-        .product-name {
-            color: #182f43;
-            font-weight: 700;
-        }
-
-        .product-meta {
-            color: #687786;
-            font-size: 9px;
-        }
-
-        .summary-table {
-            margin-top: 7px;
-        }
-
-        .summary-table>tbody>tr>td {
-            width: 50%;
-            vertical-align: top;
-        }
-
-        .summary-left {
-            padding-right: 8px;
-        }
-
-        .note-box {
-            margin-bottom: 6px;
-            padding: 6px 7px;
-            border: 1px solid #b2bec9;
-            background: #f7f9fb;
-        }
-
-        .note-box strong {
-            display: block;
-            margin-bottom: 2px;
-            color: #2b587d;
-            font-size: 9px;
-            text-transform: uppercase;
-        }
-
-        .totals {
-            margin-left: auto;
-        }
-
-        .totals td {
-            padding: 4px 6px;
-            border-bottom: 1px solid #c6d0d9;
-        }
-
-        .totals td:last-child {
-            width: 42%;
-            text-align: right;
-            white-space: nowrap;
-        }
-
-        .totals .grand td {
-            border: 1px solid #174f79;
-            color: #ffffff;
-            background: #245f8b;
-            font-size: 13px;
-            font-weight: 800;
-        }
-
-        .footer {
-            margin-top: 12px;
-            padding-top: 7px;
-            border-top: 1px solid #9eacba;
-            page-break-inside: avoid;
-        }
-
-        .footer td {
-            width: 50%;
-            vertical-align: bottom;
-        }
-
-        .signature {
-            padding-top: 30px;
-            text-align: right;
-        }
-
-        .muted {
-            color: #667585;
-        }
-
-        body.screen-mode.a5 .paper {
-            width: 148mm;
-            min-height: 210mm;
-            margin-right: auto;
-            margin-left: auto;
-        }
-
-        body.screen-mode.a4 .paper {
-            width: 210mm;
-            min-height: 297mm;
-            margin-right: auto;
-            margin-left: auto;
-        }
-
-        body.a5 .document-title {
-            min-width: 145px;
-            font-size: 15px;
-        }
-
-        body.a5 .company-name {
-            font-size: 16px;
-        }
-
-        body.a5 .paper {
-            font-size: 9px;
-        }
-
-        body.a5 .items th,
-        body.a5 .product-meta {
-            font-size: 8px;
-        }
-
-        body.a5 .box {
-            min-height: 80px;
-        }
-
-        body.a5 .items th,
-        body.a5 .items td {
-            padding: 3px 2px;
-        }
-
-        body.a5 .note-box {
-            padding: 4px 5px;
-        }
-
-        @media print {
-            body {
-                background: #ffffff;
-            }
-
-            .toolbar {
-                display: none !important;
-            }
-
-            body.screen-mode .paper {
-                width: auto !important;
-                min-height: 0 !important;
-                max-width: none !important;
-                margin: 0 !important;
-                padding: 0 !important;
-                border: 0 !important;
-                box-shadow: none !important;
-            }
-        }
-
-        @media screen and (max-width: 680px) {
-            .paper {
-                width: calc(100vw - 16px) !important;
-                min-height: auto !important;
-                max-width: calc(100vw - 16px) !important;
-                margin-top: 8px;
-                margin-right: auto !important;
-                margin-left: auto !important;
-                padding: 5mm;
-            }
-
-            .document-title {
-                min-width: 135px;
-                font-size: 14px;
-            }
-        }
-    </style>
-</head>
-
-<body class="{{ $paper }} {{ $pdfMode ? 'pdf-mode' : 'screen-mode' }}">
-    @unless ($pdfMode)
-    <div class="toolbar">
-        <a href="{{ route('quotations.show', $quotation) }}">
-            Back
-        </a>
-
-        <button
-            type="button"
-            class="paper-button {{ $paper === 'a4' ? 'active' : '' }}"
-            data-paper="a4">
-            A4
-        </button>
-
-        <button
-            type="button"
-            class="paper-button {{ $paper === 'a5' ? 'active' : '' }}"
-            data-paper="a5">
-            A5
-        </button>
-
-        <button
-            type="button"
-            class="primary"
-            onclick="window.print()">
-            Print
-        </button>
-
-        <a
-            id="pdf-link"
-            href="{{ route('quotations.pdf', ['quotation' => $quotation, 'paper' => $paper]) }}">
-            Download PDF
-        </a>
-    </div>
-    @endunless
-
-    <main class="paper">
-        <table class="top-table">
-            <tr>
-                <td>
-                    <div class="brand-line"></div>
-                    <h1 class="company-name">
-                        {{ $company->company_name ?? 'Company' }}
-                    </h1>
-
-                    <div class="company-lines">
-                        {{ $store->store_name ?? '' }}
-                        @if ($store?->address)
-                        <br>{{ $store->address }}
-                        @elseif ($company?->address)
-                        <br>{{ $company->address }}
-                        @endif
-
-                        @if ($store?->city || $store?->pincode)
-                        <br>
-                        {{ collect([$store->city, $store->state, $store->pincode])->filter()->join(', ') }}
-                        @endif
-
-                        @if ($company?->gst_number)
-                        <br>GSTIN: {{ $company->gst_number }}
-                        @endif
-
-                        @if ($store?->phone || $company?->phone)
-                        <br>Phone: {{ $store->phone ?? $company->phone }}
-                        @endif
-                    </div>
-                </td>
-
-                <td class="document-side">
-                    <div class="document-title">{{ $title }}</div>
-                    <div class="document-number">
-                        {{ $quotation->quotation_no }}
-                    </div>
-                    <br>
-                    <span class="status">{{ $quotation->status }}</span>
-                </td>
-            </tr>
-        </table>
-
-        <div class="rule"></div>
-
-        <table class="detail-table">
-            <tr>
-                <td>
-                    <div class="box">
-                        <div class="box-title">Customer Details</div>
-                        <div class="box-body">
-                            <div class="primary-text">
-                                {{ $customer->customer_name ?? 'Walk-in Customer' }}
-                            </div>
-
-                            @if ($customer?->customer_code)
-                            <div>Code: {{ $customer->customer_code }}</div>
-                            @endif
-
-                            @if ($customer?->billing_address)
-                            <div>{{ $customer->billing_address }}</div>
-                            @endif
-
-                            @if ($customer?->city || $customer?->state || $customer?->pincode)
-                            <div>
-                                {{ collect([
-                                    $customer->city,
-                                    $customer->state,
-                                    $customer->pincode,
-                                ])->filter()->join(', ') }}
-                            </div>
-                            @endif
-
-                            @if ($customer?->mobile)
-                            <div>Mobile: {{ $customer->mobile }}</div>
-                            @endif
-
-                            @if ($customer?->gst_number)
-                            <div>GSTIN: {{ $customer->gst_number }}</div>
-                            @endif
-
-                            @if ($customer?->email)
-                            <div>Email: {{ $customer->email }}</div>
-                            @endif
-                        </div>
-                    </div>
-                </td>
-
-                <td>
-                    <div class="box">
-                        <div class="box-title">Document Details</div>
-                        <div class="box-body">
-                            <div class="meta-row">
-                                <span>Number</span>
-                                <strong>{{ $quotation->quotation_no }}</strong>
-                            </div>
-                            <div class="meta-row">
-                                <span>Date</span>
-                                <strong>{{ $quotation->quotation_date?->format('d-m-Y') }}</strong>
-                            </div>
-                            <div class="meta-row">
-                                <span>Valid Until</span>
-                                <strong>
-                                    {{ $quotation->valid_until?->format('d-m-Y') ?? '—' }}
-                                </strong>
-                            </div>
-                            <div class="meta-row">
-                                <span>Billing</span>
-                                <strong>{{ $isGstBill ? 'GST' : 'Without GST' }}</strong>
-                            </div>
-                            @if ($mechanic)
-                            <div class="meta-row">
-                                <span>Mechanic</span>
-                                <strong>{{ $mechanic->mechanic_name }}</strong>
-                            </div>
-                            @endif
-                            <div class="meta-row">
-                                <span>Prepared By</span>
-                                <strong>{{ $quotation->creator->name ?? 'System' }}</strong>
-                            </div>
-                        </div>
-                    </div>
-                </td>
-            </tr>
-        </table>
-
-        <table class="items">
-            <thead>
-                <tr>
-                    <th style="width: 4%" class="center">#</th>
-                    <th style="width: {{ $isGstBill ? '29%' : '36%' }}">Product</th>
-                    <th style="width: 8%" class="number">Qty</th>
-                    <th style="width: 8%" class="number">Free</th>
-                    <th style="width: 12%" class="number">Rate</th>
-                    <th style="width: 11%" class="number">Discount</th>
-                    @if ($isGstBill)
-                    <th style="width: 9%" class="number">GST</th>
-                    @endif
-                    <th style="width: 14%" class="number">Amount</th>
-                </tr>
-            </thead>
-
-            <tbody>
-                @foreach ($quotation->items as $item)
-                <tr>
-                    <td class="center">{{ $loop->iteration }}</td>
-                    <td>
-                        <div class="product-name">
-                            {{ $item->product->product_name ?? 'Product' }}
-                        </div>
-                        <div class="product-meta">
-                            {{ collect([
-                                    $item->product->product_code ?? null,
-                                    $item->product->part_number ?? null,
-                                    $item->product->hsn_code
-                                        ? 'HSN '.$item->product->hsn_code
-                                        : null,
-                                    $item->product->unit->unit_name ?? null,
-                                ])->filter()->join(' · ') }}
-                        </div>
-                    </td>
-                    <td class="number">{{ number_format((float) $item->quantity, 2) }}</td>
-                    <td class="number">{{ number_format((float) $item->free_quantity, 2) }}</td>
-                    <td class="number">{{ number_format((float) $item->sale_price, 2) }}</td>
-                    <td class="number">
-                        {{ number_format((float) $item->discount_amount, 2) }}
-                        @if ($item->discount_type === 'percentage' && (float) $item->discount_value > 0)
-                        <div class="product-meta">
-                            {{ number_format((float) $item->discount_value, 2) }}%
-                        </div>
-                        @endif
-                    </td>
-                    @if ($isGstBill)
-                    <td class="number">
-                        {{ number_format((float) $item->gst_amount, 2) }}
-                        <div class="product-meta">
-                            {{ number_format((float) $item->gst_percent, 2) }}%
-                        </div>
-                    </td>
-                    @endif
-                    <td class="number">{{ number_format((float) $item->line_total, 2) }}</td>
-                </tr>
-                @endforeach
-            </tbody>
-        </table>
-
-        <table class="summary-table">
-            <tr>
-                <td class="summary-left">
-                    <div class="note-box">
-                        <strong>Quantity Summary</strong>
-                        {{ number_format($quantityTotal, 2) }} billed
-                        @if ($freeQuantityTotal > 0)
-                        · {{ number_format($freeQuantityTotal, 2) }} free
-                        @endif
-                        · {{ $quotation->items->count() }} item(s)
-                    </div>
-
-                    @if ($quotation->terms_conditions)
-                    <div class="note-box">
-                        <strong>Terms &amp; Conditions</strong>
-                        {!! nl2br(e($quotation->terms_conditions)) !!}
-                    </div>
-                    @endif
-
-                    @if ($quotation->remarks)
-                    <div class="note-box">
-                        <strong>Remarks</strong>
-                        {!! nl2br(e($quotation->remarks)) !!}
-                    </div>
-                    @endif
-                </td>
-
-                <td>
-                    <table class="totals">
+$columnCount = $isGstBill ? 7 : 5;
+// PDF uses a conservative height estimate; browser printing measures actual content.
+$rowHeight = $items->sum(function ($item) use ($isA5) {
+$lines = max(1, (int) ceil(mb_strlen($item->product?->product_name ?? '') / ($isA5 ? 28 : 42)));
+$details = ($item->product?->part_number ? 1 : 0)
++ ((float) $item->free_quantity > 0 ? 1 : 0)
++ ((float) $item->discount_amount > 0 ? 1 : 0);
+return ($isA5 ? 3.3 : 4.2) * $lines + ($isA5 ? 2.5 : 3) * $details + 3;
+});
+$addressText = trim(($store?->address ?? '') . ' ' . ($store?->city ?? '') . ' ' . ($store?->state ?? '') . ' ' . ($store?->pincode ?? ''));
+$extraHeader = max(0, (int) ceil(mb_strlen($addressText) / ($isA5 ? 42 : 65)) - 1) * 4;
+$termsHeight = $quotation->terms_conditions ? 7 + ceil(mb_strlen($quotation->terms_conditions) / ($isA5 ? 82 : 120)) * 4 : 0;
+$pdfFrameTop = ($isA5 ? 31 : 33) + $extraHeader;
+$pdfFrameHeight = max(0, ($isA5 ? 196 : 283) - $pdfFrameTop - 28);
+$pdfFixedPage = $pdfMode && $rowHeight < ($isA5 ? 85 : 165)
+    && mb_strlen($quotation->terms_conditions ?? '') <= 200;
+        $fillHeight=max(0, ($isA5 ? 181 : 267) - ($isA5 ? 64 : 68) - $rowHeight - $extraHeader - $termsHeight);
+        $smallWords=['Zero','One','Two','Three','Four','Five','Six','Seven','Eight','Nine','Ten','Eleven','Twelve','Thirteen','Fourteen','Fifteen','Sixteen','Seventeen','Eighteen','Nineteen'];
+        $tensWords=['', '' , 'Twenty' ,'Thirty','Forty','Fifty','Sixty','Seventy','Eighty','Ninety'];
+        $integerWords=function ($number) use (&$integerWords, $smallWords, $tensWords) {
+        $number=(int) $number;
+        if ($number < 20) return $smallWords[$number];
+        if ($number < 100) return $tensWords[intdiv($number, 10)] . ($number % 10 ? ' ' . $smallWords[$number % 10] : '' );
+        foreach ([10000000=> 'Crore', 100000 => 'Lakh', 1000 => 'Thousand', 100 => 'Hundred'] as $divisor => $label) {
+        if ($number >= $divisor) return $integerWords(intdiv($number, $divisor)) . ' ' . $label . ($number % $divisor ? ' ' . $integerWords($number % $divisor) : '');
+        }
+        return '';
+        };
+        $totalPaise = (int) round(abs((float) $quotation->grand_total) * 100);
+        $amountWords = ((float) $quotation->grand_total < 0 ? 'Minus ' : '' ) . 'INR ' . $integerWords(intdiv($totalPaise, 100))
+            . ($totalPaise % 100 ? ' and ' . $integerWords($totalPaise % 100) . ' Paise' : '' ) . ' Only' ;
+            @endphp
+            <!doctype html>
+            <html lang="en">
+
+            <head>
+                <meta charset="UTF-8">
+                <meta name="viewport" content="width=device-width,initial-scale=1">
+                <title>{{ $title }} {{ $quotation->quotation_no }}</title>
+                @if ($isA5)
+                <style id="page-size-style">
+                    @page {
+                        size: A5 portrait;
+                        margin: 7mm;
+                    }
+                </style>
+                @else
+                <style id="page-size-style">
+                    @page {
+                        size: A4 portrait;
+                        margin: 7mm;
+                    }
+                </style>
+                @endif
+                <style>
+                    * {
+                        box-sizing: border-box;
+                    }
+
+                    body {
+                        margin: 0;
+                        color: #111;
+                        background: #e9eef4;
+                        font: 12px Arial, DejaVu Sans, sans-serif;
+                    }
+
+                    .toolbar {
+                        display: flex;
+                        flex-wrap: wrap;
+                        justify-content: center;
+                        gap: 7px;
+                        padding: 10px;
+                        background: white;
+                        border-bottom: 1px solid #c8d4e0;
+                    }
+
+                    .toolbar a,
+                    .toolbar button {
+                        display: inline-block;
+                        padding: 8px 13px;
+                        border: 1px solid #b8cbe0;
+                        border-radius: 5px;
+                        color: #23496f;
+                        background: #f3f7fd;
+                        text-decoration: none;
+                        cursor: pointer;
+                        font: 600 12px Arial, sans-serif;
+                    }
+
+                    .toolbar .primary {
+                        color: white;
+                        background: #225e96;
+                        border-color: #225e96;
+                    }
+
+                    .paper {
+                        width: 210mm;
+                        margin: 15px auto;
+                        padding: 7mm;
+                        background: white;
+                        box-shadow: 0 5px 22px #18385720;
+                    }
+
+                    body.a5 .paper {
+                        width: 148mm;
+                        padding: 5mm;
+                    }
+
+                    .document-title {
+                        text-align: center;
+                        font-size: 18px;
+                        margin: 0 0 9px;
+                        text-transform: uppercase;
+                        letter-spacing: .7px;
+                    }
+
+                    table {
+                        width: 100%;
+                        border-collapse: collapse;
+                        table-layout: fixed;
+                    }
+
+                    .top {
+                        border: 1px solid #666;
+                    }
+
+                    .top td {
+                        padding: 9px 11px;
+                        vertical-align: top;
+                    }
+
+                    .seller {
+                        width: 65%;
+                        border-right: 1px solid #777;
+                        line-height: 1.4;
+                    }
+
+                    .seller strong {
+                        display: block;
+                        font-size: 18px;
+                        text-transform: uppercase;
+                    }
+
+                    .meta {
+                        line-height: 1.7;
+                        font-size: 12px;
+                    }
+
+                    .meta strong {
+                        font-size: 14px;
+                    }
+
+                    .buyer {
+                        border: 1px solid #777;
+                        border-top: 0;
+                        padding: 7px 11px;
+                        font-size: 11px;
+                        line-height: 1.5;
+                    }
+
+                    .items {
+                        border: 1px solid #777;
+                        border-top: 0;
+                    }
+
+                    .items th {
+                        padding: 9px 6px;
+                        border: 1px solid #777;
+                        border-top: 0;
+                        font-size: 12px;
+                        text-align: left;
+                    }
+
+                    .items td {
+                        border-right: 1px solid #999;
+                        padding: 6px;
+                        vertical-align: top;
+                        line-height: 1.4;
+                    }
+
+                    .serial {
+                        width: 5%;
+                        text-align: center !important;
+                    }
+
+                    .qty {
+                        width: 14%;
+                        text-align: right !important;
+                    }
+
+                    .rate {
+                        width: 14%;
+                        text-align: right !important;
+                    }
+
+                    .amount {
+                        width: 18%;
+                        text-align: right !important;
+                    }
+
+                    .gst-rate {
+                        width: 8%;
+                        text-align: right !important;
+                    }
+
+                    .gst-amount {
+                        width: 12%;
+                        text-align: right !important;
+                    }
+
+                    .gst .qty {
+                        width: 10%;
+                    }
+
+                    .gst .rate {
+                        width: 12%;
+                    }
+
+                    .gst .amount {
+                        width: 16%;
+                    }
+
+                    .name {
+                        font-weight: 600;
+                        font-size: 12px;
+                    }
+
+                    .detail {
+                        font-size: 10px;
+                        color: #333;
+                        margin-top: 3px;
+                    }
+
+                    .items .subtotal td {
+                        border-top: 1px solid #888;
+                        font-weight: bold;
+                        padding-top: 8px;
+                    }
+
+                    .items .fill td {
+                        padding: 0;
+                        font-size: 0;
+                        line-height: 0;
+                    }
+
+                    .fill-block {
+                        display: block;
+                        margin: 0;
+                        padding: 0;
+                        font-size: 1px;
+                        line-height: 1px;
+                    }
+
+                    .items .grand td {
+                        border-top: 1px solid #666;
+                        border-bottom: 1px solid #666;
+                        padding: 10px 7px;
+                        font-size: 16px;
+                        font-weight: bold;
+                        vertical-align: middle;
+                    }
+
+                    .grand-label {
+                        text-align: center;
+                        font-style: italic;
+                    }
+
+                    .words {
+                        padding: 10px;
+                        border: 1px solid #777;
+                        border-top: 0;
+                        font-size: 13px;
+                        font-weight: 700;
+                    }
+
+                    .notes {
+                        border: 1px solid #777;
+                        border-top: 0;
+                        padding: 8px 10px;
+                        line-height: 1.5;
+                        font-size: 10px;
+                    }
+
+                    .footer {
+                        display: table;
+                        width: 100%;
+                        margin-top: 8px;
+                        font-size: 10px;
+                    }
+
+                    .footer span {
+                        display: table-cell;
+                    }
+
+                    .footer span:last-child {
+                        text-align: right;
+                    }
+
+                    body.a5 {
+                        font-size: 10px;
+                    }
+
+                    body.a5 .seller strong {
+                        font-size: 14px;
+                    }
+
+                    body.a5 .items th,
+                    body.a5 .name {
+                        font-size: 10px;
+                    }
+
+                    body.a5 .items td {
+                        padding: 5px;
+                    }
+
+                    body.a5 .detail {
+                        font-size: 8px;
+                    }
+
+                    body.a5 .items .grand td {
+                        font-size: 13px;
+                    }
+
+                    body.a5 .words {
+                        font-size: 11px;
+                    }
+
+                    body.a5 .meta {
+                        font-size: 10px;
+                    }
+
+                    body.a5 .meta strong {
+                        font-size: 11px;
+                    }
+
+                    body.pdf-mode {
+                        background: white;
+                    }
+
+                    body.pdf-mode .paper {
+                        width: 100%;
+                        margin: 0;
+                        padding: 0;
+                        box-shadow: none;
+                    }
+
+                    tr {
+                        page-break-inside: avoid;
+                    }
+
+                    thead {
+                        display: table-header-group;
+                    }
+
+                    @media print {
+                        body {
+                            background: white;
+                        }
+
+                        .toolbar {
+                            display: none;
+                        }
+
+                        body .paper,
+                        body.a5 .paper {
+                            width: 100%;
+                            margin: 0;
+                            padding: 0;
+                            box-shadow: none;
+                        }
+                    }
+
+                    @media screen and (max-width:600px) {
+                        .paper {
+                            margin: 10px 0;
+                        }
+                    }
+
+                    /* Dompdf: short quotations use a physical page frame, independent of table-row sizing. */
+                    body.pdf-fixed-page .document-title {
+                        margin-bottom: 6px;
+                    }
+
+                    body.pdf-fixed-page .top td {
+                        padding: 6px 8px;
+                    }
+
+                    body.pdf-fixed-page .seller strong {
+                        font-size: 15px;
+                    }
+
+                    body.pdf-fixed-page .meta {
+                        font-size: 10px;
+                        line-height: 1.5;
+                    }
+
+                    body.pdf-fixed-page .buyer {
+                        padding: 5px 8px;
+                    }
+
+                    body.pdf-fixed-page .items {
+                        position: relative;
+                        top: auto;
+                        left: auto;
+                        width: 100%;
+                        margin-top: 0;
+                        border: 1px solid #777;
+                        border-bottom: 0;
+                    }
+
+                    body.pdf-fixed-page .items th {
+                        border: 1px solid #777;
+                    }
+
+                    body.pdf-fixed-page .items tbody td {
+                        border: 0;
+                    }
+
+                    body.pdf-fixed-page .items .fill,
+                    body.pdf-fixed-page .items .grand,
+                    body.pdf-fixed-page #quotation-sheet>.words,
+                    body.pdf-fixed-page #quotation-sheet>.notes,
+                    body.pdf-fixed-page #quotation-sheet>.footer {
+                        display: none;
+                    }
+
+                    .pdf-rule-frame {
+                        position: fixed;
+                        left: 0;
+                        right: 0;
+                        border: 1px solid #777;
+                        overflow: hidden;
+                    }
+
+                    .pdf-rule {
+                        position: absolute;
+                        top: 0;
+                        width: 0;
+                        border-left: 1px solid #999;
+                    }
+
+                    body.pdf-fixed-page .pdf-page-bottom {
+                        display: none;
+                    }
+
+                    .pdf-page-bottom {
+                        position: fixed;
+                        bottom: 0;
+                        left: 0;
+                        right: 0;
+                        height: 28mm;
+                        border: 1px solid #777;
+                        background: white;
+                    }
+
+                    .pdf-page-bottom table {
+                        table-layout: fixed;
+                    }
+
+                    .pdf-page-bottom td {
+                        padding: 8px;
+                        font-size: 15px;
+                        border-bottom: 1px solid #777;
+                        font-weight: bold;
+                    }
+
+                    .pdf-page-bottom .bottom-label {
+                        text-align: center;
+                        font-style: italic;
+                    }
+
+                    .pdf-page-bottom .bottom-amount {
+                        width: 18%;
+                        text-align: right;
+                        border-left: 1px solid #777;
+                    }
+
+                    .pdf-page-bottom.gst .bottom-amount {
+                        width: 16%;
+                    }
+
+                    .pdf-page-bottom .bottom-words {
+                        font-size: 11px;
+                        font-weight: bold;
+                        padding: 8px;
+                    }
+
+                    .pdf-page-bottom .bottom-note {
+                        padding: 0 8px;
+                        font-size: 8px;
+                    }
+
+                    body.a5.pdf-fixed-page .items {
+                        top: auto;
+                    }
+
+                    body.a5 .pdf-page-bottom td {
+                        font-size: 12px;
+                        padding: 6px;
+                    }
+
+                    body.a5 .pdf-page-bottom .bottom-words {
+                        font-size: 9px;
+                        padding: 6px;
+                    }
+                </style>
+            </head>
+
+            <body class="{{ $paper }} {{ $pdfMode ? 'pdf-mode' : 'screen-mode' }} {{ $pdfFixedPage ? 'pdf-fixed-page' : '' }}" data-paper="{{ $paper }}">
+                @unless ($pdfMode)
+                <div class="toolbar">
+                    <a href="{{ route('quotations.show', $quotation) }}">Back</a>
+                    <button type="button" data-paper="a4">A4</button><button type="button" data-paper="a5">A5</button>
+                    <button type="button" class="primary" id="print-button">Print</button>
+                    <a id="pdf-link" href="{{ route('quotations.pdf', ['quotation' => $quotation, 'paper' => $paper]) }}">PDF</a>
+                </div>
+                @endunless
+                @if ($pdfFixedPage)
+                <div id="pdf-bottom-total" class="pdf-page-bottom {{ $isGstBill ? 'gst' : '' }}">
+                    <table>
                         <tr>
-                            <td>Sub Total</td>
-                            <td>{{ number_format((float) $quotation->sub_total, 2) }}</td>
-                        </tr>
-                        @if ($isGstBill)
-                        <tr>
-                            <td>GST Total</td>
-                            <td>{{ number_format((float) $quotation->gst_total, 2) }}</td>
-                        </tr>
-                        @endif
-                        @if ((float) $quotation->final_discount > 0)
-                        <tr>
-                            <td>Final Discount</td>
-                            <td>-{{ number_format((float) $quotation->final_discount, 2) }}</td>
-                        </tr>
-                        @endif
-                        @if ((float) $quotation->round_off !== 0.0)
-                        <tr>
-                            <td>Round Off</td>
-                            <td>{{ number_format((float) $quotation->round_off, 2) }}</td>
-                        </tr>
-                        @endif
-                        <tr class="grand">
-                            <td>Grand Total</td>
-                            <td>₹ {{ number_format((float) $quotation->grand_total, 2) }}</td>
+                            <td class="bottom-label">Grand Total</td>
+                            <td class="bottom-amount">{{ number_format((float) $quotation->grand_total, 2) }}</td>
                         </tr>
                     </table>
-                </td>
-            </tr>
-        </table>
+                    <div class="bottom-words">{{ $amountWords }}</div>
+                    <div class="bottom-note">{{ $quotation->terms_conditions }}</div>
+                </div>
+                @endif
+                <main class="paper">
+                    <div id="quotation-sheet">
+                        <h1 class="document-title">{{ $title }}</h1>
+                        <table class="top">
+                            <tr>
+                                <td class="seller"><strong>{{ $company?->company_name ?? 'Company' }}</strong>
+                                    @if ($store?->store_name)<div>{{ $store->store_name }}</div>
+                                    @endif
+                                    <div>{{ $store?->address }} {{ $store?->city }} {{ $store?->state }} {{ $store?->pincode }}</div>
+                                    @if ($store?->phone ?? $company?->phone)<div>Phone: {{ $store?->phone ?? $company?->phone }}</div>
+                                    @endif
+                                    @if ($isGstBill && $company?->gst_number)<div>GSTIN: {{ $company->gst_number }}</div>
+                                    @endif
+                                </td>
+                                <td class="meta">No.: <strong>{{ $quotation->quotation_no }}</strong><br>Date: {{ optional($quotation->quotation_date)->format('d-m-Y') }}
+                                    @if ($quotation->valid_until)<br>Valid until: {{ optional($quotation->valid_until)->format('d-m-Y') }}
+                                    @endif
+                                    @if ($isGstBill)<br>GST Quotation
+                                    @endif
+                                </td>
+                            </tr>
+                        </table>
+                        @if ($customer)<div class="buyer"><strong>To: {{ $customer->customer_name }}</strong>
+                            @if ($customer->mobile) · {{ $customer->mobile }}
+                            @endif
+                            @if ($isGstBill && $customer->gst_number) · GSTIN: {{ $customer->gst_number }}
+                            @endif
+                        </div>
+                        @endif
+                        <table class="items {{ $isGstBill ? 'gst' : '' }}">
+                            <thead>
+                                <tr id="quotation-column-headings">
+                                    <th class="serial">Sl.</th>
+                                    <th>Name of Item</th>
+                                    <th class="qty">Quantity</th>
+                                    <th class="rate">{{ $isGstBill ? 'Rate excl.' : 'Rate' }}</th>
+                                    @if ($isGstBill)<th class="gst-rate">GST %</th>
+                                    <th class="gst-amount">GST Amt</th>
+                                    @endif
+                                    <th class="amount">Amount</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach ($items as $item)
+                                <tr>
+                                    <td class="serial">{{ $loop->iteration }}</td>
+                                    <td>
+                                        <div class="name">{{ $item->product?->product_name ?? 'Product' }}</div>
+                                        @if ($item->product?->part_number)<div class="detail">Part: {{ $item->product->part_number }}</div>
+                                        @endif
+                                        @if ((float) $item->free_quantity > 0)<div class="detail">Free: {{ number_format((float) $item->free_quantity, 2) }}</div>
+                                        @endif
+                                        @if ((float) $item->discount_amount > 0)<div class="detail">Discount: {{ number_format((float) $item->discount_amount, 2) }}</div>
+                                        @endif
+                                    </td>
+                                    <td class="qty">{{ number_format((float) $item->quantity, 2) }} {{ $item->product?->unit?->short_name ?? '' }}</td>
+                                    <td class="rate">{{ number_format((float) $item->sale_price, 2) }}</td>
+                                    @if ($isGstBill)<td class="gst-rate">{{ number_format((float) $item->gst_percent, 2) }}</td>
+                                    <td class="gst-amount">{{ number_format((float) $item->gst_amount, 2) }}</td>
+                                    @endif
+                                    <td class="amount">{{ number_format((float) $item->line_total, 2) }}</td>
+                                </tr>
+                                @endforeach
+                                <tr class="fill" aria-hidden="true">
+                                    @for ($column = 0; $column < $columnCount; $column++)
+                                        <td>
+                                        <div class="fill-block" @style(['height: ' . $fillHeight . ' mm'])>&nbsp;</div>
+                                        </td>
+                                        @endfor
+                                </tr>
+                                <tr class="grand">
+                                    <td colspan="{{ $columnCount - 1 }}" class="grand-label">Grand Total
+                                        @if ((float) $quotation->final_discount != 0 || (float) $quotation->round_off != 0)<div class="detail">Discount {{ number_format((float) $quotation->final_discount, 2) }} · Round off {{ number_format((float) $quotation->round_off, 2) }}</div>
+                                        @endif
+                                    </td>
+                                    <td class="amount">{{ number_format((float) $quotation->grand_total, 2) }}</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        <div class="words">{{ $amountWords }}</div>
+                        @if ($quotation->terms_conditions)<div class="notes"><strong>Terms:</strong> {{ $quotation->terms_conditions }}</div>
+                        @endif
+                        <div class="footer"><span>This is a quotation, not a tax invoice.</span><span>For {{ $company?->company_name }}</span></div>
+                    </div>
+                </main>
+                @unless ($pdfMode)
+                <script>
+                    (() => {
+                        const sheet = document.getElementById('quotation-sheet');
+                        const cells = [...document.querySelectorAll('.fill-block')];
+                        const pageStyle = document.getElementById('page-size-style');
+                        const fit = () => {
+                            cells.forEach(cell => cell.style.height = '0px');
+                            const probe = document.createElement('div');
+                            probe.style.cssText = 'position:absolute;visibility:hidden;height:100mm;width:1px';
+                            document.body.append(probe);
+                            const pixels = probe.getBoundingClientRect().height / 100;
+                            probe.remove();
+                            // A4: 297 - 14 mm margins - 2 mm safety. A5: 210 - 14 - 2.
+                            const target = (document.body.classList.contains('a5') ? 194 : 281) * pixels;
+                            const blank = Math.max(0, target - sheet.getBoundingClientRect().height);
+                            cells.forEach(cell => cell.style.height = blank + 'px');
+                        };
+                        const select = paper => {
+                            document.body.classList.remove('a4', 'a5');
+                            document.body.classList.add(paper);
+                            document.body.dataset.paper = paper;
+                            pageStyle.textContent = '@page { size:' + paper.toUpperCase() + ' portrait; margin:7mm; }';
+                            const link = document.getElementById('pdf-link');
+                            const url = new URL(link.href);
+                            url.searchParams.set('paper', paper);
+                            link.href = url.href;
+                            fit();
+                        };
+                        document.querySelectorAll('button[data-paper]').forEach(button => button.addEventListener('click', () => select(button.dataset.paper)));
+                        document.getElementById('print-button').addEventListener('click', () => {
+                            fit();
+                            window.print();
+                        });
+                        window.addEventListener('beforeprint', fit);
+                        window.addEventListener('resize', fit);
+                        window.addEventListener('load', fit, {
+                            once: true
+                        });
+                        if (document.fonts?.ready) document.fonts.ready.then(fit);
+                        select(document.body.dataset.paper);
+                    })();
+                </script>
+                @endunless
+            </body>
 
-        <table class="footer">
-            <tr>
-                <td class="muted">
-                    Generated by {{ $quotation->creator->name ?? 'System' }}
-                    <br>
-                    This {{ strtolower($title) }} is not a payment receipt.
-                </td>
-                <td class="signature">
-                    <strong>For {{ $company->company_name ?? 'Company' }}</strong>
-                    <br>Authorised Signatory
-                </td>
-            </tr>
-        </table>
-    </main>
-
-    @unless ($pdfMode)
-    <script>
-        (() => {
-            const style = document.getElementById("page-size-style");
-            const pdfLink = document.getElementById("pdf-link");
-            const buttons = document.querySelectorAll(".paper-button");
-
-            const selectPaper = (paper) => {
-                document.body.classList.remove("a4", "a5");
-                document.body.classList.add(paper);
-                style.textContent = `@page { size: ${paper.toUpperCase()} portrait; margin: 7mm; }`;
-
-                buttons.forEach((button) => {
-                    button.classList.toggle(
-                        "active",
-                        button.dataset.paper === paper,
-                    );
-                });
-
-                const url = new URL(pdfLink.href);
-                url.searchParams.set("paper", paper);
-                pdfLink.href = url.toString();
-            };
-
-            buttons.forEach((button) => {
-                button.addEventListener("click", () => {
-                    selectPaper(button.dataset.paper);
-                });
-            });
-        })();
-    </script>
-    @endunless
-</body>
-
-</html>
+            </html>

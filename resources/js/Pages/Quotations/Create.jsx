@@ -1,5 +1,7 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 
+import { createPortal } from "react-dom";
+
 import axios from "axios";
 
 import { Head, Link, useForm, usePage } from "@inertiajs/react";
@@ -22,6 +24,8 @@ export default function Create({
     const [customerResults, setCustomerResults] = useState([]);
     const [customerOpen, setCustomerOpen] = useState(false);
     const [customerLoading, setCustomerLoading] = useState(false);
+    const [activeCustomer, setActiveCustomer] = useState(0);
+    const [activeMechanic, setActiveMechanic] = useState(0);
     const [customerError, setCustomerError] = useState("");
 
     const [mechanic, setMechanic] = useState(quotation?.mechanic ?? null);
@@ -42,6 +46,49 @@ export default function Create({
     const [quickError, setQuickError] = useState("");
     const [quickCustomer, setQuickCustomer] = useState(emptyCustomer());
     const [quickMechanic, setQuickMechanic] = useState(emptyMechanic());
+
+    const [shortcutsOpen, setShortcutsOpen] = useState(false);
+    const [activeProductRow, setActiveProductRow] = useState(null);
+    const lookupAnchor = useRef(null);
+    const queuedProductEnter = useRef(false);
+    const [activeProduct, setActiveProduct] = useState(0);
+    const [saving, setSaving] = useState(false);
+    const saveLock = useRef(false);
+    const submitRef = useRef(null);
+    const tableRef = useRef(null);
+    const printRequested = useRef(false);
+    const [oneQuantity, setOneQuantity] = useState(true);
+    useEffect(() => {
+        const onKey = (event) => {
+            if (!["F2", "F9", "F10"].includes(event.key)) return;
+            event.preventDefault();
+            if (event.repeat || saveLock.current || document.querySelector(".rr-quote-modal-backdrop")) return;
+            if (event.key === "F2") {
+                const input = productInput.current;
+                const row = input?.closest("tr");
+                row?.scrollIntoView({ behavior: "smooth", block: "center", inline: "nearest" });
+                input?.focus({ preventScroll: true });
+                input?.select();
+                return;
+            }
+            tableRef.current?.querySelector("input:not(:disabled)")?.focus();
+            printRequested.current = event.key === "F10";
+            submitRef.current?.({ preventDefault() { } });
+        };
+        document.addEventListener("keydown", onKey);
+        return () => document.removeEventListener("keydown", onKey);
+    }, []);
+    const moveCell = (event) => {
+        if (event.target.type === "search" || !["INPUT", "SELECT"].includes(event.target.tagName)) return;
+        if (!["Enter", "Escape", "ArrowLeft", "ArrowRight"].includes(event.key)) return;
+        if (event.ctrlKey || event.metaKey || event.altKey) return;
+        event.preventDefault();
+        const controls = Array.from(tableRef.current.querySelectorAll("tbody input:not(:disabled), tbody select:not(:disabled)")).filter((input) => input.type !== "search");
+        const direction = event.key === "ArrowLeft" || (event.key === "Enter" && event.shiftKey) ? -1 : 1;
+        const next = controls[controls.indexOf(event.target) + direction];
+        if (next) { next.focus(); next.select?.(); }
+        else productInput.current?.focus();
+    };
 
     const customerTimer = useRef(null);
     const mechanicTimer = useRef(null);
@@ -97,6 +144,7 @@ export default function Create({
 
     useDebouncedSearch({
         value: customerSearch,
+        allowEmpty: true,
         selected: customer,
         timer: customerTimer,
         endpoint: "/quotations/customers/search",
@@ -135,7 +183,7 @@ export default function Create({
         const closeDropdowns = (event) => {
             if (!customerBox.current?.contains(event.target)) setCustomerOpen(false);
             if (!mechanicBox.current?.contains(event.target)) setMechanicOpen(false);
-            if (!productBox.current?.contains(event.target)) setProductOpen(false);
+            if (!productBox.current?.contains(event.target) && !event.target.closest(".rr-quote-results.product, .rr-quote-row-search")) setProductOpen(false);
         };
 
         document.addEventListener("mousedown", closeDropdowns);
@@ -226,29 +274,34 @@ export default function Create({
     };
 
     const addProduct = (product) => {
-        if (rows.some((row) => Number(row.product.id) === Number(product.id))) {
-            setProductError("This product is already added.");
+        if (activeProductRow !== null && rows.some((row, index) => index !== activeProductRow && Number(row.product.id) === Number(product.id))) {
+            setProductError("This product is already in another row. Change its quantity there.");
             return;
         }
-
-        setRows((previous) => [
-            ...previous,
-            {
-                product,
-                quantity: "1",
-                free_quantity: "0",
-                sale_price: String(productPrice(product)),
-                discount_type: "fixed",
-                discount_value: "0",
-                gst_percent: String(productGst(product)),
-            },
-        ]);
+        const chosenRow = activeProductRow;
+        setRows((previous) => {
+            const replacement = { product, quantity: "1", free_quantity: "0", sale_price: String(productPrice(product)), discount_type: "fixed", discount_value: "0", gst_percent: String(effectiveGst(productGst(product))) };
+            if (chosenRow !== null) return previous.map((row, index) => index === chosenRow ? replacement : row);
+            const existing = previous.findIndex((row) => Number(row.product.id) === Number(product.id));
+            if (existing >= 0) return previous.map((row, index) => index === existing ? { ...row, quantity: String(numberValue(row.quantity) + 1) } : row);
+            return [...previous, { product, quantity: "1", free_quantity: "0", sale_price: String(productPrice(product)), discount_type: "fixed", discount_value: "0", gst_percent: String(effectiveGst(productGst(product))) }];
+        });
+        setActiveProductRow(null);
         setProductSearch("");
         setProductResults([]);
         setProductOpen(false);
         setProductError("");
-        window.setTimeout(() => productInput.current?.focus(), 40);
+        window.setTimeout(() => {
+            if (oneQuantity) productInput.current?.focus();
+            else { const targetRows = tableRef.current?.querySelectorAll("tbody tr[data-product]"); const target = chosenRow !== null ? targetRows?.[chosenRow] : targetRows?.[targetRows.length - 1]; target?.querySelector("input[type='number']")?.focus(); }
+        }, 0);
     };
+
+    useEffect(() => {
+        if (!queuedProductEnter.current || productLoading) return;
+        queuedProductEnter.current = false;
+        if (productResults.length === 1) addProduct(productResults[0]);
+    }, [productResults, productLoading]);
 
     const updateRow = (index, field, value) => {
         setRows((previous) => {
@@ -304,8 +357,10 @@ export default function Create({
 
     const submit = (event, status = data.status) => {
         event.preventDefault();
+        if (saveLock.current || processing) return;
 
         if (!customer) {
+            printRequested.current = false;
             setCustomerError("Select a customer before saving.");
             customerBox.current?.scrollIntoView({ behavior: "smooth", block: "center" });
             window.setTimeout(
@@ -316,6 +371,7 @@ export default function Create({
         }
 
         if (data.sale_source === "mechanic" && !mechanic) {
+            printRequested.current = false;
             mechanicBox.current?.scrollIntoView({ behavior: "smooth", block: "center" });
             window.setTimeout(
                 () => mechanicBox.current?.querySelector("input")?.focus(),
@@ -324,6 +380,7 @@ export default function Create({
             return;
         }
         if (!rows.length) {
+            printRequested.current = false;
             setProductError("Add at least one product.");
             productInput.current?.focus();
             return;
@@ -332,15 +389,47 @@ export default function Create({
         transform((payload) => ({
             ...payload,
             status,
+            product_id: rows.map((row) => row.product.id),
+            qty: rows.map((row) => row.quantity),
+            free_qty: rows.map((row) => row.free_quantity),
+            price_includes_gst: true,
+            sale_price: rows.map((row) => row.sale_price),
+            discount_type: rows.map((row) => row.discount_type),
+            discount_value: rows.map((row) => row.discount_value),
+            gst_percent: rows.map((row) => data.billing_type === "gst" ? effectiveGst(row.gst_percent) : 0),
         }));
 
-        if (editing) {
-            put(`/quotations/${quotation.id}`, { preserveScroll: true });
-            return;
+        const wantsPrint = printRequested.current;
+        printRequested.current = false;
+        const popup = wantsPrint ? window.open("", "_blank") : null;
+        if (popup) {
+            popup.document.write('<!doctype html><html><head><title>Preparing document</title><style>@keyframes spin{to{transform:rotate(360deg)}}body{margin:0;display:grid;place-items:center;min-height:100vh;background:#f0f5fc;color:#25486d;font-family:Segoe UI,Arial}.spinner{width:42px;height:42px;border:4px solid #dae7f7;border-top-color:#2868ae;border-radius:50%;animation:spin .8s linear infinite;margin:0 auto}</style></head><body><div style="text-align:center"><div class="spinner"></div><h3>Saving your document…</h3><p>Your print preview will open when ready.</p></div></body></html>'); popup.document.close();
         }
-
-        post("/quotations", { preserveScroll: true });
+        saveLock.current = true; setSaving(true);
+        const options = {
+            preserveScroll: true,
+            onSuccess: async (page) => {
+                if (!wantsPrint) return;
+                if (!popup) { window.alert("Document saved. Allow popups and print from the saved document."); return; }
+                const match = new URL(page.url, window.location.origin).pathname.match(/\/quotations\/(\d+)\/?$/);
+                const id = quotation?.id ?? page.props.quotation?.id ?? match?.[1];
+                if (!id) { popup.document.body.textContent = "Document saved. Open it from the register and select Print."; return; }
+                try {
+                    const url = new URL(`/quotations/${id}/print?paper=a4`, window.location.origin);
+                    const response = await fetch(url, { credentials: "same-origin", headers: { Accept: "text/html" } });
+                    if (!response.ok || new URL(response.url).pathname !== url.pathname) throw new Error("Print unavailable");
+                    const html = await response.text(); if (popup.closed) return;
+                    popup.history.replaceState(null, "", url.href); popup.document.open(); popup.document.write(html); popup.document.close();
+                } catch { if (!popup.closed) popup.document.body.textContent = "Document saved. Print could not load. Open the saved document and try Print again; do not save another copy."; }
+            },
+            onError: () => { if (popup && !popup.closed) popup.close(); },
+            onFinish: () => { saveLock.current = false; setSaving(false); },
+        };
+        if (editing) put(`/quotations/${quotation.id}`, options);
+        else post("/quotations", options);
     };
+
+    submitRef.current = (event) => submit(event, editing ? data.status : "Pending");
 
     const documentTitle =
         data.document_type === "proforma_invoice"
@@ -353,6 +442,7 @@ export default function Create({
         <>
             <Head title={title} />
 
+            {(saving || processing) && typeof document !== "undefined" && createPortal(<div className="rr-quote-save-overlay" role="status" aria-live="polite"><div><span className="rr-quote-save-spinner" /><strong>{editing ? "Updating document…" : "Saving document…"}</strong><p>Please wait while your quotation is saved.</p></div></div>, document.body)}
             <div className="rr-quote-page rr-quote-create-page">
                 <MasterNavigation
                     active="quotations"
@@ -364,7 +454,18 @@ export default function Create({
                     }
                 />
 
-                <form ref={formRef} onSubmit={(event) => submit(event)}>
+                <form ref={formRef} onSubmit={(event) => submit(event)} onKeyDown={(event) => {
+                    if (event.defaultPrevented || event.key !== "Enter" || event.target.tagName === "BUTTON" || event.target.tagName === "A") return;
+                    if (event.target.type === "search" || event.target.type === "checkbox") return;
+                    if (event.target.tagName === "TEXTAREA" && event.shiftKey) return;
+                    event.preventDefault();
+                    const controls = Array.from(formRef.current.querySelectorAll("input:not(:disabled), select:not(:disabled), textarea:not(:disabled), button.save:not(:disabled)"))
+                        .filter((element) => element.offsetParent !== null && element.type !== "checkbox" && element.type !== "hidden");
+                    const position = controls.indexOf(event.target);
+                    let next = controls[position + (event.shiftKey ? -1 : 1)];
+                    if (!next || next.matches("button.save")) next = formRef.current.querySelector(".rr-quote-form-actions button.save") || formRef.current.querySelector("button.save");
+                    next?.focus(); next?.select?.();
+                }}>
                     <header className="rr-quote-header">
                         <div className="rr-quote-header-main">
                             <Link href={backUrl} className="rr-quote-back">
@@ -415,8 +516,11 @@ export default function Create({
                                         : "Save & Submit"}
                             </button>
                         </div>
+                        <button type="button" className="rr-quote-btn print" disabled={processing || saving} onClick={(event) => { printRequested.current = true; submit(event, editing ? data.status : "Pending"); }}><i className="bi bi-printer"></i> Save & Print <kbd>F10</kbd></button>
                     </header>
 
+                    <section className="rr-quote-shortcuts"><button type="button" onClick={() => setShortcutsOpen((value) => !value)} aria-expanded={shortcutsOpen} aria-controls="quotation-shortcut-notes"><i className="bi bi-keyboard"></i> Billing shortcuts <span className={`rr-quote-shortcut-switch ${shortcutsOpen ? "on" : ""}`}><i className={`bi ${shortcutsOpen ? "bi-toggle-on" : "bi-toggle-off"}`}></i>{shortcutsOpen ? "On" : "Off"}</span></button>{shortcutsOpen && <div id="quotation-shortcut-notes"><span><kbd>F2</kbd> Product search</span><span><kbd className="purple">Enter / Esc / →</kbd> Next field</span><span><kbd className="purple">← / Shift+Enter</kbd> Previous field</span><span><kbd className="green">F9</kbd> Save</span><span><kbd className="orange">F10</kbd> Save & print</span></div>}</section>
+                    <label className="rr-quote-fast-mode"><input type="checkbox" checked={oneQuantity} onChange={(event) => setOneQuantity(event.target.checked)} /> Fast billing: quantity 1, return to product search</label>
                     <div className="rr-quote-create-grid">
                         <section className="rr-quote-window rr-quote-party-window">
                             <WindowTitle icon="bi-person" title="Customer" />
@@ -437,16 +541,23 @@ export default function Create({
                                             placeholder="Search customer name, mobile or code..."
                                             loading={customerLoading}
                                             onFocus={() => setCustomerOpen(true)}
+                                            onKeyDown={(event) => {
+                                                if (["ArrowDown", "ArrowUp"].includes(event.key)) { event.preventDefault(); setCustomerOpen(true); setActiveCustomer((value) => Math.max(0, Math.min(customerResults.length - 1, value + (event.key === "ArrowDown" ? 1 : -1)))); }
+                                                if (event.key === "Enter") { event.preventDefault(); if (!customerLoading && customerResults[activeCustomer]) selectCustomer(customerResults[activeCustomer]); }
+                                                if (event.key === "Escape") { event.preventDefault(); setCustomerOpen(false); }
+                                            }}
                                             onChange={(value) => {
+                                                setActiveCustomer(0); setCustomerResults([]); setCustomerLoading(true);
                                                 setCustomerSearch(value);
                                                 setCustomerOpen(true);
                                             }}
                                         />
-                                        {customerOpen && customerSearch.trim() && (
+                                        {customerOpen && (
                                             <LookupResults
+                                                activeIndex={activeCustomer}
                                                 results={customerResults}
                                                 loading={customerLoading}
-                                                minimumReached={customerSearch.trim().length >= 2}
+                                                minimumReached={customerSearch.trim().length === 0 || customerSearch.trim().length >= 2}
                                                 render={(item) => ({
                                                     title: item.customer_name,
                                                     meta: [item.customer_code, item.mobile]
@@ -502,7 +613,7 @@ export default function Create({
                                 </Field>
                                 <Field label="Document Date" error={errors.quotation_date}>
                                     <input
-                                        type="date"
+                                        type="date" onClick={(event) => { try { event.currentTarget.showPicker?.(); } catch { } }}
                                         value={data.quotation_date}
                                         onChange={(event) =>
                                             setData("quotation_date", event.target.value)
@@ -511,7 +622,7 @@ export default function Create({
                                 </Field>
                                 <Field label="Valid Until" error={errors.valid_until}>
                                     <input
-                                        type="date"
+                                        type="date" onClick={(event) => { try { event.currentTarget.showPicker?.(); } catch { } }}
                                         min={data.quotation_date}
                                         value={data.valid_until}
                                         onChange={(event) =>
@@ -563,13 +674,20 @@ export default function Create({
                                                     placeholder="Search mechanic..."
                                                     loading={mechanicLoading}
                                                     onFocus={() => setMechanicOpen(true)}
+                                                    onKeyDown={(event) => {
+                                                        if (["ArrowDown", "ArrowUp"].includes(event.key)) { event.preventDefault(); setMechanicOpen(true); setActiveMechanic((value) => Math.max(0, Math.min(mechanicResults.length - 1, value + (event.key === "ArrowDown" ? 1 : -1)))); }
+                                                        if (event.key === "Enter") { event.preventDefault(); if (!mechanicLoading && mechanicResults[activeMechanic]) selectMechanic(mechanicResults[activeMechanic]); }
+                                                        if (event.key === "Escape") { event.preventDefault(); setMechanicOpen(false); }
+                                                    }}
                                                     onChange={(value) => {
+                                                        setActiveMechanic(0); setMechanicResults([]); setMechanicLoading(true);
                                                         setMechanicSearch(value);
                                                         setMechanicOpen(true);
                                                     }}
                                                 />
                                                 {mechanicOpen && mechanicSearch.trim() && (
                                                     <LookupResults
+                                                        activeIndex={activeMechanic}
                                                         results={mechanicResults}
                                                         loading={mechanicLoading}
                                                         minimumReached={mechanicSearch.trim().length >= 2}
@@ -669,50 +787,9 @@ export default function Create({
                             </div>
                             <span>{rows.length} product(s)</span>
                         </div>
-                        <div className="rr-quote-window-body">
-                            <div ref={productBox} className="rr-quote-product-search">
-                                <SearchInput
-                                    inputRef={productInput}
-                                    value={productSearch}
-                                    placeholder="Search product, code, barcode, model or part number..."
-                                    loading={productLoading}
-                                    onFocus={() => setProductOpen(true)}
-                                    onChange={(value) => {
-                                        setProductSearch(value);
-                                        setProductOpen(true);
-                                        setProductError("");
-                                    }}
-                                    onClear={() => {
-                                        setProductSearch("");
-                                        setProductResults([]);
-                                        setProductOpen(false);
-                                    }}
-                                />
-                                {productOpen && productSearch.trim() && (
-                                    <LookupResults
-                                        product
-                                        results={productResults}
-                                        loading={productLoading}
-                                        minimumReached={productSearch.trim().length >= 2}
-                                        render={(item) => ({
-                                            title: item.product_name,
-                                            meta: productMeta(item),
-                                            extra: productSearchExtra(item),
-                                        })}
-                                        onSelect={addProduct}
-                                        onCancel={() => {
-                                            setProductSearch("");
-                                            setProductResults([]);
-                                            setProductOpen(false);
-                                            productInput.current?.focus();
-                                        }}
-                                    />
-                                )}
-                            </div>
-                            <ErrorText message={productError || errors.product_id} />
-                        </div>
 
-                        <div className="rr-quote-table-wrap">
+
+                        <div ref={tableRef} className="rr-quote-table-wrap" onKeyDown={moveCell}>
                             <table className="rr-quote-items-table">
                                 <thead>
                                     <tr>
@@ -720,7 +797,8 @@ export default function Create({
                                         <th>Product / Model</th>
                                         <th className="number">Qty</th>
                                         <th className="number">Free</th>
-                                        <th className="number">Rate</th>
+                                        <th className="number">Net rate</th>
+                                        {data.billing_type === "gst" && <th className="number">Rate excl. GST</th>}
                                         <th>Discount</th>
                                         <th className="number">Taxable</th>
                                         {data.billing_type === "gst" && <th>GST</th>}
@@ -733,11 +811,12 @@ export default function Create({
                                         rows.map((row, index) => {
                                             const value = calculateRow(row, data.billing_type);
                                             return (
-                                                <tr key={row.product.id}>
+                                                <tr key={row.product.id} data-product={row.product.id}>
                                                     <td>{index + 1}</td>
                                                     <td>
-                                                        <strong>{row.product.product_name}</strong>
-                                                        <span>{productMeta(row.product)}</span>
+                                                        <div className="rr-quote-product-identity"><strong>{row.product.product_name}</strong>
+                                                            <div>{row.product.part_number && <span className="rr-quote-part-tag"><i className="bi bi-upc"></i>{row.product.part_number}</span>}{row.product.product_code && <span className="rr-quote-code-tag">{row.product.product_code}</span>}</div>
+                                                            {(row.product.model || row.product.model_name) && <small>{row.product.model || row.product.model_name}</small>}</div>
                                                     </td>
                                                     <NumberCell
                                                         value={row.quantity}
@@ -764,6 +843,7 @@ export default function Create({
                                                         }
                                                         error={errors[`sale_price.${index}`]}
                                                     />
+                                                    {data.billing_type === "gst" && <td className="number">{formatMoney(numberValue(row.sale_price) / (1 + effectiveGst(row.gst_percent) / 100))}</td>}
                                                     <td>
                                                         <div className="rr-quote-discount-input">
                                                             <select
@@ -841,16 +921,72 @@ export default function Create({
                                                 </tr>
                                             );
                                         })
-                                    ) : (
-                                        <tr>
-                                            <td
-                                                colSpan={data.billing_type === "gst" ? 10 : 9}
-                                                className="rr-quote-items-empty"
-                                            >
-                                                Search and select products to prepare the document.
-                                            </td>
-                                        </tr>
-                                    )}
+                                    ) : null}
+                                    <tr className="rr-quote-draft-row">
+                                        <td className="serial">{rows.length + 1}</td>
+                                        <td className="rr-quote-draft-product">
+                                            <div ref={productBox} className="rr-quote-product-search">
+                                                <SearchInput
+                                                    inputRef={productInput}
+                                                    onKeyDown={(event) => {
+                                                        if (["ArrowDown", "ArrowUp"].includes(event.key)) { event.preventDefault(); setProductOpen(true); setActiveProduct((value) => Math.max(0, Math.min(productResults.length - 1, value + (event.key === "ArrowDown" ? 1 : -1)))); }
+                                                        if (event.key === "Enter") { event.preventDefault(); if (!productSearch.trim()) { formRef.current?.querySelector(".rr-quote-bottom-grid textarea, .rr-quote-bottom-grid input")?.focus(); return; } if (productLoading) { queuedProductEnter.current = true; return; } if (productOpen && productResults[activeProduct]) addProduct(productResults[activeProduct]); }
+                                                        if (event.key === "Escape") { event.preventDefault(); setProductOpen(false); }
+                                                        if (event.key === "ArrowLeft" && !productSearch) { event.preventDefault(); const controls = tableRef.current?.querySelectorAll("tr[data-product] input, tr[data-product] select"); controls?.[controls.length - 1]?.focus(); }
+                                                    }}
+                                                    value={activeProductRow === null ? productSearch : ""}
+                                                    placeholder="Search product, code, barcode, model or part number..."
+                                                    loading={productLoading}
+                                                    onFocus={(event) => { lookupAnchor.current = productBox.current; if (activeProductRow !== null) { setActiveProductRow(null); setProductSearch(""); setProductResults([]); setProductOpen(false); } else setProductOpen(true); }}
+                                                    onChange={(value) => {
+                                                        lookupAnchor.current = productBox.current;
+                                                        setActiveProductRow(null);
+                                                        queuedProductEnter.current = false; setProductResults([]); setProductLoading(true); setActiveProduct(0);
+                                                        setProductSearch(value);
+                                                        setProductOpen(true);
+                                                        setProductError("");
+                                                    }}
+                                                    onClear={() => {
+                                                        setProductSearch("");
+                                                        setProductResults([]);
+                                                        setProductOpen(false);
+                                                    }}
+                                                />
+                                                {productOpen && productSearch.trim() && (
+                                                    <LookupResults
+                                                        product
+                                                        activeIndex={activeProduct}
+                                                        anchorRef={lookupAnchor}
+                                                        results={productResults}
+                                                        loading={productLoading}
+                                                        minimumReached={productSearch.trim().length >= 2}
+                                                        render={(item) => ({
+                                                            title: item.product_name,
+                                                            meta: productMeta(item),
+                                                            extra: productSearchExtra(item),
+                                                        })}
+                                                        onSelect={addProduct}
+                                                        onCancel={() => {
+                                                            setProductSearch("");
+                                                            setProductResults([]);
+                                                            setProductOpen(false);
+                                                            productInput.current?.focus();
+                                                        }}
+                                                    />
+                                                )}
+                                            </div>
+                                            <ErrorText message={productError || errors.product_id} />
+                                        </td>
+                                        <td className="number"><span className="rr-quote-draft-value">1</span></td>
+                                        <td className="number">0</td>
+                                        <td className="number">—</td>
+                                        {data.billing_type === "gst" && <td className="number">—</td>}
+                                        <td className="number">—</td>
+                                        <td className="number">—</td>
+                                        {data.billing_type === "gst" && <td className="number">—</td>}
+                                        <td className="number">—</td>
+                                        <td className="rr-quote-draft-plus"><i className="bi bi-plus-circle" aria-hidden="true"></i></td>
+                                    </tr>
                                 </tbody>
                             </table>
                         </div>
@@ -969,6 +1105,7 @@ export default function Create({
                                         : "Save & Submit"}
                             </button>
                         </div>
+                        <button type="button" className="rr-quote-btn print" disabled={processing || saving} onClick={(event) => { printRequested.current = true; submit(event, editing ? data.status : "Pending"); }}><i className="bi bi-printer"></i> Save & Print <kbd>F10</kbd></button>
                     </footer>
                 </form>
 
@@ -1021,37 +1158,42 @@ function useDebouncedSearch({
     setLoading,
     setError = () => { },
     enabled = true,
+    allowEmpty = false,
 }) {
     useEffect(() => {
         if (timer.current) window.clearTimeout(timer.current);
         const search = value.trim();
 
-        if (!enabled || selected || search.length < 2) {
+        if (!enabled || selected || (search.length < 2 && !(allowEmpty && search.length === 0))) {
             setResults([]);
             setLoading(false);
             return;
         }
 
+        const controller = new AbortController();
+        setResults([]); setLoading(true);
         timer.current = window.setTimeout(async () => {
             setLoading(true);
             setError("");
             try {
-                const response = await axios.get(endpoint, { params: { search } });
+                const response = await axios.get(endpoint, { params: { search }, signal: controller.signal });
+                if (controller.signal.aborted) return;
                 setResults(
                     Array.isArray(response.data?.[resultKey])
                         ? response.data[resultKey]
                         : [],
                 );
-                setOpen(true);
+                if (search.length) setOpen(true);
             } catch (error) {
+                if (controller.signal.aborted) return;
                 setResults([]);
                 setError(apiError(error, "Search failed."));
             } finally {
-                setLoading(false);
+                if (!controller.signal.aborted) setLoading(false);
             }
-        }, 300);
+        }, 180);
 
-        return () => window.clearTimeout(timer.current);
+        return () => { controller.abort(); window.clearTimeout(timer.current); };
     }, [value, selected, enabled]);
 }
 
@@ -1074,9 +1216,10 @@ function SearchInput({
     onFocus,
     onChange,
     onClear,
+    onKeyDown,
 }) {
     return (
-        <div className="rr-quote-lookup-input">
+        <div className="rr-quote-lookup-input rr-quote-search-control">
             <i className="bi bi-search"></i>
             <input
                 ref={inputRef}
@@ -1085,9 +1228,10 @@ function SearchInput({
                 placeholder={placeholder}
                 autoComplete="off"
                 onFocus={onFocus}
+                onKeyDown={onKeyDown}
                 onChange={(event) => onChange(event.target.value)}
             />
-            {loading && <span className="spinner-border spinner-border-sm"></span>}
+            {loading && <span className="spinner-border spinner-border-sm rr-quote-lookup-spinner" aria-label="Searching"></span>}
             {value && onClear && (
                 <button type="button" title="Clear search" onClick={onClear}>
                     <i className="bi bi-x-lg"></i>
@@ -1105,9 +1249,28 @@ function LookupResults({
     onSelect,
     onCancel,
     product = false,
+    activeIndex = -1,
+    anchorRef,
 }) {
-    return (
-        <div className={`rr-quote-results ${product ? "product" : ""}`}>
+    const [bounds, setBounds] = useState(null);
+    useEffect(() => {
+        if (!product || !anchorRef) return;
+        const position = () => {
+            const box = anchorRef.current?.getBoundingClientRect();
+            if (!box) return;
+            const width = Math.min(Math.max(box.width, 600), window.innerWidth - 24);
+            const left = Math.max(12, Math.min(box.left, window.innerWidth - width - 12));
+            const below = window.innerHeight - box.bottom - 18;
+            const above = box.top - 18;
+            const openAbove = below < 200 && above > below;
+            const maxHeight = Math.max(80, Math.min(350, openAbove ? above : below));
+            setBounds({ position: "fixed", top: openAbove ? Math.max(12, box.top - maxHeight - 5) : box.bottom + 5, left, width, maxHeight, zIndex: 1200, overflowY: "auto" });
+        };
+        position(); window.addEventListener("resize", position); window.addEventListener("scroll", position, true);
+        return () => { window.removeEventListener("resize", position); window.removeEventListener("scroll", position, true); };
+    }, [product, anchorRef]);
+    const content = (
+        <div style={product ? bounds ?? { display: "none" } : undefined} className={`rr-quote-results ${product ? "product" : ""}`}>
             {product && (
                 <div className="rr-quote-product-result-title">
                     <span>
@@ -1120,15 +1283,15 @@ function LookupResults({
                     </button>
                 </div>
             )}
-            {!minimumReached ? (
+            {loading ? <div className="rr-quote-result-message rr-quote-result-loading"><span className="spinner-border spinner-border-sm"></span> Searching…</div> : !minimumReached ? (
                 <div className="rr-quote-result-message">
                     Type at least two characters.
                 </div>
             ) : results.length ? (
-                results.map((item) => {
+                results.map((item, resultIndex) => {
                     const content = render(item);
                     return (
-                        <button key={item.id} type="button" onClick={() => onSelect(item)}>
+                        <button key={item.id} type="button" className={activeIndex === resultIndex ? "active" : ""} onMouseDown={(event) => event.preventDefault()} onClick={() => onSelect(item)}>
                             <div>
                                 <strong>{content.title}</strong>
                                 <span>{content.meta || "No additional details"}</span>
@@ -1143,6 +1306,7 @@ function LookupResults({
             ) : null}
         </div>
     );
+    return product && typeof document !== "undefined" ? createPortal(content, document.body) : content;
 }
 
 function SelectedParty({ icon, name, meta, onClear }) {
@@ -1204,15 +1368,29 @@ function QuickModal({
     onSubmit,
     children,
 }) {
+    const modalRef = useRef(null);
+    useEffect(() => {
+        const previous = document.activeElement;
+        modalRef.current?.querySelector("input, select, textarea")?.focus();
+        return () => previous?.focus?.();
+    }, []);
     return (
-        <div className="rr-quote-modal-backdrop" role="presentation">
-            <form className="rr-quote-modal" onSubmit={onSubmit}>
+        <div className="rr-quote-modal-backdrop rr-quote-quick-backdrop" role="presentation">
+            <form ref={modalRef} className="rr-quote-modal rr-quote-quick-modal" role="dialog" aria-modal="true" aria-label={title} onSubmit={onSubmit} onKeyDown={(event) => {
+                if (event.key === "Escape" && !processing) { event.preventDefault(); onClose(); }
+                if (event.key === "Tab") {
+                    const controls = Array.from(modalRef.current.querySelectorAll("button:not(:disabled), input:not(:disabled), select:not(:disabled), textarea:not(:disabled)"));
+                    const first = controls[0], last = controls[controls.length - 1];
+                    if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last?.focus(); }
+                    if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first?.focus(); }
+                }
+            }}>
                 <div className="rr-quote-modal-title">
                     <div>
                         <i className={`bi ${icon}`}></i>
                         <strong>{title}</strong>
                     </div>
-                    <button type="button" disabled={processing} onClick={onClose}>
+                    <button type="button" aria-label="Close quick add" disabled={processing} onClick={onClose}>
                         <i className="bi bi-x-lg"></i>
                     </button>
                 </div>
@@ -1225,7 +1403,7 @@ function QuickModal({
                         Cancel
                     </button>
                     <button type="submit" className="primary" disabled={processing}>
-                        {processing ? "Saving..." : "Save & Select"}
+                        <i className={processing ? "bi bi-arrow-repeat rr-quote-index-spin" : "bi bi-check2-circle"}></i>{processing ? "Saving…" : "Save & Select"}
                     </button>
                 </div>
             </form>
@@ -1296,6 +1474,19 @@ function ErrorText({ message }) {
     return message ? <div className="rr-quote-error">{message}</div> : null;
 }
 
+function savedNetRate(item, billingType) {
+    const quantity = numberValue(item.quantity);
+    const factor = billingType === "gst" ? 1 + numberValue(item.gst_percent) / 100 : 1;
+    if (quantity > 0 && item.line_total != null) {
+        const total = numberValue(item.line_total);
+        if (item.discount_type === "percentage") {
+            const percent = numberValue(item.discount_value);
+            if (percent < 100) return Number((total / (1 - percent / 100) / quantity).toFixed(6));
+        } else return Number(((total + numberValue(item.discount_value) * factor) / quantity).toFixed(6));
+    }
+    return numberValue(item.sale_price) * factor;
+}
+
 function initialRows(quotation) {
     const items = Array.isArray(quotation?.items) ? quotation.items : [];
 
@@ -1306,9 +1497,9 @@ function initialRows(quotation) {
             product: item.product,
             quantity: String(item.quantity ?? "1"),
             free_quantity: String(item.free_quantity ?? "0"),
-            sale_price: String(item.sale_price ?? "0"),
+            sale_price: String(savedNetRate(item, quotation?.billing_type)),
             discount_type: item.discount_type ?? "fixed",
-            discount_value: String(item.discount_value ?? "0"),
+            discount_value: String(numberValue(item.discount_value) * (quotation?.billing_type === "gst" && item.discount_type !== "percentage" ? 1 + numberValue(item.gst_percent) / 100 : 1)),
             gst_percent: String(
                 item.gst_percent ?? item.product?.gst_percent ?? "0",
             ),
@@ -1319,18 +1510,15 @@ function dateInput(value) {
     return value ? String(value).slice(0, 10) : "";
 }
 
-function calculateRow(row, billingType) {
-    const gross = round2(numberValue(row.quantity) * numberValue(row.sale_price));
-    let discount =
-        row.discount_type === "percentage"
-            ? round2((gross * numberValue(row.discount_value)) / 100)
-            : numberValue(row.discount_value);
-    discount = Math.min(gross, discount);
-    const taxable = round2(Math.max(0, gross - discount));
-    const gstPercent = billingType === "gst" ? numberValue(row.gst_percent) : 0;
-    const gst = round2((taxable * gstPercent) / 100);
+function effectiveGst(value) { return numberValue(value) > 0 ? numberValue(value) : 18; }
 
-    return { gross, discount, taxable, gst, total: round2(taxable + gst) };
+function calculateRow(row, billingType) {
+    const gross = round2(Math.max(0, numberValue(row.quantity)) * Math.max(0, numberValue(row.sale_price)));
+    const discount = Math.min(gross, Math.max(0, row.discount_type === "percentage" ? round2(gross * numberValue(row.discount_value) / 100) : numberValue(row.discount_value)));
+    const total = round2(gross - discount);
+    const taxable = billingType === "gst" ? round2(total / (1 + effectiveGst(row.gst_percent) / 100)) : total;
+    const gst = round2(total - taxable);
+    return { gross, discount, taxable, gst, total };
 }
 
 function calculateCommission(data, base) {

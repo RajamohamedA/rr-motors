@@ -181,6 +181,7 @@ class QuotationController extends Controller implements HasMiddleware
             'quotations' => $quotations,
             'filters' => $filters,
             'todayAmount' => round($todayAmount, 2),
+            'accounts' => $this->paymentAccountsForStore($companyId, $storeId),
         ]);
     }
 
@@ -279,10 +280,10 @@ class QuotationController extends Controller implements HasMiddleware
         [$companyId, $storeId] = $this->context($request);
 
         $validated = $request->validate([
-            'search' => ['required', 'string', 'min:2', 'max:100'],
+            'search' => ['nullable', 'string', 'max:100'],
         ]);
 
-        $search = trim($validated['search']);
+        $search = trim($validated['search'] ?? '');
 
         $customers = Customer::query()
             ->where('company_id', $companyId)
@@ -292,6 +293,10 @@ class QuotationController extends Controller implements HasMiddleware
                 fn(Builder $query) => $query->where('stores.id', $storeId)
             )
             ->where(function (Builder $query) use ($search) {
+                if ($search === '') {
+                    $query->where('is_system_customer', true);
+                    return;
+                }
                 $query
                     ->where('customer_name', 'like', "%{$search}%")
                     ->orWhere('customer_code', 'like', "%{$search}%")
@@ -1180,16 +1185,11 @@ class QuotationController extends Controller implements HasMiddleware
 
                     $quantity = round((float) $item->quantity, 3);
                     $freeQuantity = round((float) $item->free_quantity, 3);
-                    $gross = round($quantity * (float) $item->sale_price, 2);
-                    $discount = $item->isPercentageDiscount()
-                        ? round($gross * (float) $item->discount_value / 100, 2)
-                        : round((float) $item->discount_value, 2);
-                    $discount = min($gross, $discount);
-                    $taxable = round(max(0, $gross - $discount), 2);
-                    $gstPercent = $document->isGstBill()
-                        ? (float) $item->gst_percent
-                        : 0;
-                    $gst = round($taxable * $gstPercent / 100, 2);
+                    // Preserve the approved document's saved monetary values.
+                    $discount = round((float) $item->discount_amount, 2);
+                    $gstPercent = $document->isGstBill() ? (float) $item->gst_percent : 0;
+                    $gst = $document->isGstBill() ? round((float) $item->gst_amount, 2) : 0;
+                    $taxable = round((float) $item->line_total - $gst, 2);
 
                     return [
                         'product' => $product,
@@ -1469,19 +1469,92 @@ class QuotationController extends Controller implements HasMiddleware
 
         $this->loadDocument($quotation);
 
-        return Pdf::loadView(
-            'quotations.pdf',
-            compact('quotation', 'paper')
-        )
-            ->setPaper($paper, 'portrait')
-            ->download(
-                strtolower(str_replace(' ', '-', $quotation->documentTitle()))
-                    . '-'
-                    . $quotation->quotation_no
-                    . '-'
-                    . strtoupper($paper)
-                    . '.pdf'
-            );
+        $html = view('quotations.pdf', compact('quotation', 'paper'))->render();
+        $fixedPage = str_contains($html, 'pdf-mode pdf-fixed-page');
+        preg_match('/<div class="bottom-words">(.*?)<\/div>/s', $html, $wordMatch);
+        $amountWords = html_entity_decode(strip_tags($wordMatch[1] ?? ''), ENT_QUOTES, 'UTF-8');
+        $pdf = Pdf::loadHTML($html)
+            ->setPaper($paper, 'portrait');
+        $positions = ['columns' => [], 'footer' => null];
+        $dompdf = $pdf->getDomPDF();
+        $dompdf->setCallbacks([[
+            'event' => 'end_frame',
+            'f' => function ($frame, $canvas, $fontMetrics) use (&$positions) {
+                $node = $frame->get_node();
+                if (!$node instanceof \DOMElement) {
+                    return;
+                }
+                if ($node->getAttribute('id') === 'pdf-bottom-total') {
+                    $positions['footer'] = [
+                        'box' => $frame->get_border_box(),
+                        'page' => $canvas->get_page_number(),
+                    ];
+                }
+                if (strtolower($node->nodeName) === 'th') {
+                    $positions['columns'][] = [
+                        'box' => $frame->get_border_box(),
+                        'page' => $canvas->get_page_number(),
+                    ];
+                }
+            },
+        ]]);
+        $pdf->render();
+        if ($fixedPage) {
+            $dompdf->getCanvas()->page_script(function ($pageNumber, $pageCount, $canvas, $fontMetrics) use ($positions, $quotation, $paper, $amountWords) {
+                if ((int) $pageNumber !== 1 || $pageCount !== 1) {
+                    return;
+                }
+                $mm = 72 / 25.4;
+                $left = 7 * $mm;
+                $right = $canvas->get_width() - 7 * $mm;
+                $bottom = $canvas->get_height() - 7 * $mm;
+                $totalTop = $bottom - 28 * $mm;
+                $color = [0.40, 0.40, 0.40];
+                $columns = $positions['columns'];
+                $top = count($columns) ? (float) $columns[0]['box']['y'] : 45 * $mm;
+                $edges = [];
+                foreach ($columns as $column) {
+                    $box = $column['box'];
+                    foreach ([(float) $box['x'], (float) $box['x'] + (float) $box['w']] as $x) {
+                        $edges[(string) round($x, 1)] = $x;
+                    }
+                }
+                if (count($edges) === 0) {
+                    $fractions = $quotation->billing_type === 'gst'
+                        ? [0, .05, .42, .52, .64, .72, .84, 1]
+                        : [0, .05, .54, .68, .82, 1];
+                    foreach ($fractions as $fraction) {
+                        $x = $left + ($right - $left) * $fraction;
+                        $edges[(string) round($x, 1)] = $x;
+                    }
+                }
+                foreach ($edges as $x) {
+                    $canvas->line($x, $top, $x, $totalTop, $color, .6);
+                }
+                $canvas->rectangle($left, $totalTop, $right - $left, $bottom - $totalTop, $color, .6);
+                $totalRowBottom = $totalTop + 10 * $mm;
+                $canvas->line($left, $totalRowBottom, $right, $totalRowBottom, $color, .6);
+                $amountWidth = ($right - $left) * ($quotation->billing_type === 'gst' ? .16 : .18);
+                $canvas->line($right - $amountWidth, $totalTop, $right - $amountWidth, $totalRowBottom, $color, .6);
+                $font = $fontMetrics->getFont('DejaVu Sans', 'bold');
+                $fontSize = $paper === 'a5' ? 10 : 12;
+                $label = 'Grand Total';
+                $labelWidth = $fontMetrics->getTextWidth($label, $font, $fontSize);
+                $canvas->text($left + (($right - $left - $amountWidth - $labelWidth) / 2), $totalTop + 8, $label, $font, $fontSize, [0, 0, 0]);
+                $amount = number_format((float) $quotation->grand_total, 2);
+                $amountTextWidth = $fontMetrics->getTextWidth($amount, $font, $fontSize);
+                $canvas->text($right - $amountTextWidth - 7, $totalTop + 8, $amount, $font, $fontSize, [0, 0, 0]);
+                $wordFontSize = $paper === 'a5' ? 8 : 10;
+                $words = wordwrap($amountWords, $paper === 'a5' ? 66 : 95, "\n", false);
+                foreach (explode("\n", $words) as $lineIndex => $line) {
+                    $canvas->text($left + 7, $totalRowBottom + 8 + $lineIndex * ($wordFontSize + 3), $line, $font, $wordFontSize, [0, 0, 0]);
+                }
+            });
+        }
+        return $pdf->download(
+            strtolower(str_replace(' ', '-', $quotation->documentTitle()))
+                . '-' . $quotation->quotation_no . '-' . strtoupper($paper) . '.pdf'
+        );
     }
 
     /*
@@ -1525,6 +1598,7 @@ class QuotationController extends Controller implements HasMiddleware
             'qty.*' => ['required', 'numeric', 'gt:0'],
             'free_qty' => ['nullable', 'array'],
             'free_qty.*' => ['nullable', 'numeric', 'min:0'],
+            'price_includes_gst' => ['sometimes', 'boolean'],
             'sale_price' => ['required', 'array', 'min:1'],
             'sale_price.*' => ['required', 'numeric', 'min:0'],
             'discount_type' => ['required', 'array', 'min:1'],
@@ -1546,6 +1620,7 @@ class QuotationController extends Controller implements HasMiddleware
     ): array {
         $lines = [];
         $billingType = $validated['billing_type'];
+        $includesGst = (bool) ($validated['price_includes_gst'] ?? false);
 
         foreach ($validated['product_id'] as $index => $productId) {
             foreach (
@@ -1592,6 +1667,9 @@ class QuotationController extends Controller implements HasMiddleware
             $gstPercent = $billingType === 'gst'
                 ? round((float) $validated['gst_percent'][$index], 2)
                 : 0;
+            if ($includesGst && $billingType === 'gst' && $gstPercent <= 0) {
+                $gstPercent = 18;
+            }
             $grossAmount = round($quantity * $salePrice, 2);
 
             if ($discountType === 'percentage' && $discountValue > 100) {
@@ -1612,8 +1690,21 @@ class QuotationController extends Controller implements HasMiddleware
                 ]);
             }
 
-            $taxableAmount = round($grossAmount - $discountAmount, 2);
-            $gstAmount = round($taxableAmount * $gstPercent / 100, 2);
+            if ($includesGst && $billingType === 'gst') {
+                $factor = 1 + $gstPercent / 100;
+                $inclusiveTotal = round($grossAmount - $discountAmount, 2);
+                $taxableAmount = round($inclusiveTotal / $factor, 2);
+                $gstAmount = round($inclusiveTotal - $taxableAmount, 2);
+                // Keep existing tax-exclusive storage and conversion convention.
+                $salePrice = round($salePrice / $factor, 2);
+                $discountAmount = round($discountAmount / $factor, 2);
+                if ($discountType === 'fixed') {
+                    $discountValue = round($discountValue / $factor, 2);
+                }
+            } else {
+                $taxableAmount = round($grossAmount - $discountAmount, 2);
+                $gstAmount = round($taxableAmount * $gstPercent / 100, 2);
+            }
 
             $lines[] = [
                 'product' => $product,
