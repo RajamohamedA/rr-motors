@@ -1,0 +1,651 @@
+.rr-settings-page {
+    --ink: #183451;
+    --muted: #526983;
+    --line: #cfdaea;
+    --blue: #245e9e;
+    padding: 18px;
+    background: #f2f6fc;
+    color: var(--ink);
+    font-size: 13px;
+    min-width: 0;
+}
+
+.rr-settings-page * {
+    box-sizing: border-box;
+}
+
+.rr-settings-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 16px;
+    padding: 20px 23px;
+    border-radius: 13px;
+    background: linear-gradient(115deg, #17375e, #2865a2);
+    color: #fff;
+    box-shadow: 0 6px 22px #18345118;
+    animation: rrSettingsIn .22s ease-out;
+}
+
+.rr-settings-heading {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+
+.rr-settings-hero-icon {
+    display: grid;
+    place-items: center;
+    width: 46px;
+    height: 46px;
+    border-radius: 12px;
+    background: #ffffff20;
+    font-size: 23px;
+}
+
+.rr-settings-page .rr-settings-header h1 {
+    margin: 4px 0;
+    color: #fff;
+    font-size: 23px;
+    font-weight: 750;
+}
+
+.rr-settings-eyebrow {
+    font-size: 10px;
+    letter-spacing: 1.1px;
+    color: #d6e9ff;
+}
+
+.rr-settings-header p {
+    margin: 0;
+    color: #e3edfa;
+    font-size: 12px;
+}
+
+.rr-settings-context {
+    display: grid;
+    gap: 7px;
+    font-size: 12px;
+}
+
+.rr-settings-context span {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    color: #fff;
+}
+
+.rr-settings-tabs {
+    display: flex;
+    gap: 6px;
+    margin: 17px 0 12px;
+    padding: 5px;
+    width: fit-content;
+    max-width: 100%;
+    border: 1px solid var(--line);
+    border-radius: 9px;
+    background: #fff;
+}
+
+.rr-settings-page .rr-settings-tabs a {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 9px 14px;
+    border-radius: 6px;
+    text-decoration: none;
+    font-weight: 650;
+    color: #355673;
+}
+
+.rr-settings-page .rr-settings-tabs a:hover {
+    background: #edf4ff;
+    color: #1d5088;
+}
+
+.rr-settings-page .rr-settings-tabs a.active {
+    background: #245e9e;
+    color: #fff;
+}
+
+.rr-settings-notice,
+.rr-settings-message {
+    display: flex;
+    align-items: flex-start;
+    gap: 9px;
+    margin-bottom: 14px;
+    padding: 11px 14px;
+    border: 1px solid #c4d8f0;
+    border-radius: 8px;
+    background: #eaf2fd;
+    color: #294f78;
+    line-height: 1.6;
+}
+
+.rr-settings-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 290px;
+    gap: 18px;
+    align-items: start;
+}
+
+.rr-settings-grid>main {
+    min-width: 0;
+}
+
+.rr-settings-card {
+    margin-bottom: 16px;
+    border: 1px solid var(--line);
+    border-radius: 11px;
+    background: #fff;
+    overflow: hidden;
+    box-shadow: 0 3px 12px #18345105;
+}
+
+.rr-settings-card-title {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 13px 16px;
+    border-bottom: 1px solid var(--line);
+    background: #f7faff;
+}
+
+.rr-settings-card-title>span {
+    display: grid;
+    place-items: center;
+    width: 30px;
+    height: 30px;
+    border-radius: 8px;
+    background: #e5effe;
+    color: #245e9e;
+    font-size: 16px;
+}
+
+.rr-settings-page h2 {
+    margin: 0;
+    font-size: 14px;
+    font-weight: 750;
+    color: var(--ink);
+}
+
+.rr-settings-fields {
+    padding: 0 17px;
+}
+
+.rr-settings-field {
+    padding: 16px 0;
+    border-bottom: 1px solid #e4ebf4;
+}
+
+.rr-settings-field:last-child {
+    border-bottom: 0;
+}
+
+.rr-settings-field-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-bottom: 8px;
+}
+
+.rr-settings-field-top>label:first-child {
+    font-size: 12px;
+    font-weight: 700;
+    color: #254765;
+}
+
+.rr-settings-page .rr-settings-inherit {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+    margin: 0;
+    color: #315c8a;
+    font-size: 11px;
+    cursor: pointer;
+}
+
+.rr-settings-page input[type=checkbox] {
+    width: 15px;
+    height: 15px;
+    margin: 0;
+    accent-color: #245e9e;
+    cursor: pointer;
+}
+
+.rr-settings-field>select,
+.rr-settings-field>textarea,
+.rr-settings-percent>input {
+    display: block;
+    width: 100%;
+    max-width: 100%;
+    min-height: 39px;
+    padding: 9px 11px;
+    border: 1px solid #b8cbe1;
+    border-radius: 6px;
+    background: #fff;
+    color: #183451;
+    -webkit-text-fill-color: #183451;
+    font: inherit;
+    line-height: 1.4;
+    opacity: 1;
+}
+
+.rr-settings-field>select {
+    cursor: pointer;
+}
+
+.rr-settings-field>textarea {
+    resize: vertical;
+}
+
+.rr-settings-field small {
+    display: block;
+    margin-top: 7px;
+    color: var(--muted);
+    font-size: 11px;
+    line-height: 1.5;
+}
+
+.rr-settings-page :is(select, input, textarea):disabled {
+    background: #f0f4f9;
+    color: #465e79;
+    -webkit-text-fill-color: #465e79;
+    opacity: 1;
+    cursor: not-allowed;
+}
+
+.rr-settings-percent {
+    position: relative;
+}
+
+.rr-settings-percent>input {
+    padding-right: 35px;
+}
+
+.rr-settings-percent>span {
+    position: absolute;
+    right: 13px;
+    top: 10px;
+    color: #426386;
+    pointer-events: none;
+}
+
+.rr-settings-toggle {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 5px 0;
+    cursor: pointer;
+}
+
+.rr-settings-toggle input {
+    position: absolute;
+    left: 0;
+    top: 5px;
+    width: 36px !important;
+    height: 22px !important;
+    opacity: 0 !important;
+}
+
+.rr-settings-toggle-track {
+    width: 36px;
+    height: 22px;
+    border-radius: 20px;
+    border: 1px solid #9bb0c8;
+    background: #a8b8cd;
+    transition: background .16s;
+}
+
+.rr-settings-toggle-track::after {
+    content: '';
+    display: block;
+    width: 16px;
+    height: 16px;
+    margin: 2px;
+    background: #fff;
+    border-radius: 50%;
+    transition: transform .16s;
+    box-shadow: 0 1px 3px #18345122;
+}
+
+.rr-settings-toggle input:checked+.rr-settings-toggle-track {
+    background: #2463a6;
+    border-color: #2463a6;
+}
+
+.rr-settings-toggle input:checked+.rr-settings-toggle-track::after {
+    transform: translateX(14px);
+}
+
+.rr-settings-toggle input:focus-visible+.rr-settings-toggle-track {
+    outline: 3px solid #8eb5eb;
+    outline-offset: 3px;
+}
+
+.rr-settings-toggle input:disabled+.rr-settings-toggle-track {
+    opacity: .65;
+}
+
+.rr-settings-toggle strong {
+    font-size: 12px;
+    font-weight: 600;
+    color: #294966;
+}
+
+.rr-settings-summary dl {
+    margin: 0;
+    padding: 4px 16px;
+}
+
+.rr-settings-summary dl>div {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 11px 0;
+    border-bottom: 1px solid #e5ebf3;
+}
+
+.rr-settings-summary dt {
+    color: #526983;
+    font-weight: 500;
+    font-size: 12px;
+}
+
+.rr-settings-summary dd {
+    margin: 0;
+    color: #1e466c;
+    font-size: 12px;
+    font-weight: 700;
+    text-align: right;
+}
+
+.rr-settings-summary p {
+    margin: 12px 16px 16px;
+    font-size: 11px;
+    line-height: 1.7;
+    color: #526983;
+}
+
+.rr-settings-scope {
+    padding: 19px;
+    background: #edf8f3;
+    border-color: #c1e3d4;
+}
+
+.rr-settings-scope>i {
+    display: inline-grid;
+    place-items: center;
+    width: 34px;
+    height: 34px;
+    margin-bottom: 12px;
+    border-radius: 9px;
+    background: #d8f0e5;
+    color: #176548;
+    font-size: 20px;
+}
+
+.rr-settings-scope p {
+    margin: 8px 0 0;
+    font-size: 12px;
+    line-height: 1.6;
+    color: #32624f;
+}
+
+.rr-settings-savebar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px;
+    padding: 14px 17px;
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    background: #fff;
+}
+
+.rr-settings-savebar>span {
+    color: #46617d;
+    font-size: 12px;
+}
+
+.rr-settings-savebar>div {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.rr-settings-page .rr-settings-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    padding: 10px 15px;
+    min-height: 39px;
+    border: 1px solid transparent;
+    border-radius: 7px;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background .15s;
+}
+
+.rr-settings-page .rr-settings-btn.primary {
+    background: #245e9e;
+    border-color: #245e9e;
+    color: #fff;
+    -webkit-text-fill-color: #fff;
+}
+
+.rr-settings-page .rr-settings-btn.primary:hover:not(:disabled) {
+    background: #194b83;
+    color: #fff;
+}
+
+.rr-settings-page .rr-settings-btn.secondary {
+    background: #fff;
+    border-color: #b8cbe1;
+    color: #315472;
+    -webkit-text-fill-color: #315472;
+}
+
+.rr-settings-page .rr-settings-btn.secondary:hover:not(:disabled) {
+    background: #edf4fc;
+}
+
+.rr-settings-page .rr-settings-btn:disabled {
+    opacity: .55;
+    cursor: not-allowed;
+}
+
+.rr-settings-page :is(button, a, input, select, textarea):focus-visible {
+    outline: 3px solid #8bb4ef;
+    outline-offset: 3px;
+}
+
+.rr-settings-error {
+    display: block;
+    margin-top: 6px;
+    font-size: 12px;
+    color: #ad2440;
+}
+
+.rr-settings-page [aria-invalid=true] {
+    border-color: #c8435c;
+}
+
+.rr-settings-error-banner,
+.rr-settings-success {
+    display: flex;
+    gap: 9px;
+    align-items: center;
+    margin: 0 0 12px;
+    padding: 12px 15px;
+    border-radius: 8px;
+    border: 1px solid #eac1cb;
+    background: #fff0f3;
+    color: #9b2941;
+}
+
+.rr-settings-success {
+    background: #eaf8f0;
+    color: #176246;
+    border-color: #bde1cd;
+}
+
+@keyframes rrSettingsIn {
+    from {
+        opacity: 0;
+        transform: translateY(6px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@media(max-width:1000px) {
+    .rr-settings-grid {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .rr-settings-aside {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 16px;
+    }
+}
+
+@media(max-width:575px) {
+    .rr-settings-page {
+        padding: 10px;
+    }
+
+    .rr-settings-header {
+        padding: 16px;
+    }
+
+    .rr-settings-page .rr-settings-header h1 {
+        font-size: 21px;
+    }
+
+    .rr-settings-aside {
+        grid-template-columns: minmax(0, 1fr);
+        gap: 0;
+    }
+
+    .rr-settings-tabs {
+        width: 100%;
+    }
+
+    .rr-settings-tabs a {
+        flex: 1;
+        font-size: 11px;
+        padding: 9px !important;
+    }
+
+    .rr-settings-savebar>div {
+        width: 100%;
+    }
+
+    .rr-settings-savebar button {
+        flex: 1;
+    }
+}
+
+@media(prefers-reduced-motion:reduce) {
+    .rr-settings-page * {
+        animation: none !important;
+        transition: none !important;
+    }
+}
+
+/* Company profile uses the same settings stylesheet. */
+.rr-settings-profile-fields {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0 20px;
+    padding: 0 17px 8px;
+}
+
+.rr-settings-profile-fields .wide {
+    grid-column: 1/-1;
+}
+
+.rr-settings-profile-fields .rr-settings-field>input {
+    display: block;
+    width: 100%;
+    min-height: 39px;
+    padding: 9px 11px;
+    border: 1px solid #b8cbe1;
+    border-radius: 6px;
+    background: #fff;
+    color: #183451;
+    -webkit-text-fill-color: #183451;
+    font: inherit;
+    line-height: 1.4;
+}
+
+.rr-settings-logo-body {
+    display: grid;
+    gap: 13px;
+    padding: 18px;
+}
+
+.rr-settings-logo-preview {
+    display: grid;
+    place-items: center;
+    height: 150px;
+    border: 1px dashed #b7cce4;
+    border-radius: 10px;
+    background: #f4f8ff;
+    overflow: hidden;
+}
+
+.rr-settings-logo-preview img {
+    max-width: 100%;
+    max-height: 140px;
+    object-fit: contain;
+}
+
+.rr-settings-logo-preview>i {
+    font-size: 45px;
+    color: #587aa2;
+}
+
+.rr-settings-logo-upload {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 10px;
+    border: 1px solid #b9cce4;
+    border-radius: 7px;
+    background: #edf4ff;
+    color: #25558a;
+    cursor: pointer;
+    font-weight: 650;
+}
+
+.rr-settings-logo-body input[type=file] {
+    width: 100%;
+    font-size: 11px;
+    color: #355572;
+}
+
+.rr-settings-logo-body p {
+    margin: 0;
+    color: #526983;
+    font-size: 11px;
+}
+
+@media(max-width:575px) {
+    .rr-settings-profile-fields {
+        grid-template-columns: minmax(0, 1fr);
+    }
+}

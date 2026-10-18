@@ -3,9 +3,9 @@
 namespace App\Models;
 
 use Database\Factories\UserFactory;
-use Illuminate\Database\Eloquent\Attributes\Fillable;
-use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Spatie\Permission\Traits\HasRoles;
@@ -14,21 +14,6 @@ class User extends Authenticatable
 {
     /** @use HasFactory<UserFactory> */
     use HasFactory, Notifiable, HasRoles;
-
-    #[Fillable([
-        'company_id',
-        'store_id',
-        'name',
-        'email',
-        'mobile',
-        'password',
-        'status',
-        'is_super_user',
-    ])]
-    #[Hidden([
-        'password',
-        'remember_token',
-    ])]
 
     protected $fillable = [
         'company_id',
@@ -56,35 +41,17 @@ class User extends Authenticatable
         ];
     }
 
-    /*
-    |--------------------------------------------------------------------------
-    | Company
-    |--------------------------------------------------------------------------
-    */
-
-    public function company()
+    public function company(): BelongsTo
     {
         return $this->belongsTo(Company::class);
     }
 
-    /*
-    |--------------------------------------------------------------------------
-    | Default / Primary Store
-    |--------------------------------------------------------------------------
-    */
-
-    public function store()
+    public function store(): BelongsTo
     {
         return $this->belongsTo(Store::class);
     }
 
-    /*
-    |--------------------------------------------------------------------------
-    | All Assigned Stores
-    |--------------------------------------------------------------------------
-    */
-
-    public function stores()
+    public function stores(): BelongsToMany
     {
         return $this->belongsToMany(
             Store::class,
