@@ -142,9 +142,19 @@ export default function BusinessSidebar({
 
     const user = auth?.user;
 
-    const permissions = user?.permissions ?? [];
+    const permissions = (user?.permissions ?? []).map((permission) =>
+        typeof permission === "string" ? permission : permission.name,
+    );
 
-    const roles = user?.roles ?? [];
+    const roles = (user?.roles ?? []).map((role) =>
+        typeof role === "string" ? role : role.name,
+    );
+
+    const rawLogo = business?.company_logo ?? business?.logo ?? "";
+    const companyLogo = getLogoUrl(rawLogo);
+    const [failedLogo, setFailedLogo] = useState(null);
+    const logoKey = `${business?.company_id ?? ""}:${companyLogo}`;
+    const showLogo = Boolean(companyLogo) && failedLogo !== logoKey;
 
     /*
 
@@ -414,16 +424,21 @@ export default function BusinessSidebar({
 
                 key: "administration",
 
-                label: "Company",
+                label: "Company Admin",
 
                 icon: "bi-buildings",
 
                 visible: isSuperAdmin || isCompanyAdmin,
 
                 children: [
-
                     {
-
+                        label: "Company Dashboard",
+                        icon: "bi-speedometer2",
+                        href: "/company/dashboard",
+                        exact: true,
+                        visible: isSuperAdmin || isCompanyAdmin,
+                    },
+                    {
                         label: "Company Profile",
 
                         icon: "bi-building-gear",
@@ -1386,7 +1401,28 @@ export default function BusinessSidebar({
 
                 <div className="rr-business-sidebar-company-icon">
 
-                    {getInitials(business?.company_name)}
+                    {showLogo ? (
+                        <img
+                            key={logoKey}
+                            src={companyLogo}
+                            alt={`${business?.company_name ?? "Company"} logo`}
+                            onError={() => setFailedLogo(logoKey)}
+                            style={{
+                                display: "block",
+                                width: "100%",
+                                height: "100%",
+                                maxWidth: "100%",
+                                maxHeight: "100%",
+                                objectFit: "contain",
+                                borderRadius: "inherit",
+                                background: "#fff",
+                                padding: "3px",
+                                boxSizing: "border-box",
+                            }}
+                        />
+                    ) : (
+                        getInitials(business?.company_name ?? "Company")
+                    )}
 
                 </div>
 
@@ -1774,4 +1810,16 @@ function getInitials(name) {
 
     return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
 
+}
+
+function getLogoUrl(value) {
+    const path = typeof value === "string" ? value.trim() : "";
+
+    if (!path) return "";
+    if (/^https?:\/\//i.test(path)) return path;
+
+    const relativePath = path.replace(/^\/+/, "");
+    return relativePath.startsWith("storage/")
+        ? `/${relativePath}`
+        : `/storage/${relativePath}`;
 }

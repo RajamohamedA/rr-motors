@@ -41,13 +41,10 @@ return new class extends Migration
                 |--------------------------------------------------------------------------
                 */
 
-                $table->foreignId(
-                    'store_id'
-                )
-                    ->constrained(
-                        'stores'
-                    )
-                    ->cascadeOnDelete();
+                $storeColumn = $table->foreignId('store_id');
+                if (Schema::hasTable('stores')) {
+                    $storeColumn->constrained('stores')->cascadeOnDelete();
+                }
 
 
                 /*

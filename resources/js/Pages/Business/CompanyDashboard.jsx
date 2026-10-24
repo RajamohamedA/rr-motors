@@ -1,5 +1,5 @@
 import React, { useMemo, useRef, useState } from 'react';
-import { Head, Link, router } from '@inertiajs/react';
+import { Head, Link, router, usePage } from '@inertiajs/react';
 import BusinessLayout from '../../Layouts/BusinessLayout';
 import '../../../css/business/company-dashboard.css';
 export default function CompanyDashboard({
@@ -10,6 +10,16 @@ export default function CompanyDashboard({
     branches = [],
     context = {},
 }) {
+    const { auth = {}, business = {} } = usePage().props;
+    const [failedLogo, setFailedLogo] = useState(null);
+    const allowedIds = new Set((business.assigned_branch_ids
+        ?? (business.available_branches ?? []).map((item) => item.id)).map(String));
+    const hasAccess = (item) => Boolean(auth.user?.is_super_user) || allowedIds.has(String(item?.id));
+    const rawLogo = business.company_logo ?? company?.logo ?? '';
+    const logoPath = String(rawLogo).replace(/^\/+/, '');
+    const companyLogo = /^https?:\/\//i.test(rawLogo) ? rawLogo
+        : logoPath ? (logoPath.startsWith('storage/') ? `/${logoPath}` : `/storage/${logoPath}`) : '';
+    const logoKey = `${company?.id ?? business.company_id}:${companyLogo}`;
     const [search, setSearch] = useState('');
     const [status, setStatus] = useState('all');
     const [switchingId, setSwitchingId] = useState(null);
@@ -32,7 +42,7 @@ export default function CompanyDashboard({
         });
     }, [branches, search, status]);
     const selectBranch = (branch) => {
-        if (pendingRequest.current || !branch?.id || !isActive(branch.status) || Number(activeBranch?.id) === Number(branch.id)) {
+        if (pendingRequest.current || !branch?.id || !hasAccess(branch) || !isActive(branch.status) || Number(activeBranch?.id) === Number(branch.id)) {
             return;
         }
         pendingRequest.current = true;
@@ -60,7 +70,11 @@ export default function CompanyDashboard({
                     <div className="rr-company-hero-orb orb-two" />
                     <div className="rr-company-hero-content">
                         <div className="rr-company-hero-icon">
-                            <i className="bi bi-buildings-fill" />
+                            {companyLogo && failedLogo !== logoKey ? (
+                                <img key={logoKey} src={companyLogo}
+                                    alt={`${company?.company_name ?? 'Company'} logo`}
+                                    onError={() => setFailedLogo(logoKey)} />
+                            ) : <i className="bi bi-buildings-fill" />}
                         </div>
                         <div>
                             <span className="rr-company-eyebrow">
@@ -129,7 +143,7 @@ export default function CompanyDashboard({
                                 <h2>Current Branch</h2>
                             </div>
                         </div>
-                        {activeBranch ? (
+                        {activeBranch && hasAccess(activeBranch) ? (
                             <div className="rr-company-current-branch">
                                 <div className="rr-company-current-mark">
                                     <i className="bi bi-shop" />
@@ -156,7 +170,7 @@ export default function CompanyDashboard({
                                 </div>
                             </div>
                         )}
-                        {activeBranch && isActive(activeBranch.status) && (
+                        {activeBranch && hasAccess(activeBranch) && isActive(activeBranch.status) && (
                             <Link className="rr-company-enter-button" href="/business/dashboard">
                                 <span>
                                     <small>CONTINUE WORKING</small>
@@ -262,7 +276,8 @@ export default function CompanyDashboard({
                             </thead>
                             <tbody>
                                 {filteredBranches.length > 0 ? filteredBranches.map((branch) => {
-                                    const current = Number(activeBranch?.id) === Number(branch.id);
+                                    const allowed = hasAccess(branch);
+                                    const current = allowed && Number(activeBranch?.id) === Number(branch.id);
                                     const switching = Number(switchingId) === Number(branch.id);
                                     return (
                                         <tr key={branch.id} className={current ? 'current' : ''} aria-busy={switching}>
@@ -273,7 +288,7 @@ export default function CompanyDashboard({
                                                     </span>
                                                     <div>
                                                         <strong>{branch.store_name}</strong>
-                                                        <small>{current ? 'Current workspace' : 'Company branch'}</small>
+                                                        <small>{!allowed ? 'Contact Super Admin or ERP support for access.' : current ? 'Current workspace' : 'Company branch'}</small>
                                                     </div>
                                                 </div>
                                             </td>
@@ -281,10 +296,16 @@ export default function CompanyDashboard({
                                             <td>{[branch.city, branch.state].filter(Boolean).join(', ') || '—'}</td>
                                             <td>{branch.created_at || '—'}</td>
                                             <td>
-                                                <span className={`rr-company-status ${isActive(branch.status) ? 'active' : 'pending'}`}>
-                                                    <i />
-                                                    {branch.status_label || (isActive(branch.status) ? 'Active' : 'Pending')}
-                                                </span>
+                                                <div className="rr-company-status-stack">
+                                                    <span className={`rr-company-status ${isActive(branch.status) ? 'active' : 'pending'}`}>
+                                                        <i /> {isActive(branch.status) ? 'Active' : 'Needs Approval'}
+                                                    </span>
+                                                    <span className={`rr-company-status ${allowed ? 'assigned' : 'no-access'}`}>
+                                                        <i /> {allowed ? 'Assigned' : 'No Access'}
+                                                    </span>
+                                                </div>
+                                                {!isActive(branch.status) && <small className="rr-company-status-help">Contact Super Admin for approval.</small>}
+                                                {!allowed && <small className="rr-company-status-help access">Contact Super Admin or ERP support for access.</small>}
                                             </td>
                                             <td className="action">
                                                 {current && isActive(branch.status) ? (
@@ -294,16 +315,19 @@ export default function CompanyDashboard({
                                                 ) : (
                                                     <button
                                                         type="button"
-                                                        className="rr-company-row-action"
-                                                        disabled={!isActive(branch.status) || switchingId !== null}
+                                                        className={`rr-company-row-action ${!allowed ? 'no-access' : ''}`}
+                                                        title={!allowed ? 'Contact Super Admin or the ERP support team to request branch access.' : undefined}
+                                                        disabled={!allowed || !isActive(branch.status) || switchingId !== null}
                                                         onClick={() => selectBranch(branch)}
                                                     >
-                                                        {switching ? (
+                                                        {!allowed ? (
+                                                            <>No Access <i className="bi bi-lock-fill" /></>
+                                                        ) : switching ? (
                                                             <><span className="spinner-border spinner-border-sm" /> Switching</>
                                                         ) : isActive(branch.status) ? (
                                                             <>Select <i className="bi bi-arrow-right" /></>
                                                         ) : (
-                                                            <>Unavailable <i className="bi bi-lock" /></>
+                                                            <>Needs Approval <i className="bi bi-clock" /></>
                                                         )}
                                                     </button>
                                                 )}

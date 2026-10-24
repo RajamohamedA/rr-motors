@@ -129,7 +129,8 @@ return new class extends Migration
         |------------------------------------------------------------------
         */
 
-        DB::statement(
+        if (DB::getDriverName() === 'mysql') {
+            DB::statement(
             "ALTER TABLE quotations MODIFY status
              ENUM(
                 'Draft',
@@ -141,6 +142,7 @@ return new class extends Migration
                 'Cancelled'
              ) NOT NULL DEFAULT 'Draft'"
         );
+        }
 
         /*
         |------------------------------------------------------------------
@@ -230,7 +232,8 @@ return new class extends Migration
             ->whereIn('status', ['Expired', 'Cancelled'])
             ->update(['status' => 'Rejected']);
 
-        DB::statement(
+        if (DB::getDriverName() === 'mysql') {
+            DB::statement(
             "ALTER TABLE quotations MODIFY status
              ENUM(
                 'Draft',
@@ -240,6 +243,7 @@ return new class extends Migration
                 'Converted'
              ) NOT NULL DEFAULT 'Draft'"
         );
+        }
 
         Schema::table('quotations', function (Blueprint $table) {
             $table->dropIndex('quotations_context_date_index');

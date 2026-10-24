@@ -137,6 +137,10 @@ class ProfileController extends Controller
         |--------------------------------------------------------------------------
         */
 
+        if ($user->email !== $validated['email']) {
+            $user->forceFill(['email_verified_at' => null]);
+        }
+
         $user->update([
             'name' =>
             $validated['name'],

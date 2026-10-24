@@ -3,6 +3,8 @@
 namespace App\Services;
 
 use App\Models\Product;
+use App\Models\Store;
+use App\Models\Godown;
 use App\Models\StockLedger;
 use Illuminate\Support\Facades\DB;
 use RuntimeException;
@@ -110,7 +112,8 @@ class StockService
      */
     private function lockProduct(
         Product $product,
-        int $companyId
+        int $companyId,
+        int $storeId
     ): Product {
         $lockedProduct = Product::query()
             ->whereKey($product->getKey())
@@ -126,9 +129,22 @@ class StockService
             );
         }
 
+        if ((int) $lockedProduct->store_id !== $storeId || !Store::query()
+            ->whereKey($storeId)->where('company_id', $companyId)->exists()) {
+            throw new RuntimeException('The selected product does not belong to the active branch.');
+        }
+
         return $lockedProduct;
     }
 
+
+    private function validateGodown(int $companyId, int $storeId, ?int $godownId): void
+    {
+        if ($godownId !== null && !Godown::query()->whereKey($godownId)
+            ->where('company_id', $companyId)->where('store_id', $storeId)->exists()) {
+            throw new RuntimeException('The selected godown does not belong to the active branch.');
+        }
+    }
 
     /**
      * Create one stock-ledger entry.
@@ -213,8 +229,10 @@ class StockService
         ) {
             $lockedProduct = $this->lockProduct(
                 $product,
-                $companyId
+                $companyId,
+                $storeId
             );
+            $this->validateGodown($companyId, $storeId, $godownId);
 
             $valuation = $this->getValuation(
                 $companyId,
@@ -307,8 +325,10 @@ class StockService
         ) {
             $lockedProduct = $this->lockProduct(
                 $product,
-                $companyId
+                $companyId,
+                $storeId
             );
+            $this->validateGodown($companyId, $storeId, $godownId);
 
             $valuation = $this->getValuation(
                 $companyId,
@@ -432,8 +452,11 @@ class StockService
         ) {
             $lockedProduct = $this->lockProduct(
                 $product,
-                $companyId
+                $companyId,
+                $storeId
             );
+            $this->validateGodown($companyId, $storeId, $fromGodownId);
+            $this->validateGodown($companyId, $storeId, $toGodownId);
 
             /*
             |--------------------------------------------------------------------------

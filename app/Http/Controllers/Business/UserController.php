@@ -32,17 +32,14 @@ class UserController extends Controller
         $currentUser =
             $request->user();
 
-
         $this->ensureCompanyAdmin(
             $currentUser
         );
-
 
         $company =
             $this->getCompany(
                 $currentUser
             );
-
 
         /*
         |--------------------------------------------------------------------------
@@ -57,7 +54,6 @@ class UserController extends Controller
                     ->toString()
             );
 
-
         $role =
             trim(
                 $request
@@ -65,12 +61,10 @@ class UserController extends Controller
                     ->toString()
             );
 
-
         $status =
             $request->input(
                 'status'
             );
-
 
         /*
         |--------------------------------------------------------------------------
@@ -257,7 +251,6 @@ class UserController extends Controller
 
             ->withQueryString();
 
-
         /*
         |--------------------------------------------------------------------------
         | Transform
@@ -275,7 +268,6 @@ class UserController extends Controller
                     $user->hasRole(
                         'Company Admin'
                     );
-
 
                 return [
 
@@ -382,7 +374,6 @@ class UserController extends Controller
             }
         );
 
-
         /*
         |--------------------------------------------------------------------------
         | Summary
@@ -399,7 +390,6 @@ class UserController extends Controller
                 'is_super_user',
                 false
             );
-
 
         $summary = [
 
@@ -433,7 +423,6 @@ class UserController extends Controller
                 ->count(),
         ];
 
-
         /*
         |--------------------------------------------------------------------------
         | Filter Roles
@@ -444,7 +433,6 @@ class UserController extends Controller
             $this->getFilterRoles(
                 $company
             );
-
 
         /*
         |--------------------------------------------------------------------------
@@ -485,7 +473,6 @@ class UserController extends Controller
         );
     }
 
-
     /*
     |--------------------------------------------------------------------------
     | Create
@@ -499,17 +486,14 @@ class UserController extends Controller
         $currentUser =
             $request->user();
 
-
         $this->ensureCompanyAdmin(
             $currentUser
         );
-
 
         $company =
             $this->getCompany(
                 $currentUser
             );
-
 
         return Inertia::render(
             'Business/Users/Create',
@@ -526,13 +510,10 @@ class UserController extends Controller
                 ),
 
                 'branches' =>
-                $this->getCompanyBranches(
-                    $company
-                ),
+                $this->getCompanyBranches($company, $currentUser),
             ]
         );
     }
-
 
     /*
     |--------------------------------------------------------------------------
@@ -547,17 +528,14 @@ class UserController extends Controller
         $currentUser =
             $request->user();
 
-
         $this->ensureCompanyAdmin(
             $currentUser
         );
-
 
         $company =
             $this->getCompany(
                 $currentUser
             );
-
 
         /*
         |--------------------------------------------------------------------------
@@ -611,6 +589,7 @@ class UserController extends Controller
                 'store_ids.*' => [
                     'required',
                     'integer',
+                    Rule::in($this->getAssignableBranchIds($company, $currentUser)),
 
                     Rule::exists(
                         'stores',
@@ -637,7 +616,6 @@ class UserController extends Controller
                 ],
             ]);
 
-
         /*
         |--------------------------------------------------------------------------
         | Validate Company Role
@@ -649,7 +627,6 @@ class UserController extends Controller
                 $validated['role'],
                 $company
             );
-
 
         /*
         |--------------------------------------------------------------------------
@@ -673,7 +650,6 @@ class UserController extends Controller
                             )
                         )
                     );
-
 
                 $user =
                     User::create([
@@ -728,7 +704,6 @@ class UserController extends Controller
                         false,
                     ]);
 
-
                 /*
                 |--------------------------------------------------------------------------
                 | Company Role
@@ -738,7 +713,6 @@ class UserController extends Controller
                 $user->syncRoles([
                     $role,
                 ]);
-
 
                 /*
                 |--------------------------------------------------------------------------
@@ -754,13 +728,11 @@ class UserController extends Controller
             }
         );
 
-
         return AppResponse::successRoute(
             'business.users.index',
             'User created successfully.'
         );
     }
-
 
     /*
     |--------------------------------------------------------------------------
@@ -776,29 +748,24 @@ class UserController extends Controller
         $currentUser =
             $request->user();
 
-
         $this->ensureCompanyAdmin(
             $currentUser
         );
-
 
         $company =
             $this->getCompany(
                 $currentUser
             );
 
-
         $this->ensureUserBelongsToCompany(
             $user,
             $company
         );
 
-
         $user->load([
             'roles:id,company_id,name,description,status,is_system_role',
             'stores:id,company_id,store_name,store_code,status',
         ]);
-
 
         return Inertia::render(
             'Business/Users/Show',
@@ -818,7 +785,6 @@ class UserController extends Controller
         );
     }
 
-
     /*
     |--------------------------------------------------------------------------
     | Edit
@@ -833,23 +799,21 @@ class UserController extends Controller
         $currentUser =
             $request->user();
 
-
         $this->ensureCompanyAdmin(
             $currentUser
         );
-
 
         $company =
             $this->getCompany(
                 $currentUser
             );
 
-
         $this->ensureUserBelongsToCompany(
             $user,
             $company
         );
 
+        $this->ensureUserBranchesManageable($user, $company, $currentUser);
 
         /*
         |--------------------------------------------------------------------------
@@ -871,12 +835,10 @@ class UserController extends Controller
             );
         }
 
-
         $user->load([
             'roles:id,company_id,name,description,status,is_system_role',
             'stores:id,company_id,store_name,store_code,status',
         ]);
-
 
         return Inertia::render(
             'Business/Users/Edit',
@@ -899,13 +861,10 @@ class UserController extends Controller
                 ),
 
                 'branches' =>
-                $this->getCompanyBranches(
-                    $company
-                ),
+                $this->getCompanyBranches($company, $currentUser),
             ]
         );
     }
-
 
     /*
     |--------------------------------------------------------------------------
@@ -921,23 +880,21 @@ class UserController extends Controller
         $currentUser =
             $request->user();
 
-
         $this->ensureCompanyAdmin(
             $currentUser
         );
-
 
         $company =
             $this->getCompany(
                 $currentUser
             );
 
-
         $this->ensureUserBelongsToCompany(
             $user,
             $company
         );
 
+        $this->ensureUserBranchesManageable($user, $company, $currentUser);
 
         /*
         |--------------------------------------------------------------------------
@@ -957,7 +914,6 @@ class UserController extends Controller
                 'Company Admin accounts can only be managed by Super Admin.'
             );
         }
-
 
         /*
         |--------------------------------------------------------------------------
@@ -1013,6 +969,7 @@ class UserController extends Controller
                 'store_ids.*' => [
                     'required',
                     'integer',
+                    Rule::in($this->getAssignableBranchIds($company, $currentUser)),
 
                     Rule::exists(
                         'stores',
@@ -1039,7 +996,6 @@ class UserController extends Controller
                 ],
             ]);
 
-
         /*
         |--------------------------------------------------------------------------
         | Validate Company Role
@@ -1051,7 +1007,6 @@ class UserController extends Controller
                 $validated['role'],
                 $company
             );
-
 
         /*
         |--------------------------------------------------------------------------
@@ -1075,7 +1030,6 @@ class UserController extends Controller
                             )
                         )
                     );
-
 
                 $data = [
 
@@ -1106,7 +1060,6 @@ class UserController extends Controller
                     (bool) $validated['status'],
                 ];
 
-
                 /*
                 |--------------------------------------------------------------------------
                 | Password Only When Entered
@@ -1123,11 +1076,9 @@ class UserController extends Controller
                         );
                 }
 
-
                 $user->update(
                     $data
                 );
-
 
                 /*
                 |--------------------------------------------------------------------------
@@ -1138,7 +1089,6 @@ class UserController extends Controller
                 $user->syncRoles([
                     $role,
                 ]);
-
 
                 /*
                 |--------------------------------------------------------------------------
@@ -1154,13 +1104,11 @@ class UserController extends Controller
             }
         );
 
-
         return AppResponse::successRoute(
             'business.users.index',
             'User updated successfully.'
         );
     }
-
 
     /*
     |--------------------------------------------------------------------------
@@ -1176,23 +1124,21 @@ class UserController extends Controller
         $currentUser =
             $request->user();
 
-
         $this->ensureCompanyAdmin(
             $currentUser
         );
-
 
         $company =
             $this->getCompany(
                 $currentUser
             );
 
-
         $this->ensureUserBelongsToCompany(
             $user,
             $company
         );
 
+        $this->ensureUserBranchesManageable($user, $company, $currentUser);
 
         /*
         |--------------------------------------------------------------------------
@@ -1209,7 +1155,6 @@ class UserController extends Controller
                 'You cannot change the status of your own account.'
             );
         }
-
 
         /*
         |--------------------------------------------------------------------------
@@ -1230,7 +1175,6 @@ class UserController extends Controller
             );
         }
 
-
         /*
         |--------------------------------------------------------------------------
         | Validation
@@ -1246,7 +1190,6 @@ class UserController extends Controller
                 ],
             ]);
 
-
         /*
         |--------------------------------------------------------------------------
         | Update
@@ -1258,14 +1201,12 @@ class UserController extends Controller
             (bool) $validated['status'],
         ]);
 
-
         return AppResponse::success(
             $user->status
                 ? 'User activated successfully.'
                 : 'User deactivated successfully.'
         );
     }
-
 
     /*
     |--------------------------------------------------------------------------
@@ -1292,7 +1233,6 @@ class UserController extends Controller
                     'active_company_id'
                 );
 
-
             if (
                 !$companyId
             ) {
@@ -1302,7 +1242,6 @@ class UserController extends Controller
                     'No active company is selected.'
                 );
             }
-
 
             $company =
                 Company::query()
@@ -1318,7 +1257,6 @@ class UserController extends Controller
 
                 ->first();
 
-
             if (
                 !$company
             ) {
@@ -1329,10 +1267,8 @@ class UserController extends Controller
                 );
             }
 
-
             return $company;
         }
-
 
         /*
         |--------------------------------------------------------------------------
@@ -1350,7 +1286,6 @@ class UserController extends Controller
             );
         }
 
-
         $company =
             Company::query()
 
@@ -1365,7 +1300,6 @@ class UserController extends Controller
 
             ->first();
 
-
         if (
             !$company
         ) {
@@ -1376,10 +1310,8 @@ class UserController extends Controller
             );
         }
 
-
         return $company;
     }
-
 
     /*
     |--------------------------------------------------------------------------
@@ -1400,7 +1332,6 @@ class UserController extends Controller
             );
         }
 
-
         /*
         |--------------------------------------------------------------------------
         | Super Admin
@@ -1416,7 +1347,6 @@ class UserController extends Controller
                     'active_company_id'
                 );
 
-
             if (
                 !$companyId
             ) {
@@ -1427,10 +1357,8 @@ class UserController extends Controller
                 );
             }
 
-
             return;
         }
-
 
         /*
         |--------------------------------------------------------------------------
@@ -1451,7 +1379,6 @@ class UserController extends Controller
         }
     }
 
-
     /*
     |--------------------------------------------------------------------------
     | User Company Isolation
@@ -1471,7 +1398,6 @@ class UserController extends Controller
             404
         );
     }
-
 
     /*
     |--------------------------------------------------------------------------
@@ -1496,13 +1422,11 @@ class UserController extends Controller
         $currentUser =
             auth()->user();
 
-
         $isSuperAdmin =
             (bool) (
                 $currentUser?->is_super_user
                 ?? false
             );
-
 
         return Role::query()
 
@@ -1557,7 +1481,6 @@ class UserController extends Controller
                         );
                     }
 
-
                     /*
                     |--------------------------------------------------------------------------
                     | Global System Roles
@@ -1586,7 +1509,6 @@ class UserController extends Controller
                                 );
                         }
                     );
-
 
                     /*
                     |--------------------------------------------------------------------------
@@ -1665,7 +1587,6 @@ class UserController extends Controller
             ->all();
     }
 
-
     /*
     |--------------------------------------------------------------------------
     | Filter Roles
@@ -1725,7 +1646,6 @@ class UserController extends Controller
             ->all();
     }
 
-
     /*
     |--------------------------------------------------------------------------
     | Validate Company Role
@@ -1752,13 +1672,11 @@ class UserController extends Controller
         $currentUser =
             auth()->user();
 
-
         $isSuperAdmin =
             (bool) (
                 $currentUser?->is_super_user
                 ?? false
             );
-
 
         /*
         |--------------------------------------------------------------------------
@@ -1776,7 +1694,6 @@ class UserController extends Controller
                 'The Super Admin role cannot be assigned from company user management.'
             );
         }
-
 
         /*
         |--------------------------------------------------------------------------
@@ -1796,7 +1713,6 @@ class UserController extends Controller
                 'Company Admin accounts can only be assigned by Super Admin.'
             );
         }
-
 
         $role =
             Role::query()
@@ -1845,7 +1761,6 @@ class UserController extends Controller
                         );
                     }
 
-
                     $query->orWhere(
                         function (
                             $systemQuery
@@ -1868,7 +1783,6 @@ class UserController extends Controller
                                 );
                         }
                     );
-
 
                     $query->orWhere(
                         function (
@@ -1893,7 +1807,6 @@ class UserController extends Controller
 
             ->first();
 
-
         if (
             !$role
         ) {
@@ -1904,10 +1817,8 @@ class UserController extends Controller
             );
         }
 
-
         return $role;
     }
-
 
     /*
     |--------------------------------------------------------------------------
@@ -1937,12 +1848,10 @@ class UserController extends Controller
             return null;
         }
 
-
         return (bool) $role->is_system_role
             ? 'system'
             : 'company';
     }
-
 
     /*
     |--------------------------------------------------------------------------
@@ -1950,11 +1859,57 @@ class UserController extends Controller
     |--------------------------------------------------------------------------
     */
 
+    /** Branch assignment authority never comes from the submitted role. */
+    private function getAssignableBranchIds(Company $company, User $currentUser): array
+    {
+        $query = Store::query()
+            ->where('company_id', $company->id)
+            ->where('status', true);
+
+        if (!(bool) $currentUser->is_super_user) {
+            abort_if((int) $currentUser->company_id !== (int) $company->id, 403);
+            $query->whereIn('id', $currentUser->stores()
+                ->where('stores.company_id', $company->id)
+                ->select('stores.id'));
+        }
+
+        return $query->pluck('id')->map(fn($id) => (int) $id)->all();
+    }
+
+    /** Do not silently remove assignments that this administrator cannot manage. */
+    private function ensureUserBranchesManageable(
+        User $user,
+        Company $company,
+        User $currentUser
+    ): void {
+        if ((bool) $currentUser->is_super_user) {
+            return;
+        }
+
+        // Include inactive assignments here so ordinary edits can retain them.
+        $allowed = $currentUser->stores()
+            ->where('stores.company_id', $company->id)
+            ->pluck('stores.id')->map(fn($id) => (int) $id)->all();
+        $assigned = $user->stores()->pluck('stores.id')
+            ->map(fn($id) => (int) $id)->all();
+        if ($user->store_id !== null) {
+            $assigned[] = (int) $user->store_id;
+        }
+
+        abort_if(
+            count(array_diff($assigned, $allowed)) > 0,
+            403,
+            'This user has branch access outside your assignments. Contact Super Admin.'
+        );
+    }
+
     private function getCompanyBranches(
-        Company $company
+        Company $company,
+        User $currentUser
     ): array {
 
         return Store::query()
+            ->whereIn('id', $this->getAssignableBranchIds($company, $currentUser))
 
             ->where(
                 'company_id',
@@ -2001,7 +1956,6 @@ class UserController extends Controller
             ->all();
     }
 
-
     /*
     |--------------------------------------------------------------------------
     | Company Data
@@ -2028,7 +1982,6 @@ class UserController extends Controller
         ];
     }
 
-
     /*
     |--------------------------------------------------------------------------
     | User Data
@@ -2045,12 +1998,10 @@ class UserController extends Controller
             'stores:id,company_id,store_name,store_code,status',
         ]);
 
-
         $isCompanyAdmin =
             $user->hasRole(
                 'Company Admin'
             );
-
 
         return [
 

@@ -39,6 +39,7 @@ class BranchContextController extends Controller
 
         abort_unless(
             $user &&
+                (bool) $user->status &&
                 (bool) $user->is_super_user,
             403,
             'Only the Super Administrator can enter a company from the platform panel.'
@@ -180,6 +181,12 @@ class BranchContextController extends Controller
             401
         );
 
+
+        abort_unless(
+            (bool) $user->status,
+            403,
+            'Your account is inactive. Please contact the administrator.'
+        );
 
         /*
         |--------------------------------------------------------------------------
@@ -340,66 +347,23 @@ class BranchContextController extends Controller
 
         /*
         |--------------------------------------------------------------------------
-        | Company Admin
+        | Assigned Branch Access
         |--------------------------------------------------------------------------
         |
-        | Company Admin may access any ACTIVE branch belonging
-        | to their own company.
+        | Company Admin, Store Manager and other company users require
+        | explicit user_stores membership. Super Admin is handled above.
         |
         */
 
-        if (
-            $user->hasRole(
-                'Company Admin'
-            )
-        ) {
-
-            abort_unless(
-                (int) $store->company_id ===
-                    (int) $user->company_id,
-                403,
-                'You do not have access to this branch.'
-            );
-        } else {
-
-            /*
-            |--------------------------------------------------------------------------
-            | Branch Admin / Normal Business User
-            |--------------------------------------------------------------------------
-            |
-            | Non Company-Admin users must have explicit branch assignment
-            | through user_stores.
-            |
-            */
-
-            $hasAccess =
-                $user
-                ->stores()
-                ->where(
-                    'stores.id',
-                    $store->id
-                )
-                ->where(
-                    'stores.company_id',
-                    $user->company_id
-                )
-                ->where(
-                    'stores.status',
-                    true
-                )
-                ->exists();
-
-
-            if (
-                !$hasAccess
-            ) {
-
-                return AppResponse::error(
-                    'You do not have access to this branch.'
-                );
-            }
-        }
-
+        abort_unless(
+            $user->stores()
+                ->where('stores.id', $store->id)
+                ->where('stores.company_id', $user->company_id)
+                ->where('stores.status', true)
+                ->exists(),
+            403,
+            'You do not have access to this branch.'
+        );
 
         /*
         |--------------------------------------------------------------------------

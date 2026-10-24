@@ -1,732 +1,424 @@
-import {
-    Head,
-    Link,
-    useForm,
-} from '@inertiajs/react';
-
-import BusinessLayout
-    from '../../../Layouts/BusinessLayout';
-
-import PageShell
-    from '../../../Components/Business/PageShell';
-
-
-export default function RoleCreate({
-    company,
-    permissionGroups,
-}) {
-
+import '../../../../css/business/roles.css';
+import { useState } from 'react';
+import { Head, Link, useForm, usePage } from '@inertiajs/react';
+import BusinessLayout from '../../../Layouts/BusinessLayout';
+import PageShell from '../../../Components/Business/PageShell';
+export default function RoleCreate({ company, permissionGroups }) {
+    const { business } = usePage().props;
+    const logoPath =
+        company?.logo ||
+        (String(company?.id) === String(business?.company_id)
+            ? business?.company_logo
+            : null);
+    const logoUrl = logoPath
+        ? /^(https?:\/\/|\/)/i.test(logoPath)
+            ? logoPath
+            : `/storage/${String(logoPath).replace(/^storage\//, '')}`
+        : null;
+    const [failedLogo, setFailedLogo] = useState(null);
+    const [permissionSearch, setPermissionSearch] = useState('');
+    const searchQuery = permissionSearch.trim().toLowerCase();
+    const visibleGroups = (permissionGroups ?? []).filter((group) => {
+        const text = [
+            group.label,
+            group.module,
+            ...(group.permissions ?? []).flatMap((permission) => [
+                permission.label,
+                permission.action,
+                permission.name,
+            ]),
+        ]
+            .filter(Boolean)
+            .join(' ')
+            .toLowerCase();
+        return !searchQuery || text.includes(searchQuery);
+    });
     /*
     |--------------------------------------------------------------------------
     | Form
     |--------------------------------------------------------------------------
     */
-
-    const {
-        data,
-        setData,
-        post,
-        processing,
-        errors,
-        reset,
-    } = useForm({
-
-        name:
-            '',
-
-        description:
-            '',
-
-        status:
-            true,
-
-        permissions:
-            [],
+    const { data, setData, post, processing, errors, reset } = useForm({
+        name: '',
+        description: '',
+        status: true,
+        permissions: [],
     });
-
-
     /*
     |--------------------------------------------------------------------------
     | Toggle Permission
     |--------------------------------------------------------------------------
     */
-
-    const togglePermission =
-        permissionId => {
-
-            const current =
-                Array.isArray(
-                    data.permissions
-                )
-                    ? data.permissions
-                    : [];
-
-
-            const exists =
-                current.includes(
-                    permissionId
-                );
-
-
-            setData(
-                'permissions',
-                exists
-                    ? current.filter(
-                        id =>
-                            id !== permissionId
-                    )
-                    : [
-                        ...current,
-                        permissionId,
-                    ]
-            );
-        };
-
-
+    const togglePermission = (permissionId) => {
+        const current = Array.isArray(data.permissions) ? data.permissions : [];
+        const exists = current.includes(permissionId);
+        setData(
+            'permissions',
+            exists
+                ? current.filter((id) => id !== permissionId)
+                : [...current, permissionId],
+        );
+    };
     /*
     |--------------------------------------------------------------------------
     | Select Group
     |--------------------------------------------------------------------------
     */
-
-    const selectGroup =
-        group => {
-
-            const ids =
-                (
-                    group?.permissions
-                    ?? []
-                ).map(
-                    permission =>
-                        permission.id
-                );
-
-
-            const merged =
-                Array.from(
-                    new Set([
-                        ...data.permissions,
-                        ...ids,
-                    ])
-                );
-
-
-            setData(
-                'permissions',
-                merged
-            );
-        };
-
-
+    const selectGroup = (group) => {
+        const ids = (group?.permissions ?? []).map((permission) => permission.id);
+        const merged = Array.from(new Set([...data.permissions, ...ids]));
+        setData('permissions', merged);
+    };
     /*
     |--------------------------------------------------------------------------
     | Clear Group
     |--------------------------------------------------------------------------
     */
-
-    const clearGroup =
-        group => {
-
-            const ids =
-                new Set(
-                    (
-                        group?.permissions
-                        ?? []
-                    ).map(
-                        permission =>
-                            permission.id
-                    )
-                );
-
-
-            setData(
-                'permissions',
-                data.permissions.filter(
-                    id =>
-                        !ids.has(id)
-                )
-            );
-        };
-
-
+    const clearGroup = (group) => {
+        const ids = new Set(
+            (group?.permissions ?? []).map((permission) => permission.id),
+        );
+        setData(
+            'permissions',
+            data.permissions.filter((id) => !ids.has(id)),
+        );
+    };
     /*
     |--------------------------------------------------------------------------
     | Select All
     |--------------------------------------------------------------------------
     */
-
-    const selectAll =
-        () => {
-
-            const ids =
-                (
-                    permissionGroups
-                    ?? []
-                )
-                    .flatMap(
-                        group =>
-                            group.permissions
-                            ?? []
-                    )
-                    .map(
-                        permission =>
-                            permission.id
-                    );
-
-
-            setData(
-                'permissions',
-                ids
-            );
-        };
-
-
+    const selectAll = () => {
+        const ids = (permissionGroups ?? [])
+            .flatMap((group) => group.permissions ?? [])
+            .map((permission) => permission.id);
+        setData('permissions', ids);
+    };
     /*
     |--------------------------------------------------------------------------
     | Clear All
     |--------------------------------------------------------------------------
     */
-
-    const clearAll =
-        () => {
-
-            setData(
-                'permissions',
-                []
-            );
-        };
-
-
+    const clearAll = () => {
+        setData('permissions', []);
+    };
     /*
     |--------------------------------------------------------------------------
     | Submit
     |--------------------------------------------------------------------------
     */
-
-    const submit =
-        event => {
-
-            event.preventDefault();
-
-
-            post(
-                '/company/roles',
-                {
-                    preserveScroll:
-                        true,
-                }
-            );
-        };
-
-
+    const submit = (event) => {
+        event.preventDefault();
+        post('/company/roles', {
+            preserveScroll: true,
+        });
+    };
     return (
-
         <BusinessLayout>
-
             <Head title="Add Role" />
-
-
-            <PageShell
-                eyebrow="Company Management"
-                title="Add Role"
-                description="Create a company role and choose exactly what users with this role can access."
-                icon="bi-shield-plus"
-                breadcrumb={[
-                    {
-                        label:
-                            'Company',
-                        href:
-                            '/company/dashboard',
-                    },
-
-                    {
-                        label:
-                            'Roles & Permissions',
-                        href:
-                            '/company/roles',
-                    },
-
-                    {
-                        label:
-                            'Add Role',
-                    },
-                ]}
-                actions={
-                    <Link
-                        href="/company/roles"
-                        className="rr-page-secondary-btn"
-                    >
-                        <i className="bi bi-arrow-left"></i>
-
-                        Back
-                    </Link>
-                }
-            >
-
-                {/* =====================================================
+            <div className="rr-roles-refresh rr-role-create-page">
+                <PageShell
+                    eyebrow="Company Management"
+                    title="Add Role"
+                    description="Create a company role and choose exactly what users with this role can access."
+                    icon="bi-shield-plus"
+                    breadcrumb={[
+                        {
+                            label: 'Company',
+                            href: '/company/dashboard',
+                        },
+                        {
+                            label: 'Roles & Permissions',
+                            href: '/company/roles',
+                        },
+                        {
+                            label: 'Add Role',
+                        },
+                    ]}
+                    actions={
+                        <Link
+                            href="/company/roles"
+                            className="rr-page-secondary-btn"
+                        >
+                            <i className="bi bi-arrow-left"></i>
+                            Back
+                        </Link>
+                    }
+                >
+                    {/* =====================================================
                     COMPANY CONTEXT
                    ===================================================== */}
-
-                <section className="rr-role-create-context">
-
-                    <div className="rr-role-create-context-main">
-
-                        <div className="rr-role-create-context-avatar">
-
-                            {
-                                getInitials(
-                                    company?.company_name
-                                )
-                            }
-
+                    <section className="rr-role-create-context">
+                        <div className="rr-role-create-context-main">
+                            <div className="rr-role-create-context-avatar">
+                                {logoUrl && failedLogo !== logoUrl ? (
+                                    <img
+                                        src={logoUrl}
+                                        alt={`${company?.company_name ?? 'Company'} logo`}
+                                        onError={() => setFailedLogo(logoUrl)}
+                                    />
+                                ) : (
+                                    <span>{getInitials(company?.company_name)}</span>
+                                )}
+                            </div>
+                            <div>
+                                <span>Company</span>
+                                <strong>{company?.company_name ?? 'Company'}</strong>
+                                <small>{company?.company_code ?? ''}</small>
+                            </div>
                         </div>
-
-
-                        <div>
-
+                        <div className="rr-role-create-context-note">
+                            <i className="bi bi-shield-lock"></i>
                             <span>
-                                Company
+                                This role is available only inside this company.
                             </span>
-
-                            <strong>
-                                {
-                                    company?.company_name
-                                    ?? 'Company'
-                                }
-                            </strong>
-
-                            <small>
-                                {
-                                    company?.company_code
-                                    ?? ''
-                                }
-                            </small>
-
                         </div>
-
-                    </div>
-
-
-                    <div className="rr-role-create-context-note">
-
-                        <i className="bi bi-shield-lock"></i>
-
-                        <span>
-                            This role is available only inside this company.
-                        </span>
-
-                    </div>
-
-                </section>
-
-
-                {/* =====================================================
+                    </section>
+                    {/* =====================================================
                     FORM
                    ===================================================== */}
-
-                <form
-                    onSubmit={
-                        submit
-                    }
-                    className="rr-role-create-form"
-                >
-
-                    {/* =================================================
+                    <form
+                        onSubmit={submit}
+                        className="rr-role-create-form"
+                    >
+                        {/* =================================================
                         ROLE INFORMATION
                        ================================================= */}
-
-                    <section className="rr-page-panel rr-role-create-panel">
-
-                        <div className="rr-page-panel-header">
-
-                            <div className="rr-page-panel-title">
-
-                                <h2>
-                                    Role Information
-                                </h2>
-
-                                <p>
-                                    Role name, description and status
-                                </p>
-
+                        <section className="rr-page-panel rr-role-create-panel">
+                            <div className="rr-page-panel-header">
+                                <div className="rr-page-panel-title">
+                                    <h2>Role Information</h2>
+                                    <p>Role name, description and status</p>
+                                </div>
+                                <div className="rr-role-create-panel-icon">
+                                    <i className="bi bi-person-badge"></i>
+                                </div>
                             </div>
-
-
-                            <div className="rr-role-create-panel-icon">
-
-                                <i className="bi bi-person-badge"></i>
-
-                            </div>
-
-                        </div>
-
-
-                        <div className="rr-role-create-panel-body">
-
-                            <div className="rr-role-form-grid">
-
-                                <FormField
-                                    label="Role Name"
-                                    required
-                                    error={
-                                        errors.name
-                                    }
-                                >
-
-                                    <input
-                                        type="text"
-                                        value={
-                                            data.name
-                                        }
-                                        onChange={
-                                            event =>
-                                                setData(
-                                                    'name',
-                                                    event.target.value
-                                                )
-                                        }
-                                        placeholder="Example: Sales Staff"
-                                        autoFocus
-                                    />
-
-                                </FormField>
-
-
-                                <FormField
-                                    label="Status"
-                                    error={
-                                        errors.status
-                                    }
-                                >
-
-                                    <label className="rr-role-status-switch">
-
+                            <div className="rr-role-create-panel-body">
+                                <div className="rr-role-form-grid">
+                                    <FormField
+                                        label="Role Name"
+                                        required
+                                        error={errors.name}
+                                    >
                                         <input
-                                            type="checkbox"
-                                            checked={
-                                                Boolean(
-                                                    data.status
-                                                )
+                                            type="text"
+                                            value={data.name}
+                                            onChange={(event) =>
+                                                setData('name', event.target.value)
                                             }
-                                            onChange={
-                                                event =>
+                                            placeholder="Example: Sales Staff"
+                                            autoFocus
+                                        />
+                                    </FormField>
+                                    <FormField
+                                        label="Status"
+                                        error={errors.status}
+                                    >
+                                        <label className="rr-role-status-switch">
+                                            <input
+                                                type="checkbox"
+                                                checked={Boolean(data.status)}
+                                                onChange={(event) =>
                                                     setData(
                                                         'status',
-                                                        event.target.checked
+                                                        event.target.checked,
                                                     )
-                                            }
-                                        />
-
-
-                                        <span className="rr-role-status-slider"></span>
-
-
-                                        <div>
-
-                                            <strong>
-
-                                                {
-                                                    data.status
+                                                }
+                                            />
+                                            <span className="rr-role-status-slider"></span>
+                                            <div>
+                                                <strong>
+                                                    {data.status
                                                         ? 'Active'
-                                                        : 'Inactive'
-                                                }
-
-                                            </strong>
-
-                                            <small>
-
-                                                {
-                                                    data.status
+                                                        : 'Inactive'}
+                                                </strong>
+                                                <small>
+                                                    {data.status
                                                         ? 'Role can be assigned to users.'
-                                                        : 'Role is disabled.'
-                                                }
-
-                                            </small>
-
-                                        </div>
-
-                                    </label>
-
-                                </FormField>
-
-
-                                <FormField
-                                    label="Description"
-                                    error={
-                                        errors.description
-                                    }
-                                    wide
-                                >
-
-                                    <textarea
-                                        rows="3"
-                                        value={
-                                            data.description
-                                        }
-                                        onChange={
-                                            event =>
+                                                        : 'Role is disabled.'}
+                                                </small>
+                                            </div>
+                                        </label>
+                                    </FormField>
+                                    <FormField
+                                        label="Description"
+                                        error={errors.description}
+                                        wide
+                                    >
+                                        <textarea
+                                            rows="3"
+                                            value={data.description}
+                                            onChange={(event) =>
                                                 setData(
                                                     'description',
-                                                    event.target.value
+                                                    event.target.value,
                                                 )
-                                        }
-                                        placeholder="Describe what this role is used for..."
-                                    />
-
-                                </FormField>
-
+                                            }
+                                            placeholder="Describe what this role is used for..."
+                                        />
+                                    </FormField>
+                                </div>
                             </div>
-
-                        </div>
-
-                    </section>
-
-
-                    {/* =================================================
+                        </section>
+                        {/* =================================================
                         PERMISSIONS
                        ================================================= */}
-
-                    <section className="rr-page-panel rr-role-permission-panel">
-
-                        <div className="rr-role-permission-header">
-
-                            <div>
-
-                                <span>
-                                    Access Control
-                                </span>
-
-                                <strong>
-                                    Permissions
-                                </strong>
-
-                                <small>
-                                    Choose what users with this role can view or manage.
-                                </small>
-
-                            </div>
-
-
-                            <div className="rr-role-permission-actions">
-
-                                <span>
-                                    {
-                                        data.permissions.length
-                                    } selected
-                                </span>
-
-
-                                <button
-                                    type="button"
-                                    onClick={
-                                        selectAll
-                                    }
-                                >
-                                    <i className="bi bi-check2-all"></i>
-
-                                    Select All
-                                </button>
-
-
-                                <button
-                                    type="button"
-                                    onClick={
-                                        clearAll
-                                    }
-                                >
-                                    <i className="bi bi-x-lg"></i>
-
-                                    Clear
-                                </button>
-
-                            </div>
-
-                        </div>
-
-
-                        {
-                            errors.permissions && (
-
-                                <div className="rr-role-form-error rr-role-permission-error">
-
-                                    <i className="bi bi-exclamation-circle"></i>
-
-                                    {
-                                        errors.permissions
-                                    }
-
+                        <section className="rr-page-panel rr-role-permission-panel">
+                            <div className="rr-role-permission-header">
+                                <div>
+                                    <span>Access Control</span>
+                                    <strong>Permissions</strong>
+                                    <small>
+                                        Choose what users with this role can view or
+                                        manage.
+                                    </small>
                                 </div>
-
-                            )
-                        }
-
-
-                        {/* =============================================
+                                <div className="rr-role-permission-actions">
+                                    <span>{data.permissions.length} selected</span>
+                                    <button
+                                        type="button"
+                                        onClick={selectAll}
+                                    >
+                                        <i className="bi bi-check2-all"></i>
+                                        Select All
+                                    </button>
+                                    <button
+                                        type="button"
+                                        onClick={clearAll}
+                                    >
+                                        <i className="bi bi-x-lg"></i>
+                                        Clear
+                                    </button>
+                                </div>
+                            </div>
+                            <div className="rr-role-permission-search-toolbar">
+                                <div className="rr-role-permission-search">
+                                    <i
+                                        className="bi bi-search"
+                                        aria-hidden="true"
+                                    ></i>
+                                    <input
+                                        type="search"
+                                        aria-label="Search permissions"
+                                        placeholder="Search modules or permissions…"
+                                        value={permissionSearch}
+                                        onChange={(event) =>
+                                            setPermissionSearch(event.target.value)
+                                        }
+                                        onKeyDown={(event) => {
+                                            if (event.key === 'Enter')
+                                                event.preventDefault();
+                                            if (event.key === 'Escape')
+                                                setPermissionSearch('');
+                                        }}
+                                    />
+                                    {permissionSearch && (
+                                        <button
+                                            type="button"
+                                            aria-label="Clear permission search"
+                                            onClick={() => setPermissionSearch('')}
+                                        >
+                                            <i
+                                                className="bi bi-x-lg"
+                                                aria-hidden="true"
+                                            ></i>
+                                        </button>
+                                    )}
+                                </div>
+                                <span>
+                                    {visibleGroups.length} /{' '}
+                                    {(permissionGroups ?? []).length} modules
+                                </span>
+                            </div>
+                            {errors.permissions && (
+                                <div className="rr-role-form-error rr-role-permission-error">
+                                    <i className="bi bi-exclamation-circle"></i>
+                                    {errors.permissions}
+                                </div>
+                            )}
+                            {/* =============================================
                             WINDOWS PERMISSION MATRIX
                            ============================================= */}
-
-                        <div className="rr-role-permission-table-wrap">
-
-                            <table className="rr-role-permission-table">
-
-                                <thead>
-
-                                    <tr>
-
-                                        <th>
-                                            Module
-                                        </th>
-
-                                        <th>
-                                            Permissions
-                                        </th>
-
-                                        <th className="rr-role-permission-group-actions-head">
-                                            Group
-                                        </th>
-
-                                    </tr>
-
-                                </thead>
-
-
-                                <tbody>
-
-                                    {
-                                        (
-                                            permissionGroups
-                                            ?? []
-                                        ).map(
-                                            group => (
-
-                                                <PermissionGroupRow
-                                                    key={
-                                                        group.module
-                                                    }
-
-                                                    group={
-                                                        group
-                                                    }
-
-                                                    selectedPermissions={
-                                                        data.permissions
-                                                    }
-
-                                                    onToggle={
-                                                        togglePermission
-                                                    }
-
-                                                    onSelectGroup={
-                                                        selectGroup
-                                                    }
-
-                                                    onClearGroup={
-                                                        clearGroup
-                                                    }
-                                                />
-
-                                            )
-                                        )
-                                    }
-
-                                </tbody>
-
-                            </table>
-
-                        </div>
-
-                    </section>
-
-
-                    {/* =================================================
+                            <div className="rr-role-permission-table-wrap">
+                                <div className="rr-role-permission-card-grid">
+                                    {visibleGroups.map((group) => (
+                                        <PermissionGroupRow
+                                            key={group.module}
+                                            group={group}
+                                            selectedPermissions={data.permissions}
+                                            onToggle={togglePermission}
+                                            onSelectGroup={selectGroup}
+                                            onClearGroup={clearGroup}
+                                        />
+                                    ))}
+                                    {visibleGroups.length === 0 && (
+                                        <div>
+                                            <div className="rr-role-permission-no-results">
+                                                No matching permissions. Try another
+                                                search.
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+                        </section>
+                        {/* =================================================
                         ACTION BAR
                        ================================================= */}
-
-                    <div className="rr-role-create-actions">
-
-                        <div className="rr-role-create-actions-info">
-
-                            <i className="bi bi-info-circle"></i>
-
-                            <span>
-                                Super Admin and Company Admin permissions are protected by the system.
-                            </span>
-
+                        <div className="rr-role-create-actions">
+                            <div className="rr-role-create-actions-info">
+                                <i className="bi bi-info-circle"></i>
+                                <span>
+                                    Super Admin and Company Admin permissions are
+                                    protected by the system.
+                                </span>
+                            </div>
+                            <div>
+                                <Link
+                                    href="/company/roles"
+                                    className="rr-page-secondary-btn"
+                                >
+                                    Cancel
+                                </Link>
+                                <button
+                                    type="button"
+                                    className="rr-page-secondary-btn"
+                                    disabled={processing}
+                                    onClick={() => reset()}
+                                >
+                                    Reset
+                                </button>
+                                <button
+                                    type="submit"
+                                    className="rr-page-primary-btn"
+                                    disabled={processing}
+                                >
+                                    {processing ? (
+                                        <>
+                                            <span className="spinner-border spinner-border-sm"></span>
+                                            Creating...
+                                        </>
+                                    ) : (
+                                        <>
+                                            <i className="bi bi-shield-check"></i>
+                                            Create Role
+                                        </>
+                                    )}
+                                </button>
+                            </div>
                         </div>
-
-
-                        <div>
-
-                            <Link
-                                href="/company/roles"
-                                className="rr-page-secondary-btn"
-                            >
-                                Cancel
-                            </Link>
-
-
-                            <button
-                                type="button"
-                                className="rr-page-secondary-btn"
-                                disabled={
-                                    processing
-                                }
-                                onClick={
-                                    () =>
-                                        reset()
-                                }
-                            >
-                                Reset
-                            </button>
-
-
-                            <button
-                                type="submit"
-                                className="rr-page-primary-btn"
-                                disabled={
-                                    processing
-                                }
-                            >
-
-                                {
-                                    processing
-                                        ? (
-                                            <>
-                                                <span className="spinner-border spinner-border-sm"></span>
-
-                                                Creating...
-                                            </>
-                                        )
-                                        : (
-                                            <>
-                                                <i className="bi bi-shield-check"></i>
-
-                                                Create Role
-                                            </>
-                                        )
-                                }
-
-                            </button>
-
-                        </div>
-
-                    </div>
-
-                </form>
-
-            </PageShell>
-
+                    </form>
+                </PageShell>
+            </div>
         </BusinessLayout>
     );
 }
-
-
 /*
 |--------------------------------------------------------------------------
 | Permission Group Row
 |--------------------------------------------------------------------------
 */
-
 function PermissionGroupRow({
     group,
     selectedPermissions,
@@ -734,196 +426,83 @@ function PermissionGroupRow({
     onSelectGroup,
     onClearGroup,
 }) {
-
-    const permissions =
-        group?.permissions
-        ?? [];
-
-
-    const selectedCount =
-        permissions.filter(
-            permission =>
-                selectedPermissions.includes(
-                    permission.id
-                )
-        ).length;
-
-
+    const permissions = group?.permissions ?? [];
+    const selectedCount = permissions.filter((permission) =>
+        selectedPermissions.includes(permission.id),
+    ).length;
     const allSelected =
-        permissions.length > 0 &&
-        selectedCount ===
-        permissions.length;
-
-
+        permissions.length > 0 && selectedCount === permissions.length;
     return (
-
-        <tr>
-
+        <article className="rr-role-permission-card">
             {/* MODULE */}
-
-            <td>
-
+            <div className="rr-role-permission-card-section">
                 <div className="rr-role-permission-module">
-
                     <div>
-
                         <i className="bi bi-grid"></i>
-
                     </div>
-
-
                     <section>
-
-                        <strong>
-                            {
-                                group?.label
-                                ?? group?.module
-                                ?? 'Module'
-                            }
-                        </strong>
-
+                        <strong>{group?.label ?? group?.module ?? 'Module'}</strong>
                         <span>
-                            {
-                                selectedCount
-                            } / {
-                                permissions.length
-                            } selected
+                            {selectedCount} / {permissions.length} selected
                         </span>
-
                     </section>
-
                 </div>
-
-            </td>
-
-
+            </div>
             {/* PERMISSIONS */}
-
-            <td>
-
+            <div className="rr-role-permission-card-section">
                 <div className="rr-role-permission-options">
-
-                    {
-                        permissions.map(
-                            permission => {
-
-                                const selected =
-                                    selectedPermissions.includes(
-                                        permission.id
-                                    );
-
-
-                                return (
-
-                                    <label
-                                        key={
-                                            permission.id
-                                        }
-                                        className={
-                                            `rr-role-permission-option ${selected
-                                                ? 'selected'
-                                                : ''
-                                            }`
-                                        }
-                                    >
-
-                                        <input
-                                            type="checkbox"
-                                            checked={
-                                                selected
-                                            }
-                                            onChange={
-                                                () =>
-                                                    onToggle(
-                                                        permission.id
-                                                    )
-                                            }
-                                        />
-
-
-                                        <span className="rr-role-permission-checkbox">
-
-                                            <i className="bi bi-check"></i>
-
-                                        </span>
-
-
-                                        <span>
-                                            {
-                                                permission.label
-                                                ?? permission.action
-                                            }
-                                        </span>
-
-                                    </label>
-
-                                );
-                            }
-                        )
-                    }
-
+                    {permissions.map((permission) => {
+                        const selected = selectedPermissions.includes(permission.id);
+                        return (
+                            <label
+                                key={permission.id}
+                                className={`rr-role-permission-option ${selected ? 'selected' : ''
+                                    }`}
+                            >
+                                <input
+                                    type="checkbox"
+                                    checked={selected}
+                                    onChange={() => onToggle(permission.id)}
+                                />
+                                <span className="rr-role-permission-checkbox">
+                                    <i className="bi bi-check"></i>
+                                </span>
+                                <span>{permission.label ?? permission.action}</span>
+                            </label>
+                        );
+                    })}
                 </div>
-
-            </td>
-
-
+            </div>
             {/* GROUP ACTION */}
-
-            <td>
-
+            <div className="rr-role-permission-card-section">
                 <div className="rr-role-group-actions">
-
-                    {
-                        allSelected
-                            ? (
-
-                                <button
-                                    type="button"
-                                    onClick={
-                                        () =>
-                                            onClearGroup(
-                                                group
-                                            )
-                                    }
-                                    title="Clear module permissions"
-                                >
-                                    Clear
-                                </button>
-
-                            )
-                            : (
-
-                                <button
-                                    type="button"
-                                    onClick={
-                                        () =>
-                                            onSelectGroup(
-                                                group
-                                            )
-                                    }
-                                    title="Select all module permissions"
-                                >
-                                    Select
-                                </button>
-
-                            )
-                    }
-
+                    {allSelected ? (
+                        <button
+                            type="button"
+                            onClick={() => onClearGroup(group)}
+                            title="Clear module permissions"
+                        >
+                            Clear
+                        </button>
+                    ) : (
+                        <button
+                            type="button"
+                            onClick={() => onSelectGroup(group)}
+                            title="Select all module permissions"
+                        >
+                            Select
+                        </button>
+                    )}
                 </div>
-
-            </td>
-
-        </tr>
+            </div>
+        </article>
     );
 }
-
-
 /*
 |--------------------------------------------------------------------------
 | Form Field
 |--------------------------------------------------------------------------
 */
-
 function FormField({
     label,
     required = false,
@@ -931,125 +510,39 @@ function FormField({
     wide = false,
     children,
 }) {
-
     return (
-
-        <div
-            className={
-                `rr-role-form-field ${wide
-                    ? 'wide'
-                    : ''
-                }`
-            }
-        >
-
+        <div className={`rr-role-form-field ${wide ? 'wide' : ''}`}>
             <label>
-
                 {label}
-
-                {
-                    required && (
-                        <span>
-                            *
-                        </span>
-                    )
-                }
-
+                {required && <span>*</span>}
             </label>
-
-
-            <div
-                className={
-                    `rr-role-form-control ${error
-                        ? 'has-error'
-                        : ''
-                    }`
-                }
-            >
-
+            <div className={`rr-role-form-control ${error ? 'has-error' : ''}`}>
                 {children}
-
             </div>
-
-
-            {
-                error && (
-
-                    <div className="rr-role-form-error">
-
-                        <i className="bi bi-exclamation-circle"></i>
-
-                        {
-                            error
-                        }
-
-                    </div>
-
-                )
-            }
-
+            {error && (
+                <div className="rr-role-form-error">
+                    <i className="bi bi-exclamation-circle"></i>
+                    {error}
+                </div>
+            )}
         </div>
     );
 }
-
-
 /*
 |--------------------------------------------------------------------------
 | Initials
 |--------------------------------------------------------------------------
 */
-
-function getInitials(
-    name
-) {
-
-    if (
-        !name
-    ) {
-
+function getInitials(name) {
+    if (!name) {
         return 'CO';
     }
-
-
-    const parts =
-        String(
-            name
-        )
-            .trim()
-            .split(
-                /\s+/
-            )
-            .filter(
-                Boolean
-            );
-
-
-    if (
-        parts.length === 0
-    ) {
-
+    const parts = String(name).trim().split(/\s+/).filter(Boolean);
+    if (parts.length === 0) {
         return 'CO';
     }
-
-
-    if (
-        parts.length === 1
-    ) {
-
-        return parts[0]
-            .substring(
-                0,
-                2
-            )
-            .toUpperCase();
+    if (parts.length === 1) {
+        return parts[0].substring(0, 2).toUpperCase();
     }
-
-
-    return (
-        parts[0][0]
-        +
-        parts[
-        parts.length - 1
-        ][0]
-    ).toUpperCase();
+    return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
 }

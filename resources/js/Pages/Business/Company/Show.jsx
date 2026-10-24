@@ -1,1318 +1,234 @@
-import {
-    Head,
-    useForm,
-} from '@inertiajs/react';
-
-import BusinessLayout
-    from '../../../Layouts/BusinessLayout';
-
+import { Head, Link, useForm } from '@inertiajs/react';
+import { useEffect, useRef, useState } from 'react';
+import BusinessLayout from '../../../Layouts/BusinessLayout';
 import '../../../../css/business/company.css';
 
+export default function Show({ company = {} }) {
+    const form = useForm({
+        company_name: company.company_name ?? '',
+        owner_name: company.owner_name ?? '',
+        gst_number: company.gst_number ?? '',
+        pan_number: company.pan_number ?? '',
+        email: company.email ?? '',
+        phone: company.phone ?? '',
+        website: company.website ?? '',
+        address: company.address ?? '',
+        city: company.city ?? '',
+        state: company.state ?? '',
+        country: company.country ?? '',
+        pincode: company.pincode ?? '',
+        logo: null,
+    });
+    const picker = useRef(null);
+    const [preview, setPreview] = useState('');
+    const [failedLogo, setFailedLogo] = useState(null);
+    const [saved, setSaved] = useState(false);
+    const storedLogo = logoUrl(company.logo);
+    const displayLogo = preview || storedLogo;
+    const logoKey = `${company.id}:${displayLogo}`;
+    const active = [true, 1, '1'].includes(company.status);
 
-export default function Show({
-    company,
-}) {
+    useEffect(() => {
+        if (!form.data.logo) {
+            setPreview('');
+            return;
+        }
+        const url = URL.createObjectURL(form.data.logo);
+        setPreview(url);
+        return () => URL.revokeObjectURL(url);
+    }, [form.data.logo]);
 
-    /*
-    |--------------------------------------------------------------------------
-    | Form
-    |--------------------------------------------------------------------------
-    */
+    const update = (field, value) => {
+        form.setData(field, value);
+        form.clearErrors(field);
+        setSaved(false);
+    };
 
-    const form =
-        useForm({
+    const chooseLogo = (event) => {
+        const file = event.target.files?.[0];
+        if (!file) return;
+        if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.type)) {
+            form.setError('logo', 'Choose a JPG, PNG or WebP image.');
+            event.target.value = '';
+            return;
+        }
+        if (file.size > 2 * 1024 * 1024) {
+            form.setError('logo', 'The logo must be 2 MB or smaller.');
+            event.target.value = '';
+            return;
+        }
+        update('logo', file);
+    };
 
-            company_name:
-                company?.company_name
-                ?? '',
+    const clearSelection = () => {
+        update('logo', null);
+        if (picker.current) picker.current.value = '';
+    };
 
-            owner_name:
-                company?.owner_name
-                ?? '',
+    const reset = () => {
+        form.reset();
+        form.clearErrors();
+        setSaved(false);
+        if (picker.current) picker.current.value = '';
+    };
 
-            gst_number:
-                company?.gst_number
-                ?? '',
-
-            pan_number:
-                company?.pan_number
-                ?? '',
-
-            email:
-                company?.email
-                ?? '',
-
-            phone:
-                company?.phone
-                ?? '',
-
-            website:
-                company?.website
-                ?? '',
-
-            address:
-                company?.address
-                ?? '',
-
-            city:
-                company?.city
-                ?? '',
-
-            state:
-                company?.state
-                ?? '',
-
-            country:
-                company?.country
-                ?? '',
-
-            pincode:
-                company?.pincode
-                ?? '',
+    const submit = (event) => {
+        event.preventDefault();
+        if (form.processing) return;
+        form.transform((data) => ({ ...data, _method: 'put' }));
+        form.post('/company/profile', {
+            forceFormData: true,
+            preserveScroll: true,
+            onSuccess: () => {
+                form.defaults({ ...form.data, logo: null });
+                form.reset();
+                form.clearErrors();
+                if (picker.current) picker.current.value = '';
+                setSaved(true);
+            },
         });
+    };
 
+    const field = (name, label, icon, options = {}) => (
+        <Field
+            key={name}
+            name={name}
+            label={label}
+            icon={icon}
+            value={form.data[name]}
+            error={form.errors[name]}
+            onChange={(value) => update(name, options.uppercase ? value.toUpperCase() : value)}
+            disabled={form.processing}
+            {...options}
+        />
+    );
 
-    /*
-    |--------------------------------------------------------------------------
-    | Submit
-    |--------------------------------------------------------------------------
-    */
-
-    const submit =
-        (event) => {
-
-            event.preventDefault();
-
-
-            if (
-                form.processing
-            ) {
-
-                return;
-            }
-
-
-            form.put(
-                '/company/profile',
-                {
-                    preserveScroll:
-                        true,
-                }
-            );
-        };
-
-
-    /*
-    |--------------------------------------------------------------------------
-    | Update Field
-    |--------------------------------------------------------------------------
-    */
-
-    const updateField =
-        (
-            field,
-            value
-        ) => {
-
-            form.setData(
-                field,
-                value
-            );
-
-
-            if (
-                form.errors[
-                field
-                ]
-            ) {
-
-                form.clearErrors(
-                    field
-                );
-            }
-        };
-
+    const logoContent = displayLogo && failedLogo !== logoKey ? (
+        <img key={logoKey} src={displayLogo} alt={`${company.company_name ?? 'Company'} logo`} onError={() => setFailedLogo(logoKey)} />
+    ) : <span>{initials(company.company_name)}</span>;
 
     return (
-
-        <BusinessLayout
-            title="Company Profile"
-            subtitle="Manage your business information"
-            breadcrumbs={[
-                {
-                    label:
-                        'Dashboard',
-
-                    href:
-                        '/business/dashboard',
-                },
-
-                {
-                    label:
-                        'Company Profile',
-                },
-            ]}
-        >
-
+        <BusinessLayout title="Company Profile" subtitle="Business identity and contact details">
             <Head title="Company Profile - RR ERP" />
-
-
-            <div className="rr-company-profile-page">
-
-                {/* =====================================================
-                    HERO
-                   ===================================================== */}
-
-                <section className="rr-company-profile-hero">
-
-                    <div className="rr-company-profile-hero-main">
-
-                        <div className="rr-company-profile-logo">
-
-                            {
-                                company?.logo
-                                    ? (
-
-                                        <img
-                                            src={
-                                                company.logo
-                                            }
-                                            alt={
-                                                company.company_name
-                                            }
-                                        />
-
-                                    )
-                                    : (
-
-                                        <span>
-                                            {
-                                                getInitials(
-                                                    company?.company_name
-                                                )
-                                            }
-                                        </span>
-
-                                    )
-                            }
-
-                        </div>
-
-
-                        <div className="rr-company-profile-hero-content">
-
-                            <div className="rr-company-profile-eyebrow">
-                                COMPANY PROFILE
+            <main className="rr-cp">
+                <header className="rr-cp-hero">
+                    <div className="rr-cp-hero-main">
+                        <div className="rr-cp-hero-logo">{logoContent}</div>
+                        <div className="rr-cp-hero-copy">
+                            <span className="rr-cp-eyebrow"><i className="bi bi-building-check" /> COMPANY IDENTITY</span>
+                            <h1>{company.company_name || 'Company Profile'}</h1>
+                            <p>Your business identity, contact details and registered address.</p>
+                            <div className="rr-cp-chips">
+                                <span><i className="bi bi-upc-scan" /> {company.company_code || 'Company'}</span>
+                                <span><i className={`bi ${active ? 'bi-check-circle' : 'bi-pause-circle'}`} /> {active ? 'Active company' : 'Inactive company'}</span>
+                                {company.created_at && <span><i className="bi bi-calendar3" /> Since {date(company.created_at)}</span>}
                             </div>
-
-
-                            <h1>
-                                {
-                                    company?.company_name
-                                    ?? 'Company'
-                                }
-                            </h1>
-
-
-                            <p>
-                                Manage the official business information
-                                used throughout RR ERP.
-                            </p>
-
-
-                            <div className="rr-company-profile-meta">
-
-                                <MetaBadge
-                                    icon="bi-hash"
-                                    label="Company Code"
-                                    value={
-                                        company?.company_code
-                                        ?? '—'
-                                    }
-                                />
-
-
-                                <MetaBadge
-                                    icon={
-                                        company?.status
-                                            ? 'bi-check-circle-fill'
-                                            : 'bi-x-circle-fill'
-                                    }
-                                    label="Status"
-                                    value={
-                                        company?.status
-                                            ? 'Active'
-                                            : 'Inactive'
-                                    }
-                                    status={
-                                        company?.status
-                                    }
-                                />
-
-
-                                <MetaBadge
-                                    icon="bi-calendar3"
-                                    label="Created"
-                                    value={
-                                        formatDate(
-                                            company?.created_at
-                                        )
-                                    }
-                                />
-
-                            </div>
-
                         </div>
-
                     </div>
+                    <Link href="/company/dashboard" className="rr-cp-back"><i className="bi bi-arrow-left" /> Company Dashboard</Link>
+                </header>
 
-
-                    <div className="rr-company-profile-security">
-
-                        <div className="rr-company-profile-security-icon">
-
-                            <i className="bi bi-shield-check"></i>
-
-                        </div>
-
-
-                        <div>
-
-                            <strong>
-                                Protected Company Settings
-                            </strong>
-
-                            <span>
-                                Company code, activation and subscription
-                                controls are managed by the RR ERP Super
-                                Administrator.
-                            </span>
-
-                        </div>
-
-                    </div>
-
+                <section className="rr-cp-stats" aria-label="Company overview">
+                    <Summary icon="bi-person-badge" label="Owner / Contact" value={company.owner_name} tone="blue" />
+                    <Summary icon="bi-telephone" label="Phone" value={company.phone} tone="green" />
+                    <Summary icon="bi-envelope" label="Email" value={company.email} tone="violet" />
+                    <Summary icon="bi-geo-alt" label="Location" value={[company.city, company.state].filter(Boolean).join(', ')} tone="cyan" />
                 </section>
 
-
-                {/* =====================================================
-                    SUMMARY
-                   ===================================================== */}
-
-                <div className="rr-company-profile-summary">
-
-                    <SummaryCard
-                        icon="bi-person"
-                        label="Owner / Contact"
-                        value={
-                            company?.owner_name
-                            ?? 'Not provided'
-                        }
-                    />
-
-
-                    <SummaryCard
-                        icon="bi-telephone"
-                        label="Phone"
-                        value={
-                            company?.phone
-                            ?? 'Not provided'
-                        }
-                    />
-
-
-                    <SummaryCard
-                        icon="bi-envelope"
-                        label="Email"
-                        value={
-                            company?.email
-                            ?? 'Not provided'
-                        }
-                    />
-
-
-                    <SummaryCard
-                        icon="bi-geo-alt"
-                        label="Location"
-                        value={
-                            formatLocation(
-                                company
-                            )
-                        }
-                    />
-
-                </div>
-
-
-                {/* =====================================================
-                    FORM
-                   ===================================================== */}
-
-                <form
-                    onSubmit={
-                        submit
-                    }
-                    className="rr-company-profile-form"
-                >
-
-                    {/* =================================================
-                        BUSINESS INFORMATION
-                       ================================================= */}
-
-                    <section className="rr-company-profile-section">
-
-                        <SectionHeader
-                            icon="bi-buildings"
-                            title="Business Information"
-                            description="Core company and registration details"
-                        />
-
-
-                        <div className="rr-company-profile-section-body">
-
-                            <div className="rr-company-profile-grid">
-
-                                <FormField
-                                    label="Company Name"
-                                    required
-                                    error={
-                                        form.errors
-                                            .company_name
-                                    }
-                                    full
-                                >
-
-                                    <InputWrapper
-                                        icon="bi-buildings"
-                                    >
-
-                                        <input
-                                            type="text"
-                                            value={
-                                                form.data
-                                                    .company_name
-                                            }
-                                            onChange={
-                                                (
-                                                    event
-                                                ) =>
-                                                    updateField(
-                                                        'company_name',
-                                                        event.target.value
-                                                    )
-                                            }
-                                            placeholder="Company name"
-                                        />
-
-                                    </InputWrapper>
-
-                                </FormField>
-
-
-                                <FormField
-                                    label="Owner / Contact Name"
-                                    required
-                                    error={
-                                        form.errors
-                                            .owner_name
-                                    }
-                                >
-
-                                    <InputWrapper
-                                        icon="bi-person"
-                                    >
-
-                                        <input
-                                            type="text"
-                                            value={
-                                                form.data
-                                                    .owner_name
-                                            }
-                                            onChange={
-                                                (
-                                                    event
-                                                ) =>
-                                                    updateField(
-                                                        'owner_name',
-                                                        event.target.value
-                                                    )
-                                            }
-                                            placeholder="Owner or contact person"
-                                        />
-
-                                    </InputWrapper>
-
-                                </FormField>
-
-
-                                <FormField
-                                    label="Company Code"
-                                    hint="Managed by Super Admin"
-                                >
-
-                                    <InputWrapper
-                                        icon="bi-hash"
-                                        readOnly
-                                    >
-
-                                        <input
-                                            type="text"
-                                            value={
-                                                company?.company_code
-                                                ?? ''
-                                            }
-                                            readOnly
-                                        />
-
-                                    </InputWrapper>
-
-                                </FormField>
-
-
-                                <FormField
-                                    label="GST Number"
-                                    error={
-                                        form.errors
-                                            .gst_number
-                                    }
-                                >
-
-                                    <InputWrapper
-                                        icon="bi-file-earmark-text"
-                                    >
-
-                                        <input
-                                            type="text"
-                                            value={
-                                                form.data
-                                                    .gst_number
-                                            }
-                                            onChange={
-                                                (
-                                                    event
-                                                ) =>
-                                                    updateField(
-                                                        'gst_number',
-                                                        event.target.value
-                                                            .toUpperCase()
-                                                    )
-                                            }
-                                            placeholder="GSTIN"
-                                        />
-
-                                    </InputWrapper>
-
-                                </FormField>
-
-
-                                <FormField
-                                    label="PAN Number"
-                                    error={
-                                        form.errors
-                                            .pan_number
-                                    }
-                                >
-
-                                    <InputWrapper
-                                        icon="bi-card-text"
-                                    >
-
-                                        <input
-                                            type="text"
-                                            value={
-                                                form.data
-                                                    .pan_number
-                                            }
-                                            onChange={
-                                                (
-                                                    event
-                                                ) =>
-                                                    updateField(
-                                                        'pan_number',
-                                                        event.target.value
-                                                            .toUpperCase()
-                                                    )
-                                            }
-                                            placeholder="PAN number"
-                                        />
-
-                                    </InputWrapper>
-
-                                </FormField>
-
+                <form onSubmit={submit} className="rr-cp-form" encType="multipart/form-data">
+                    <section className="rr-cp-panel rr-cp-branding">
+                        <Section icon="bi-palette2" title="Company branding" description="A recognizable identity across your workspace" />
+                        <div className="rr-cp-brand-body">
+                            <div className="rr-cp-logo-preview">{logoContent}</div>
+                            <div className="rr-cp-logo-controls">
+                                <label htmlFor="company-logo" className="rr-cp-label">Company logo</label>
+                                <p>Upload a clear JPG, PNG or WebP image up to 2 MB. A square logo works best.</p>
+                                <div className="rr-cp-logo-actions">
+                                    <input ref={picker} id="company-logo" type="file" accept="image/jpeg,image/png,image/webp" disabled={form.processing} onChange={chooseLogo} className="rr-cp-file" />
+                                    <button type="button" className="rr-cp-btn rr-cp-secondary" disabled={form.processing} onClick={() => picker.current?.click()}><i className="bi bi-cloud-arrow-up" /> Change logo</button>
+                                    {form.data.logo && <button type="button" className="rr-cp-btn rr-cp-plain" disabled={form.processing} onClick={clearSelection}><i className="bi bi-x-lg" /> Undo selection</button>}
+                                </div>
+                                <small className="rr-cp-file-name">{form.data.logo ? form.data.logo.name : 'Your existing logo is kept until you save a replacement.'}</small>
+                                {form.errors.logo && <div className="rr-cp-error" role="alert"><i className="bi bi-exclamation-circle" /> {form.errors.logo}</div>}
                             </div>
-
                         </div>
-
                     </section>
 
-
-                    {/* =================================================
-                        CONTACT INFORMATION
-                       ================================================= */}
-
-                    <section className="rr-company-profile-section">
-
-                        <SectionHeader
-                            icon="bi-person-lines-fill"
-                            title="Contact Information"
-                            description="Business communication details"
-                        />
-
-
-                        <div className="rr-company-profile-section-body">
-
-                            <div className="rr-company-profile-grid">
-
-                                <FormField
-                                    label="Email Address"
-                                    error={
-                                        form.errors
-                                            .email
-                                    }
-                                >
-
-                                    <InputWrapper
-                                        icon="bi-envelope"
-                                    >
-
-                                        <input
-                                            type="email"
-                                            value={
-                                                form.data
-                                                    .email
-                                            }
-                                            onChange={
-                                                (
-                                                    event
-                                                ) =>
-                                                    updateField(
-                                                        'email',
-                                                        event.target.value
-                                                    )
-                                            }
-                                            placeholder="company@example.com"
-                                        />
-
-                                    </InputWrapper>
-
-                                </FormField>
-
-
-                                <FormField
-                                    label="Phone Number"
-                                    error={
-                                        form.errors
-                                            .phone
-                                    }
-                                >
-
-                                    <InputWrapper
-                                        icon="bi-telephone"
-                                    >
-
-                                        <input
-                                            type="text"
-                                            value={
-                                                form.data
-                                                    .phone
-                                            }
-                                            onChange={
-                                                (
-                                                    event
-                                                ) =>
-                                                    updateField(
-                                                        'phone',
-                                                        event.target.value
-                                                    )
-                                            }
-                                            placeholder="Business phone"
-                                        />
-
-                                    </InputWrapper>
-
-                                </FormField>
-
-
-                                <FormField
-                                    label="Website"
-                                    error={
-                                        form.errors
-                                            .website
-                                    }
-                                    full
-                                >
-
-                                    <InputWrapper
-                                        icon="bi-globe2"
-                                    >
-
-                                        <input
-                                            type="text"
-                                            value={
-                                                form.data
-                                                    .website
-                                            }
-                                            onChange={
-                                                (
-                                                    event
-                                                ) =>
-                                                    updateField(
-                                                        'website',
-                                                        event.target.value
-                                                    )
-                                            }
-                                            placeholder="https://example.com"
-                                        />
-
-                                    </InputWrapper>
-
-                                </FormField>
-
-                            </div>
-
+                    <section className="rr-cp-panel">
+                        <Section icon="bi-buildings" title="Business information" description="Official company and registration details" />
+                        <div className="rr-cp-fields">
+                            {field('company_name', 'Company name', 'bi-buildings', { required: true, full: true, placeholder: 'Registered company name', maxLength: 255 })}
+                            {field('owner_name', 'Owner / Contact name', 'bi-person', { required: true, placeholder: 'Owner or primary contact', maxLength: 255 })}
+                            <Field name="company_code" label="Company code" icon="bi-hash" value={company.company_code ?? ''} readOnly hint="Managed by Super Admin" />
+                            {field('gst_number', 'GST number', 'bi-file-earmark-text', { uppercase: true, placeholder: 'GSTIN', maxLength: 50 })}
+                            {field('pan_number', 'PAN number', 'bi-card-text', { uppercase: true, placeholder: 'PAN', maxLength: 50 })}
                         </div>
-
                     </section>
 
-
-                    {/* =================================================
-                        ADDRESS
-                       ================================================= */}
-
-                    <section className="rr-company-profile-section">
-
-                        <SectionHeader
-                            icon="bi-geo-alt"
-                            title="Business Address"
-                            description="Registered or primary business location"
-                        />
-
-
-                        <div className="rr-company-profile-section-body">
-
-                            <div className="rr-company-profile-grid">
-
-                                <FormField
-                                    label="Address"
-                                    error={
-                                        form.errors
-                                            .address
-                                    }
-                                    full
-                                >
-
-                                    <InputWrapper
-                                        icon="bi-geo-alt"
-                                        textarea
-                                    >
-
-                                        <textarea
-                                            rows="4"
-                                            value={
-                                                form.data
-                                                    .address
-                                            }
-                                            onChange={
-                                                (
-                                                    event
-                                                ) =>
-                                                    updateField(
-                                                        'address',
-                                                        event.target.value
-                                                    )
-                                            }
-                                            placeholder="Street, building, area..."
-                                        ></textarea>
-
-                                    </InputWrapper>
-
-                                </FormField>
-
-
-                                <FormField
-                                    label="City"
-                                    error={
-                                        form.errors
-                                            .city
-                                    }
-                                >
-
-                                    <InputWrapper
-                                        icon="bi-geo"
-                                    >
-
-                                        <input
-                                            type="text"
-                                            value={
-                                                form.data
-                                                    .city
-                                            }
-                                            onChange={
-                                                (
-                                                    event
-                                                ) =>
-                                                    updateField(
-                                                        'city',
-                                                        event.target.value
-                                                    )
-                                            }
-                                            placeholder="City"
-                                        />
-
-                                    </InputWrapper>
-
-                                </FormField>
-
-
-                                <FormField
-                                    label="State"
-                                    error={
-                                        form.errors
-                                            .state
-                                    }
-                                >
-
-                                    <InputWrapper
-                                        icon="bi-map"
-                                    >
-
-                                        <input
-                                            type="text"
-                                            value={
-                                                form.data
-                                                    .state
-                                            }
-                                            onChange={
-                                                (
-                                                    event
-                                                ) =>
-                                                    updateField(
-                                                        'state',
-                                                        event.target.value
-                                                    )
-                                            }
-                                            placeholder="State"
-                                        />
-
-                                    </InputWrapper>
-
-                                </FormField>
-
-
-                                <FormField
-                                    label="Country"
-                                    error={
-                                        form.errors
-                                            .country
-                                    }
-                                >
-
-                                    <InputWrapper
-                                        icon="bi-globe"
-                                    >
-
-                                        <input
-                                            type="text"
-                                            value={
-                                                form.data
-                                                    .country
-                                            }
-                                            onChange={
-                                                (
-                                                    event
-                                                ) =>
-                                                    updateField(
-                                                        'country',
-                                                        event.target.value
-                                                    )
-                                            }
-                                            placeholder="Country"
-                                        />
-
-                                    </InputWrapper>
-
-                                </FormField>
-
-
-                                <FormField
-                                    label="Pincode"
-                                    error={
-                                        form.errors
-                                            .pincode
-                                    }
-                                >
-
-                                    <InputWrapper
-                                        icon="bi-mailbox"
-                                    >
-
-                                        <input
-                                            type="text"
-                                            value={
-                                                form.data
-                                                    .pincode
-                                            }
-                                            onChange={
-                                                (
-                                                    event
-                                                ) =>
-                                                    updateField(
-                                                        'pincode',
-                                                        event.target.value
-                                                    )
-                                            }
-                                            placeholder="Pincode"
-                                        />
-
-                                    </InputWrapper>
-
-                                </FormField>
-
-                            </div>
-
+                    <section className="rr-cp-panel">
+                        <Section icon="bi-chat-square-text" title="Contact information" description="How customers and partners reach your business" />
+                        <div className="rr-cp-fields">
+                            {field('email', 'Email address', 'bi-envelope', { type: 'email', placeholder: 'accounts@company.com', maxLength: 255 })}
+                            {field('phone', 'Phone number', 'bi-telephone', { type: 'tel', placeholder: 'Business contact number', maxLength: 30 })}
+                            {field('website', 'Website', 'bi-globe', { full: true, placeholder: 'https://yourcompany.com', maxLength: 255 })}
                         </div>
-
                     </section>
 
-
-                    {/* =================================================
-                        FORM ACTIONS
-                       ================================================= */}
-
-                    <div className="rr-company-profile-actions">
-
-                        <div>
-
-                            {
-                                form.isDirty && (
-
-                                    <span className="rr-company-profile-unsaved">
-
-                                        <i className="bi bi-circle-fill"></i>
-
-                                        Unsaved changes
-
-                                    </span>
-
-                                )
-                            }
-
+                    <section className="rr-cp-panel">
+                        <Section icon="bi-geo-alt" title="Business address" description="Registered or primary business location" />
+                        <div className="rr-cp-fields">
+                            {field('address', 'Address', 'bi-geo-alt', { textarea: true, full: true, placeholder: 'Building, street and area', maxLength: 1000 })}
+                            {field('city', 'City', 'bi-geo', { placeholder: 'City', maxLength: 100 })}
+                            {field('state', 'State', 'bi-map', { placeholder: 'State', maxLength: 100 })}
+                            {field('country', 'Country', 'bi-globe', { placeholder: 'Country', maxLength: 100 })}
+                            {field('pincode', 'Pincode', 'bi-mailbox', { placeholder: 'Postal code', maxLength: 20 })}
                         </div>
+                    </section>
 
-
-                        <div className="rr-company-profile-action-buttons">
-
-                            <button
-                                type="button"
-                                className="rr-company-profile-reset-btn"
-                                disabled={
-                                    form.processing ||
-                                    !form.isDirty
-                                }
-                                onClick={
-                                    () =>
-                                        form.reset()
-                                }
-                            >
-
-                                <i className="bi bi-arrow-counterclockwise"></i>
-
-                                Reset
-
-                            </button>
-
-
-                            <button
-                                type="submit"
-                                className="rr-company-profile-save-btn"
-                                disabled={
-                                    form.processing ||
-                                    !form.isDirty
-                                }
-                            >
-
-                                {
-                                    form.processing
-                                        ? (
-                                            <>
-                                                <span className="spinner-border spinner-border-sm"></span>
-
-                                                Saving...
-                                            </>
-                                        )
-                                        : (
-                                            <>
-                                                <i className="bi bi-check-lg"></i>
-
-                                                Save Company Profile
-                                            </>
-                                        )
-                                }
-
-                            </button>
-
+                    <div className="rr-cp-protected"><i className="bi bi-shield-lock" /><span>Company code, activation and subscription controls are managed by Super Admin.</span></div>
+                    <footer className="rr-cp-actions">
+                        <div aria-live="polite">
+                            {form.processing ? <span className="rr-cp-save-state">{form.progress ? `Uploading ${form.progress.percentage}%` : 'Saving company profile…'}</span>
+                                : form.isDirty ? <span className="rr-cp-dirty"><i className="bi bi-circle-fill" /> Unsaved changes</span>
+                                    : saved ? <span className="rr-cp-saved"><i className="bi bi-check-circle" /> Company profile saved</span>
+                                        : <span className="rr-cp-save-state">Your company details are up to date.</span>}
                         </div>
-
-                    </div>
-
+                        <div className="rr-cp-action-buttons">
+                            <button type="button" className="rr-cp-btn rr-cp-secondary" onClick={reset} disabled={form.processing || !form.isDirty}><i className="bi bi-arrow-counterclockwise" /> Reset</button>
+                            <button type="submit" className="rr-cp-btn rr-cp-primary" disabled={form.processing || !form.isDirty}>{form.processing ? <span className="spinner-border spinner-border-sm" aria-hidden="true" /> : <i className="bi bi-check2" />}{form.processing ? 'Saving…' : 'Save Company Profile'}</button>
+                        </div>
+                    </footer>
                 </form>
-
-            </div>
-
+            </main>
         </BusinessLayout>
     );
 }
 
+function Section({ icon, title, description }) {
+    return <header className="rr-cp-panel-heading"><span><i className={`bi ${icon}`} /></span><div><h2>{title}</h2><p>{description}</p></div></header>;
+}
 
-/*
-|--------------------------------------------------------------------------
-| Section Header
-|--------------------------------------------------------------------------
-*/
+function Summary({ icon, label, value, tone }) {
+    return <article className={`rr-cp-stat ${tone}`}><span className="rr-cp-stat-icon"><i className={`bi ${icon}`} /></span><div><small>{label}</small><strong>{value || 'Not provided'}</strong></div><i className={`bi ${icon} rr-cp-watermark`} /></article>;
+}
 
-function SectionHeader({
-    icon,
-    title,
-    description,
-}) {
-
+function Field({ name, label, icon, value, onChange, error, hint, required = false, full = false, readOnly = false, disabled = false, textarea = false, type = 'text', placeholder = '', maxLength }) {
+    const id = `company-${name}`;
+    const props = {
+        id, value, readOnly, disabled, required, placeholder, maxLength,
+        'aria-invalid': Boolean(error),
+        'aria-describedby': error ? `${id}-error` : hint ? `${id}-hint` : undefined,
+        onChange: (event) => onChange?.(event.target.value),
+    };
     return (
-
-        <div className="rr-company-profile-section-header">
-
-            <div className="rr-company-profile-section-icon">
-
-                <i className={`bi ${icon}`}></i>
-
-            </div>
-
-
-            <div>
-
-                <h2>
-                    {title}
-                </h2>
-
-                <p>
-                    {description}
-                </p>
-
-            </div>
-
+        <div className={`rr-cp-field ${full ? 'full' : ''}`}>
+            <div className="rr-cp-label-row"><label htmlFor={id}>{label}{required && <span> *</span>}</label>{hint && <small id={`${id}-hint`}>{hint}</small>}</div>
+            <div className={`rr-cp-input ${textarea ? 'textarea' : ''} ${readOnly ? 'readonly' : ''} ${error ? 'invalid' : ''}`}><i className={`bi ${icon}`} />{textarea ? <textarea {...props} rows={3} /> : <input {...props} type={type} />}</div>
+            {error && <div id={`${id}-error`} className="rr-cp-error" role="alert"><i className="bi bi-exclamation-circle" /> {error}</div>}
         </div>
     );
 }
 
-
-/*
-|--------------------------------------------------------------------------
-| Form Field
-|--------------------------------------------------------------------------
-*/
-
-function FormField({
-    label,
-    required = false,
-    hint = null,
-    error = null,
-    full = false,
-    children,
-}) {
-
-    return (
-
-        <div
-            className={
-                `rr-company-profile-field ${full
-                    ? 'full'
-                    : ''
-                }`
-            }
-        >
-
-            <div className="rr-company-profile-label-row">
-
-                <label>
-
-                    {label}
-
-                    {
-                        required && (
-                            <span>*</span>
-                        )
-                    }
-
-                </label>
-
-
-                {
-                    hint && (
-
-                        <small>
-                            {hint}
-                        </small>
-
-                    )
-                }
-
-            </div>
-
-
-            {children}
-
-
-            {
-                error && (
-
-                    <div className="rr-company-profile-error">
-
-                        <i className="bi bi-exclamation-circle"></i>
-
-                        {error}
-
-                    </div>
-
-                )
-            }
-
-        </div>
-    );
-}
-
-
-/*
-|--------------------------------------------------------------------------
-| Input Wrapper
-|--------------------------------------------------------------------------
-*/
-
-function InputWrapper({
-    icon,
-    readOnly = false,
-    textarea = false,
-    children,
-}) {
-
-    return (
-
-        <div
-            className={
-                `rr-company-profile-input-wrapper ${readOnly
-                    ? 'readonly'
-                    : ''
-                } ${textarea
-                    ? 'textarea'
-                    : ''
-                }`
-            }
-        >
-
-            <i className={`bi ${icon}`}></i>
-
-            {children}
-
-        </div>
-    );
-}
-
-
-/*
-|--------------------------------------------------------------------------
-| Meta Badge
-|--------------------------------------------------------------------------
-*/
-
-function MetaBadge({
-    icon,
-    label,
-    value,
-    status = null,
-}) {
-
-    return (
-
-        <div
-            className={
-                `rr-company-profile-meta-badge ${status === true
-                    ? 'active'
-                    : status === false
-                        ? 'inactive'
-                        : ''
-                }`
-            }
-        >
-
-            <i className={`bi ${icon}`}></i>
-
-
-            <div>
-
-                <span>
-                    {label}
-                </span>
-
-                <strong>
-                    {value}
-                </strong>
-
-            </div>
-
-        </div>
-    );
-}
-
-
-/*
-|--------------------------------------------------------------------------
-| Summary
-|--------------------------------------------------------------------------
-*/
-
-function SummaryCard({
-    icon,
-    label,
-    value,
-}) {
-
-    return (
-
-        <div className="rr-company-profile-summary-card">
-
-            <div className="rr-company-profile-summary-icon">
-
-                <i className={`bi ${icon}`}></i>
-
-            </div>
-
-
-            <div>
-
-                <span>
-                    {label}
-                </span>
-
-                <strong>
-                    {value}
-                </strong>
-
-            </div>
-
-        </div>
-    );
-}
-
-
-/*
-|--------------------------------------------------------------------------
-| Initials
-|--------------------------------------------------------------------------
-*/
-
-function getInitials(
-    name
-) {
-
-    if (
-        !name
-    ) {
-        return 'CO';
-    }
-
-
-    const parts =
-        String(
-            name
-        )
-            .trim()
-            .split(
-                /\s+/
-            )
-            .filter(
-                Boolean
-            );
-
-
-    if (
-        parts.length === 1
-    ) {
-
-        return parts[0]
-            .substring(
-                0,
-                2
-            )
-            .toUpperCase();
-    }
-
-
-    return (
-        parts[0][0]
-        +
-        parts[
-        parts.length - 1
-        ][0]
-    ).toUpperCase();
-}
-
-
-/*
-|--------------------------------------------------------------------------
-| Date
-|--------------------------------------------------------------------------
-*/
-
-function formatDate(
-    value
-) {
-
-    if (
-        !value
-    ) {
-        return '—';
-    }
-
-
-    return new Intl.DateTimeFormat(
-        'en-IN',
-        {
-            day:
-                '2-digit',
-
-            month:
-                'short',
-
-            year:
-                'numeric',
-        }
-    ).format(
-        new Date(
-            value
-        )
-    );
-}
-
-
-/*
-|--------------------------------------------------------------------------
-| Location
-|--------------------------------------------------------------------------
-*/
-
-function formatLocation(
-    company
-) {
-
-    const parts =
-        [
-            company?.city,
-            company?.state,
-        ].filter(
-            Boolean
-        );
-
-
-    return parts.length
-        ? parts.join(', ')
-        : 'Not provided';
-}
+function logoUrl(value) { const path = typeof value === 'string' ? value.trim() : ''; if (!path) return ''; if (/^https?:\/\//i.test(path)) return path; const relative = path.replace(/^\/+/, ''); return relative.startsWith('storage/') ? `/${relative}` : `/storage/${relative}`; }
+function initials(value) { const words = String(value || 'Company').trim().split(/\s+/).filter(Boolean); return words.length > 1 ? `${words[0][0]}${words.at(-1)[0]}`.toUpperCase() : (words[0] || 'CO').slice(0, 2).toUpperCase(); }
+function date(value) { const result = new Date(value); return Number.isNaN(result.getTime()) ? '—' : new Intl.DateTimeFormat('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }).format(result); }

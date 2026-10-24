@@ -2,64 +2,64 @@
 
 namespace App\Http\Controllers;
 
+use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
 
 class BranchSelectionController extends Controller
 {
-    public function index(): Response
+    public function index(Request $request): Response
     {
-        $user = auth()->user();
+        $user = $request->user();
 
-        abort_if(
-            ! $user,
+        abort_unless(
+            $user,
             401,
             'Please log in to continue.'
         );
 
+        abort_unless(
+            $user->status,
+            403,
+            'Your account is inactive.'
+        );
+
         $company = $user->company;
 
-        abort_if(
-            ! $company,
+        abort_unless(
+            $company,
             403,
             'No company is assigned to your account.'
         );
 
+        abort_unless(
+            $company->status,
+            403,
+            'Your company is inactive.'
+        );
+
         /*
         |--------------------------------------------------------------------------
-        | Company Admin / Company Owner
+        | Assigned Branches
         |--------------------------------------------------------------------------
         |
-        | Access all active branches belonging to their company.
+        | Company Admin, Store Manager and other company users must
+        | have explicit branch assignments through user_stores.
+        |
+        | Super Admin uses the separate company/branch selection flow.
         |
         */
 
-        if ($user->hasAnyRole(['Company Admin', 'company-owner'])) {
-            $stores = $company->stores()
-                ->where('stores.status', 1)
-                ->orderBy('stores.store_name')
-                ->get();
-        } else {
-            /*
-            |--------------------------------------------------------------------------
-            | Normal User
-            |--------------------------------------------------------------------------
-            |
-            | Access only assigned active branches within their company.
-            |
-            */
-
-            $stores = $user->stores()
-                ->where('stores.company_id', $company->id)
-                ->where('stores.status', 1)
-                ->orderBy('stores.store_name')
-                ->get();
-        }
+        $stores = $user->stores()
+            ->where('stores.company_id', $company->id)
+            ->where('stores.status', true)
+            ->orderBy('stores.store_name')
+            ->get();
 
         abort_if(
             $stores->isEmpty(),
             403,
-            'No active branch is available for your account.'
+            'No active branch is assigned to your account.'
         );
 
         return Inertia::render('Branch/Select', [

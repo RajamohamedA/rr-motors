@@ -75,12 +75,9 @@ return new class extends Migration
         |------------------------------------------------------------------
         */
 
-        DB::statement(
-            'UPDATE sales_returns AS sr
-             INNER JOIN sales AS s ON s.id = sr.sale_id
-             SET sr.store_id = s.store_id
-             WHERE sr.store_id IS NULL'
-        );
+        DB::table('sales_returns')->whereNull('store_id')->update([
+            'store_id' => DB::raw('(SELECT sales.store_id FROM sales WHERE sales.id = sales_returns.sale_id)'),
+        ]);
 
         /*
         |------------------------------------------------------------------
@@ -140,22 +137,19 @@ return new class extends Migration
         |------------------------------------------------------------------
         */
 
-        DB::statement(
-            'UPDATE sale_return_items AS sri
-             INNER JOIN sales_returns AS sr ON sr.id = sri.sale_return_id
-             INNER JOIN sale_items AS si
-                ON si.sale_id = sr.sale_id
-                AND si.product_id = sri.product_id
-             SET sri.sale_item_id = si.id
-             WHERE sri.sale_item_id IS NULL'
-        );
+        DB::table('sale_return_items')->whereNull('sale_item_id')->update([
+            // Repeated products on an old invoice cannot be linked unambiguously.
+            'sale_item_id' => DB::raw('(SELECT CASE WHEN COUNT(*) = 1 THEN MIN(si.id) ELSE NULL END
+                FROM sale_items AS si
+                INNER JOIN sales_returns AS sr ON sr.sale_id = si.sale_id
+                WHERE sr.id = sale_return_items.sale_return_id
+                  AND si.product_id = sale_return_items.product_id)'),
+        ]);
 
         DB::table('sale_return_items')->update([
             'taxable_amount' => DB::raw(
-                'GREATEST(
-                    0,
-                    (quantity * sale_price) - discount_amount
-                )'
+                'CASE WHEN (quantity * sale_price) - discount_amount > 0
+                    THEN (quantity * sale_price) - discount_amount ELSE 0 END'
             ),
         ]);
     }

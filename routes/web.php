@@ -78,29 +78,6 @@ Route::get(
 
 /*
 |--------------------------------------------------------------------------
-| React Test
-|--------------------------------------------------------------------------
-|
-| Development helper.
-| Remove in production if no longer required.
-|
-*/
-
-Route::get(
-    '/react-test',
-    function () {
-
-        return Inertia::render(
-            'Test'
-        );
-    }
-)->middleware(
-    'auth'
-);
-
-
-/*
-|--------------------------------------------------------------------------
 | Generic Dashboard Redirect
 |--------------------------------------------------------------------------
 */
@@ -168,26 +145,6 @@ Route::middleware([
     );
 
 
-    Route::get(
-        '/forgot-password',
-        [
-            PasswordResetLinkController::class,
-            'create',
-        ]
-    )->name(
-        'password.request'
-    );
-
-
-    Route::post(
-        '/forgot-password',
-        [
-            PasswordResetLinkController::class,
-            'store',
-        ]
-    )->name(
-        'password.email'
-    );
 });
 
 
@@ -1224,6 +1181,7 @@ Route::middleware([
 |
 | ONE profile route group only.
 |
+| Personal profile is scoped to the authenticated user, not a branch.
 | Profile Show.jsx automatically chooses:
 |
 | SuperAdminLayout
@@ -1234,7 +1192,6 @@ Route::middleware([
 Route::middleware([
     'auth',
     'verified',
-    'business.context',
 ])->group(function () {
 
     Route::get(

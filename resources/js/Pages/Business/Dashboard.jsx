@@ -14,7 +14,9 @@ export default function Dashboard({
     recentSales = [],
     recentPurchases = [],
 }) {
-    const { auth = {} } = usePage().props;
+    const { auth = {}, business = {} } = usePage().props;
+    const [failedLogo, setFailedLogo] = useState(null);
+    const [branchPage, setBranchPage] = useState(1);
     const [switchingBranch, setSwitchingBranch] = useState(null);
 
     const company = context?.company ?? {};
@@ -36,8 +38,47 @@ export default function Dashboard({
         || roleNames.includes('company owner')
     );
 
+    const permissions = (auth?.user?.permissions ?? []).map((permission) =>
+        typeof permission === 'string' ? permission : permission?.name,
+    );
+    const can = (permission) => isCompanyAdmin || permissions.includes(permission);
+    const rawLogo = business.company_logo ?? company.logo ?? '';
+    const logoPath = String(rawLogo).replace(/^\/+/, '');
+    const logoUrl = /^https?:\/\//i.test(rawLogo)
+        ? rawLogo
+        : logoPath ? (logoPath.startsWith('storage/') ? `/${logoPath}` : `/storage/${logoPath}`) : '';
+    const logoKey = `${company.id ?? business.company_id}:${logoUrl}`;
+
+    // Branch details come from the company dashboard; access comes only
+    // from the server-authorized active branch list.
+    const authorizedBranches = Array.isArray(business.available_branches)
+        ? business.available_branches : [];
+    const authorizedIds = new Set(authorizedBranches.map((item) => String(item.id)));
+    const branchRows = Array.isArray(branches) && branches.length
+        ? branches : authorizedBranches;
+    const availableBranches = branchRows.map((item) => {
+        const hasAccess = Boolean(auth?.user?.is_super_user)
+            || authorizedIds.has(String(item.id));
+        const active = item.status === undefined
+            ? authorizedIds.has(String(item.id))
+            : [true, 1, '1'].includes(item.status);
+        return {
+            ...item,
+            name: item.name ?? item.store_name,
+            code: item.code ?? item.store_code,
+            status: active,
+            hasAccess,
+            is_current: hasAccess && Number(item.id) === Number(branch.id ?? business.store_id),
+        };
+    });
+    const accessibleCount = availableBranches.filter((item) => item.hasAccess && item.status).length;
+    const noAccessCount = availableBranches.filter((item) => !item.hasAccess).length;
+    const pageCount = Math.max(1, Math.ceil(availableBranches.length / 5));
+    const currentPage = Math.min(branchPage, pageCount);
+    const visibleBranches = availableBranches.slice((currentPage - 1) * 5, currentPage * 5);
+
     const selectBranch = (item) => {
-        if (!item?.id || item.is_current || !item.status) return;
+        if (switchingBranch !== null || !item?.id || !item.hasAccess || item.is_current || !item.status) return;
 
         setSwitchingBranch(item.id);
         router.post(`/select-branch/${item.id}`, {}, {
@@ -54,7 +95,15 @@ export default function Dashboard({
         >
             <Head title={`${branch.name ?? 'Branch'} Dashboard - RR ERP`} />
 
-            <main className="rr-branch-dash">
+            <main className="rr-branch-dash" aria-busy={switchingBranch !== null}>
+                {switchingBranch !== null && (
+                    <div role="status" aria-live="polite" style={{ position: 'fixed', inset: 0, zIndex: 20000, display: 'grid', placeItems: 'center', background: '#172f5066', backdropFilter: 'blur(2px)' }}>
+                        <div style={{ padding: '24px 32px', borderRadius: 12, background: '#fff', color: '#172f50', boxShadow: '0 12px 40px #172f5033', display: 'flex', alignItems: 'center', gap: 12 }}>
+                            <span className="spinner-border spinner-border-sm text-primary" aria-hidden="true" />
+                            <strong>Opening branch workspace…</strong>
+                        </div>
+                    </div>
+                )}
                 <section className="rr-branch-hero">
                     <div className="rr-branch-hero-grid" />
                     <span className="rr-branch-orb orb-one" />
@@ -62,7 +111,15 @@ export default function Dashboard({
 
                     <div className="rr-branch-hero-main">
                         <div className="rr-branch-hero-icon">
-                            <i className="bi bi-shop-window" />
+                            {logoUrl && failedLogo !== logoKey ? (
+                                <img
+                                    key={logoKey}
+                                    src={logoUrl}
+                                    alt={`${company.name ?? business.company_name ?? 'Company'} logo`}
+                                    onError={() => setFailedLogo(logoKey)}
+                                    style={{ width: '100%', height: '100%', objectFit: 'contain', borderRadius: 'inherit', background: '#fff', padding: 4, boxSizing: 'border-box' }}
+                                />
+                            ) : <i className="bi bi-shop-window" />}
                         </div>
 
                         <div className="rr-branch-hero-copy">
@@ -88,10 +145,10 @@ export default function Dashboard({
                                 Company Dashboard
                             </Link>
                         )}
-                        <Link href="/sales/create" className="rr-branch-btn bright">
+                        {can('sales.create') && <Link href="/sales/create" className="rr-branch-btn bright">
                             <i className="bi bi-plus-circle" />
                             New Sale
-                        </Link>
+                        </Link>}
                         {isSuperAdminContext && (
                             <button
                                 type="button"
@@ -115,36 +172,36 @@ export default function Dashboard({
                 </section>
 
                 <section className="rr-branch-kpi-grid">
-                    <KpiCard tone="blue" icon="bi-receipt-cutoff" label="Today's Sales" value={money(performance.today_sales)} hint="Branch sales today" href="/sales" />
-                    <KpiCard tone="violet" icon="bi-bag-check" label="Today's Purchases" value={money(performance.today_purchases)} hint="Branch purchases today" href="/purchases" />
-                    <KpiCard tone="cyan" icon="bi-wallet2" label="Receivables" value={money(performance.receivables)} hint="Customer outstanding" href="/customer-ledger" />
-                    <KpiCard tone="green" icon="bi-box-seam" label="Stock Value" value={money(performance.stock_value)} hint={`${number(performance.stock_quantity)} units available`} href="/current-stock" />
-                    <KpiCard tone="amber" icon="bi-exclamation-triangle" label="Low Stock" value={number(performance.low_stock_count)} hint="Items need attention" href="/current-stock?stock_status=low_stock" />
-                    <KpiCard tone="rose" icon="bi-people" label="Customers" value={number(performance.customers_count)} hint="Registered customers" href="/customers" />
-                    <KpiCard tone="indigo" icon="bi-truck" label="Suppliers" value={number(performance.suppliers_count)} hint="Registered suppliers" href="/suppliers" />
-                    <KpiCard tone="slate" icon="bi-boxes" label="Products" value={number(performance.products_count)} hint="Products in catalogue" href="/products" />
+                    {can('sales.view') && <KpiCard tone="blue" icon="bi-receipt-cutoff" label="Today's Sales" value={money(performance.today_sales)} hint="Branch sales today" href="/sales" />}
+                    {can('purchase.view') && <KpiCard tone="violet" icon="bi-bag-check" label="Today's Purchases" value={money(performance.today_purchases)} hint="Branch purchases today" href="/purchases" />}
+                    {can('customer-ledger.view') && <KpiCard tone="cyan" icon="bi-wallet2" label="Receivables" value={money(performance.receivables)} hint="Customer outstanding" href="/customer-ledger" />}
+                    {can('current-stock.view') && <KpiCard tone="green" icon="bi-box-seam" label="Stock Value" value={money(performance.stock_value)} hint={`${number(performance.stock_quantity)} units available`} href="/inventory/current-stock" />}
+                    {can('current-stock.view') && <KpiCard tone="amber" icon="bi-exclamation-triangle" label="Low Stock" value={number(performance.low_stock_count)} hint="Items need attention" href="/inventory/current-stock?stock_status=low_stock" />}
+                    {can('customer.view') && <KpiCard tone="rose" icon="bi-people" label="Customers" value={number(performance.customers_count)} hint="Registered customers" href="/customers" />}
+                    {can('supplier.view') && <KpiCard tone="indigo" icon="bi-truck" label="Suppliers" value={number(performance.suppliers_count)} hint="Registered suppliers" href="/suppliers" />}
+                    {can('product.view') && <KpiCard tone="slate" icon="bi-boxes" label="Products" value={number(performance.products_count)} hint="Products in catalogue" href="/products" />}
                 </section>
 
                 <section className="rr-branch-workspace-grid">
                     <article className="rr-branch-panel rr-branch-quick-panel">
                         <PanelTitle icon="bi-lightning-charge-fill" tone="amber" eyebrow="WORKSPACE" title="Quick Actions" description="Frequently used branch operations" />
                         <div className="rr-branch-quick-grid">
-                            <QuickAction href="/sales/create" icon="bi-receipt" tone="blue" title="Create Sale" text="New customer invoice" />
-                            <QuickAction href="/purchases/create" icon="bi-bag-plus" tone="violet" title="Create Purchase" text="Record supplier bill" />
-                            <QuickAction href="/stock-transfers/create" icon="bi-arrow-left-right" tone="cyan" title="Stock Transfer" text="Move stock to godown" />
-                            <QuickAction href="/customer-payments/create" icon="bi-cash-coin" tone="green" title="Receive Payment" text="Customer collection" />
-                            <QuickAction href="/expenses/create" icon="bi-wallet2" tone="rose" title="Add Expense" text="Record branch expense" />
-                            <QuickAction href="/current-stock" icon="bi-box-seam" tone="slate" title="Current Stock" text="View availability" />
+                            {can('sales.create') && <QuickAction href="/sales/create" icon="bi-receipt" tone="blue" title="Create Sale" text="New customer invoice" />}
+                            {can('purchase.create') && <QuickAction href="/purchases/create" icon="bi-bag-plus" tone="violet" title="Create Purchase" text="Record supplier bill" />}
+                            {can('stock-transfer.create') && <QuickAction href="/stock-transfers/create" icon="bi-arrow-left-right" tone="cyan" title="Stock Transfer" text="Move stock to godown" />}
+                            {can('customer-payment.create') && <QuickAction href="/customer-payments/create" icon="bi-cash-coin" tone="green" title="Receive Payment" text="Customer collection" />}
+                            {can('expense.create') && <QuickAction href="/expenses/create" icon="bi-wallet2" tone="rose" title="Add Expense" text="Record branch expense" />}
+                            {can('current-stock.view') && <QuickAction href="/inventory/current-stock" icon="bi-box-seam" tone="slate" title="Current Stock" text="View availability" />}
                         </div>
                     </article>
 
                     <article className="rr-branch-panel rr-branch-health-panel">
                         <PanelTitle icon="bi-activity" tone="green" eyebrow="SYSTEM STATUS" title="Branch Health" description="Operational readiness at a glance" />
                         <div className="rr-branch-health-list">
-                            <HealthRow label="Inventory catalogue" value={`${number(performance.products_count)} products`} icon="bi-boxes" tone="blue" />
-                            <HealthRow label="Customer network" value={`${number(performance.customers_count)} customers`} icon="bi-people" tone="rose" />
-                            <HealthRow label="Supplier network" value={`${number(performance.suppliers_count)} suppliers`} icon="bi-truck" tone="violet" />
-                            <HealthRow label="Stock attention" value={`${number(performance.low_stock_count)} low-stock items`} icon="bi-exclamation-circle" tone={Number(performance.low_stock_count) > 0 ? 'amber' : 'green'} />
+                            {can('product.view') && <HealthRow label="Inventory catalogue" value={`${number(performance.products_count)} products`} icon="bi-boxes" tone="blue" />}
+                            {can('customer.view') && <HealthRow label="Customer network" value={`${number(performance.customers_count)} customers`} icon="bi-people" tone="rose" />}
+                            {can('supplier.view') && <HealthRow label="Supplier network" value={`${number(performance.suppliers_count)} suppliers`} icon="bi-truck" tone="violet" />}
+                            {can('current-stock.view') && <HealthRow label="Stock attention" value={`${number(performance.low_stock_count)} low-stock items`} icon="bi-exclamation-circle" tone={Number(performance.low_stock_count) > 0 ? 'amber' : 'green'} />}
                         </div>
                     </article>
                 </section>
@@ -152,32 +209,43 @@ export default function Dashboard({
                 {isCompanyAdmin && (
                     <section className="rr-branch-admin-grid">
                         <article className="rr-branch-panel">
-                            <PanelTitle icon="bi-diagram-3" tone="blue" eyebrow="COMPANY CONTROL" title="Branch Network" description="Switch between available company branches" />
+                            <PanelTitle icon="bi-diagram-3" tone="blue" eyebrow="COMPANY CONTROL" title="Branch Network" description="Open assigned branches. Other branches require access approval." />
 
                             <div className="rr-branch-summary-strip">
-                                <SummaryMetric label="Total" value={branchSummary.total} tone="blue" />
-                                <SummaryMetric label="Active" value={branchSummary.active} tone="green" />
-                                <SummaryMetric label="Pending" value={branchSummary.pending} tone="amber" />
+                                <SummaryMetric label="Branches" value={availableBranches.length} tone="blue" />
+                                <SummaryMetric label="Accessible" value={accessibleCount} tone="green" />
+                                <SummaryMetric label="No Access" value={noAccessCount} tone="rose" />
+
                             </div>
 
                             <div className="rr-branch-list">
-                                {branches.length > 0 ? branches.slice(0, 5).map((item) => (
+                                {visibleBranches.length > 0 ? visibleBranches.map((item) => (
                                     <button
                                         type="button"
                                         key={item.id}
                                         className={`rr-branch-list-item ${item.is_current ? 'current' : ''}`}
-                                        disabled={!item.status || item.is_current || switchingBranch === item.id}
+                                        disabled={!item.hasAccess || !item.status || item.is_current || switchingBranch !== null}
+                                        title={!item.hasAccess ? 'Contact Super Admin or the ERP support team to request branch access.' : undefined}
+                                        style={!item.hasAccess ? { opacity: 1, color: '#475569', background: '#f8fafc', cursor: 'not-allowed' } : undefined}
                                         onClick={() => selectBranch(item)}
                                     >
                                         <span className="rr-branch-list-icon"><i className="bi bi-shop" /></span>
                                         <span className="rr-branch-list-data">
                                             <strong>{item.name}</strong>
                                             <small>{[item.code, item.city].filter(Boolean).join(' • ')}</small>
+                                            {!item.hasAccess && (
+                                                <small style={{ color: '#9f1239', whiteSpace: 'normal', lineHeight: 1.4 }}>
+                                                    Contact Super Admin or the ERP support team for access.
+                                                </small>
+                                            )}
                                         </span>
-                                        <span className={`rr-branch-status ${item.status ? 'active' : 'pending'}`}>
-                                            <i /> {item.is_current ? 'Current' : item.status ? 'Active' : 'Pending'}
+                                        <span
+                                            className={`rr-branch-status ${item.hasAccess && item.status ? 'active' : 'pending'}`}
+                                            style={!item.hasAccess ? { color: '#9f1239', background: '#fff1f2', borderColor: '#fecdd3', whiteSpace: 'nowrap' } : undefined}
+                                        >
+                                            <i /> {!item.hasAccess ? 'No Access' : item.is_current ? 'Current' : item.status ? 'Active' : 'Inactive'}
                                         </span>
-                                        {!item.is_current && item.status && (
+                                        {item.hasAccess && !item.is_current && item.status && (
                                             <i className={`bi ${switchingBranch === item.id ? 'bi-arrow-repeat rr-spin' : 'bi-chevron-right'} rr-branch-list-arrow`} />
                                         )}
                                     </button>
@@ -186,8 +254,15 @@ export default function Dashboard({
                                 )}
                             </div>
 
+                            {pageCount > 1 && (
+                                <div className="rr-branch-panel-footer" aria-label="Branch pagination">
+                                    <button type="button" className="btn btn-sm btn-outline-primary" disabled={currentPage === 1 || switchingBranch !== null} onClick={() => setBranchPage(currentPage - 1)}>Previous</button>
+                                    <span>Page {currentPage} of {pageCount}</span>
+                                    <button type="button" className="btn btn-sm btn-outline-primary" disabled={currentPage === pageCount || switchingBranch !== null} onClick={() => setBranchPage(currentPage + 1)}>Next</button>
+                                </div>
+                            )}
                             <div className="rr-branch-panel-footer">
-                                <Link href="/company/branches">Manage All Branches <i className="bi bi-arrow-right" /></Link>
+                                <Link href="/company/branches">Manage Branches <i className="bi bi-arrow-right" /></Link>
                             </div>
                         </article>
 
@@ -210,17 +285,17 @@ export default function Dashboard({
                 )}
 
                 <section className="rr-branch-activity-grid">
-                    <TransactionPanel title="Recent Sales" icon="bi-receipt" tone="blue" href="/sales" empty="No recent sales recorded.">
+                    {can('sales.view') && <TransactionPanel title="Recent Sales" icon="bi-receipt" tone="blue" href="/sales" empty="No recent sales recorded.">
                         {recentSales.map((sale) => (
                             <TransactionRow key={sale.id} href={`/sales/${sale.id}`} number={sale.invoice_no} party={sale.customer} amount={money(sale.grand_total)} tone="in" />
                         ))}
-                    </TransactionPanel>
+                    </TransactionPanel>}
 
-                    <TransactionPanel title="Recent Purchases" icon="bi-bag" tone="violet" href="/purchases" empty="No recent purchases recorded.">
+                    {can('purchase.view') && <TransactionPanel title="Recent Purchases" icon="bi-bag" tone="violet" href="/purchases" empty="No recent purchases recorded.">
                         {recentPurchases.map((purchase) => (
                             <TransactionRow key={purchase.id} href={`/purchases/${purchase.id}`} number={purchase.purchase_no} party={purchase.supplier} amount={money(purchase.grand_total)} tone="out" />
                         ))}
-                    </TransactionPanel>
+                    </TransactionPanel>}
                 </section>
             </main>
         </BusinessLayout>
@@ -318,10 +393,10 @@ function EmptyState({ icon, text }) {
 
 function money(value) {
     return new Intl.NumberFormat('en-IN', {
-        style: 'currency', currency: 'INR', maximumFractionDigits: 0,
-    }).format(Number(value ?? 0));
+        style: 'currency', currency: 'INR', minimumFractionDigits: 2, maximumFractionDigits: 2,
+    }).format(Number.isFinite(Number(value)) ? Number(value) : 0);
 }
 
 function number(value) {
-    return new Intl.NumberFormat('en-IN').format(Number(value ?? 0));
+    return new Intl.NumberFormat('en-IN').format(Number.isFinite(Number(value)) ? Number(value) : 0);
 }

@@ -387,6 +387,7 @@ class BusinessRegistrationController extends Controller
 
                         $companyAdminRole =
                             Role::query()
+                            ->whereNull('company_id')
                             ->where(
                                 'name',
                                 'Company Admin'

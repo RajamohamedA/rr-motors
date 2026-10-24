@@ -1,1135 +1,511 @@
-import {
-    Head,
-    Link,
-    router,
-    useForm,
-    usePage,
-} from '@inertiajs/react';
-
-import BusinessLayout
-    from '../../../Layouts/BusinessLayout';
-
-import PageShell
-    from '../../../Components/Business/PageShell';
-
-
-export default function UsersIndex({
-    company,
-    users,
-    summary,
-    roles,
-    filters,
-}) {
-
+import '../../../../css/business/users.css';
+import { useState } from 'react';
+import { Head, Link, router, useForm, usePage } from '@inertiajs/react';
+import BusinessLayout from '../../../Layouts/BusinessLayout';
+import PageShell from '../../../Components/Business/PageShell';
+export default function UsersIndex({ company, users, summary, roles, filters }) {
     /*
     |--------------------------------------------------------------------------
     | Current User
     |--------------------------------------------------------------------------
     */
-
-    const {
-        auth,
-    } = usePage().props;
-
-
-    const currentUser =
-        auth?.user;
-
-
-    const isSuperAdmin =
-        Boolean(
-            currentUser?.is_super_user
-        );
-
-
+    const { auth, business } = usePage().props;
+    const logoPath =
+        company?.logo ||
+        (String(business?.company_id) === String(company?.id)
+            ? business?.company_logo
+            : null);
+    const logoUrl = logoPath
+        ? /^(https?:\/\/|\/)/i.test(logoPath)
+            ? logoPath
+            : `/storage/${String(logoPath).replace(/^storage\//, '')}`
+        : null;
+    const [failedLogo, setFailedLogo] = useState(null);
+    const currentUser = auth?.user;
+    const isSuperAdmin = Boolean(currentUser?.is_super_user);
     /*
     |--------------------------------------------------------------------------
     | Filter Form
     |--------------------------------------------------------------------------
     */
-
-    const {
-        data,
-        setData,
-    } = useForm({
-
-        search:
-            filters?.search
-            ?? '',
-
-        role:
-            filters?.role
-            ?? '',
-
-        status:
-            filters?.status
-            ?? '',
+    const { data, setData } = useForm({
+        search: filters?.search ?? '',
+        role: filters?.role ?? '',
+        status: filters?.status ?? '',
     });
-
-
     /*
     |--------------------------------------------------------------------------
     | Users
     |--------------------------------------------------------------------------
     */
-
-    const userItems =
-        users?.data
-        ?? [];
-
-
+    const userItems = users?.data ?? [];
     /*
     |--------------------------------------------------------------------------
     | Role Filter Groups
     |--------------------------------------------------------------------------
     */
-
-    const systemRoles =
-        (
-            roles
-            ?? []
-        ).filter(
-            role =>
-                role?.type === 'system'
-                ||
-                Boolean(
-                    role?.is_system_role
-                )
-        );
-
-
-    const companyRoles =
-        (
-            roles
-            ?? []
-        ).filter(
-            role =>
-                role?.type === 'company'
-                ||
-                !Boolean(
-                    role?.is_system_role
-                )
-        );
-
-
+    const systemRoles = (roles ?? []).filter(
+        (role) => role?.type === 'system' || Boolean(role?.is_system_role),
+    );
+    const companyRoles = (roles ?? []).filter(
+        (role) => role?.type === 'company' || !Boolean(role?.is_system_role),
+    );
     /*
     |--------------------------------------------------------------------------
     | Apply Filters
     |--------------------------------------------------------------------------
     */
-
-    const applyFilters =
-        (
-            overrides = {}
-        ) => {
-
-            const payload = {
-
-                search:
-                    overrides.search
-                    ?? data.search,
-
-                role:
-                    overrides.role
-                    ?? data.role,
-
-                status:
-                    overrides.status
-                    ?? data.status,
-            };
-
-
-            router.get(
-                '/company/users',
-                payload,
-                {
-                    preserveState:
-                        true,
-
-                    preserveScroll:
-                        true,
-
-                    replace:
-                        true,
-                }
-            );
+    const applyFilters = (overrides = {}) => {
+        const payload = {
+            search: overrides.search ?? data.search,
+            role: overrides.role ?? data.role,
+            status: overrides.status ?? data.status,
         };
-
-
+        router.get('/company/users', payload, {
+            preserveState: true,
+            preserveScroll: true,
+            replace: true,
+        });
+    };
     /*
     |--------------------------------------------------------------------------
     | Search
     |--------------------------------------------------------------------------
     */
-
-    const submitSearch =
-        event => {
-
-            event.preventDefault();
-
-            applyFilters();
-        };
-
-
+    const submitSearch = (event) => {
+        event.preventDefault();
+        applyFilters();
+    };
     /*
     |--------------------------------------------------------------------------
     | Role Filter
     |--------------------------------------------------------------------------
     */
-
-    const changeRole =
-        event => {
-
-            const value =
-                event.target.value;
-
-
-            setData(
-                'role',
-                value
-            );
-
-
-            applyFilters({
-                role:
-                    value,
-            });
-        };
-
-
+    const changeRole = (event) => {
+        const value = event.target.value;
+        setData('role', value);
+        applyFilters({
+            role: value,
+        });
+    };
     /*
     |--------------------------------------------------------------------------
     | Status Filter
     |--------------------------------------------------------------------------
     */
-
-    const changeStatus =
-        event => {
-
-            const value =
-                event.target.value;
-
-
-            setData(
-                'status',
-                value
-            );
-
-
-            applyFilters({
-                status:
-                    value,
-            });
-        };
-
-
+    const changeStatus = (event) => {
+        const value = event.target.value;
+        setData('status', value);
+        applyFilters({
+            status: value,
+        });
+    };
     /*
     |--------------------------------------------------------------------------
     | Clear Search
     |--------------------------------------------------------------------------
     */
-
-    const clearSearch =
-        () => {
-
-            setData(
-                'search',
-                ''
-            );
-
-
-            applyFilters({
-                search:
-                    '',
-            });
-        };
-
-
+    const clearSearch = () => {
+        setData('search', '');
+        applyFilters({
+            search: '',
+        });
+    };
     /*
     |--------------------------------------------------------------------------
     | Clear All Filters
     |--------------------------------------------------------------------------
     */
-
-    const clearFilters =
-        () => {
-
-            setData({
-                search:
-                    '',
-                role:
-                    '',
-                status:
-                    '',
-            });
-
-
-            router.get(
-                '/company/users',
-                {},
-                {
-                    preserveState:
-                        true,
-
-                    preserveScroll:
-                        true,
-
-                    replace:
-                        true,
-                }
-            );
-        };
-
-
+    const clearFilters = () => {
+        setData({
+            search: '',
+            role: '',
+            status: '',
+        });
+        router.get(
+            '/company/users',
+            {},
+            {
+                preserveState: true,
+                preserveScroll: true,
+                replace: true,
+            },
+        );
+    };
     /*
     |--------------------------------------------------------------------------
     | Refresh
     |--------------------------------------------------------------------------
     */
-
-    const refresh =
-        () => {
-
-            router.reload({
-                only: [
-                    'users',
-                    'summary',
-                ],
-
-                preserveScroll:
-                    true,
-            });
-        };
-
-
+    const refresh = () => {
+        router.reload({
+            only: ['users', 'summary'],
+            preserveScroll: true,
+        });
+    };
     /*
     |--------------------------------------------------------------------------
     | Change Status
     |--------------------------------------------------------------------------
     */
-
-    const changeUserStatus =
-        (
-            managedUser,
-            status
-        ) => {
-
-            if (
-                !managedUser?.id ||
-                managedUser?.is_current_user
-            ) {
-                return;
-            }
-
-
-            if (
-                managedUser?.role ===
-                    'Company Admin'
-                &&
-                !isSuperAdmin
-            ) {
-                return;
-            }
-
-
-            router.patch(
-                `/company/users/${managedUser.id}/status`,
-                {
-                    status,
-                },
-                {
-                    preserveScroll:
-                        true,
-                }
-            );
-        };
-
-
+    const changeUserStatus = (managedUser, status) => {
+        if (!managedUser?.id || managedUser?.is_current_user) {
+            return;
+        }
+        if (managedUser?.role === 'Company Admin' && !isSuperAdmin) {
+            return;
+        }
+        router.patch(
+            `/company/users/${managedUser.id}/status`,
+            {
+                status,
+            },
+            {
+                preserveScroll: true,
+            },
+        );
+    };
     /*
     |--------------------------------------------------------------------------
     | Active Filters
     |--------------------------------------------------------------------------
     */
-
-    const hasFilters =
-        Boolean(
-            String(
-                filters?.search
-                ?? ''
-            ).trim()
-            ||
-            String(
-                filters?.role
-                ?? ''
-            ).trim()
-            ||
-            String(
-                filters?.status
-                ?? ''
-            ).trim()
-        );
-
-
+    const hasFilters = Boolean(
+        String(filters?.search ?? '').trim() ||
+        String(filters?.role ?? '').trim() ||
+        String(filters?.status ?? '').trim(),
+    );
     return (
-
         <BusinessLayout>
-
             <Head title="Users & Access" />
-
-
-            <PageShell
-                eyebrow="Company Management"
-                title="Users & Access"
-                description="Manage employees, roles and branch access."
-                icon="bi-people"
-                breadcrumb={[
-                    {
-                        label:
-                            'Company',
-                        href:
-                            '/company/dashboard',
-                    },
-                    {
-                        label:
-                            'Users & Access',
-                    },
-                ]}
-                actions={
-                    <Link
-                        href="/company/users/create"
-                        className="rr-page-primary-btn"
-                    >
-                        <i className="bi bi-person-plus"></i>
-
-                        Add User
-                    </Link>
-                }
-            >
-
-                {/* =====================================================
+            <div className="rr-users-refresh rr-users-index">
+                <PageShell
+                    eyebrow="Company Management"
+                    title="Users & Access"
+                    description="Manage employees, roles and branch access."
+                    icon="bi-people"
+                    breadcrumb={[
+                        {
+                            label: 'Company',
+                            href: '/company/dashboard',
+                        },
+                        {
+                            label: 'Users & Access',
+                        },
+                    ]}
+                    actions={
+                        <Link
+                            href="/company/users/create"
+                            className="rr-page-primary-btn"
+                        >
+                            <i className="bi bi-person-plus"></i>
+                            Add User
+                        </Link>
+                    }
+                >
+                    {/* =====================================================
                     COMPANY STRIP
                    ===================================================== */}
-
-                <section className="rr-users-company-strip">
-
-                    <div>
-
-                        <div className="rr-users-company-avatar">
-
-                            {
-                                getInitials(
-                                    company?.company_name
-                                )
-                            }
-
+                    <section className="rr-users-company-strip">
+                        <div>
+                            <div className="rr-users-company-avatar">
+                                {logoUrl && failedLogo !== logoUrl ? (
+                                    <img
+                                        src={logoUrl}
+                                        alt={`${company?.company_name ?? 'Company'} logo`}
+                                        onError={() => setFailedLogo(logoUrl)}
+                                    />
+                                ) : (
+                                    <span>{getInitials(company?.company_name)}</span>
+                                )}
+                            </div>
+                            <div className="rr-users-company-info">
+                                <span>Company</span>
+                                <strong>{company?.company_name ?? 'Company'}</strong>
+                                {company?.company_code && (
+                                    <small>{company.company_code}</small>
+                                )}
+                            </div>
                         </div>
-
-
-                        <div className="rr-users-company-info">
-
-                            <span>
-                                Company
-                            </span>
-
-                            <strong>
-                                {
-                                    company?.company_name
-                                    ?? 'Company'
-                                }
-                            </strong>
-
-                            {
-                                company?.company_code && (
-
-                                    <small>
-                                        {
-                                            company.company_code
-                                        }
-                                    </small>
-
-                                )
-                            }
-
+                        <div className="rr-users-company-security">
+                            <i className="bi bi-shield-check"></i>
+                            <span>Company-isolated user management</span>
                         </div>
-
-                    </div>
-
-
-                    <div className="rr-users-company-security">
-
-                        <i className="bi bi-shield-check"></i>
-
-                        <span>
-                            Company-isolated user management
-                        </span>
-
-                    </div>
-
-                </section>
-
-
-                {/* =====================================================
+                    </section>
+                    {/* =====================================================
                     SUMMARY
                    ===================================================== */}
-
-                <section className="rr-users-summary">
-
-                    <SummaryItem
-                        label="Total Users"
-                        value={
-                            summary?.total
-                            ?? 0
-                        }
-                        icon="bi-people"
-                    />
-
-                    <SummaryItem
-                        label="Active Users"
-                        value={
-                            summary?.active
-                            ?? 0
-                        }
-                        icon="bi-person-check"
-                        tone="success"
-                    />
-
-                    <SummaryItem
-                        label="Inactive"
-                        value={
-                            summary?.inactive
-                            ?? 0
-                        }
-                        icon="bi-person-dash"
-                        tone="danger"
-                    />
-
-                    <SummaryItem
-                        label="Branch Access"
-                        value={
-                            summary?.branches
-                            ?? 0
-                        }
-                        icon="bi-diagram-3"
-                        tone="primary"
-                    />
-
-                </section>
-
-
-                {/* =====================================================
+                    <section className="rr-users-summary">
+                        <SummaryItem
+                            label="Total Users"
+                            value={summary?.total ?? 0}
+                            icon="bi-people"
+                        />
+                        <SummaryItem
+                            label="Active Users"
+                            value={summary?.active ?? 0}
+                            icon="bi-person-check"
+                            tone="success"
+                        />
+                        <SummaryItem
+                            label="Inactive"
+                            value={summary?.inactive ?? 0}
+                            icon="bi-person-dash"
+                            tone="danger"
+                        />
+                        <SummaryItem
+                            label="Branch Access"
+                            value={summary?.branches ?? 0}
+                            icon="bi-diagram-3"
+                            tone="primary"
+                        />
+                    </section>
+                    {/* =====================================================
                     MAIN PANEL
                    ===================================================== */}
-
-                <section className="rr-users-panel">
-
-                    {/* =================================================
+                    <section className="rr-users-panel">
+                        {/* =================================================
                         TOOLBAR
                        ================================================= */}
-
-                    <div className="rr-users-toolbar">
-
-                        <form
-                            className="rr-users-search-form"
-                            onSubmit={
-                                submitSearch
-                            }
-                        >
-
-                            <div className="rr-users-search-box">
-
-                                <i className="bi bi-search"></i>
-
-
-                                <input
-                                    type="text"
-                                    value={
-                                        data.search
-                                    }
-                                    placeholder="Search name, email or mobile..."
-                                    onChange={
-                                        event =>
-                                            setData(
-                                                'search',
-                                                event.target.value
-                                            )
-                                    }
-                                />
-
-
-                                {
-                                    data.search && (
-
+                        <div className="rr-users-toolbar">
+                            <form
+                                className="rr-users-search-form"
+                                onSubmit={submitSearch}
+                            >
+                                <div className="rr-users-search-box">
+                                    <i className="bi bi-search"></i>
+                                    <input
+                                        type="text"
+                                        value={data.search}
+                                        placeholder="Search name, email or mobile..."
+                                        onChange={(event) =>
+                                            setData('search', event.target.value)
+                                        }
+                                    />
+                                    {data.search && (
                                         <button
                                             type="button"
-                                            onClick={
-                                                clearSearch
-                                            }
+                                            onClick={clearSearch}
                                             className="rr-users-search-clear"
                                             title="Clear search"
                                         >
-
                                             <i className="bi bi-x-lg"></i>
-
                                         </button>
-
-                                    )
-                                }
-
-                            </div>
-
-
-                            <button
-                                type="submit"
-                                className="rr-users-search-btn"
-                            >
-                                Search
-                            </button>
-
-                        </form>
-
-
-                        <div className="rr-users-filter-group">
-
-                            <div className="rr-users-filter">
-
-                                <label>
-                                    Role
-                                </label>
-
-                                <select
-                                    value={
-                                        data.role
-                                    }
-                                    onChange={
-                                        changeRole
-                                    }
+                                    )}
+                                </div>
+                                <button
+                                    type="submit"
+                                    className="rr-users-search-btn"
                                 >
-                                    <option value="">
-                                        All Roles
-                                    </option>
-
-
-                                    {
-                                        systemRoles.length > 0 && (
-
+                                    Search
+                                </button>
+                            </form>
+                            <div className="rr-users-filter-group">
+                                <div className="rr-users-filter">
+                                    <label>Role</label>
+                                    <select
+                                        value={data.role}
+                                        onChange={changeRole}
+                                    >
+                                        <option value="">All Roles</option>
+                                        {systemRoles.length > 0 && (
                                             <optgroup label="System Roles">
-
-                                                {
-                                                    systemRoles.map(
-                                                        role => (
-
-                                                            <option
-                                                                key={
-                                                                    role.id
-                                                                }
-                                                                value={
-                                                                    role.name
-                                                                }
-                                                            >
-                                                                {
-                                                                    role.name
-                                                                }
-                                                            </option>
-
-                                                        )
-                                                    )
-                                                }
-
+                                                {systemRoles.map((role) => (
+                                                    <option
+                                                        key={role.id}
+                                                        value={role.name}
+                                                    >
+                                                        {role.name}
+                                                    </option>
+                                                ))}
                                             </optgroup>
-
-                                        )
-                                    }
-
-
-                                    {
-                                        companyRoles.length > 0 && (
-
+                                        )}
+                                        {companyRoles.length > 0 && (
                                             <optgroup label="Company Roles">
-
-                                                {
-                                                    companyRoles.map(
-                                                        role => (
-
-                                                            <option
-                                                                key={
-                                                                    role.id
-                                                                }
-                                                                value={
-                                                                    role.name
-                                                                }
-                                                            >
-                                                                {
-                                                                    role.name
-                                                                }
-                                                            </option>
-
-                                                        )
-                                                    )
-                                                }
-
+                                                {companyRoles.map((role) => (
+                                                    <option
+                                                        key={role.id}
+                                                        value={role.name}
+                                                    >
+                                                        {role.name}
+                                                    </option>
+                                                ))}
                                             </optgroup>
-
-                                        )
-                                    }
-
-                                </select>
-
-                            </div>
-
-
-                            <div className="rr-users-filter">
-
-                                <label>
-                                    Status
-                                </label>
-
-                                <select
-                                    value={
-                                        data.status
-                                    }
-                                    onChange={
-                                        changeStatus
-                                    }
-                                >
-                                    <option value="">
-                                        All
-                                    </option>
-
-                                    <option value="1">
-                                        Active
-                                    </option>
-
-                                    <option value="0">
-                                        Inactive
-                                    </option>
-
-                                </select>
-
-                            </div>
-
-
-                            {
-                                hasFilters && (
-
+                                        )}
+                                    </select>
+                                </div>
+                                <div className="rr-users-filter">
+                                    <label>Status</label>
+                                    <select
+                                        value={data.status}
+                                        onChange={changeStatus}
+                                    >
+                                        <option value="">All</option>
+                                        <option value="1">Active</option>
+                                        <option value="0">Inactive</option>
+                                    </select>
+                                </div>
+                                {hasFilters && (
                                     <button
                                         type="button"
                                         className="rr-users-clear-filters"
-                                        onClick={
-                                            clearFilters
-                                        }
+                                        onClick={clearFilters}
                                     >
-
                                         <i className="bi bi-funnel"></i>
-
                                         Clear
-
                                     </button>
-
-                                )
-                            }
-
-
-                            <button
-                                type="button"
-                                className="rr-users-refresh-btn"
-                                onClick={
-                                    refresh
-                                }
-                            >
-
-                                <i className="bi bi-arrow-clockwise"></i>
-
-                                Refresh
-
-                            </button>
-
+                                )}
+                                <button
+                                    type="button"
+                                    className="rr-users-refresh-btn"
+                                    onClick={refresh}
+                                >
+                                    <i className="bi bi-arrow-clockwise"></i>
+                                    Refresh
+                                </button>
+                            </div>
                         </div>
-
-                    </div>
-
-
-                    {/* =================================================
+                        {/* =================================================
                         TABLE
                        ================================================= */}
-
-                    {
-                        userItems.length > 0
-                            ? (
-
-                                <div className="rr-users-table-wrap">
-
-                                    <table className="rr-users-table">
-
-                                        <thead>
-
-                                            <tr>
-
-                                                <th>
-                                                    User
-                                                </th>
-
-                                                <th>
-                                                    Role
-                                                </th>
-
-                                                <th>
-                                                    Branch Access
-                                                </th>
-
-                                                <th>
-                                                    Status
-                                                </th>
-
-                                                <th className="rr-users-actions-heading">
-                                                    Actions
-                                                </th>
-
-                                            </tr>
-
-                                        </thead>
-
-
-                                        <tbody>
-
-                                            {
-                                                userItems.map(
-                                                    managedUser => (
-
-                                                        <UserRow
-                                                            key={
-                                                                managedUser.id
-                                                            }
-
-                                                            user={
-                                                                managedUser
-                                                            }
-
-                                                            onStatusChange={
-                                                                changeUserStatus
-                                                            }
-
-                                                            isSuperAdmin={
-                                                                isSuperAdmin
-                                                            }
-                                                        />
-
-                                                    )
-                                                )
-                                            }
-
-                                        </tbody>
-
-                                    </table>
-
-                                </div>
-
-                            )
-                            : (
-
-                                <EmptyUsers
-                                    hasFilters={
-                                        hasFilters
-                                    }
-                                />
-
-                            )
-                    }
-
-                </section>
-
-
-                {/* =====================================================
+                        {userItems.length > 0 ? (
+                            <div className="rr-users-table-wrap">
+                                <table className="rr-users-table">
+                                    <thead>
+                                        <tr>
+                                            <th>User</th>
+                                            <th>Role</th>
+                                            <th>Branch Access</th>
+                                            <th>Status</th>
+                                            <th className="rr-users-actions-heading">
+                                                Actions
+                                            </th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {userItems.map((managedUser) => (
+                                            <UserRow
+                                                key={managedUser.id}
+                                                user={managedUser}
+                                                onStatusChange={changeUserStatus}
+                                                isSuperAdmin={isSuperAdmin}
+                                            />
+                                        ))}
+                                    </tbody>
+                                </table>
+                            </div>
+                        ) : (
+                            <EmptyUsers hasFilters={hasFilters} />
+                        )}
+                    </section>
+                    {/* =====================================================
                     PAGINATION
                    ===================================================== */}
-
-                {
-                    (
-                        users?.links
-                        ?? []
-                    ).length > 3 && (
-
+                    {(users?.links ?? []).length > 3 && (
                         <div className="rr-users-pagination">
-
-                            {
-                                users.links.map(
-                                    (
-                                        link,
-                                        index
-                                    ) => (
-
-                                        link.url
-                                            ? (
-
-                                                <Link
-                                                    key={
-                                                        index
-                                                    }
-                                                    href={
-                                                        link.url
-                                                    }
-                                                    preserveScroll
-                                                    className={
-                                                        link.active
-                                                            ? 'active'
-                                                            : ''
-                                                    }
-                                                >
-
-                                                    <span
-                                                        dangerouslySetInnerHTML={{
-                                                            __html:
-                                                                link.label,
-                                                        }}
-                                                    />
-
-                                                </Link>
-
-                                            )
-                                            : (
-
-                                                <span
-                                                    key={
-                                                        index
-                                                    }
-                                                    className="disabled"
-                                                    dangerouslySetInnerHTML={{
-                                                        __html:
-                                                            link.label,
-                                                    }}
-                                                />
-
-                                            )
-
-                                    )
-                                )
-                            }
-
+                            {users.links.map((link, index) =>
+                                link.url ? (
+                                    <Link
+                                        key={index}
+                                        href={link.url}
+                                        preserveScroll
+                                        className={link.active ? 'active' : ''}
+                                    >
+                                        <span
+                                            dangerouslySetInnerHTML={{
+                                                __html: link.label,
+                                            }}
+                                        />
+                                    </Link>
+                                ) : (
+                                    <span
+                                        key={index}
+                                        className="disabled"
+                                        dangerouslySetInnerHTML={{
+                                            __html: link.label,
+                                        }}
+                                    />
+                                ),
+                            )}
                         </div>
-
-                    )
-                }
-
-            </PageShell>
-
+                    )}
+                </PageShell>
+            </div>
         </BusinessLayout>
     );
 }
-
-
 /*
 |--------------------------------------------------------------------------
 | Summary
 |--------------------------------------------------------------------------
 */
-
-function SummaryItem({
-    label,
-    value,
-    icon,
-    tone = 'default',
-}) {
-
+function SummaryItem({ label, value, icon, tone = 'default' }) {
     return (
-
-        <div
-            className={
-                `rr-users-summary-item rr-users-summary-${tone}`
-            }
-        >
-
+        <div className={`rr-users-summary-item rr-users-summary-${tone}`}>
             <div className="rr-users-summary-icon">
-
-                <i
-                    className={
-                        `bi ${icon}`
-                    }
-                ></i>
-
+                <i className={`bi ${icon}`}></i>
             </div>
-
-
             <div>
-
-                <span>
-                    {label}
-                </span>
-
-                <strong>
-                    {
-                        Number(
-                            value
-                            ?? 0
-                        ).toLocaleString(
-                            'en-IN'
-                        )
-                    }
-                </strong>
-
+                <span>{label}</span>
+                <strong>{Number(value ?? 0).toLocaleString('en-IN')}</strong>
             </div>
-
         </div>
-
     );
 }
-
-
 /*
 |--------------------------------------------------------------------------
 | User Row
 |--------------------------------------------------------------------------
 */
-
-function UserRow({
-    user,
-    onStatusChange,
-    isSuperAdmin,
-}) {
-
-    const isCompanyAdmin =
-        user?.role ===
-        'Company Admin';
-
-
+function UserRow({ user, onStatusChange, isSuperAdmin }) {
+    const isCompanyAdmin = user?.role === 'Company Admin';
     const roleType =
-        user?.role_type
-        ?? (
-            user?.is_system_role
-                ? 'system'
-                : (
-                    isCompanyAdmin
-                        ? 'system'
-                        : 'company'
-                )
-        );
-
-
-    const roleTypeLabel =
-        isCompanyAdmin
-            ? (
-                isSuperAdmin
-                    ? 'Company Admin'
-                    : 'Protected'
-            )
-            : roleType === 'system'
-                ? 'System'
-                : 'Company';
-
-
-    const branches =
-        user?.branches
-        ?? [];
-
-
-    const branchText =
-        user?.all_branches
-            ? 'All Branches'
-            : getBranchSummary(
-                branches
-            );
-
-
+        user?.role_type ??
+        (user?.is_system_role ? 'system' : isCompanyAdmin ? 'system' : 'company');
+    const roleTypeLabel = isCompanyAdmin
+        ? isSuperAdmin
+            ? 'Company Admin'
+            : 'Protected'
+        : roleType === 'system'
+            ? 'System'
+            : 'Company';
+    const branches = user?.branches ?? [];
+    const branchText = user?.all_branches
+        ? 'All Branches'
+        : getBranchSummary(branches);
     return (
-
-        <tr
-            className={
-                user?.is_current_user
-                    ? 'current-user'
-                    : ''
-            }
-        >
-
+        <tr className={user?.is_current_user ? 'current-user' : ''}>
             {/* USER */}
-
             <td>
-
                 <div className="rr-users-user-cell">
-
-                    <div className="rr-users-avatar">
-
-                        {
-                            getInitials(
-                                user?.name
-                            )
-                        }
-
-                    </div>
-
-
+                    <div className="rr-users-avatar">{getInitials(user?.name)}</div>
                     <div className="rr-users-user-info">
-
                         <div>
-
-                            <strong>
-                                {
-                                    user?.name
-                                    ?? 'User'
-                                }
-                            </strong>
-
-
-                            {
-                                user?.is_current_user && (
-
-                                    <span className="rr-users-you-badge">
-                                        You
-                                    </span>
-
-                                )
-                            }
-
+                            <strong>{user?.name ?? 'User'}</strong>
+                            {user?.is_current_user && (
+                                <span className="rr-users-you-badge">You</span>
+                            )}
                         </div>
-
-
                         <span>
-
                             <i className="bi bi-envelope"></i>
-
-                            {
-                                user?.email
-                                ?? '—'
-                            }
-
+                            {user?.email ?? '—'}
                         </span>
-
-
-                        {
-                            user?.mobile && (
-
-                                <span>
-
-                                    <i className="bi bi-telephone"></i>
-
-                                    {
-                                        user.mobile
-                                    }
-
-                                </span>
-
-                            )
-                        }
-
+                        {user?.mobile && (
+                            <span>
+                                <i className="bi bi-telephone"></i>
+                                {user.mobile}
+                            </span>
+                        )}
                     </div>
-
                 </div>
-
             </td>
-
-
             {/* ROLE */}
-
             <td>
-
                 <div className="rr-users-role-cell">
-
                     <span
-                        className={
-                            `rr-users-role-badge ${isCompanyAdmin
-                                ? 'company-admin'
-                                : roleType
-                            }`
-                        }
+                        className={`rr-users-role-badge ${isCompanyAdmin ? 'company-admin' : roleType
+                            }`}
                     >
-
                         <i
                             className={
                                 isCompanyAdmin
@@ -1139,71 +515,32 @@ function UserRow({
                                         : 'bi bi-person-badge'
                             }
                         ></i>
-
-                        {
-                            user?.role
-                            ?? 'No Role'
-                        }
-
+                        {user?.role ?? 'No Role'}
                     </span>
-
-
-                    {
-                        user?.role && (
-
-                            <span
-                                className={
-                                    `rr-users-role-type ${isCompanyAdmin
-                                        ? 'protected'
-                                        : roleType
-                                    }`
-                                }
-                            >
-
-                                {
-                                    roleTypeLabel
-                                }
-
-                                {
-                                    !isCompanyAdmin &&
-                                        roleType === 'system'
-                                        ? ' Role'
-                                        : !isCompanyAdmin
-                                            ? ' Role'
-                                            : ''
-                                }
-
-                            </span>
-
-                        )
-                    }
-
+                    {user?.role && (
+                        <span
+                            className={`rr-users-role-type ${isCompanyAdmin ? 'protected' : roleType
+                                }`}
+                        >
+                            {roleTypeLabel}
+                            {!isCompanyAdmin && roleType === 'system'
+                                ? ' Role'
+                                : !isCompanyAdmin
+                                    ? ' Role'
+                                    : ''}
+                        </span>
+                    )}
                 </div>
-
             </td>
-
-
             {/* BRANCH ACCESS */}
-
             <td>
-
                 <div className="rr-users-branch-access">
-
                     <i className="bi bi-diagram-3"></i>
-
-                    <span>
-                        {branchText}
-                    </span>
-
+                    <span>{branchText}</span>
                 </div>
-
             </td>
-
-
             {/* STATUS */}
-
             <td>
-
                 <span
                     className={
                         user?.status
@@ -1211,295 +548,118 @@ function UserRow({
                             : 'rr-users-status inactive'
                     }
                 >
-
                     <span></span>
-
-                    {
-                        user?.status
-                            ? 'Active'
-                            : 'Inactive'
-                    }
-
+                    {user?.status ? 'Active' : 'Inactive'}
                 </span>
-
             </td>
-
-
             {/* ACTIONS */}
-
-            <td>
-
+            <td className="rr-users-actions-cell">
                 <div className="rr-users-row-actions">
-
                     <Link
-                        href={
-                            `/company/users/${user.id}`
-                        }
+                        href={`/company/users/${user.id}`}
                         className="rr-users-action-btn view"
                         title="View user"
                     >
-
                         <i className="bi bi-eye"></i>
-
                         View
-
                     </Link>
-
-
-                    {
-                        (
-                            !isCompanyAdmin
-                            ||
-                            isSuperAdmin
-                        ) && (
-
-                            <Link
-                                href={
-                                    `/company/users/${user.id}/edit`
-                                }
-                                className="rr-users-action-btn edit"
-                                title={
-                                    isCompanyAdmin
-                                        ? 'Edit Company Admin'
-                                        : 'Edit user'
-                                }
-                            >
-
-                                <i className="bi bi-pencil-square"></i>
-
-                                Edit
-
-                            </Link>
-
-                        )
-                    }
-
-
-                    {
-                        !user?.is_current_user
-                        &&
-                        (
-                            !isCompanyAdmin
-                            ||
-                            isSuperAdmin
-                        ) && (
-
-                            <button
-                                type="button"
+                    {(!isCompanyAdmin || isSuperAdmin) && (
+                        <Link
+                            href={`/company/users/${user.id}/edit`}
+                            className="rr-users-action-btn edit"
+                            title={
+                                isCompanyAdmin ? 'Edit Company Admin' : 'Edit user'
+                            }
+                        >
+                            <i className="bi bi-pencil-square"></i>
+                            Edit
+                        </Link>
+                    )}
+                    {!user?.is_current_user && (!isCompanyAdmin || isSuperAdmin) && (
+                        <button
+                            type="button"
+                            className={`rr-users-action-btn ${user?.status ? 'disable' : 'enable'
+                                }`}
+                            onClick={() => onStatusChange(user, !user.status)}
+                            title={
+                                user?.status ? 'Deactivate user' : 'Activate user'
+                            }
+                        >
+                            <i
                                 className={
-                                    `rr-users-action-btn ${user?.status
-                                        ? 'disable'
-                                        : 'enable'
-                                    }`
-                                }
-                                onClick={
-                                    () =>
-                                        onStatusChange(
-                                            user,
-                                            !user.status
-                                        )
-                                }
-                                title={
                                     user?.status
-                                        ? 'Deactivate user'
-                                        : 'Activate user'
+                                        ? 'bi bi-person-x'
+                                        : 'bi bi-person-check'
                                 }
-                            >
-
-                                <i
-                                    className={
-                                        user?.status
-                                            ? 'bi bi-person-x'
-                                            : 'bi bi-person-check'
-                                    }
-                                ></i>
-
-                                {
-                                    user?.status
-                                        ? 'Disable'
-                                        : 'Enable'
-                                }
-
-                            </button>
-
-                        )
-                    }
-
+                            ></i>
+                            {user?.status ? 'Disable' : 'Enable'}
+                        </button>
+                    )}
                 </div>
-
             </td>
-
         </tr>
-
     );
 }
-
-
 /*
 |--------------------------------------------------------------------------
 | Empty
 |--------------------------------------------------------------------------
 */
-
-function EmptyUsers({
-    hasFilters,
-}) {
-
+function EmptyUsers({ hasFilters }) {
     return (
-
         <div className="rr-users-empty">
-
             <div>
-
-                <i
-                    className={
-                        hasFilters
-                            ? 'bi bi-search'
-                            : 'bi bi-person-plus'
-                    }
-                ></i>
-
+                <i className={hasFilters ? 'bi bi-search' : 'bi bi-person-plus'}></i>
             </div>
-
-
             <strong>
-
-                {
-                    hasFilters
-                        ? 'No matching users'
-                        : 'No users created yet'
-                }
-
+                {hasFilters ? 'No matching users' : 'No users created yet'}
             </strong>
-
-
             <p>
-
-                {
-                    hasFilters
-                        ? 'Change the search or filter options and try again.'
-                        : 'Create a business user and assign their role and branch access.'
-                }
-
+                {hasFilters
+                    ? 'Change the search or filter options and try again.'
+                    : 'Create a business user and assign their role and branch access.'}
             </p>
-
-
-            {
-                !hasFilters && (
-
-                    <Link
-                        href="/company/users/create"
-                        className="rr-page-primary-btn"
-                    >
-
-                        <i className="bi bi-person-plus"></i>
-
-                        Add User
-
-                    </Link>
-
-                )
-            }
-
+            {!hasFilters && (
+                <Link
+                    href="/company/users/create"
+                    className="rr-page-primary-btn"
+                >
+                    <i className="bi bi-person-plus"></i>
+                    Add User
+                </Link>
+            )}
         </div>
-
     );
 }
-
-
 /*
 |--------------------------------------------------------------------------
 | Branch Summary
 |--------------------------------------------------------------------------
 */
-
-function getBranchSummary(
-    branches
-) {
-
-    if (
-        !Array.isArray(
-            branches
-        ) ||
-        branches.length === 0
-    ) {
-
+function getBranchSummary(branches) {
+    if (!Array.isArray(branches) || branches.length === 0) {
         return 'No Branch Access';
     }
-
-
-    if (
-        branches.length === 1
-    ) {
-
-        return branches[0]?.store_name
-            ?? '1 Branch';
+    if (branches.length === 1) {
+        return branches[0]?.store_name ?? '1 Branch';
     }
-
-
-    return `${branches[0]?.store_name
-        ?? 'Branch'
-        } +${branches.length - 1}`;
+    return `${branches[0]?.store_name ?? 'Branch'} +${branches.length - 1}`;
 }
-
-
 /*
 |--------------------------------------------------------------------------
 | Initials
 |--------------------------------------------------------------------------
 */
-
-function getInitials(
-    name
-) {
-
-    if (
-        !name
-    ) {
-
+function getInitials(name) {
+    if (!name) {
         return 'U';
     }
-
-
-    const parts =
-        String(
-            name
-        )
-            .trim()
-            .split(
-                /\s+/
-            )
-            .filter(
-                Boolean
-            );
-
-
-    if (
-        parts.length === 0
-    ) {
-
+    const parts = String(name).trim().split(/\s+/).filter(Boolean);
+    if (parts.length === 0) {
         return 'U';
     }
-
-
-    if (
-        parts.length === 1
-    ) {
-
-        return parts[0]
-            .substring(
-                0,
-                2
-            )
-            .toUpperCase();
+    if (parts.length === 1) {
+        return parts[0].substring(0, 2).toUpperCase();
     }
-
-
-    return (
-        parts[0][0]
-        +
-        parts[
-        parts.length - 1
-        ][0]
-    ).toUpperCase();
+    return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
 }

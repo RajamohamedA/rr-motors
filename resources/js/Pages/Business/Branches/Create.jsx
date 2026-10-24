@@ -1,797 +1,125 @@
-import {
-    Head,
-    Link,
-    useForm,
-} from '@inertiajs/react';
+import { Head, Link, useForm, usePage } from '@inertiajs/react';
+import { useState } from 'react';
+import BusinessLayout from '../../../Layouts/BusinessLayout';
+import '../../../../css/business/branches.css';
 
-import BusinessLayout
-    from '../../../Layouts/BusinessLayout';
-
-import PageShell
-    from '../../../Components/Business/PageShell';
-
-
-export default function BranchCreate({
-    company,
-}) {
-
-    /*
-    |--------------------------------------------------------------------------
-    | Form
-    |--------------------------------------------------------------------------
-    */
-
-    const {
-        data,
-        setData,
-        post,
-        processing,
-        errors,
-        reset,
-    } = useForm({
-
-        store_name:
-            '',
-
-        contact_person:
-            '',
-
-        phone:
-            '',
-
-        email:
-            '',
-
-        address:
-            '',
-
-        city:
-            '',
-
-        state:
-            '',
-
-        country:
-            'India',
-
-        pincode:
-            '',
+export default function BranchCreate({ company = {} }) {
+    const { business = {} } = usePage().props;
+    const form = useForm({
+        store_name: '',
+        contact_person: '',
+        phone: '',
+        email: '',
+        address: '',
+        city: '',
+        state: '',
+        country: 'India',
+        pincode: '',
     });
+    const [failedLogo, setFailedLogo] = useState(null);
+    const logo = logoUrl(business.company_logo ?? company.logo);
+    const logoKey = `${company.id ?? business.company_id}:${logo}`;
 
+    const update = (name, value) => {
+        form.setData(name, value);
+        form.clearErrors(name);
+    };
 
-    /*
-    |--------------------------------------------------------------------------
-    | Submit
-    |--------------------------------------------------------------------------
-    */
+    const submit = (event) => {
+        event.preventDefault();
+        if (form.processing) return;
+        form.post('/company/branches', { preserveScroll: true });
+    };
 
-    const submit =
-        (event) => {
-
-            event.preventDefault();
-
-
-            post(
-                '/company/branches',
-                {
-                    preserveScroll:
-                        true,
-                }
-            );
-        };
-
-
-    /*
-    |--------------------------------------------------------------------------
-    | Render
-    |--------------------------------------------------------------------------
-    */
+    const field = (name, label, icon, options = {}) => (
+        <Field key={name} name={name} label={label} icon={icon}
+            value={form.data[name]} error={form.errors[name]}
+            onChange={(value) => update(name, value)}
+            disabled={form.processing} {...options} />
+    );
 
     return (
-
         <BusinessLayout>
-
-            <Head title="Add Branch" />
-
-
-            <PageShell
-
-                eyebrow="Company Management"
-
-                title="Add Branch"
-
-                description="Create a new company branch. New branches remain pending until Super Admin approval."
-
-                icon="bi-building-add"
-
-                breadcrumb={[
-                    {
-                        label:
-                            'Company',
-                        href:
-                            '/company/dashboard',
-                    },
-
-                    {
-                        label:
-                            'Branches',
-                        href:
-                            '/company/branches',
-                    },
-
-                    {
-                        label:
-                            'Add Branch',
-                    },
-                ]}
-
-                actions={
-
-                    <Link
-                        href="/company/branches"
-                        className="rr-page-secondary-btn"
-                    >
-
-                        <i className="bi bi-arrow-left"></i>
-
-                        Back to Branches
-
-                    </Link>
-                }
-            >
-
-                {/* =====================================================
-                    COMPANY CONTEXT
-                   ===================================================== */}
-
-                <section className="rr-branches-context-card">
-
-                    <div className="rr-branches-context-main">
-
-                        <div className="rr-branches-context-logo">
-
-                            {
-                                getInitials(
-                                    company?.company_name
-                                )
-                            }
-
-                        </div>
-
-
-                        <div className="rr-branches-context-info">
-
-                            <span>
-                                Company
-                            </span>
-
-                            <strong>
-
-                                {
-                                    company?.company_name
-                                    ?? 'Company'
-                                }
-
-                            </strong>
-
-
-                            {
-                                company?.company_code && (
-
-                                    <small>
-
-                                        <i className="bi bi-upc-scan"></i>
-
-                                        {
-                                            company.company_code
-                                        }
-
-                                    </small>
-
-                                )
-                            }
-
-                        </div>
-
+            <Head title="Add Branch - RR ERP" />
+            <main className="rr-bx rr-bcreate">
+                <header className="rr-bx-hero">
+                    <div className="rr-bx-hero-copy">
+                        <div className="rr-bx-eyebrow"><span /> GROW YOUR BUSINESS</div>
+                        <h1>A new location. <span>A connected workspace.</span></h1>
+                        <p>Add your branch details. Super Admin approval is required before operations begin.</p>
+                        <nav aria-label="Breadcrumb"><Link href="/company/dashboard">Company</Link><i className="bi bi-chevron-right" /><Link href="/company/branches">Branches</Link><i className="bi bi-chevron-right" /><span>Add Branch</span></nav>
                     </div>
+                    <div className="rr-bx-hero-actions"><Link href="/company/branches" className="rr-bx-btn rr-bx-glass"><i className="bi bi-arrow-left" /> Back to Branches</Link></div>
+                </header>
 
-
-                    <div className="rr-branches-context-note">
-
-                        <i className="bi bi-shield-lock"></i>
-
-                        <div>
-
-                            <strong>
-                                Pending approval
-                            </strong>
-
-                            <span>
-                                Super Admin must activate this branch before it can be used.
-                            </span>
-
-                        </div>
-
+                <section className="rr-bx-company" aria-label="Branch company">
+                    <div className="rr-bx-company-main">
+                        <div className="rr-bx-logo">{logo && failedLogo !== logoKey ? <img key={logoKey} src={logo} alt={`${company.company_name ?? 'Company'} logo`} onError={() => setFailedLogo(logoKey)} /> : initials(company.company_name)}</div>
+                        <div><small>CURRENT COMPANY</small><h2>{company.company_name ?? business.company_name ?? 'Company'}</h2><p>{company.company_code ?? business.company_code ?? 'Company workspace'}</p></div>
                     </div>
-
+                    <div className="rr-bx-company-policy"><i className="bi bi-shield-lock" /><div><strong>Approval required</strong><span>New branches remain pending until Super Admin activates them.</span></div></div>
                 </section>
 
-
-                {/* =====================================================
-                    FORM PANEL
-                   ===================================================== */}
-
-                <section className="rr-page-panel">
-
-                    <div className="rr-page-panel-header">
-
-                        <div className="rr-page-panel-title">
-
-                            <h2>
-                                Branch Information
-                            </h2>
-
-                            <p>
-                                Enter the branch contact and location details.
-                            </p>
-
-                        </div>
-
+                <form onSubmit={submit} className="rr-bcreate-layout" aria-busy={form.processing}>
+                    <div className="rr-bcreate-main">
+                        <section className="rr-bcreate-panel">
+                            <Section number="01" icon="bi-shop-window" title="Branch information" description="Give this location a name and a primary contact." />
+                            <div className="rr-bcreate-fields">
+                                {field('store_name', 'Branch name', 'bi-shop', { required: true, placeholder: 'e.g. TTP Main Branch', maxLength: 255, autoFocus: true, full: true })}
+                                {field('contact_person', 'Contact person', 'bi-person', { placeholder: 'Branch manager or primary contact', maxLength: 255, full: true })}
+                                {field('phone', 'Phone number', 'bi-telephone', { type: 'tel', placeholder: 'Branch contact number', maxLength: 30 })}
+                                {field('email', 'Email address', 'bi-envelope', { type: 'email', placeholder: 'branch@company.com', maxLength: 255 })}
+                            </div>
+                        </section>
+                        <section className="rr-bcreate-panel">
+                            <Section number="02" icon="bi-geo-alt" title="Location & address" description="Where customers, suppliers and your team can find this branch." />
+                            <div className="rr-bcreate-fields">
+                                {field('address', 'Address', 'bi-geo-alt', { textarea: true, full: true, placeholder: 'Building, street and area', maxLength: 1000 })}
+                                {field('city', 'City', 'bi-geo', { placeholder: 'City', maxLength: 100 })}
+                                {field('state', 'State', 'bi-map', { placeholder: 'State', maxLength: 100 })}
+                                {field('country', 'Country', 'bi-globe', { placeholder: 'Country', maxLength: 100 })}
+                                {field('pincode', 'Pincode', 'bi-mailbox', { placeholder: 'Postal code', maxLength: 20 })}
+                            </div>
+                        </section>
                     </div>
 
+                    <aside className="rr-bcreate-guide">
+                        <div className="rr-bcreate-guide-icon"><i className="bi bi-building-add" /></div>
+                        <span className="rr-bcreate-kicker">NEW LOCATION</span>
+                        <h2>Ready for your next branch.</h2>
+                        <p>A few details now. A dedicated workspace after approval.</p>
+                        <ol className="rr-bcreate-steps">
+                            <li><span>1</span><div><strong>Create the branch</strong><small>Save contact and address details.</small></div></li>
+                            <li><span>2</span><div><strong>Super Admin approval</strong><small>The new branch starts as pending.</small></div></li>
+                            <li><span>3</span><div><strong>Assign access</strong><small>Confirm which users can work here.</small></div></li>
+                        </ol>
+                        <div className="rr-bcreate-preview"><small>BRANCH PREVIEW</small><strong>{form.data.store_name.trim() || 'Your new branch'}</strong><span>{[form.data.city, form.data.state].filter(Boolean).join(', ') || 'Location details appear here'}</span><em><i className="bi bi-clock" /> Pending approval</em></div>
+                        <div className="rr-bcreate-system"><i className="bi bi-info-circle" /><span>Company, branch code and approval status are managed by the system.</span></div>
+                    </aside>
 
-                    <form
-                        onSubmit={
-                            submit
-                        }
-                        className="rr-branch-form"
-                    >
-
-                        {/* =================================================
-                            BASIC DETAILS
-                           ================================================= */}
-
-                        <div className="rr-branch-form-section">
-
-                            <div className="rr-branch-form-section-heading">
-
-                                <div className="rr-branch-form-section-icon">
-
-                                    <i className="bi bi-shop-window"></i>
-
-                                </div>
-
-                                <div>
-
-                                    <strong>
-                                        Basic Details
-                                    </strong>
-
-                                    <span>
-                                        Main branch identification and contact person.
-                                    </span>
-
-                                </div>
-
-                            </div>
-
-
-                            <div className="rr-branch-form-grid">
-
-                                <FormField
-                                    label="Branch Name"
-                                    required
-                                    error={
-                                        errors.store_name
-                                    }
-                                >
-
-                                    <input
-                                        type="text"
-                                        value={
-                                            data.store_name
-                                        }
-                                        onChange={
-                                            event =>
-                                                setData(
-                                                    'store_name',
-                                                    event.target.value
-                                                )
-                                        }
-                                        placeholder="Enter branch name"
-                                        autoFocus
-                                    />
-
-                                </FormField>
-
-
-                                <FormField
-                                    label="Contact Person"
-                                    error={
-                                        errors.contact_person
-                                    }
-                                >
-
-                                    <input
-                                        type="text"
-                                        value={
-                                            data.contact_person
-                                        }
-                                        onChange={
-                                            event =>
-                                                setData(
-                                                    'contact_person',
-                                                    event.target.value
-                                                )
-                                        }
-                                        placeholder="Enter contact person"
-                                    />
-
-                                </FormField>
-
-
-                                <FormField
-                                    label="Phone"
-                                    error={
-                                        errors.phone
-                                    }
-                                >
-
-                                    <div className="rr-branch-input-icon-wrap">
-
-                                        <i className="bi bi-telephone"></i>
-
-                                        <input
-                                            type="text"
-                                            value={
-                                                data.phone
-                                            }
-                                            onChange={
-                                                event =>
-                                                    setData(
-                                                        'phone',
-                                                        event.target.value
-                                                    )
-                                            }
-                                            placeholder="Enter phone number"
-                                        />
-
-                                    </div>
-
-                                </FormField>
-
-
-                                <FormField
-                                    label="Email"
-                                    error={
-                                        errors.email
-                                    }
-                                >
-
-                                    <div className="rr-branch-input-icon-wrap">
-
-                                        <i className="bi bi-envelope"></i>
-
-                                        <input
-                                            type="email"
-                                            value={
-                                                data.email
-                                            }
-                                            onChange={
-                                                event =>
-                                                    setData(
-                                                        'email',
-                                                        event.target.value
-                                                    )
-                                            }
-                                            placeholder="Enter email address"
-                                        />
-
-                                    </div>
-
-                                </FormField>
-
-                            </div>
-
+                    <footer className="rr-bcreate-actions">
+                        <div aria-live="polite">{form.processing ? <span><i className="bi bi-arrow-repeat rr-bx-spin" /> Creating your branch…</span> : form.isDirty ? <span className="dirty"><i className="bi bi-circle-fill" /> Unsaved branch details</span> : <span><i className="bi bi-shield-check" /> Secure company workspace</span>}</div>
+                        <div className="rr-bcreate-buttons">
+                            {form.processing ? <button type="button" className="rr-bx-btn rr-bx-outline" disabled>Cancel</button> : <Link href="/company/branches" className="rr-bx-btn rr-bx-outline">Cancel</Link>}
+                            <button type="button" className="rr-bx-btn rr-bx-outline" disabled={form.processing || !form.isDirty} onClick={() => { form.reset(); form.clearErrors(); }}><i className="bi bi-arrow-counterclockwise" /> Reset</button>
+                            <button type="submit" className="rr-bx-btn rr-bx-primary" disabled={form.processing}>{form.processing ? <span className="spinner-border spinner-border-sm" aria-hidden="true" /> : <i className="bi bi-check2-circle" />}{form.processing ? 'Creating…' : 'Create Branch'}</button>
                         </div>
-
-
-                        {/* =================================================
-                            ADDRESS
-                           ================================================= */}
-
-                        <div className="rr-branch-form-section">
-
-                            <div className="rr-branch-form-section-heading">
-
-                                <div className="rr-branch-form-section-icon">
-
-                                    <i className="bi bi-geo-alt"></i>
-
-                                </div>
-
-                                <div>
-
-                                    <strong>
-                                        Address
-                                    </strong>
-
-                                    <span>
-                                        Branch location and postal information.
-                                    </span>
-
-                                </div>
-
-                            </div>
-
-
-                            <div className="rr-branch-form-grid">
-
-                                <FormField
-                                    label="Address"
-                                    error={
-                                        errors.address
-                                    }
-                                    wide
-                                >
-
-                                    <textarea
-                                        rows="3"
-                                        value={
-                                            data.address
-                                        }
-                                        onChange={
-                                            event =>
-                                                setData(
-                                                    'address',
-                                                    event.target.value
-                                                )
-                                        }
-                                        placeholder="Enter branch address"
-                                    />
-
-                                </FormField>
-
-
-                                <FormField
-                                    label="City"
-                                    error={
-                                        errors.city
-                                    }
-                                >
-
-                                    <input
-                                        type="text"
-                                        value={
-                                            data.city
-                                        }
-                                        onChange={
-                                            event =>
-                                                setData(
-                                                    'city',
-                                                    event.target.value
-                                                )
-                                        }
-                                        placeholder="Enter city"
-                                    />
-
-                                </FormField>
-
-
-                                <FormField
-                                    label="State"
-                                    error={
-                                        errors.state
-                                    }
-                                >
-
-                                    <input
-                                        type="text"
-                                        value={
-                                            data.state
-                                        }
-                                        onChange={
-                                            event =>
-                                                setData(
-                                                    'state',
-                                                    event.target.value
-                                                )
-                                        }
-                                        placeholder="Enter state"
-                                    />
-
-                                </FormField>
-
-
-                                <FormField
-                                    label="Country"
-                                    error={
-                                        errors.country
-                                    }
-                                >
-
-                                    <input
-                                        type="text"
-                                        value={
-                                            data.country
-                                        }
-                                        onChange={
-                                            event =>
-                                                setData(
-                                                    'country',
-                                                    event.target.value
-                                                )
-                                        }
-                                        placeholder="Enter country"
-                                    />
-
-                                </FormField>
-
-
-                                <FormField
-                                    label="Pincode"
-                                    error={
-                                        errors.pincode
-                                    }
-                                >
-
-                                    <input
-                                        type="text"
-                                        value={
-                                            data.pincode
-                                        }
-                                        onChange={
-                                            event =>
-                                                setData(
-                                                    'pincode',
-                                                    event.target.value
-                                                )
-                                        }
-                                        placeholder="Enter pincode"
-                                    />
-
-                                </FormField>
-
-                            </div>
-
-                        </div>
-
-
-                        {/* =================================================
-                            SYSTEM INFO
-                           ================================================= */}
-
-                        <div className="rr-branch-form-system-note">
-
-                            <div>
-
-                                <i className="bi bi-info-circle"></i>
-
-                            </div>
-
-                            <div>
-
-                                <strong>
-                                    System controlled fields
-                                </strong>
-
-                                <p>
-                                    Company, branch code and approval status are automatically managed by the system.
-                                </p>
-
-                            </div>
-
-                        </div>
-
-
-                        {/* =================================================
-                            ACTIONS
-                           ================================================= */}
-
-                        <div className="rr-branch-form-actions">
-
-                            <Link
-                                href="/company/branches"
-                                className="rr-page-secondary-btn"
-                            >
-
-                                <i className="bi bi-x-lg"></i>
-
-                                Cancel
-
-                            </Link>
-
-
-                            <button
-                                type="button"
-                                className="rr-page-secondary-btn"
-                                disabled={
-                                    processing
-                                }
-                                onClick={
-                                    () =>
-                                        reset()
-                                }
-                            >
-
-                                <i className="bi bi-arrow-counterclockwise"></i>
-
-                                Reset
-
-                            </button>
-
-
-                            <button
-                                type="submit"
-                                className="rr-page-primary-btn"
-                                disabled={
-                                    processing
-                                }
-                            >
-
-                                {
-                                    processing
-                                        ? (
-                                            <>
-                                                <span className="spinner-border spinner-border-sm"></span>
-                                                Creating...
-                                            </>
-                                        )
-                                        : (
-                                            <>
-                                                <i className="bi bi-check2-circle"></i>
-                                                Create Branch
-                                            </>
-                                        )
-                                }
-
-                            </button>
-
-                        </div>
-
-                    </form>
-
-                </section>
-
-            </PageShell>
-
+                    </footer>
+                </form>
+            </main>
         </BusinessLayout>
     );
 }
 
-
-/*
-|--------------------------------------------------------------------------
-| Form Field
-|--------------------------------------------------------------------------
-*/
-
-function FormField({
-    label,
-    required = false,
-    error = null,
-    wide = false,
-    children,
-}) {
-
-    return (
-
-        <div
-            className={
-                `rr-branch-form-field ${wide
-                    ? 'rr-branch-form-field-wide'
-                    : ''
-                }`
-            }
-        >
-
-            <label>
-
-                {label}
-
-                {
-                    required && (
-
-                        <span className="rr-branch-required">
-                            *
-                        </span>
-
-                    )
-                }
-
-            </label>
-
-
-            <div
-                className={
-                    `rr-branch-form-control ${error
-                        ? 'has-error'
-                        : ''
-                    }`
-                }
-            >
-
-                {children}
-
-            </div>
-
-
-            {
-                error && (
-
-                    <div className="rr-branch-form-error">
-
-                        <i className="bi bi-exclamation-circle"></i>
-
-                        {error}
-
-                    </div>
-
-                )
-            }
-
-        </div>
-    );
+function Section({ number, icon, title, description }) {
+    return <header className="rr-bcreate-heading"><span><i className={`bi ${icon}`} /></span><div><h2>{title}</h2><p>{description}</p></div><small>{number}</small></header>;
 }
 
-
-/*
-|--------------------------------------------------------------------------
-| Initials
-|--------------------------------------------------------------------------
-*/
-
-function getInitials(
-    name
-) {
-
-    if (
-        !name
-    ) {
-
-        return 'CO';
-    }
-
-
-    const parts =
-        String(
-            name
-        )
-            .trim()
-            .split(
-                /\s+/
-            )
-            .filter(
-                Boolean
-            );
-
-
-    if (
-        parts.length === 0
-    ) {
-
-        return 'CO';
-    }
-
-
-    if (
-        parts.length === 1
-    ) {
-
-        return parts[0]
-            .substring(
-                0,
-                2
-            )
-            .toUpperCase();
-    }
-
-
-    return (
-        parts[0][0]
-        +
-        parts[
-        parts.length - 1
-        ][0]
-    ).toUpperCase();
+function Field({ name, label, icon, value, onChange, error, required = false, full = false, disabled, textarea, type = 'text', placeholder, maxLength, autoFocus }) {
+    const id = `branch-${name}`;
+    const props = { id, value, required, disabled, placeholder, maxLength, autoFocus, 'aria-invalid': Boolean(error), 'aria-describedby': error ? `${id}-error` : undefined, onChange: (event) => onChange(event.target.value) };
+    return <div className={`rr-bcreate-field ${full ? 'full' : ''}`}><label htmlFor={id}>{label}{required && <span> *</span>}</label><div className={`rr-bcreate-input ${textarea ? 'textarea' : ''} ${error ? 'invalid' : ''}`}><i className={`bi ${icon}`} />{textarea ? <textarea {...props} rows={3} /> : <input {...props} type={type} />}</div>{error && <small id={`${id}-error`} className="rr-bcreate-error" role="alert"><i className="bi bi-exclamation-circle" /> {error}</small>}</div>;
 }
+
+function initials(value) { const words = String(value || 'Company').trim().split(/\s+/).filter(Boolean); return words.length > 1 ? `${words[0][0]}${words.at(-1)[0]}`.toUpperCase() : (words[0] || 'CO').slice(0, 2).toUpperCase(); }
+function logoUrl(value) { const path = typeof value === 'string' ? value.trim() : ''; if (!path) return ''; if (/^https?:\/\//i.test(path)) return path; const relative = path.replace(/^\/+/, ''); return relative.startsWith('storage/') ? `/${relative}` : `/storage/${relative}`; }

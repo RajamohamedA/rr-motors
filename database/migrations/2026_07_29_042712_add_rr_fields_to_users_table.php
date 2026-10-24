@@ -34,7 +34,6 @@ return new class extends Migration
     {
         Schema::table('users', function (Blueprint $table) {
 
-            $table->dropConstrainedForeignId('company_id');
 
             $table->dropColumn([
                 'is_super_user',

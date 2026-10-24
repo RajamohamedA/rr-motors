@@ -34,6 +34,7 @@ return Application::configure(
 
         $middleware->web(
             append: [
+                \App\Http\Middleware\EnsureActiveUser::class,
                 HandleInertiaRequests::class,
             ]
         );

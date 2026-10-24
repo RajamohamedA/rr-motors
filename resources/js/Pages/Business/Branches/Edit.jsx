@@ -1,857 +1,138 @@
-import {
-    Head,
-    Link,
-    useForm,
-} from '@inertiajs/react';
+import { Head, Link, useForm, usePage } from '@inertiajs/react';
+import { useState } from 'react';
+import BusinessLayout from '../../../Layouts/BusinessLayout';
+import '../../../../css/business/branches.css';
 
-import BusinessLayout
-    from '../../../Layouts/BusinessLayout';
-
-import PageShell
-    from '../../../Components/Business/PageShell';
-
-
-export default function BranchEdit({
-    company,
-    branch,
-}) {
-
-    const {
-        data,
-        setData,
-        put,
-        processing,
-        errors,
-    } = useForm({
-
-        store_name:
-            branch?.store_name
-            ?? '',
-
-        contact_person:
-            branch?.contact_person
-            ?? '',
-
-        phone:
-            branch?.phone
-            ?? '',
-
-        email:
-            branch?.email
-            ?? '',
-
-        address:
-            branch?.address
-            ?? '',
-
-        city:
-            branch?.city
-            ?? '',
-
-        state:
-            branch?.state
-            ?? '',
-
-        country:
-            branch?.country
-            ?? 'India',
-
-        pincode:
-            branch?.pincode
-            ?? '',
+export default function BranchEdit({ company = {}, branch = {} }) {
+    const { business = {}, auth = {} } = usePage().props;
+    const form = useForm({
+        store_name: branch.store_name ?? '',
+        contact_person: branch.contact_person ?? '',
+        phone: branch.phone ?? '',
+        email: branch.email ?? '',
+        address: branch.address ?? '',
+        city: branch.city ?? '',
+        state: branch.state ?? '',
+        country: branch.country ?? 'India',
+        pincode: branch.pincode ?? '',
     });
+    const roles = (auth.user?.roles ?? []).map((item) => typeof item === 'string' ? item : item?.name);
+    const permissions = (auth.user?.permissions ?? []).map((item) => typeof item === 'string' ? item : item?.name);
+    const assignedIds = business.assigned_branch_ids ?? (business.available_branches ?? []).map((item) => item.id);
+    const assigned = Boolean(auth.user?.is_super_user) || assignedIds.map(String).includes(String(branch.id));
+    const canEdit = assigned && (Boolean(auth.user?.is_super_user) || roles.includes('Company Admin') || permissions.includes('store.edit'));
+    const isActive = [true, 1, '1'].includes(branch.status);
+    const [failedLogo, setFailedLogo] = useState(null);
+    const logo = logoUrl(business.company_logo ?? company.logo);
+    const logoKey = `${company.id ?? business.company_id}:${logo}`;
 
+    const update = (name, value) => {
+        form.setData(name, value);
+        form.clearErrors(name);
+    };
 
-    /*
-    |--------------------------------------------------------------------------
-    | Submit
-    |--------------------------------------------------------------------------
-    */
+    const submit = (event) => {
+        event.preventDefault();
+        if (form.processing || !canEdit) return;
+        form.put(`/company/branches/${branch.id}`, { preserveScroll: true });
+    };
 
-    const submit =
-        (event) => {
-
-            event.preventDefault();
-
-
-            put(
-                `/company/branches/${branch.id}`,
-                {
-                    preserveScroll:
-                        true,
-                }
-            );
-        };
-
+    const field = (name, label, icon, options = {}) => (
+        <Field key={name} name={name} label={label} icon={icon}
+            value={form.data[name]} error={form.errors[name]}
+            onChange={(value) => update(name, value)}
+            disabled={form.processing || !canEdit} {...options} />
+    );
 
     return (
-
         <BusinessLayout>
-
-            <Head
-                title={
-                    `Edit ${branch?.store_name
-                    ?? 'Branch'
-                    }`
-                }
-            />
-
-
-            <PageShell
-
-                eyebrow="Company Management"
-
-                title="Edit Branch"
-
-                description={
-                    `Update branch details for ${branch?.store_name
-                    ?? 'this branch'
-                    }.`
-                }
-
-                icon="bi-pencil-square"
-
-                breadcrumb={[
-                    {
-                        label:
-                            'Company',
-                        href:
-                            '/company/dashboard',
-                    },
-
-                    {
-                        label:
-                            'Branches',
-                        href:
-                            '/company/branches',
-                    },
-
-                    {
-                        label:
-                            branch?.store_name
-                            ?? 'Branch',
-                        href:
-                            `/company/branches/${branch.id}`,
-                    },
-
-                    {
-                        label:
-                            'Edit',
-                    },
-                ]}
-
-                actions={
-
-                    <>
-
-                        <Link
-                            href={
-                                `/company/branches/${branch.id}`
-                            }
-                            className="rr-page-secondary-btn"
-                        >
-
-                            <i className="bi bi-eye"></i>
-
-                            View
-
-                        </Link>
-
-
-                        <Link
-                            href="/company/branches"
-                            className="rr-page-secondary-btn"
-                        >
-
-                            <i className="bi bi-arrow-left"></i>
-
-                            Back
-
-                        </Link>
-
-                    </>
-
-                }
-            >
-
-                {/* =====================================================
-                    BRANCH CONTEXT
-                   ===================================================== */}
-
-                <section className="rr-branch-edit-context">
-
-                    <div className="rr-branch-edit-context-main">
-
-                        <div
-                            className={
-                                `rr-branch-edit-context-icon ${branch?.status
-                                    ? 'active'
-                                    : 'pending'
-                                }`
-                            }
-                        >
-
-                            <i className="bi bi-shop-window"></i>
-
-                        </div>
-
-
-                        <div>
-
-                            <span>
-                                Branch
-                            </span>
-
-                            <strong>
-
-                                {
-                                    branch?.store_name
-                                    ?? 'Branch'
-                                }
-
-                            </strong>
-
-                            <small>
-
-                                {
-                                    branch?.store_code
-                                    ?? '—'
-                                }
-
-                            </small>
-
-                        </div>
-
+            <Head title={`Edit ${branch.store_name ?? 'Branch'} - RR ERP`} />
+            <main className="rr-bx rr-bcreate">
+                <header className="rr-bx-hero">
+                    <div className="rr-bx-hero-copy">
+                        <div className="rr-bx-eyebrow"><span /> BRANCH SETTINGS</div>
+                        <h1>Branch details. <span>Always up to date.</span></h1>
+                        <p>Update contact and location information. Branch code and approval remain protected.</p>
+                        <nav aria-label="Breadcrumb"><Link href="/company/dashboard">Company</Link><i className="bi bi-chevron-right" /><Link href="/company/branches">Branches</Link><i className="bi bi-chevron-right" /><span>Edit Branch</span></nav>
                     </div>
+                    <div className="rr-bx-hero-actions"><Link href="/company/branches" className="rr-bx-btn rr-bx-glass"><i className="bi bi-arrow-left" /> Back to Branches</Link></div>
+                </header>
 
-
-                    <div className="rr-branch-edit-context-status">
-
-                        <span
-                            className={
-                                branch?.status
-                                    ? 'active'
-                                    : 'pending'
-                            }
-                        >
-
-                            <i
-                                className={
-                                    branch?.status
-                                        ? 'bi bi-check-circle-fill'
-                                        : 'bi bi-clock-fill'
-                                }
-                            ></i>
-
-                            {
-                                branch?.status
-                                    ? 'Active'
-                                    : 'Pending Approval'
-                            }
-
-                        </span>
-
+                <section className="rr-bx-company" aria-label="Branch company">
+                    <div className="rr-bx-company-main">
+                        <div className="rr-bx-logo">{logo && failedLogo !== logoKey ? <img key={logoKey} src={logo} alt={`${company.company_name ?? 'Company'} logo`} onError={() => setFailedLogo(logoKey)} /> : initials(company.company_name)}</div>
+                        <div><small>CURRENT COMPANY</small><h2>{company.company_name ?? business.company_name ?? 'Company'}</h2><p>{company.company_code ?? business.company_code ?? 'Company workspace'}</p></div>
                     </div>
-
+                    <div className="rr-bx-company-policy"><i className="bi bi-shield-lock" /><div><strong>{isActive ? 'Active branch' : 'Needs Approval'}</strong><span>{isActive ? 'Changes apply to this company branch.' : 'Super Admin must activate the branch before it can be used.'}</span></div></div>
                 </section>
 
-
-                {/* =====================================================
-                    READ ONLY SYSTEM INFO
-                   ===================================================== */}
-
-                <section className="rr-branch-edit-system-grid">
-
-                    <ReadOnlyItem
-                        label="Company"
-                        value={
-                            company?.company_name
-                        }
-                        icon="bi-building"
-                    />
-
-                    <ReadOnlyItem
-                        label="Company Code"
-                        value={
-                            company?.company_code
-                        }
-                        icon="bi-upc"
-                    />
-
-                    <ReadOnlyItem
-                        label="Branch Number"
-                        value={
-                            branch?.branch_number
-                                ? `#${String(
-                                    branch.branch_number
-                                ).padStart(
-                                    3,
-                                    '0'
-                                )}`
-                                : '—'
-                        }
-                        icon="bi-list-ol"
-                    />
-
-                    <ReadOnlyItem
-                        label="Branch Code"
-                        value={
-                            branch?.store_code
-                        }
-                        icon="bi-upc-scan"
-                    />
-
-                </section>
-
-
-                {/* =====================================================
-                    FORM PANEL
-                   ===================================================== */}
-
-                <section className="rr-page-panel">
-
-                    <div className="rr-page-panel-header">
-
-                        <div className="rr-page-panel-title">
-
-                            <h2>
-                                Branch Information
-                            </h2>
-
-                            <p>
-                                Update contact and location details.
-                            </p>
-
-                        </div>
-
+                {!canEdit && <div className="rr-bdetail-notice denied" role="status"><i className="bi bi-lock" /><span>{!assigned ? 'No Access — contact Super Admin or ERP support to request access to this branch.' : 'Your role does not have permission to edit this branch.'}</span></div>}
+                <form onSubmit={submit} className="rr-bcreate-layout" aria-busy={form.processing}>
+                    <div className="rr-bcreate-main">
+                        <section className="rr-bcreate-panel">
+                            <Section number="01" icon="bi-shop-window" title="Branch information" description="Give this location a name and a primary contact." />
+                            <div className="rr-bcreate-fields">
+                                {field('store_name', 'Branch name', 'bi-shop', { required: true, placeholder: 'e.g. TTP Main Branch', maxLength: 255, autoFocus: true, full: true })}
+                                {field('contact_person', 'Contact person', 'bi-person', { placeholder: 'Branch manager or primary contact', maxLength: 255, full: true })}
+                                {field('phone', 'Phone number', 'bi-telephone', { type: 'tel', placeholder: 'Branch contact number', maxLength: 30 })}
+                                {field('email', 'Email address', 'bi-envelope', { type: 'email', placeholder: 'branch@company.com', maxLength: 255 })}
+                            </div>
+                        </section>
+                        <section className="rr-bcreate-panel">
+                            <Section number="02" icon="bi-geo-alt" title="Location & address" description="Where customers, suppliers and your team can find this branch." />
+                            <div className="rr-bcreate-fields">
+                                {field('address', 'Address', 'bi-geo-alt', { textarea: true, full: true, placeholder: 'Building, street and area', maxLength: 1000 })}
+                                {field('city', 'City', 'bi-geo', { placeholder: 'City', maxLength: 100 })}
+                                {field('state', 'State', 'bi-map', { placeholder: 'State', maxLength: 100 })}
+                                {field('country', 'Country', 'bi-globe', { placeholder: 'Country', maxLength: 100 })}
+                                {field('pincode', 'Pincode', 'bi-mailbox', { placeholder: 'Postal code', maxLength: 20 })}
+                            </div>
+                        </section>
                     </div>
 
-
-                    <form
-                        className="rr-branch-form"
-                        onSubmit={
-                            submit
-                        }
-                    >
-
-                        {/* =================================================
-                            BASIC DETAILS
-                           ================================================= */}
-
-                        <div className="rr-branch-form-section">
-
-                            <div className="rr-branch-form-section-heading">
-
-                                <div className="rr-branch-form-section-icon">
-
-                                    <i className="bi bi-shop-window"></i>
-
-                                </div>
-
-
-                                <div>
-
-                                    <strong>
-                                        Basic Details
-                                    </strong>
-
-                                    <span>
-                                        Branch name and primary contact information.
-                                    </span>
-
-                                </div>
-
-                            </div>
-
-
-                            <div className="rr-branch-form-grid">
-
-                                <FormField
-                                    label="Branch Name"
-                                    required
-                                    error={
-                                        errors.store_name
-                                    }
-                                >
-
-                                    <input
-                                        type="text"
-                                        value={
-                                            data.store_name
-                                        }
-                                        onChange={
-                                            event =>
-                                                setData(
-                                                    'store_name',
-                                                    event.target.value
-                                                )
-                                        }
-                                        placeholder="Enter branch name"
-                                        autoFocus
-                                    />
-
-                                </FormField>
-
-
-                                <FormField
-                                    label="Contact Person"
-                                    error={
-                                        errors.contact_person
-                                    }
-                                >
-
-                                    <input
-                                        type="text"
-                                        value={
-                                            data.contact_person
-                                        }
-                                        onChange={
-                                            event =>
-                                                setData(
-                                                    'contact_person',
-                                                    event.target.value
-                                                )
-                                        }
-                                        placeholder="Enter contact person"
-                                    />
-
-                                </FormField>
-
-
-                                <FormField
-                                    label="Phone"
-                                    error={
-                                        errors.phone
-                                    }
-                                >
-
-                                    <div className="rr-branch-input-icon-wrap">
-
-                                        <i className="bi bi-telephone"></i>
-
-                                        <input
-                                            type="text"
-                                            value={
-                                                data.phone
-                                            }
-                                            onChange={
-                                                event =>
-                                                    setData(
-                                                        'phone',
-                                                        event.target.value
-                                                    )
-                                            }
-                                            placeholder="Enter phone number"
-                                        />
-
-                                    </div>
-
-                                </FormField>
-
-
-                                <FormField
-                                    label="Email"
-                                    error={
-                                        errors.email
-                                    }
-                                >
-
-                                    <div className="rr-branch-input-icon-wrap">
-
-                                        <i className="bi bi-envelope"></i>
-
-                                        <input
-                                            type="email"
-                                            value={
-                                                data.email
-                                            }
-                                            onChange={
-                                                event =>
-                                                    setData(
-                                                        'email',
-                                                        event.target.value
-                                                    )
-                                            }
-                                            placeholder="Enter email address"
-                                        />
-
-                                    </div>
-
-                                </FormField>
-
-                            </div>
-
+                    <aside className="rr-bcreate-guide">
+                        <div className="rr-bcreate-guide-icon"><i className="bi bi-shop-window" /></div>
+                        <span className="rr-bcreate-kicker">BRANCH IDENTITY</span>
+                        <h2>{branch.store_name ?? 'Branch'}</h2>
+                        <p>{branch.store_code ?? 'Branch code'} · {company.company_code ?? 'Company'}</p>
+                        <div className="rr-bdetail-badges">
+                            <span className={`rr-bx-badge ${isActive ? 'green' : 'purple'}`}>{isActive ? 'Active' : 'Needs Approval'}</span>
+                            <span className={`rr-bx-badge ${assigned ? 'blue' : 'rose'}`}>{assigned ? 'Assigned' : 'No Access'}</span>
                         </div>
-
-
-                        {/* =================================================
-                            ADDRESS
-                           ================================================= */}
-
-                        <div className="rr-branch-form-section">
-
-                            <div className="rr-branch-form-section-heading">
-
-                                <div className="rr-branch-form-section-icon">
-
-                                    <i className="bi bi-geo-alt"></i>
-
-                                </div>
-
-
-                                <div>
-
-                                    <strong>
-                                        Address
-                                    </strong>
-
-                                    <span>
-                                        Branch location and postal details.
-                                    </span>
-
-                                </div>
-
-                            </div>
-
-
-                            <div className="rr-branch-form-grid">
-
-                                <FormField
-                                    label="Address"
-                                    error={
-                                        errors.address
-                                    }
-                                    wide
-                                >
-
-                                    <textarea
-                                        rows="3"
-                                        value={
-                                            data.address
-                                        }
-                                        onChange={
-                                            event =>
-                                                setData(
-                                                    'address',
-                                                    event.target.value
-                                                )
-                                        }
-                                        placeholder="Enter branch address"
-                                    />
-
-                                </FormField>
-
-
-                                <FormField
-                                    label="City"
-                                    error={
-                                        errors.city
-                                    }
-                                >
-
-                                    <input
-                                        type="text"
-                                        value={
-                                            data.city
-                                        }
-                                        onChange={
-                                            event =>
-                                                setData(
-                                                    'city',
-                                                    event.target.value
-                                                )
-                                        }
-                                        placeholder="Enter city"
-                                    />
-
-                                </FormField>
-
-
-                                <FormField
-                                    label="State"
-                                    error={
-                                        errors.state
-                                    }
-                                >
-
-                                    <input
-                                        type="text"
-                                        value={
-                                            data.state
-                                        }
-                                        onChange={
-                                            event =>
-                                                setData(
-                                                    'state',
-                                                    event.target.value
-                                                )
-                                        }
-                                        placeholder="Enter state"
-                                    />
-
-                                </FormField>
-
-
-                                <FormField
-                                    label="Country"
-                                    error={
-                                        errors.country
-                                    }
-                                >
-
-                                    <input
-                                        type="text"
-                                        value={
-                                            data.country
-                                        }
-                                        onChange={
-                                            event =>
-                                                setData(
-                                                    'country',
-                                                    event.target.value
-                                                )
-                                        }
-                                        placeholder="Enter country"
-                                    />
-
-                                </FormField>
-
-
-                                <FormField
-                                    label="Pincode"
-                                    error={
-                                        errors.pincode
-                                    }
-                                >
-
-                                    <input
-                                        type="text"
-                                        value={
-                                            data.pincode
-                                        }
-                                        onChange={
-                                            event =>
-                                                setData(
-                                                    'pincode',
-                                                    event.target.value
-                                                )
-                                        }
-                                        placeholder="Enter pincode"
-                                    />
-
-                                </FormField>
-
-                            </div>
-
+                        <div className="rr-bcreate-preview">
+                            <small>UPDATED DETAILS PREVIEW</small>
+                            <strong>{form.data.store_name.trim() || 'Branch name'}</strong>
+                            <span>{[form.data.city, form.data.state].filter(Boolean).join(', ') || 'Location not provided'}</span>
+                            <span>{form.data.phone || 'Phone not provided'}</span>
                         </div>
+                        <div className="rr-bcreate-system"><i className="bi bi-shield-lock" /><span>Branch number, branch code, company and activation are managed by the system.</span></div>
+                        {!assigned && <div className="rr-bdetail-notice denied"><i className="bi bi-lock" /><span>Contact Super Admin or ERP support for branch access.</span></div>}
+                        {assigned && !canEdit && <div className="rr-bdetail-notice denied"><i className="bi bi-lock" /><span>Your role does not have permission to edit this branch.</span></div>}
+                    </aside>
 
-
-                        {/* =================================================
-                            SYSTEM PROTECTION
-                           ================================================= */}
-
-                        <div className="rr-branch-form-system-note">
-
-                            <div>
-
-                                <i className="bi bi-shield-lock"></i>
-
-                            </div>
-
-
-                            <div>
-
-                                <strong>
-                                    Protected system fields
-                                </strong>
-
-                                <p>
-                                    Company, branch number, branch code and approval
-                                    status cannot be changed from the Company Portal.
-                                    Branch activation is controlled by Super Admin.
-                                </p>
-
-                            </div>
-
+                    <footer className="rr-bcreate-actions">
+                        <div aria-live="polite">{form.processing ? <span><i className="bi bi-arrow-repeat rr-bx-spin" /> Saving branch details…</span> : form.isDirty ? <span className="dirty"><i className="bi bi-circle-fill" /> Unsaved changes</span> : <span><i className="bi bi-shield-check" /> Branch settings are up to date</span>}</div>
+                        <div className="rr-bcreate-buttons">
+                            {form.processing ? <button type="button" className="rr-bx-btn rr-bx-outline" disabled>Cancel</button> : <Link href="/company/branches" className="rr-bx-btn rr-bx-outline">Cancel</Link>}
+                            <button type="button" className="rr-bx-btn rr-bx-outline" disabled={form.processing || !form.isDirty || !canEdit} onClick={() => { form.reset(); form.clearErrors(); }}><i className="bi bi-arrow-counterclockwise" /> Reset</button>
+                            <button type="submit" className="rr-bx-btn rr-bx-primary" disabled={form.processing || !form.isDirty || !canEdit}>{form.processing ? <span className="spinner-border spinner-border-sm" aria-hidden="true" /> : <i className="bi bi-check2-circle" />}{form.processing ? 'Saving…' : 'Save Changes'}</button>
                         </div>
-
-
-                        {/* =================================================
-                            ACTIONS
-                           ================================================= */}
-
-                        <div className="rr-branch-form-actions">
-
-                            <Link
-                                href="/company/branches"
-                                className="rr-page-secondary-btn"
-                            >
-
-                                <i className="bi bi-x-lg"></i>
-
-                                Cancel
-
-                            </Link>
-
-
-                            <button
-                                type="submit"
-                                className="rr-page-primary-btn"
-                                disabled={
-                                    processing
-                                }
-                            >
-
-                                {
-                                    processing
-                                        ? (
-                                            <>
-                                                <span className="spinner-border spinner-border-sm"></span>
-
-                                                Saving...
-                                            </>
-                                        )
-                                        : (
-                                            <>
-                                                <i className="bi bi-check2-circle"></i>
-
-                                                Save Changes
-                                            </>
-                                        )
-                                }
-
-                            </button>
-
-                        </div>
-
-                    </form>
-
-                </section>
-
-            </PageShell>
-
+                    </footer>
+                </form>
+            </main>
         </BusinessLayout>
     );
 }
 
-
-/*
-|--------------------------------------------------------------------------
-| Form Field
-|--------------------------------------------------------------------------
-*/
-
-function FormField({
-    label,
-    required = false,
-    error = null,
-    wide = false,
-    children,
-}) {
-
-    return (
-
-        <div
-            className={
-                `rr-branch-form-field ${wide
-                    ? 'rr-branch-form-field-wide'
-                    : ''
-                }`
-            }
-        >
-
-            <label>
-
-                {label}
-
-                {
-                    required && (
-
-                        <span className="rr-branch-required">
-                            *
-                        </span>
-
-                    )
-                }
-
-            </label>
-
-
-            <div
-                className={
-                    `rr-branch-form-control ${error
-                        ? 'has-error'
-                        : ''
-                    }`
-                }
-            >
-
-                {children}
-
-            </div>
-
-
-            {
-                error && (
-
-                    <div className="rr-branch-form-error">
-
-                        <i className="bi bi-exclamation-circle"></i>
-
-                        {error}
-
-                    </div>
-
-                )
-            }
-
-        </div>
-    );
+function Section({ number, icon, title, description }) {
+    return <header className="rr-bcreate-heading"><span><i className={`bi ${icon}`} /></span><div><h2>{title}</h2><p>{description}</p></div><small>{number}</small></header>;
 }
 
-
-/*
-|--------------------------------------------------------------------------
-| Read Only System Item
-|--------------------------------------------------------------------------
-*/
-
-function ReadOnlyItem({
-    label,
-    value,
-    icon,
-}) {
-
-    return (
-
-        <div className="rr-branch-edit-system-item">
-
-            <div className="rr-branch-edit-system-icon">
-
-                <i
-                    className={
-                        `bi ${icon}`
-                    }
-                ></i>
-
-            </div>
-
-
-            <div>
-
-                <span>
-                    {label}
-                </span>
-
-                <strong>
-                    {
-                        value
-                        || '—'
-                    }
-                </strong>
-
-            </div>
-
-        </div>
-    );
+function Field({ name, label, icon, value, onChange, error, required = false, full = false, disabled, textarea, type = 'text', placeholder, maxLength, autoFocus }) {
+    const id = `branch-${name}`;
+    const props = { id, value, required, disabled, placeholder, maxLength, autoFocus, 'aria-invalid': Boolean(error), 'aria-describedby': error ? `${id}-error` : undefined, onChange: (event) => onChange(event.target.value) };
+    return <div className={`rr-bcreate-field ${full ? 'full' : ''}`}><label htmlFor={id}>{label}{required && <span> *</span>}</label><div className={`rr-bcreate-input ${textarea ? 'textarea' : ''} ${error ? 'invalid' : ''}`}><i className={`bi ${icon}`} />{textarea ? <textarea {...props} rows={3} /> : <input {...props} type={type} />}</div>{error && <small id={`${id}-error`} className="rr-bcreate-error" role="alert"><i className="bi bi-exclamation-circle" /> {error}</small>}</div>;
 }
+
+function initials(value) { const words = String(value || 'Company').trim().split(/\s+/).filter(Boolean); return words.length > 1 ? `${words[0][0]}${words.at(-1)[0]}`.toUpperCase() : (words[0] || 'CO').slice(0, 2).toUpperCase(); }
+function logoUrl(value) { const path = typeof value === 'string' ? value.trim() : ''; if (!path) return ''; if (/^https?:\/\//i.test(path)) return path; const relative = path.replace(/^\/+/, ''); return relative.startsWith('storage/') ? `/${relative}` : `/storage/${relative}`; }

@@ -2,6 +2,7 @@
 
 namespace App\Http\Middleware;
 
+use App\Models\Company;
 use App\Models\Store;
 use Illuminate\Http\Request;
 use Inertia\Middleware;
@@ -142,6 +143,24 @@ class HandleInertiaRequests extends Middleware
 
             'business' => [
 
+                'company_logo' => fn() => $this->getCompanyLogo($request),
+                'assigned_branch_ids' => function () use ($request) {
+                    $user = $request->user();
+                    $companyId = $request->session()->get('active_company_id');
+                    if (!$user || !$user->status || !$companyId) {
+                        return [];
+                    }
+                    if ($user->is_super_user) {
+                        return Store::where('company_id', $companyId)->pluck('id')->all();
+                    }
+                    if ((int) $companyId !== (int) $user->company_id) {
+                        return [];
+                    }
+                    // Include pending assignments to distinguish approval from membership.
+                    return $user->stores()->where('stores.company_id', $companyId)
+                        ->pluck('stores.id')->all();
+                },
+
                 /*
                 |--------------------------------------------------------------------------
                 | Company
@@ -215,7 +234,7 @@ class HandleInertiaRequests extends Middleware
                 | - all active branches in current company context
                 |
                 | Company Admin:
-                | - all active branches in own company
+                | - only explicitly assigned active branches
                 |
                 | Branch Admin / Normal User:
                 | - only explicitly assigned active branches
@@ -296,6 +315,29 @@ class HandleInertiaRequests extends Middleware
     }
 
 
+    /** Return the public-disk path; the sidebar adds /storage/. */
+    private function getCompanyLogo(Request $request): ?string
+    {
+        $user = $request->user();
+        $companyId = $request->session()->get('active_company_id');
+
+        if (!$user || !(bool) $user->status || !$companyId) {
+            return null;
+        }
+
+        if (
+            !$user->is_super_user &&
+            (int) $companyId !== (int) $user->company_id
+        ) {
+            return null;
+        }
+
+        return Company::query()
+            ->whereKey($companyId)
+            ->where('status', true)
+            ->value('logo');
+    }
+
     /*
     |--------------------------------------------------------------------------
     | Available Branches
@@ -317,7 +359,7 @@ class HandleInertiaRequests extends Middleware
 
 
         if (
-            !$user
+            !$user || !(bool) $user->status
         ) {
 
             return [];
@@ -430,86 +472,10 @@ class HandleInertiaRequests extends Middleware
         }
 
 
-        /*
-        |--------------------------------------------------------------------------
-        | Company Admin
-        |--------------------------------------------------------------------------
-        */
-
-        if (
-            $user->hasRole(
-                'Company Admin'
-            )
-        ) {
-
-            /*
-            |--------------------------------------------------------------------------
-            | Security Check
-            |--------------------------------------------------------------------------
-            */
-
-            if (
-                (int) $activeCompanyId !==
-                (int) $user->company_id
-            ) {
-
-                return [];
-            }
-
-
-            return Store::query()
-                ->where(
-                    'company_id',
-                    $user->company_id
-                )
-                ->where(
-                    'status',
-                    1
-                )
-                ->orderBy(
-                    'store_name'
-                )
-                ->get([
-                    'id',
-                    'store_code',
-                    'store_name',
-                    'city',
-                    'state',
-                ])
-                ->map(
-                    function (
-                        Store $store
-                    ) use (
-                        $activeStoreId
-                    ) {
-
-                        return [
-
-                            'id' =>
-                            $store->id,
-
-                            'store_code' =>
-                            $store->store_code,
-
-                            'store_name' =>
-                            $store->store_name,
-
-                            'city' =>
-                            $store->city,
-
-                            'state' =>
-                            $store->state,
-
-                            'is_current' =>
-                            (int) $activeStoreId ===
-                                (int) $store->id,
-                        ];
-                    }
-                )
-                ->values()
-                ->all();
+        // Company Admin and Store Manager require explicit membership.
+        if ((int) $activeCompanyId !== (int) $user->company_id) {
+            return [];
         }
-
 
         /*
         |--------------------------------------------------------------------------

@@ -8,21 +8,18 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::table('products', function (Blueprint $table) {
-
-            $table->decimal('current_stock',15,2)
-                  ->default(0)
-                  ->after('opening_stock');
-
-        });
+        // The current base products migration already creates this column.
+        if (!Schema::hasColumn('products', 'current_stock')) {
+            Schema::table('products', function (Blueprint $table) {
+                $table->decimal('current_stock', 15, 3)
+                    ->default(0)->after('opening_stock');
+            });
+        }
     }
 
     public function down(): void
     {
-        Schema::table('products', function (Blueprint $table) {
-
-            $table->dropColumn('current_stock');
-
-        });
+        // Preserve a compatibility column that may belong to the base schema.
+        // Rolling back the base products migration drops the table itself.
     }
 };

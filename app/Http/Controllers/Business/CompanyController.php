@@ -8,6 +8,7 @@ use App\Services\ActivityLogger;
 use App\Support\AppResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -218,6 +219,8 @@ class CompanyController extends Controller
         $validated =
             $request->validate([
 
+                'logo' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
+
                 'company_name' => [
                     'required',
                     'string',
@@ -305,6 +308,8 @@ class CompanyController extends Controller
         |--------------------------------------------------------------------------
         */
 
+        unset($validated['logo']);
+
         $validated['company_name'] =
             trim(
                 $validated['company_name']
@@ -363,6 +368,7 @@ class CompanyController extends Controller
         */
 
         $oldValues = [
+            'logo' => $company->logo,
 
             'company_name' =>
             $company->company_name,
@@ -416,9 +422,27 @@ class CompanyController extends Controller
         |
         */
 
-        $company->update(
-            $validated
-        );
+        $oldLogo = $company->logo;
+        $newLogo = null;
+        if ($request->hasFile('logo')) {
+            $newLogo = $request->file('logo')->store('companies', 'public');
+            abort_unless($newLogo, 500, 'Unable to store the company logo.');
+            $validated['logo'] = $newLogo;
+        }
+
+        try {
+            $company->update($validated);
+        } catch (\Throwable $exception) {
+            if ($newLogo) {
+                Storage::disk('public')->delete($newLogo);
+            }
+            throw $exception;
+        }
+
+        // Delete the previous file only after the new path has been saved.
+        if ($newLogo && $oldLogo && str_starts_with($oldLogo, 'companies/')) {
+            Storage::disk('public')->delete($oldLogo);
+        }
 
 
         /*
@@ -437,6 +461,7 @@ class CompanyController extends Controller
         */
 
         $newValues = [
+            'logo' => $company->logo,
 
             'company_name' =>
             $company->company_name,
