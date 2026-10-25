@@ -1,3 +1,4 @@
+import PublicHeader from '../../Components/PublicHeader';
 import { Head, Link, useForm, usePage } from '@inertiajs/react';
 import { useMemo, useState } from 'react';
 import '../../../css/login.css';
@@ -100,29 +101,7 @@ export default function Login({ canResetPassword = false }) {
                 {/* =====================================================
                     HEADER
                    ===================================================== */}
-                <header className="rr-react-login-header">
-                    <Link
-                        href="/"
-                        className="rr-react-login-brand"
-                    >
-                        <div className="rr-react-login-brand-mark">RR</div>
-                        <div>
-                            <div className="rr-react-login-brand-name">RR ERP</div>
-                            <div className="rr-react-login-brand-caption">
-                                Business Management Platform
-                            </div>
-                        </div>
-                    </Link>
-                    <div className="rr-react-login-header-actions">
-                        <span>New to RR ERP?</span>
-                        <Link
-                            href="/register-business"
-                            className="rr-react-login-register-link"
-                        >
-                            Register Business
-                        </Link>
-                    </div>
-                </header>
+                <PublicHeader page="login" />
                 {/* =====================================================
                     MAIN
                    ===================================================== */}
@@ -141,9 +120,9 @@ export default function Login({ canResetPassword = false }) {
                                 <span>One connected workspace.</span>
                             </h1>
                             <p>
-                                Sign in to manage your branches, inventory, purchases,
-                                sales, stock, users and reports from one secure ERP
-                                platform.
+                                Sign in to manage your branches, inventory,
+                                purchases, sales, stock, users and reports from one
+                                secure ERP platform.
                             </p>
                             <div className="rr-react-login-features">
                                 <Feature
@@ -274,7 +253,9 @@ export default function Login({ canResetPassword = false }) {
                                     <span>*</span>
                                 </label>
                                 <div
-                                    className={`rr-react-login-input ${errors.email ? 'rr-react-login-input-error' : ''
+                                    className={`rr-react-login-input ${errors.email
+                                            ? 'rr-react-login-input-error'
+                                            : ''
                                         }`}
                                 >
                                     <i className="bi bi-envelope"></i>
@@ -348,7 +329,10 @@ export default function Login({ canResetPassword = false }) {
                                         type={showPassword ? 'text' : 'password'}
                                         value={data.password}
                                         onChange={(event) =>
-                                            updateField('password', event.target.value)
+                                            updateField(
+                                                'password',
+                                                event.target.value,
+                                            )
                                         }
                                         placeholder="Enter your password"
                                         autoComplete="current-password"

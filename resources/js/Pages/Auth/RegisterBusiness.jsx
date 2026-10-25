@@ -1,3 +1,4 @@
+import PublicHeader from '../../Components/PublicHeader';
 import { Head, Link, useForm } from '@inertiajs/react';
 import {
     useMemo,
@@ -219,29 +220,7 @@ export default function RegisterBusiness() {
                 {/* =====================================================
                     HEADER
                    ===================================================== */}
-                <header className="rr-register-header">
-                    <Link
-                        href="/"
-                        className="rr-register-brand"
-                    >
-                        <div className="rr-register-brand-mark">RR</div>
-                        <div>
-                            <div className="rr-register-brand-name">RR ERP</div>
-                            <div className="rr-register-brand-caption">
-                                Business Management Platform
-                            </div>
-                        </div>
-                    </Link>
-                    <div className="rr-register-header-right">
-                        <span>Already registered?</span>
-                        <Link
-                            href="/login"
-                            className="rr-register-login-link"
-                        >
-                            Sign In
-                        </Link>
-                    </div>
-                </header>
+                <PublicHeader page="register" />
                 {/* =====================================================
                     MAIN
                    ===================================================== */}
@@ -467,7 +446,9 @@ export default function RegisterBusiness() {
                                                 <i className="bi bi-lock-fill"></i>
                                                 <input
                                                     type="password"
-                                                    value={data.password_confirmation}
+                                                    value={
+                                                        data.password_confirmation
+                                                    }
                                                     onChange={(event) =>
                                                         updateField(
                                                             'password_confirmation',
@@ -614,8 +595,8 @@ export default function RegisterBusiness() {
                                                 automatically
                                             </strong>
                                             <p>
-                                                You don't need to create or remember an
-                                                internal company code during
+                                                You don't need to create or remember
+                                                an internal company code during
                                                 registration.
                                             </p>
                                         </div>
@@ -830,9 +811,9 @@ export default function RegisterBusiness() {
                                             <i className="bi bi-check"></i>
                                         </span>
                                         <span>
-                                            I confirm that the information provided is
-                                            correct and I agree to create this business
-                                            workspace in RR ERP.
+                                            I confirm that the information provided
+                                            is correct and I agree to create this
+                                            business workspace in RR ERP.
                                         </span>
                                     </label>
                                     {errors.terms && (

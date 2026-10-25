@@ -1,3 +1,4 @@
+import PublicHeader from '../../Components/PublicHeader';
 import { Head, Link, useForm, usePage } from '@inertiajs/react';
 import '../../../css/forgot-password.css';
 export default function ForgotPassword({ status }) {
@@ -82,31 +83,7 @@ export default function ForgotPassword({ status }) {
                 {/* =========================================================
                     HEADER
                    ========================================================= */}
-                <header className="rr-forgot-header">
-                    {/* BRAND */}
-                    <Link
-                        href="/"
-                        className="rr-forgot-brand"
-                    >
-                        <div className="rr-forgot-brand-icon">RR</div>
-                        <div>
-                            <div className="rr-forgot-brand-name">RR ERP</div>
-                            <div className="rr-forgot-brand-caption">
-                                Business Management Platform
-                            </div>
-                        </div>
-                    </Link>
-                    {/* LOGIN */}
-                    <div className="rr-forgot-header-right">
-                        <span>Remember your password?</span>
-                        <Link
-                            href="/login"
-                            className="rr-forgot-login-link"
-                        >
-                            Sign In
-                        </Link>
-                    </div>
-                </header>
+                <PublicHeader page="forgot" />
                 {/* =========================================================
                     MAIN
                    ========================================================= */}
@@ -126,7 +103,8 @@ export default function ForgotPassword({ status }) {
                             <h1>Forgot your password?</h1>
                             <p>
                                 Enter the email address associated with your RR ERP
-                                account. We will send you a secure password reset link.
+                                account. We will send you a secure password reset
+                                link.
                             </p>
                         </div>
                         {/* =================================================

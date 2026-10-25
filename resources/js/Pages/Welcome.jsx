@@ -1,3 +1,4 @@
+import PublicHeader, { PublicBrand } from '../Components/PublicHeader';
 import { Head, Link } from '@inertiajs/react';
 import { useState, useEffect, useRef } from 'react';
 
@@ -74,7 +75,7 @@ export default function Welcome() {
                 '--rr-reading-progress',
                 String(available > 0 ? window.scrollY / available : 0),
             );
-            root.querySelector('.rr-home-navbar')?.classList.toggle(
+            root.querySelector('.rr-public-header')?.classList.toggle(
                 'is-scrolled',
                 window.scrollY > 24,
             );
@@ -82,7 +83,9 @@ export default function Welcome() {
         onScroll();
         window.addEventListener('scroll', onScroll, { passive: true });
         window.addEventListener('resize', onScroll);
-        const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        const reduced = window.matchMedia(
+            '(prefers-reduced-motion: reduce)',
+        ).matches;
         let observer;
         if ('IntersectionObserver' in window && !reduced) {
             observer = new IntersectionObserver(
@@ -109,7 +112,6 @@ export default function Welcome() {
             window.removeEventListener('resize', onScroll);
         };
     }, []);
-    const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
     return (
         <>
             <Head title="RR ERP - Business Management Platform" />
@@ -130,111 +132,7 @@ export default function Welcome() {
                 {/* =====================================================
                     NAVBAR
                    ===================================================== */}
-                <header className="rr-home-navbar">
-                    <Link
-                        href="/"
-                        className="rr-home-brand"
-                        onClick={() => setMobileMenuOpen(false)}
-                    >
-                        <div className="rr-home-brand-mark">
-                            <span>RR</span>
-                        </div>
-                        <div className="rr-home-brand-content">
-                            <div className="rr-home-brand-name">RR ERP</div>
-                            <div className="rr-home-brand-caption">
-                                Business Management Platform
-                            </div>
-                        </div>
-                    </Link>
-                    {/* Desktop Menu */}
-                    <nav className="rr-home-nav">
-                        <a href="#features">Features</a>
-                        <a href="#modules">Modules</a>
-                        <a href="#multi-branch">Multi Branch</a>
-                        <a href="#security">Security</a>
-                    </nav>
-                    {/* Desktop Actions */}
-                    <div className="rr-home-navbar-actions">
-                        <Link
-                            href="/login"
-                            className="rr-home-login-link"
-                        >
-                            Sign In
-                        </Link>
-                        <Link
-                            href="/register-business"
-                            className="rr-home-register-btn"
-                        >
-                            Register Business
-                            <i className="bi bi-arrow-right"></i>
-                        </Link>
-                        {/* Mobile Toggle */}
-                        <button
-                            type="button"
-                            className={`rr-home-mobile-toggle ${mobileMenuOpen ? 'open' : ''
-                                }`}
-                            onClick={() => setMobileMenuOpen((current) => !current)}
-                            aria-label="Toggle navigation"
-                        >
-                            <span></span>
-                            <span></span>
-                            <span></span>
-                        </button>
-                    </div>
-                    {/* Mobile Menu */}
-                    <div
-                        className={`rr-home-mobile-menu ${mobileMenuOpen ? 'open' : ''
-                            }`}
-                    >
-                        <div className="rr-home-mobile-menu-inner">
-                            <a
-                                href="#features"
-                                onClick={() => setMobileMenuOpen(false)}
-                            >
-                                <i className="bi bi-stars"></i>
-                                Features
-                            </a>
-                            <a
-                                href="#modules"
-                                onClick={() => setMobileMenuOpen(false)}
-                            >
-                                <i className="bi bi-grid"></i>
-                                Modules
-                            </a>
-                            <a
-                                href="#multi-branch"
-                                onClick={() => setMobileMenuOpen(false)}
-                            >
-                                <i className="bi bi-buildings"></i>
-                                Multi Branch
-                            </a>
-                            <a
-                                href="#security"
-                                onClick={() => setMobileMenuOpen(false)}
-                            >
-                                <i className="bi bi-shield-check"></i>
-                                Security
-                            </a>
-                            <div className="rr-home-mobile-menu-divider"></div>
-                            <Link
-                                href="/login"
-                                className="rr-home-mobile-login"
-                                onClick={() => setMobileMenuOpen(false)}
-                            >
-                                <i className="bi bi-box-arrow-in-right"></i>
-                                Sign In
-                            </Link>
-                            <Link
-                                href="/register-business"
-                                className="rr-home-mobile-register"
-                                onClick={() => setMobileMenuOpen(false)}
-                            >
-                                Register Your Business
-                                <i className="bi bi-arrow-right"></i>
-                            </Link>
-                        </div>
-                    </div>
-                </header>
+                <PublicHeader page="welcome" />
                 <main id="rr-home-main">
                     {/* =====================================================
                         HERO
@@ -254,24 +152,26 @@ export default function Welcome() {
                                 className="rr-home-hero-title rr-hero-sliding-title"
                                 aria-label="One ERP. Every Branch. Complete Control."
                             >
-                                {['One ERP.', 'Every Branch.', 'Complete Control.'].map(
-                                    (line, index) => (
+                                {[
+                                    'One ERP.',
+                                    'Every Branch.',
+                                    'Complete Control.',
+                                ].map((line, index) => (
+                                    <span
+                                        className="rr-hero-line-mask"
+                                        key={line}
+                                        aria-hidden="true"
+                                    >
                                         <span
-                                            className="rr-hero-line-mask"
-                                            key={line}
-                                            aria-hidden="true"
+                                            className={`rr-hero-line-text ${index === 1 ? 'accent' : ''}`}
+                                            style={{
+                                                '--line-delay': `${index * 0.28}s`,
+                                            }}
                                         >
-                                            <span
-                                                className={`rr-hero-line-text ${index === 1 ? 'accent' : ''}`}
-                                                style={{
-                                                    '--line-delay': `${index * 0.28}s`,
-                                                }}
-                                            >
-                                                {line}
-                                            </span>
+                                            {line}
                                         </span>
-                                    ),
-                                )}
+                                    </span>
+                                ))}
                             </h1>
                             <p
                                 className="rr-home-hero-description rr-hero-animated-description"
@@ -412,7 +312,8 @@ export default function Welcome() {
                                                             Business Overview
                                                         </strong>
                                                         <span>
-                                                            {previewPeriod === 'month'
+                                                            {previewPeriod ===
+                                                                'month'
                                                                 ? 'Monthly sample activity'
                                                                 : 'Weekly sample activity'}
                                                         </span>
@@ -423,7 +324,8 @@ export default function Welcome() {
                                                         onClick={() =>
                                                             setPreviewPeriod(
                                                                 (current) =>
-                                                                    current === 'month'
+                                                                    current ===
+                                                                        'month'
                                                                         ? 'week'
                                                                         : 'month',
                                                             )
@@ -441,8 +343,8 @@ export default function Welcome() {
                                                 </div>
                                                 <div className="rr-preview-chart">
                                                     {[
-                                                        41, 61, 49, 76, 59, 88, 72, 96,
-                                                        68,
+                                                        41, 61, 49, 76, 59, 88, 72,
+                                                        96, 68,
                                                     ].map((height, index) => (
                                                         <div
                                                             key={index}
@@ -461,7 +363,9 @@ export default function Welcome() {
                                             <div className="rr-preview-card">
                                                 <div className="rr-preview-card-heading">
                                                     <div>
-                                                        <strong>Recent Activity</strong>
+                                                        <strong>
+                                                            Recent Activity
+                                                        </strong>
                                                         <span>Live updates</span>
                                                     </div>
                                                 </div>
@@ -515,11 +419,14 @@ export default function Welcome() {
                         className="rr-home-slider-section"
                     >
                         <div className="rr-home-section-heading">
-                            <div className="rr-home-section-label">RR ERP FEATURES</div>
+                            <div className="rr-home-section-label">
+                                RR ERP FEATURES
+                            </div>
                             <h2>Powerful tools for daily business operations</h2>
                             <p>
                                 Everything required to manage stock, transactions,
-                                locations and business users from one connected system.
+                                locations and business users from one connected
+                                system.
                             </p>
                         </div>
                         <div
@@ -529,13 +436,17 @@ export default function Welcome() {
                                 type="button"
                                 className="rr-feature-motion-toggle"
                                 aria-pressed={featuresPaused}
-                                onClick={() => setFeaturesPaused((current) => !current)}
+                                onClick={() =>
+                                    setFeaturesPaused((current) => !current)
+                                }
                             >
                                 <i
                                     className={`bi ${featuresPaused ? 'bi-play-fill' : 'bi-pause-fill'}`}
                                     aria-hidden="true"
                                 />
-                                {featuresPaused ? 'Play animation' : 'Pause animation'}
+                                {featuresPaused
+                                    ? 'Play animation'
+                                    : 'Pause animation'}
                             </button>
                             <div className="rr-feature-slider-fade left"></div>
                             <div className="rr-feature-slider-fade right"></div>
@@ -563,7 +474,9 @@ export default function Welcome() {
                                 <div className="rr-home-section-label">
                                     ONE CONNECTED PLATFORM
                                 </div>
-                                <h2>Every important business module works together.</h2>
+                                <h2>
+                                    Every important business module works together.
+                                </h2>
                                 <p>
                                     Enter data once and let RR ERP maintain connected
                                     stock, transaction and operational records
@@ -629,12 +542,13 @@ export default function Welcome() {
                                 MULTI-BRANCH CONTROL
                             </div>
                             <h2>
-                                Your company, branches and godowns — clearly separated.
+                                Your company, branches and godowns — clearly
+                                separated.
                             </h2>
                             <p>
                                 RR ERP keeps company and branch operations properly
-                                isolated while giving authorized owners complete control
-                                over their business.
+                                isolated while giving authorized owners complete
+                                control over their business.
                             </p>
                             <div className="rr-home-check-list">
                                 <CheckItem text="Separate branch transactions" />
@@ -699,7 +613,9 @@ export default function Welcome() {
                                 <div className="rr-home-section-label">
                                     SECURITY & ACCESS
                                 </div>
-                                <h2>Give every user exactly the access they need.</h2>
+                                <h2>
+                                    Give every user exactly the access they need.
+                                </h2>
                                 <p>
                                     RR ERP uses role and permission based access so
                                     business owners can control who can view, create,
@@ -766,13 +682,16 @@ export default function Welcome() {
                     <section className="rr-home-final-cta">
                         <div className="rr-home-final-glow"></div>
                         <div className="rr-home-final-content">
-                            <div className="rr-home-final-badge">START WITH RR ERP</div>
+                            <div className="rr-home-final-badge">
+                                START WITH RR ERP
+                            </div>
                             <h2>
-                                Bring your entire business into one organized workspace.
+                                Bring your entire business into one organized
+                                workspace.
                             </h2>
                             <p>
-                                Create your business, set up your main branch and start
-                                managing operations with RR ERP.
+                                Create your business, set up your main branch and
+                                start managing operations with RR ERP.
                             </p>
                             <div className="rr-home-final-actions">
                                 <Link
@@ -798,13 +717,7 @@ export default function Welcome() {
                 <footer className="rr-home-footer">
                     <div className="rr-home-footer-main">
                         <div className="rr-home-brand">
-                            <div className="rr-home-brand-mark">RR</div>
-                            <div>
-                                <div className="rr-home-brand-name">RR ERP</div>
-                                <div className="rr-home-brand-caption">
-                                    Business Management Platform
-                                </div>
-                            </div>
+                            <PublicBrand footer />
                         </div>
                         <div className="rr-home-footer-links">
                             <a href="#features">Features</a>
@@ -815,7 +728,8 @@ export default function Welcome() {
                     </div>
                     <div className="rr-home-footer-bottom">
                         <span>
-                            © {new Date().getFullYear()} RR ERP. All rights reserved.
+                            © {new Date().getFullYear()} RR ERP. All rights
+                            reserved.
                         </span>
                         <span>Business Management Platform</span>
                     </div>
