@@ -1445,6 +1445,9 @@ Route::middleware([
 require __DIR__ . '/auth.php';
 
 
+require __DIR__ . '/company_locations.php';
+
+
 /*
 |--------------------------------------------------------------------------
 | Operational Business Routes

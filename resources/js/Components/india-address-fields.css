@@ -1,0 +1,224 @@
+.rr-india-address {
+    margin-top: 18px;
+    color: #173454;
+}
+
+.rr-location-heading {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 14px;
+    background: #edf4ff;
+    border: 1px solid #ccdaef;
+    border-radius: 8px 8px 0 0;
+}
+
+.rr-location-heading>i {
+    font-size: 20px;
+    color: #245dba;
+}
+
+.rr-location-heading strong {
+    display: block;
+    font-size: 13px;
+}
+
+.rr-location-heading span {
+    display: block;
+    font-size: 11px;
+    color: #415a75;
+    margin-top: 3px;
+}
+
+.rr-location-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px;
+    padding: 16px;
+    border: 1px solid #ccdaef;
+    border-top: 0;
+    border-radius: 0 0 8px 8px;
+    background: #fbfdff;
+}
+
+.rr-location-field {
+    position: relative;
+    min-width: 0;
+}
+
+.rr-location-field>label {
+    display: block;
+    font-size: 12px;
+    font-weight: 650;
+    margin-bottom: 6px;
+    color: #25425f;
+}
+
+.rr-location-field>label span {
+    color: #b3263b;
+}
+
+.rr-location-control {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    padding: 0 11px;
+    border: 1px solid #a9bfdc;
+    border-radius: 6px;
+    background: #fff;
+    transition:
+        border-color 0.15s,
+        box-shadow 0.15s;
+}
+
+.rr-location-control.is-open {
+    border-color: #2864bc;
+    box-shadow: 0 0 0 3px #2864bc15;
+}
+
+.rr-location-control>i {
+    flex-shrink: 0;
+    color: #315c96;
+    font-size: 13px;
+    pointer-events: none;
+}
+
+.rr-location-control>input {
+    width: 100%;
+    min-width: 0;
+    height: 39px;
+    border: 0 !important;
+    background: transparent;
+    padding: 0 !important;
+    color: #173454;
+    font-size: 13px;
+    outline: 0;
+    box-shadow: none !important;
+    cursor: pointer;
+}
+
+.rr-location-control>input:disabled {
+    color: #536881;
+    cursor: not-allowed;
+}
+
+.rr-location-control:has(input:disabled) {
+    background: #edf1f6;
+}
+
+.rr-location-control input::placeholder {
+    color: #546b85;
+    opacity: 1;
+}
+
+.rr-location-country {
+    width: 100%;
+    height: 41px;
+    padding: 0 12px;
+    border: 1px solid #c6d6e9;
+    border-radius: 6px;
+    background: #eaf1fc;
+    color: #244e84;
+    font-size: 13px;
+    font-weight: 650;
+}
+
+.rr-location-field>small {
+    display: block;
+    font-size: 11px;
+    margin-top: 5px;
+    color: #4d627b;
+}
+
+.rr-location-dropdown {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    z-index: 1080;
+    margin-top: 4px;
+    border: 1px solid #a7bfdf;
+    border-radius: 7px;
+    background: #fff;
+    box-shadow: 0 10px 25px #17345425;
+    overflow: hidden;
+    animation: rr-location-in 0.14s ease-out;
+}
+
+.rr-location-dropdown ul {
+    list-style: none;
+    margin: 0;
+    padding: 4px;
+    max-height: 230px;
+    overflow-y: auto;
+}
+
+.rr-location-dropdown li {
+    padding: 9px 10px;
+    border-radius: 4px;
+    font-size: 12px;
+    color: #173454;
+    cursor: pointer;
+    overflow-wrap: anywhere;
+}
+
+.rr-location-dropdown li[aria-selected='true'] {
+    background: #e3eeff;
+    color: #174b98;
+    font-weight: 650;
+}
+
+.rr-location-dropdown>small {
+    display: block;
+    padding: 8px 12px;
+    border-top: 1px solid #dce5f0;
+    background: #f4f8fe;
+    font-size: 10px;
+    color: #435b78;
+}
+
+.rr-location-message {
+    padding: 12px;
+    font-size: 12px;
+    color: #304f73;
+}
+
+.rr-location-message button {
+    border: 0;
+    border-radius: 4px;
+    background: #e3eeff;
+    color: #174b98;
+    cursor: pointer;
+}
+
+.rr-location-error {
+    margin-top: 5px;
+    color: #a82036;
+    font-size: 11px;
+}
+
+@keyframes rr-location-in {
+    from {
+        opacity: 0;
+        transform: translateY(-3px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@media (max-width: 650px) {
+    .rr-location-grid {
+        grid-template-columns: 1fr;
+        padding: 12px;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .rr-india-address * {
+        animation: none;
+        transition: none;
+    }
+}

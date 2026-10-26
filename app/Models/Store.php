@@ -35,6 +35,8 @@ class Store extends Model
 
         'city',
 
+        'district',
+
         'state',
 
         'country',

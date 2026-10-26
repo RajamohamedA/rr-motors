@@ -4,7 +4,11 @@ namespace App\Http\Controllers\SuperAdmin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Company;
+use App\Support\IndiaCompanyAddress;
 use App\Models\User;
+use App\Services\UnitProvisioningService;
+use App\Services\WalkInCustomerService;
+use Illuminate\Support\Facades\DB;
 use App\Notifications\SuperAdminAlert;
 use App\Services\ActivityLogger;
 use App\Support\AppResponse;
@@ -128,6 +132,8 @@ class CompanyController extends Controller
                     'max:255',
                 ],
 
+                'branch_name' => ['nullable', 'string', 'max:100'],
+
                 'owner_name' => [
                     'nullable',
                     'string',
@@ -170,8 +176,12 @@ class CompanyController extends Controller
                     'string',
                 ],
 
+                'state_id' => ['required', 'string', 'max:10'],
+                'district_id' => ['required', 'string', 'max:10'],
+                'city_id' => ['nullable', 'integer'],
+
                 'city' => [
-                    'nullable',
+                    'required',
                     'string',
                     'max:100',
                 ],
@@ -183,7 +193,8 @@ class CompanyController extends Controller
                 ],
 
                 'country' => [
-                    'nullable',
+                    'required',
+                    Rule::in(['India']),
                     'string',
                     'max:100',
                 ],
@@ -209,50 +220,62 @@ class CompanyController extends Controller
             ]);
 
 
-        /*
-        |--------------------------------------------------------------------------
-        | Generate Company Code
-        |--------------------------------------------------------------------------
-        */
+        $validated = app(IndiaCompanyAddress::class)->normalize($validated);
 
-        $validated['company_code'] =
-            Company::generateCompanyCode(
-                $validated['company_name']
-            );
+        // Files are stored outside the database transaction; remove the new
+        // upload if company or branch setup fails.
+        $logoPath = null;
 
+        try {
+            if ($request->hasFile('logo')) {
+                $logoPath = $request->file('logo')->store('companies', 'public');
+                $validated['logo'] = $logoPath;
+            } else {
+                unset($validated['logo']);
+            }
 
-        /*
-        |--------------------------------------------------------------------------
-        | Upload Logo
-        |--------------------------------------------------------------------------
-        */
+            $company = DB::transaction(function () use ($validated) {
+                $branchName = trim($validated['branch_name'] ?? '');
+                $branchName = $branchName !== ''
+                    ? $branchName
+                    : (trim($validated['city'] ?? '') ?: 'Main Branch');
 
-        if (
-            $request->hasFile(
-                'logo'
-            )
-        ) {
+                unset($validated['branch_name']);
 
-            $validated['logo'] =
-                $request
-                ->file('logo')
-                ->store(
-                    'companies',
-                    'public'
+                $validated['company_code'] = Company::generateCompanyCode(
+                    $validated['company_name']
                 );
+
+                $company = Company::create($validated);
+
+                $store = $company->stores()->create([
+                    'branch_number' => 1,
+                    'store_code' => strtoupper($company->company_code) . '-B001',
+                    'store_name' => $branchName,
+                    'contact_person' => $company->owner_name,
+                    'phone' => $company->phone,
+                    'email' => $company->email,
+                    'address' => $company->address,
+                    'city' => $company->city,
+                    'district' => $company->district,
+                    'state' => $company->state,
+                    'country' => $company->country ?: 'India',
+                    'pincode' => $company->pincode,
+                    'status' => $company->status,
+                ]);
+
+                app(UnitProvisioningService::class)->provision($store);
+                app(WalkInCustomerService::class)->attachToStore($company, $store);
+
+                return $company;
+            });
+        } catch (\Throwable $exception) {
+            if ($logoPath) {
+                Storage::disk('public')->delete($logoPath);
+            }
+
+            throw $exception;
         }
-
-
-        /*
-        |--------------------------------------------------------------------------
-        | Create Company
-        |--------------------------------------------------------------------------
-        */
-
-        $company =
-            Company::create(
-                $validated
-            );
 
 
         /*
@@ -311,7 +334,7 @@ class CompanyController extends Controller
 
         return AppResponse::successRoute(
             'super-admin.companies.index',
-            'Company created successfully.'
+            'Company and first branch created successfully.'
         );
     }
 
@@ -354,11 +377,31 @@ class CompanyController extends Controller
     public function edit(
         Company $company
     ) {
+        // Resolve the saved name fields without changing the company address.
+        $state = DB::table('geo_states')
+            ->whereRaw('LOWER(name) = ?', [mb_strtolower(trim($company->state ?? ''))])
+            ->first();
+        $district = $state
+            ? DB::table('geo_districts')->where('state_code', $state->code)
+            ->whereRaw('LOWER(name) = ?', [mb_strtolower(trim($company->district ?? ''))])
+            ->first()
+            : null;
+        $city = $district
+            ? DB::table('geo_cities')->where('district_code', $district->code)
+            ->whereRaw('LOWER(name) = ?', [mb_strtolower(trim($company->city ?? ''))])
+            ->first()
+            : null;
+
         return Inertia::render(
             'SuperAdmin/Companies/Edit',
             [
                 'company' =>
                 $company,
+                'addressSelection' => [
+                    'state_id' => $state?->code ?? '',
+                    'district_id' => $district?->code ?? '',
+                    'city_id' => $city?->id ?? '',
+                ],
             ]
         );
     }
@@ -437,6 +480,12 @@ class CompanyController extends Controller
                     'string',
                 ],
 
+                'state_id' => ['nullable', 'string', 'max:10'],
+                'district_id' => ['nullable', 'string', 'max:10'],
+                'city_id' => ['nullable', 'integer'],
+
+                'district' => ['nullable', 'string', 'max:100'],
+
                 'city' => [
                     'nullable',
                     'string',
@@ -475,6 +524,34 @@ class CompanyController extends Controller
 
             ]);
 
+
+        $locationChanged = false;
+        foreach (['country', 'state', 'district', 'city'] as $field) {
+            if (
+                array_key_exists($field, $validated)
+                && trim((string) $validated[$field]) !== trim((string) $company->{$field})
+            ) {
+                $locationChanged = true;
+                break;
+            }
+        }
+
+        if ($locationChanged) {
+            validator($validated, [
+                'country' => ['required', Rule::in(['India'])],
+                'state_id' => ['required', 'string'],
+                'district_id' => ['required', 'string'],
+                'city' => ['required', 'string', 'max:100'],
+            ])->validate();
+            $validated = app(IndiaCompanyAddress::class)->normalize($validated);
+        } else {
+            // Keep legacy spelling and empty district values until the address
+            // is explicitly changed. Never persist transient selection IDs.
+            unset($validated['state_id'], $validated['district_id'], $validated['city_id']);
+            foreach (['country', 'state', 'district', 'city'] as $field) {
+                unset($validated[$field]);
+            }
+        }
 
         /*
         |--------------------------------------------------------------------------
@@ -1152,6 +1229,9 @@ class CompanyController extends Controller
 
             'city' =>
             $company->city,
+
+            'district' =>
+            $company->district,
 
             'state' =>
             $company->state,

@@ -20,6 +20,7 @@ class Company extends Model
         'website',
         'address',
         'city',
+        'district',
         'state',
         'country',
         'pincode',
