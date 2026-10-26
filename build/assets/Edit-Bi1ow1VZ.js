@@ -1,0 +1,1 @@
+import"./rolldown-runtime-QTnfLwEv.js";import{c as e,t}from"./react-app-Dpl9nMhu.js";import n from"./Create-BmWimoO1.js";e();var r=t();function i(e){return(0,r.jsx)(n,{...e,mode:`edit`})}i.layout=n.layout;export{i as default};

@@ -1,0 +1,1 @@
+import"./rolldown-runtime-QTnfLwEv.js";import{c as e,t}from"./react-app-Dpl9nMhu.js";import{t as n}from"./BusinessLayout-tkFlW2Yw.js";import r from"./Create-DIygzcTv.js";e();var i=t();function a(e){return(0,i.jsx)(r,{...e,mode:`edit`})}a.layout=e=>(0,i.jsx)(n,{title:`Edit Stock Adjustment`,children:e});export{a as default};
