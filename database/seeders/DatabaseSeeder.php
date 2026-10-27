@@ -10,15 +10,13 @@ class DatabaseSeeder extends Seeder
 {
     use WithoutModelEvents;
 
-    /**
-     * Seed the application's database.
-     */
     public function run(): void
     {
-        // User::factory(10)->create();
-
-        // Never seed an active account with a known factory password in production.
-        if (app()->environment(['local', 'testing']) && !User::where('email', 'test@example.com')->exists()) {
+        // Create the test account only in local and testing environments.
+        if (
+            app()->environment(['local', 'testing'])
+            && ! User::where('email', 'test@example.com')->exists()
+        ) {
             User::factory()->create([
                 'name' => 'Test User',
                 'email' => 'test@example.com',
@@ -29,6 +27,9 @@ class DatabaseSeeder extends Seeder
             PermissionSeeder::class,
             RoleSeeder::class,
             DefaultUnitSeeder::class,
+            AccountSeeder::class,
+            WalkInCustomerSeeder::class,
+            IndiaLocationSeeder::class,
         ]);
     }
 }

@@ -7,6 +7,7 @@ use App\Models\Store;
 use App\Services\Gst\ApiGstProvider;
 use App\Services\Gst\MockGstProvider;
 use Illuminate\Support\ServiceProvider;
+use Illuminate\Support\Facades\Gate;
 use Inertia\Inertia;
 use RuntimeException;
 
@@ -71,6 +72,14 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        // Use the trusted account flag, not a role name that companies can edit.
+        // Other users must continue through their normal permission checks.
+        Gate::before(function ($user, string $ability): ?bool {
+            return (bool) $user->is_super_user && (bool) $user->status
+                ? true
+                : null;
+        });
+
         Inertia::share([
 
             /*
@@ -298,65 +307,11 @@ class AppServiceProvider extends ServiceProvider
                 }
 
 
-                /*
-                |--------------------------------------------------------------------------
-                | Company Admin
-                |--------------------------------------------------------------------------
-                |
-                | Company Admin can access every active branch belonging
-                | to their own company.
-                |
-                */
-
-                if (
-                    $user->hasRole(
-                        'Company Admin'
-                    )
-                ) {
-
-                    if (
-                        (int) $user->company_id !==
-                        $companyId
-                    ) {
-
-                        return [];
-                    }
-
-
-                    return Store::query()
-
-                        ->where(
-                            'company_id',
-                            $user->company_id
-                        )
-
-                        ->where(
-                            'status',
-                            true
-                        )
-
-                        ->orderBy(
-                            'store_name'
-                        )
-
-                        ->get([
-                            'id',
-                            'store_code',
-                            'store_name',
-                            'company_id',
-                        ]);
+                // All company users, including Company Admin, may only see
+                // explicitly assigned branches within their own company.
+                if ((int) $user->company_id !== $companyId) {
+                    return [];
                 }
-
-
-                /*
-                |--------------------------------------------------------------------------
-                | Normal User
-                |--------------------------------------------------------------------------
-                |
-                | Normal users only receive branches explicitly assigned
-                | through user_stores.
-                |
-                */
 
                 return $user
                     ->stores()

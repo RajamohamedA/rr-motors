@@ -407,7 +407,8 @@ class BranchController extends Controller
                 function () use (
                     $validated,
                     $company,
-                    $user
+                    $user,
+                    $unitProvisioningService
                 ) {
 
                     /*
@@ -566,7 +567,7 @@ class BranchController extends Controller
                     |--------------------------------------------------------------------------
                     */
 
-                    return Store::create([
+                    $store = Store::create([
 
                         ...$validated,
 
@@ -588,24 +589,12 @@ class BranchController extends Controller
                         'status' =>
                         (bool) $user->is_super_user,
                     ]);
+                    // Keep branch and default units in the same transaction.
+                    $unitProvisioningService->provision($store);
+
+                    return $store;
                 }
             );
-
-
-        /*
-        |--------------------------------------------------------------------------
-        | Provision Default Units
-        |--------------------------------------------------------------------------
-        |
-        | Every newly created branch receives the standard system units
-        | automatically. updateOrCreate() inside the service keeps this safe
-        | if provisioning is ever triggered again for the same branch.
-        |
-        */
-
-        $unitProvisioningService->provision(
-            $store
-        );
 
 
         /*

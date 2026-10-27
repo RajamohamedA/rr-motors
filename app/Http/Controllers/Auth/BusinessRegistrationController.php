@@ -8,6 +8,7 @@ use App\Models\Store;
 use App\Models\User;
 use App\Services\ActivityLogger;
 use App\Services\SuperAdminNotificationService;
+use App\Services\UnitProvisioningService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -612,6 +613,19 @@ class BusinessRegistrationController extends Controller
                                 'status' =>
                                 false,
                             ]);
+
+
+                        /*
+                        |--------------------------------------------------------------------------
+                        | Provision Default Units For The First Branch
+                        |--------------------------------------------------------------------------
+                        |
+                        | Prepare units even while the branch awaits approval.
+                        | A failure rolls back the entire registration transaction.
+                        |
+                        */
+
+                        app(UnitProvisioningService::class)->provision($store);
 
 
                         /*

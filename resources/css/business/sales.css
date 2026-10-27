@@ -13476,3 +13476,139 @@
     font-weight: 500;
     text-transform: none;
 }
+
+/* Sales register header: keep the background and text contrast together. */
+.rr-sales-index-page .rr-sales-index-header {
+    gap: 14px;
+    padding: 15px 18px;
+    border: 1px solid #214d83;
+    border-radius: 11px;
+    background: linear-gradient(115deg, #18365f 0%, #285b9c 100%);
+    color: #ffffff;
+    box-shadow: 0 6px 18px rgb(24 54 95 / 14%);
+}
+
+.rr-sales-index-page .rr-sales-index-header .rr-sales-index-heading {
+    min-width: 0;
+    gap: 11px;
+}
+
+.rr-sales-index-page .rr-sales-index-header .rr-sales-index-heading-icon {
+    width: 44px;
+    height: 44px;
+    flex: 0 0 44px;
+    border: 1px solid rgb(255 255 255 / 24%);
+    border-radius: 10px;
+    background: rgb(255 255 255 / 12%);
+    color: #ffffff;
+    font-size: 20px;
+}
+
+.rr-sales-index-page .rr-sales-index-header .rr-sales-index-heading-icon i {
+    color: inherit;
+}
+
+.rr-sales-index-page .rr-sales-index-header .rr-sales-index-heading h1 {
+    margin: 3px 0 6px;
+    color: #ffffff;
+    font-size: 22px;
+    font-weight: 750;
+    line-height: 1.2;
+    overflow-wrap: anywhere;
+}
+
+.rr-sales-index-page .rr-sales-index-header .rr-sales-index-eyebrow {
+    color: #dce9ff;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+}
+
+.rr-sales-index-page .rr-sales-index-header .rr-sales-index-context {
+    gap: 7px;
+    color: #e6efff;
+    font-size: 11px;
+}
+
+.rr-sales-index-page .rr-sales-index-header .rr-sales-index-context span {
+    min-width: 0;
+    gap: 5px;
+    padding: 4px 7px;
+    border: 1px solid rgb(255 255 255 / 18%);
+    border-radius: 5px;
+    background: rgb(255 255 255 / 8%);
+    color: #e6efff;
+    overflow-wrap: anywhere;
+}
+
+.rr-sales-index-page .rr-sales-index-header .rr-sales-index-context i {
+    flex-shrink: 0;
+    color: #e6efff;
+}
+
+.rr-sales-index-page .rr-sales-index-header .rr-sales-new-button {
+    flex-shrink: 0;
+    min-height: 38px;
+    padding: 9px 14px;
+    border: 1px solid #ffffff;
+    border-radius: 7px;
+    background: #ffffff;
+    color: #193f70;
+    font-size: 12px;
+    font-weight: 750;
+    line-height: 1.2;
+    text-decoration: none;
+    box-shadow: 0 3px 10px rgb(8 29 56 / 15%);
+    cursor: pointer;
+    transition: background-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.rr-sales-index-page .rr-sales-index-header .rr-sales-new-button:visited {
+    color: #193f70;
+}
+
+.rr-sales-index-page .rr-sales-index-header .rr-sales-new-button:hover,
+.rr-sales-index-page .rr-sales-index-header .rr-sales-new-button:focus-visible {
+    border-color: #dceaff;
+    background: #eaf2ff;
+    color: #14365f;
+    box-shadow: 0 4px 12px rgb(8 29 56 / 22%);
+}
+
+.rr-sales-index-page .rr-sales-index-header .rr-sales-new-button:active {
+    background: #dceaff;
+    color: #14365f;
+}
+
+.rr-sales-index-page .rr-sales-index-header .rr-sales-new-button i,
+.rr-sales-index-page .rr-sales-index-header .rr-sales-new-button span {
+    color: inherit;
+}
+
+.rr-sales-index-page .rr-sales-index-header .rr-sales-new-button:focus-visible {
+    outline: 2px solid #ffffff;
+    outline-offset: 3px;
+}
+
+@media (max-width: 575px) {
+    .rr-sales-index-page .rr-sales-index-header {
+        align-items: stretch;
+        flex-direction: column;
+        gap: 12px;
+        padding: 13px;
+    }
+
+    .rr-sales-index-page .rr-sales-index-header .rr-sales-index-heading h1 {
+        font-size: 20px;
+    }
+
+    .rr-sales-index-page .rr-sales-index-header .rr-sales-new-button {
+        width: 100%;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .rr-sales-index-page .rr-sales-index-header .rr-sales-new-button {
+        transition: none;
+    }
+}
